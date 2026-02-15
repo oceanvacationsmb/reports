@@ -68,6 +68,12 @@ tr:nth-child(even){background:#fafafa}
 .history-actions{display:flex;gap:8px}
 .history-actions button{padding:5px 10px;font-size:9px;cursor:pointer;border:none;border-radius:3px;color:#fff}
 .section-title{font-size:12px;font-weight:bold;text-transform:uppercase;margin-top:20px;margin-bottom:10px;color:#000}
+.property-settings-box{margin-bottom:20px;padding:15px;background:#f0f0f0;border-radius:3px;border-left:4px solid #17a2b8}
+.property-name-label{font-weight:bold;color:#000;margin-bottom:10px;display:block;text-transform:uppercase}
+.checkbox-group{display:flex;flex-wrap:wrap;gap:15px;align-items:center}
+.checkbox-item{display:flex;align-items:center;gap:8px}
+.checkbox-item input[type="checkbox"]{width:18px;height:18px;cursor:pointer;accent-color:#17a2b8}
+.checkbox-item label{color:#000;font-weight:bold;cursor:pointer;margin:0}
 @media print{.sidebar,.back-btn,.print-btn{display:none}.main{margin-left:0;width:100%}.page{padding:20px}}
 </style>
 </head>
@@ -106,7 +112,7 @@ tr:nth-child(even){background:#fafafa}
 
 <hr style="border:1px solid #555;margin:20px 0">
 
-<button class="btn btn-info" onclick="openPropertySettings()" style="font-size:11px">⚙️ Property Settings</button>
+<button class="btn btn-info" onclick="openPropertySettings()" style="font-size:11px">⚙️ Property Tax Settings</button>
 
 <hr style="border:1px solid #555;margin:20px 0">
 
@@ -153,7 +159,7 @@ tr:nth-child(even){background:#fafafa}
 <div id="propertySettingsModal" class="modal">
 <div class="modal-content">
 <span class="modal-close" onclick="closePropertySettings()">&times;</span>
-<h2>Property Settings</h2>
+<h2 style="text-transform:uppercase;text-align:center">PROPERTY TAX SETTINGS</h2>
 <div id="propertySettingsContent" style="margin-top:20px;max-height:600px;overflow-y:auto"></div>
 </div>
 </div>
@@ -251,6 +257,8 @@ let masterTotals = {};
 let propertyTotals = {};
 let taxByProperty = {};
 
+const municipalities = ["SC", "MB", "NMB", "SSB", "HC"];
+
 // INIT
 document.addEventListener("DOMContentLoaded", async function() {
   await initDB();
@@ -347,24 +355,30 @@ function openPropertySettings() {
   const modal = document.getElementById("propertySettingsModal");
   const content = document.getElementById("propertySettingsContent");
 
-  let html = `<div><h3 style="margin-bottom:20px;text-transform:uppercase;text-align:center;font-weight:bold">PROPERTY MUNICIPALITY SETTINGS</h3>`;
+  let html = `<div>`;
   
-  const municipalities = ["SC", "MB", "NMB", "SSB", "HC"];
-
   Object.keys(OWNERS).sort().forEach(propName => {
-    const settings = propertySettings[propName] || { name: propName, municipality: "" };
+    const settings = propertySettings[propName] || { name: propName, municipalities: {} };
     
     html += `
-      <div style="margin-bottom:20px;padding:15px;background:#f0f0f0;border-radius:3px">
-        <label style="color:#000;font-weight:bold;display:block;margin-bottom:10px;text-transform:uppercase">${propName}</label>
-        <select onchange="
-          if(!propertySettings['${propName}']) propertySettings['${propName}'] = {name: '${propName}'};
-          propertySettings['${propName}'].municipality = this.value;
-          savePropertySettings();"
-          style="width:100%;padding:8px;border:1px solid #ddd;border-radius:3px">
-          <option value="">-- No Tax Reporting --</option>
-          ${municipalities.map(m => `<option value="${m}" ${settings.municipality === m ? 'selected' : ''}>${m}</option>`).join('')}
-        </select>
+      <div class="property-settings-box">
+        <span class="property-name-label">${propName}</span>
+        <div class="checkbox-group">
+          ${municipalities.map(mun => `
+            <div class="checkbox-item">
+              <input type="checkbox" 
+                id="mun_${propName}_${mun}" 
+                ${settings.municipalities && settings.municipalities[mun] ? 'checked' : ''} 
+                onchange="
+                  if(!propertySettings['${propName}']) propertySettings['${propName}'] = {name: '${propName}', municipalities: {}};
+                  if(!propertySettings['${propName}'].municipalities) propertySettings['${propName}'].municipalities = {};
+                  propertySettings['${propName}'].municipalities['${mun}'] = this.checked;
+                  savePropertySettings();
+                ">
+              <label for="mun_${propName}_${mun}">${mun}</label>
+            </div>
+          `).join('')}
+        </div>
       </div>
     `;
   });
@@ -872,22 +886,23 @@ async function generateSummary() {
       </table>
     </div>
 
-    ${type === "payout" && Object.entries(propertyTotals).some(([prop]) => propertySettings[prop]?.municipality) ? `
+    ${type === "payout" && Object.entries(propertyTotals).some(([prop]) => propertySettings[prop]?.municipalities && Object.values(propertySettings[prop].municipalities).some(v => v)) ? `
     <div class="tax-info">
       <div class="tax-info-title">⚠️ TAX REPORTING - PAYMENT REQUIRED BY MUNICIPALITY</div>
       <table class="tax-table">
         <tr>
           <th>PROPERTY</th>
-          <th>MUNICIPALITY</th>
+          <th>MUNICIPALITIES</th>
           <th>TAX AMOUNT</th>
         </tr>
         ${Object.entries(propertyTotals).map(([prop, data]) => {
           const settings = propertySettings[prop];
-          if (!settings || !settings.municipality) return "";
+          if (!settings || !settings.municipalities || !Object.values(settings.municipalities).some(v => v)) return "";
+          const munis = Object.keys(settings.municipalities || {}).filter(m => settings.municipalities[m]).join(", ");
           return `
             <tr>
               <td style="text-transform:uppercase">${prop}</td>
-              <td>${settings.municipality}</td>
+              <td>${munis}</td>
               <td class="tax-amount">${money(taxByProperty[prop] || 0)}</td>
             </tr>
           `;
