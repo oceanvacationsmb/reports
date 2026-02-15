@@ -231,6 +231,11 @@
       "id": 1771149480274,
       "name": "AMAZON",
       "phone": ""
+    },
+    {
+      "id": 1771149483644,
+      "name": "WALMART",
+      "phone": ""
     }
   ],
   "expenses": [],
