@@ -33,9 +33,9 @@ table{width:100%;border-collapse:collapse;margin:20px 0;font-size:11px}
 th,td{border:1px solid #e0e0e0;padding:12px;text-align:left}
 th{background:#f5f5f5;color:#000;font-weight:bold;text-align:center;text-transform:uppercase}
 tr:nth-child(even){background:#fafafa}
-.back-btn{margin:20px 0;background:#666}
+.back-btn{margin:20px 0;background:#666;width:auto;display:inline-block;padding:10px 20px}
 .back-btn:hover{background:#555}
-.print-btn{background:#e74c3c}
+.print-btn{background:#e74c3c;width:auto;display:inline-block;padding:10px 20px;margin-right:10px}
 .print-btn:hover{background:#c0392b}
 .property-section{margin:40px 0;padding:20px;border:1px solid #ddd;border-radius:5px;background:#fff}
 .property-title{font-size:14px;font-weight:bold;margin-bottom:15px;display:flex;align-items:center;text-transform:uppercase;text-align:center;justify-content:center}
@@ -50,7 +50,7 @@ tr:nth-child(even){background:#fafafa}
 .attachment-file{background:#e8f4f8;padding:8px;margin:8px 0;border-left:3px solid #17a2b8;border-radius:3px;display:flex;justify-content:space-between;align-items:center}
 .file-info{flex:1}
 .file-name{font-weight:bold;color:#0c5460}
-.file-download{color:#0066cc;cursor:pointer;text-decoration:underline;font-size:9px}
+.file-download{color:#0066cc;cursor:pointer;text-decoration:underline;font-size:9px;margin-right:10px}
 .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.5)}
 .modal-content{background:#fff;margin:10% auto;padding:20px;border:1px solid #888;width:80%;max-width:600px;border-radius:5px;max-height:80vh;overflow-y:auto}
 .modal-close{color:#aaa;float:right;font-size:28px;font-weight:bold;cursor:pointer}
@@ -73,7 +73,8 @@ tr:nth-child(even){background:#fafafa}
 .checkbox-item{display:flex;align-items:center;gap:8px}
 .checkbox-item input[type="checkbox"]{width:18px;height:18px;cursor:pointer;accent-color:#17a2b8}
 .checkbox-item label{color:#000;font-weight:bold;cursor:pointer;margin:0}
-@media print{.sidebar,.back-btn,.print-btn{display:none}.main{margin-left:0;width:100%}.page{padding:20px}}
+.btn-small{padding:5px 10px;font-size:9px;width:auto;margin:0;display:inline-block}
+@media print{.sidebar,.back-btn,.print-btn,.history-actions{display:none}.main{margin-left:0;width:100%}.page{padding:20px}}
 </style>
 </head>
 <body>
@@ -405,7 +406,7 @@ function showVendorModal() {
   if (vendors.length === 0) {
     list.innerHTML = '<p>No vendors yet</p>';
   } else {
-    list.innerHTML = vendors.map(v => `<div style="background:#f0f0f0;padding:15px;margin:10px 0;border-radius:3px;display:flex;justify-content:space-between;align-items:center"><div><strong>${v.name}</strong><br><span style="color:#666;font-size:11px">${v.phone}</span></div><button onclick="deleteVendor(${v.id})" class="btn btn-danger" style="width:80px;margin:0;padding:5px">Delete</button></div>`).join("");
+    list.innerHTML = vendors.map(v => `<div style="background:#f0f0f0;padding:15px;margin:10px 0;border-radius:3px;display:flex;justify-content:space-between;align-items:center"><div><strong>${v.name}</strong><br><span style="color:#666;font-size:11px">${v.phone}</span></div><button onclick="deleteVendor(${v.id})" class="btn btn-danger btn-small">Delete</button></div>`).join("");
   }
   modal.style.display = "block";
 }
@@ -615,7 +616,7 @@ function displayStatement() {
         html += `<div class="attachment"><div class="attachment-left"><strong>${e.type}</strong> - ${e.vendor}: ${money(e.amount)}`;
         if (e.notes) html += `<br><span style="color:#666">Notes: ${e.notes}</span>`;
         if (e.file) html += `<div class="attachment-file"><div class="file-info"><div class="file-name">📎 ${e.file.name}</div></div><span class="file-download" onclick="downloadExpenseFile(${e.id})">Download</span></div>`;
-        html += `</div><button onclick="deleteExpense(${e.id})" class="btn btn-danger" style="width:60px;margin:0;padding:3px;font-size:9px">Delete</button></div>`;
+        html += `</div><button onclick="deleteExpense(${e.id})" class="btn btn-danger btn-small">Delete</button></div>`;
       });
       html += `</div>`;
     }
@@ -713,7 +714,7 @@ async function viewHistory() {
   updateHeaderDates();
   let html = `<button class="btn back-btn" onclick="generateStatement()">← Back</button><div class="summary-title">STATEMENT HISTORY</div>`;
   ownerStatements.forEach(s => {
-    html += `<div class="history-row"><div class="history-info"><strong>${getMonthName(s.month)} ${s.year}</strong> - ${s.type.toUpperCase()} - ${money(s.amount)}<br><span style="color:#666">${new Date(s.date).toLocaleString()}</span></div><div class="history-actions"><button onclick="downloadStatementPDF(${s.id})" style="background:#17a2b8">📥 PDF</button><button onclick="deleteStatement(${s.id})" style="background:#dc3545">🗑️ Delete</button></div></div>`;
+    html += `<div class="history-row"><div class="history-info"><strong>${getMonthName(s.month)} ${s.year}</strong> - ${s.type.toUpperCase()} - ${money(s.amount)}<br><span style="color:#666">${new Date(s.date).toLocaleString()}</span></div><div class="history-actions"><button onclick="downloadStatementPDF(${s.id})" class="btn btn-info btn-small">📥 PDF</button><button onclick="deleteStatement(${s.id})" class="btn btn-danger btn-small">🗑️ Delete</button></div></div>`;
   });
   document.getElementById("mainContent").innerHTML = html;
 }
@@ -738,7 +739,9 @@ async function downloadStatementPDF(id) {
     html += `<tr><td style="font-weight:bold;text-transform:uppercase">NET AMOUNT TO SEND</td><td style="text-align:right;font-weight:bold">${money(finalPayout)}</td></tr>`;
   }
   html += `</table></div>`;
-  html2pdf().set({ margin: 10, jsPDF: { unit: "mm", format: "a4" } }).from(document.createElement("div")).set({ html: html }).save(`Statement-${statement.owner}-${statement.month}-${statement.year}.pdf`);
+  const element = document.createElement('div');
+  element.innerHTML = html;
+  html2pdf().set({ margin: 10, jsPDF: { unit: "mm", format: "a4" } }).from(element).save(`Statement-${statement.owner}-${statement.month}-${statement.year}.pdf`);
 }
 
 function downloadPDF() {
