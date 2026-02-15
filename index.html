@@ -72,9 +72,12 @@ let expenses=[];
 let csvData=[];
 let propertySettings={};
 let currentOwner="";
-let masterTotals={};
+let masterTotals={gross:0,acc:0,clean:0,pmc:0,expenses:0,draft:0,owner:0,websiteFee:0};
 let propertyTotals={};
 const municipalities=["SC","MB","NMB","SSB","HC"];
+
+function num(v){return parseFloat((v||"0").toString().replace(/[$,]/g,""))||0;}
+function money(v){return"$"+(Number(v)||0).toFixed(2);}
 
 function loadData(){
   fetch("https://raw.githubusercontent.com/oceanvacationsmb/reports/main/data.json?t="+Date.now())
@@ -86,317 +89,60 @@ function loadData(){
       propertySettings=data.properties||{};
       init();
     })
-    .catch(e=>{
-      console.error(e);
-      init();
-    });
+    .catch(e=>{console.error(e);init();});
 }
 
-function init(){
-  buildOwners();
-  buildMonths();
-  buildYears();
-  document.getElementById("mainContent").innerHTML="<div style='text-align:center;padding:40px'>Ready!";
-}
+function init(){buildOwners();buildMonths();buildYears();document.getElementById("mainContent").innerHTML="<div style='text-align:center;padding:40px'>Ready!";}
 
-function buildOwners(){
-  const sel=document.getElementById("ownerSelect");
-  sel.innerHTML="<option>--Select--</option>";
-  Object.keys(OWNERS).sort().forEach(name=>{
-    sel.innerHTML+="<option>"+name+"</option>";
-  });
-}
+function buildOwners(){const sel=document.getElementById("ownerSelect");sel.innerHTML="<option>--Select--</option>";Object.keys(OWNERS).sort().forEach(name=>{sel.innerHTML+="<option>"+name+"</option>";});}
 
-function buildMonths(){
-  const sel=document.getElementById("monthSelect");
-  const months=["January","February","March","April","May","June","July","August","September","October","November","December"];
-  months.forEach((m,i)=>{
-    sel.innerHTML+="<option value='"+(i+1)+"'>"+m+"</option>";
-  });
-  sel.value=new Date().getMonth()+1;
-}
+function buildMonths(){const sel=document.getElementById("monthSelect");const months=["January","February","March","April","May","June","July","August","September","October","November","December"];months.forEach((m,i)=>{sel.innerHTML+="<option value='"+(i+1)+"'>"+m+"</option>";});sel.value=new Date().getMonth()+1;}
 
-function buildYears(){
-  const sel=document.getElementById("yearSelect");
-  const y=new Date().getFullYear();
-  for(let i=y-2;i<=y+2;i++){
-    sel.innerHTML+="<option>"+i+"</option>";
-  }
-  sel.value=y;
-}
+function buildYears(){const sel=document.getElementById("yearSelect");const y=new Date().getFullYear();for(let i=y-2;i<=y+2;i++){sel.innerHTML+="<option>"+i+"</option>";}sel.value=y;}
 
-function onOwnerChange(){
-  currentOwner=document.getElementById("ownerSelect").value;
-}
+function onOwnerChange(){currentOwner=document.getElementById("ownerSelect").value;}
 
-function openOwners(){
-  const list=document.getElementById("ownersList");
-  let html="";
-  Object.keys(OWNERS).forEach(name=>{
-    const o=OWNERS[name];
-    html+="<div style='background:#555;padding:10px;margin:8px 0;border-radius:3px'>";
-    html+="<strong>"+name+"</strong><br>";
-    html+="<input type='email' value='"+(o.email||"")+"' placeholder='Email' class='modal-input' style='margin:5px 0'>";
-    html+="<input type='number' step='0.01' value='"+(o.percent*100)+"' placeholder='Commission %' class='modal-input' style='margin:5px 0'>";
-    html+="<select class='modal-input' style='margin:5px 0'><option "+(o.type==='draft'?'selected':'')+">draft</option><option "+(o.type==='payout'?'selected':'')+">payout</option></select>";
-    html+="<button class='btn btn-danger' onclick=\"deleteOwner('"+name+"')\" style='width:100%;margin-top:8px;padding:8px'>Delete</button>";
-    html+="</div>";
-  });
-  list.innerHTML=html;
-  openModal("ownerModal");
-}
+function openOwners(){const list=document.getElementById("ownersList");let html="";Object.keys(OWNERS).forEach(name=>{const o=OWNERS[name];html+="<div style='background:#555;padding:10px;margin:8px 0;border-radius:3px'><strong>"+name+"</strong><br><input type='email' value='"+(o.email||"")+"' placeholder='Email' class='modal-input' style='margin:5px 0'><input type='number' step='0.01' value='"+(o.percent*100)+"' placeholder='Commission %' class='modal-input' style='margin:5px 0'><select class='modal-input' style='margin:5px 0'><option "+(o.type==='draft'?'selected':'')+">draft</option><option "+(o.type==='payout'?'selected':'')+">payout</option></select><button class='btn btn-danger' onclick=\"deleteOwner('"+name+"')\" style='width:100%;margin-top:8px;padding:8px'>Delete</button></div>";});list.innerHTML=html;openModal("ownerModal");}
 
-function addOwner(){
-  const name=document.getElementById("ownerName").value;
-  const email=document.getElementById("ownerEmail").value;
-  const comm=parseFloat(document.getElementById("ownerComm").value)||0.12;
-  const sales=parseFloat(document.getElementById("ownerSales").value)||5;
-  const type=document.getElementById("ownerType").value;
-  if(!name)return;
-  OWNERS[name]={email:email,percent:comm/100,salesFeePercent:sales,type:type};
-  document.getElementById("ownerName").value="";
-  document.getElementById("ownerEmail").value="";
-  document.getElementById("ownerComm").value="";
-  document.getElementById("ownerSales").value="";
-  saveData();
-  buildOwners();
-  openOwners();
-}
+function addOwner(){const name=document.getElementById("ownerName").value;const email=document.getElementById("ownerEmail").value;const comm=parseFloat(document.getElementById("ownerComm").value)||0.12;const sales=parseFloat(document.getElementById("ownerSales").value)||5;const type=document.getElementById("ownerType").value;if(!name)return;OWNERS[name]={email:email,percent:comm/100,salesFeePercent:sales,type:type};document.getElementById("ownerName").value="";document.getElementById("ownerEmail").value="";document.getElementById("ownerComm").value="";document.getElementById("ownerSales").value="";saveData();buildOwners();openOwners();}
 
-function deleteOwner(name){
-  if(!confirm("Delete?"))return;
-  delete OWNERS[name];
-  saveData();
-  buildOwners();
-  openOwners();
-}
+function deleteOwner(name){if(!confirm("Delete?"))return;delete OWNERS[name];saveData();buildOwners();openOwners();}
 
-function openTax(){
-  const content=document.getElementById("taxContent");
-  let html="";
-  Object.keys(OWNERS).forEach(name=>{
-    html+="<div style='background:#555;padding:10px;margin:8px 0'><strong>"+name+"</strong><br>";
-    municipalities.forEach(m=>{
-      const checked=propertySettings[name]&&propertySettings[name][m]?"checked":"";
-      html+="<label style='color:#fff'><input type='checkbox' "+checked+" onchange=\"if(!propertySettings['"+name+"'])propertySettings['"+name+"']={};propertySettings['"+name+"']['"+m+"']=this.checked\"> "+m+"</label> ";
-    });
-    html+="</div>";
-  });
-  content.innerHTML=html;
-  openModal("taxModal");
-}
+function openTax(){const content=document.getElementById("taxContent");let html="";Object.keys(OWNERS).forEach(name=>{html+="<div style='background:#555;padding:10px;margin:8px 0'><strong>"+name+"</strong><br>";municipalities.forEach(m=>{const checked=propertySettings[name]&&propertySettings[name][m]?"checked":"";html+="<label style='color:#fff'><input type='checkbox' "+checked+" onchange=\"if(!propertySettings['"+name+"'])propertySettings['"+name+"']={};propertySettings['"+name+"']['"+m+"']=this.checked\"> "+m+"</label> ";});html+="</div>";});content.innerHTML=html;openModal("taxModal");}
 
-function addVendor(){
-  const name=document.getElementById("vendorName").value;
-  const phone=document.getElementById("vendorPhone").value;
-  if(!name)return;
-  vendors.push({id:Date.now(),name:name,phone:phone});
-  document.getElementById("vendorName").value="";
-  document.getElementById("vendorPhone").value="";
-  saveData();
-  alert("✓ Added");
-}
+function addVendor(){const name=document.getElementById("vendorName").value;const phone=document.getElementById("vendorPhone").value;if(!name)return;vendors.push({id:Date.now(),name:name,phone:phone});document.getElementById("vendorName").value="";document.getElementById("vendorPhone").value="";saveData();alert("✓ Added");}
 
-function showVendors(){
-  const list=document.getElementById("vendorsList");
-  let html="";
-  vendors.forEach(v=>{
-    html+="<div style='background:#555;padding:10px;margin:8px 0;display:flex;justify-content:space-between'><div><strong style='color:#fff'>"+v.name+"</strong><br><span style='font-size:10px;color:#aaa'>"+v.phone+"</span></div><button class='btn btn-danger' onclick='deleteVendor("+v.id+")' style='padding:5px 10px;font-size:9px'>Delete</button></div>";
-  });
-  list.innerHTML=html;
-  openModal("vendorModal");
-}
+function showVendors(){const list=document.getElementById("vendorsList");let html="";vendors.forEach(v=>{html+="<div style='background:#555;padding:10px;margin:8px 0;display:flex;justify-content:space-between'><div><strong style='color:#fff'>"+v.name+"</strong><br><span style='font-size:10px;color:#aaa'>"+v.phone+"</span></div><button class='btn btn-danger' onclick='deleteVendor("+v.id+")' style='padding:5px 10px;font-size:9px'>Delete</button></div>";});list.innerHTML=html;openModal("vendorModal");}
 
-function deleteVendor(id){
-  vendors=vendors.filter(v=>v.id!==id);
-  saveData();
-  showVendors();
-}
+function deleteVendor(id){vendors=vendors.filter(v=>v.id!==id);saveData();showVendors();}
 
-function openAddExpense(){
-  if(!currentOwner)return;
-  const prop=document.getElementById("expenseProperty");
-  prop.innerHTML="<option>--Select--</option>";
-  Object.keys(propertyTotals).forEach(p=>{
-    prop.innerHTML+="<option>"+p+"</option>";
-  });
-  const vend=document.getElementById("expenseVendor");
-  vend.innerHTML="<option>--Select--</option>";
-  vendors.forEach(v=>{
-    vend.innerHTML+="<option>"+v.name+"</option>";
-  });
-  openModal("expenseModal");
-}
+function openAddExpense(){if(!currentOwner)return;const prop=document.getElementById("expenseProperty");prop.innerHTML="<option>--Select--</option>";Object.keys(propertyTotals).forEach(p=>{prop.innerHTML+="<option>"+p+"</option>";});const vend=document.getElementById("expenseVendor");vend.innerHTML="<option>--Select--</option>";vendors.forEach(v=>{vend.innerHTML+="<option>"+v.name+"</option>";});openModal("expenseModal");}
 
-function submitExpense(){
-  const type=document.getElementById("expenseType").value;
-  const property=document.getElementById("expenseProperty").value;
-  const vendor=document.getElementById("expenseVendor").value;
-  const amount=parseFloat(document.getElementById("expenseAmount").value);
-  if(!currentOwner||!property||!vendor||!amount)return;
-  expenses.push({id:Date.now(),owner:currentOwner,type:type,property:property,vendor:vendor,amount:amount,notes:document.getElementById("expenseNotes").value});
-  closeAll();
-  saveData();
-  alert("✓ Added");
-}
+function submitExpense(){const type=document.getElementById("expenseType").value;const property=document.getElementById("expenseProperty").value;const vendor=document.getElementById("expenseVendor").value;const amount=parseFloat(document.getElementById("expenseAmount").value);if(!currentOwner||!property||!vendor||!amount)return;expenses.push({id:Date.now(),owner:currentOwner,type:type,property:property,vendor:vendor,amount:amount,notes:document.getElementById("expenseNotes").value});closeAll();saveData();alert("✓ Added");}
 
-function setupToken(){
-  const token=prompt("GitHub Token:");
-  if(token){
-    localStorage.setItem("github_token",token);
-    loadData();
-  }
-}
+function setupToken(){const token=prompt("GitHub Token:");if(token){localStorage.setItem("github_token",token);loadData();}}
 
-function setupDropbox(){
-  const token=prompt("Dropbox Token:");
-  if(token){
-    localStorage.setItem("dropbox_token",token);
-  }
-}
+function setupDropbox(){const token=prompt("Dropbox Token:");if(token){localStorage.setItem("dropbox_token",token);}}
 
-function saveData(){
-  const token=localStorage.getItem("github_token");
-  if(!token)return;
-  const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses},null,2);
-  const content=btoa(unescape(encodeURIComponent(data)));
-  fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{headers:{"Authorization":"token "+token}})
-    .then(r=>r.json())
-    .then(file=>{
-      fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{
-        method:"PUT",
-        headers:{"Authorization":"token "+token,"Content-Type":"application/json"},
-        body:JSON.stringify({message:"Update",content:content,sha:file.sha})
-      });
-    });
-}
+function saveData(){const token=localStorage.getItem("github_token");if(!token)return;const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses},null,2);const content=btoa(unescape(encodeURIComponent(data)));fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{headers:{"Authorization":"token "+token}}).then(r=>r.json()).then(file=>{fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{method:"PUT",headers:{"Authorization":"token "+token,"Content-Type":"application/json"},body:JSON.stringify({message:"Update",content:content,sha:file.sha})});});}
 
-function generateStatement(){
-  const file=document.getElementById("csvFile").files[0];
-  if(!file||!currentOwner)return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    csvData=Papa.parse(e.target.result,{header:true,skipEmptyLines:true}).data;
-    const month=parseInt(document.getElementById("monthSelect").value);
-    const year=parseInt(document.getElementById("yearSelect").value);
-    processData(month,year);
-    displayStatement(month,year);
-  };
-  reader.readAsText(file);
-}
+function generateStatement(){const file=document.getElementById("csvFile").files[0];if(!file||!currentOwner)return;const reader=new FileReader();reader.onload=e=>{csvData=Papa.parse(e.target.result,{header:true,skipEmptyLines:true}).data;const month=parseInt(document.getElementById("monthSelect").value);const year=parseInt(document.getElementById("yearSelect").value);processData(month,year);displayStatement(month,year);};reader.readAsText(file);}
 
-function processData(month,year){
-  const owner=OWNERS[currentOwner];
-  propertyTotals={};
-  masterTotals={gross:0,acc:0,clean:0,pmc:0,expenses:0};
-  let byProperty={};
-  csvData.forEach(row=>{
-    if(!row["CHECK-IN DATE"])return;
-    const m=parseInt(row["CHECK-IN DATE"].split("-")[1]);
-    const y=parseInt(row["CHECK-IN DATE"].split("-")[0]);
-    if(m!==month||y!==year)return;
-    const prop=row["LISTING'S NICKNAME"]||"Unknown";
-    if(!byProperty[prop])byProperty[prop]=[];
-    byProperty[prop].push(row);
-  });
-  Object.keys(byProperty).forEach(prop=>{
-    let gross=0,acc=0,clean=0,pmc=0;
-    byProperty[prop].forEach(row=>{
-      const g=parseFloat((row["TOTAL PAYOUT"]||"0").replace(/[$,]/g,""));
-      const a=parseFloat((row["ACCOMMODATION FARE"]||"0").replace(/[$,]/g,""))-parseFloat((row["MARKUP"]||"0").replace(/[$,]/g,""));
-      const c=(row["STATUS"]||"").toLowerCase().includes("cancelled")?0:parseFloat((row["CLEANING FARE"]||"0").replace(/[$,]/g,""));
-      const p=a*owner.percent;
-      gross+=g;
-      acc+=a;
-      clean+=c;
-      pmc+=p;
-    });
-    const exp=expenses.filter(e=>e.property===prop&&e.owner===currentOwner).reduce((sum,e)=>sum+e.amount,0);
-    propertyTotals[prop]={gross:gross,acc:acc,clean:clean,pmc:pmc,expenses:exp,owner:acc-pmc-exp,reservations:byProperty[prop]};
-    masterTotals.gross+=gross;
-    masterTotals.acc+=acc;
-    masterTotals.clean+=clean;
-    masterTotals.pmc+=pmc;
-    masterTotals.expenses+=exp;
-  });
-}
+function processData(month,year){const t=OWNERS[currentOwner];propertyTotals={};masterTotals={gross:0,acc:0,clean:0,pmc:0,expenses:0,draft:0,owner:0,websiteFee:0};let a={};csvData.forEach(row=>{if(!row["CHECK-IN DATE"])return;const m=parseInt(row["CHECK-IN DATE"].split("-")[1]);const y=parseInt(row["CHECK-IN DATE"].split("-")[0]);if(m!==month||y!==year)return;const prop=row["LISTING'S NICKNAME"]||"Unknown";if(!a[prop])a[prop]=[];a[prop].push(row);});Object.keys(a).forEach(prop=>{let n=0,s=0,r=0,i=0,d=0,c=0;a[prop].forEach(row=>{const f=num(row["TOTAL PAYOUT"]);const l=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);const h=(row["STATUS"]||"").toLowerCase().includes("cancelled")?0:num(row["CLEANING FARE"]);const u=l*t.percent;let b=0;if(t.type==="draft"&&l>0){const g=row["CONFIRMATION CODE"]||"";const p=row["PLATFORM"]||"";if(!g.toUpperCase().startsWith("HA")&&(p.toLowerCase().includes("website")||p.toLowerCase().includes("manual"))){b=f*0.01}}n+=f;s+=l;r+=h;i+=u;d+=b;c+=0;});const o=expenses.filter(e=>e.property===prop&&e.owner===currentOwner).reduce((sum,e)=>sum+e.amount,0);const l=i+r+d+o;const h=s-i-o;propertyTotals[prop]={gross:n,acc:s,clean:r,pmc:i,websiteFee:d,expenses:o,draft:l,owner:h,reservations:a[prop]};masterTotals.gross+=n;masterTotals.acc+=s;masterTotals.clean+=r;masterTotals.pmc+=i;masterTotals.websiteFee+=d;masterTotals.expenses+=o;masterTotals.draft+=l;masterTotals.owner+=h;});}
 
-function displayStatement(month,year){
-  const months=["January","February","March","April","May","June","July","August","September","October","November","December"];
-  const owner=OWNERS[currentOwner];
-  const last=new Date(year,month,0).getDate();
-  let next=month+1,nextYear=year;
-  if(next>12){next=1;nextYear++;}
-  document.getElementById("statementDate").innerHTML="<strong>"+months[next-1]+" 1, "+nextYear+"</strong>";
-  document.getElementById("periodDate").innerHTML="<strong>"+months[month-1]+" 1-"+last+", "+year+"</strong>";
-  document.getElementById("ownerTitle").textContent=currentOwner;
-  let html="<button class='copy-link-btn' onclick='generateLink()'>🔗 Generate Link</button>";
-  html+="<div style='font-size:12px;font-weight:bold;text-align:center;margin:20px 0'>SUMMARY</div>";
-  html+="<div class='summary-grid'>";
-  html+="<div class='summary-card'><div>Accommodation</div><div class='summary-value'>$"+masterTotals.acc.toFixed(2)+"</div></div>";
-  html+="<div class='summary-card'><div>PMC</div><div class='summary-value'>$"+masterTotals.pmc.toFixed(2)+"</div></div>";
-  if(owner.type==="draft"){
-    html+="<div class='summary-card' style='background:#000;color:#fff'><div>DUE</div><div class='summary-value' style='color:#fff'>$"+(masterTotals.pmc+masterTotals.clean).toFixed(2)+"</div></div>";
-  }else{
-    html+="<div class='summary-card' style='background:#000;color:#fff'><div>PAYOUT</div><div class='summary-value' style='color:#fff'>$"+(masterTotals.acc-masterTotals.pmc).toFixed(2)+"</div></div>";
-  }
-  html+="</div>";
-  Object.keys(propertyTotals).forEach(prop=>{
-    const p=propertyTotals[prop];
-    html+="<div class='property-section'><div class='property-title'>"+prop.toUpperCase()+"</div><table><tr><th>Code</th><th>Check-in</th><th>Amount</th></tr>";
-    p.reservations.forEach(row=>{
-      const a=parseFloat((row["ACCOMMODATION FARE"]||"0").replace(/[$,]/g,""))-parseFloat((row["MARKUP"]||"0").replace(/[$,]/g,""));
-      html+="<tr><td>"+(row["CONFIRMATION CODE"]||"").substring(0,8)+"</td><td>"+(row["CHECK-IN DATE"]||"")+"</td><td>$"+a.toFixed(2)+"</td></tr>";
-    });
-    html+="</table></div>";
-  });
-  document.getElementById("mainContent").innerHTML=html;
-}
+function displayStatement(month,year){const months=["January","February","March","April","May","June","July","August","September","October","November","December"];const t=OWNERS[currentOwner];const last=new Date(year,month,0).getDate();let next=month+1,nextYear=year;if(next>12){next=1;nextYear++;}document.getElementById("statementDate").innerHTML="<strong>"+months[next-1]+" 1, "+nextYear+"</strong>";document.getElementById("periodDate").innerHTML="<strong>"+months[month-1]+" 1-"+last+", "+year+"</strong>";document.getElementById("ownerTitle").textContent=currentOwner;let html="<button class='copy-link-btn' onclick='generateLink()'>🔗 Generate Link</button>";html+="<div style='font-size:12px;font-weight:bold;text-align:center;margin:20px 0'>SUMMARY</div>";html+="<div class='summary-grid'>";if(t.type==="draft"){html+="<div class='summary-card'><div>Accommodation</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";html+="<div class='summary-card'><div>PMC</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";html+="<div class='summary-card' style='background:#000;color:#fff'><div>DUE</div><div class='summary-value' style='color:#fff'>"+money(masterTotals.draft)+"</div></div>";}else{html+="<div class='summary-card'><div>Accommodation</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";html+="<div class='summary-card'><div>PMC</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";html+="<div class='summary-card' style='background:#000;color:#fff'><div>PAYOUT</div><div class='summary-value' style='color:#fff'>"+money(masterTotals.owner)+"</div></div>";}html+="</div>";Object.keys(propertyTotals).forEach(prop=>{const p=propertyTotals[prop];html+="<div class='property-section'><div class='property-title'>"+prop.toUpperCase()+"</div><table><tr><th>Code</th><th>Check-in</th><th>Accommodation</th><th>PMC</th></tr>";p.reservations.forEach(row=>{const a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);const pmc=a*t.percent;html+="<tr><td>"+(row["CONFIRMATION CODE"]||"").substring(0,8)+"</td><td>"+(row["CHECK-IN DATE"]||"")+"</td><td>"+money(a)+"</td><td>"+money(pmc)+"</td></tr>";});html+="</table></div>";});document.getElementById("mainContent").innerHTML=html;}
 
-function generateSummary(){
-  document.getElementById("mainContent").innerHTML="<button class='back-btn' onclick='displayStatement()'>← Back</button><h2 style='text-align:center'>COMMISSION: $"+masterTotals.pmc.toFixed(2)+"</h2>";
-}
+function generateSummary(){document.getElementById("mainContent").innerHTML="<button class='back-btn' onclick='location.reload()'>← Back</button><h2 style='text-align:center'>COMMISSION: "+money(masterTotals.pmc)+"</h2>";}
 
-function generateAnnual(){
-  document.getElementById("mainContent").innerHTML="<button class='back-btn' onclick='displayStatement()'>← Back</button><h2 style='text-align:center'>ANNUAL: $"+masterTotals.acc.toFixed(2)+"</h2>";
-}
+function generateAnnual(){document.getElementById("mainContent").innerHTML="<button class='back-btn' onclick='location.reload()'>← Back</button><h2 style='text-align:center'>ANNUAL: "+money(masterTotals.acc)+"</h2>";}
 
-function generateLink(){
-  const token=localStorage.getItem("dropbox_token");
-  if(!token)return alert("Setup Dropbox first");
-  const html=document.getElementById("content").innerHTML;
-  const name=currentOwner+"_"+Date.now()+".html";
-  fetch("https://content.dropboxapi.com/2/files/upload",{
-    method:"POST",
-    headers:{"Authorization":"Bearer "+token,"Dropbox-API-Arg":JSON.stringify({path:"/statements/"+name,mode:"add"})},
-    body:html
-  }).then(r=>{
-    if(r.ok){
-      fetch("https://www.dropboxapi.com/2/sharing/create_shared_link_with_settings",{
-        method:"POST",
-        headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"},
-        body:JSON.stringify({path:"/statements/"+name,settings:{requested_visibility:"public"}})
-      }).then(r=>r.json()).then(data=>{
-        const link=data.url.replace("?dl=0","?dl=1");
-        document.getElementById("mainContent").innerHTML+="<div style='background:#d4edda;padding:15px;margin:20px 0;border-radius:5px;text-align:center'><h3 style='color:#155724'>✓ Generated!</h3><button class='copy-link-btn' onclick=\"copyLink('"+link+"')\">📋 Copy</button><p style='font-size:11px;color:#155724;word-break:break-all'>"+link+"</p></div>";
-      });
-    }
-  });
-}
+function generateLink(){const token=localStorage.getItem("dropbox_token");if(!token)return alert("Setup Dropbox first");const html=document.getElementById("content").innerHTML;const name=currentOwner+"_"+Date.now()+".html";fetch("https://content.dropboxapi.com/2/files/upload",{method:"POST",headers:{"Authorization":"Bearer "+token,"Dropbox-API-Arg":JSON.stringify({path:"/statements/"+name,mode:"add"})},body:html}).then(r=>{if(r.ok){fetch("https://www.dropboxapi.com/2/sharing/create_shared_link_with_settings",{method:"POST",headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"},body:JSON.stringify({path:"/statements/"+name,settings:{requested_visibility:"public"}})}).then(r=>r.json()).then(data=>{const link=data.url.replace("?dl=0","?dl=1");document.getElementById("mainContent").innerHTML+="<div style='background:#d4edda;padding:15px;margin:20px 0;border-radius:5px;text-align:center'><h3 style='color:#155724'>✓ Generated!</h3><button class='copy-link-btn' onclick=\"copyLink('"+link+"')\">📋 Copy</button><p style='font-size:11px;color:#155724;word-break:break-all'>"+link+"</p></div>";});}});}
 
-function copyLink(link){
-  navigator.clipboard.writeText(link).then(()=>alert("✓ Copied"));
-}
+function copyLink(link){navigator.clipboard.writeText(link).then(()=>alert("✓ Copied"));}
 
-function openModal(id){
-  document.getElementById("modalOverlay").classList.add("show");
-  document.getElementById(id).classList.add("show");
-}
+function openModal(id){document.getElementById("modalOverlay").classList.add("show");document.getElementById(id).classList.add("show");}
 
-function closeAll(){
-  document.getElementById("modalOverlay").classList.remove("show");
-  document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));
-}
+function closeAll(){document.getElementById("modalOverlay").classList.remove("show");document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));}
 
 loadData();
 </script>
