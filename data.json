@@ -223,18 +223,7 @@
       "phone": "843-987-6543"
     }
   ],
-  "expenses": [
-    {
-      "id": 1771148784985,
-      "owner": "ERAN",
-      "type": "Purchase",
-      "property": "GC - 1211A",
-      "vendor": "ABC Cleaning Services",
-      "amount": 500,
-      "notes": "",
-      "date": "2/15/2026, 4:46:24 AM"
-    }
-  ],
+  "expenses": [],
   "statements": [],
   "lastUpdated": ""
 }
