@@ -253,17 +253,7 @@
       "phone": ""
     }
   ],
-  "expenses": [
-    {
-      "id": 1771171019535,
-      "owner": "ERAN",
-      "type": "Credit",
-      "property": "GC - 1211A",
-      "vendor": "CREDIT",
-      "amount": -250,
-      "notes": "Cancelled"
-    }
-  ],
+  "expenses": [],
   "statements": [],
   "lastUpdated": "",
   "reports": []
