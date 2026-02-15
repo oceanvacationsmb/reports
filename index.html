@@ -34,6 +34,10 @@ body{font-family:Arial;background:#f5f5f5;color:#000;display:flex}
 .owner-item-label{font-size:10px;color:#bbb;display:block;margin-bottom:3px}
 .owner-item-control input,.owner-item-control select{width:100%;padding:5px;background:#666;color:#fff;border:1px solid #777;border-radius:2px;font-size:10px}
 .owner-item-control input:focus,.owner-item-control select:focus{outline:none;border-color:#fff}
+.checkbox-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:5px}
+.checkbox-item{display:flex;align-items:center;gap:4px}
+.checkbox-item input[type="checkbox"]{width:14px;height:14px;cursor:pointer}
+.checkbox-item label{color:#fff;font-size:10px;cursor:pointer}
 .main-content{margin-left:250px;padding:15px;width:calc(100% - 250px)}
 .page-break{page-break-after:always}
 .header{display:flex;justify-content:space-between;margin-bottom:12px}
@@ -142,19 +146,19 @@ tr:nth-child(even){background:#f9f9f9}
 <script>
 
 let owners={
-"ERAN":{percent:0.12,type:"draft",salesFeePercent:5},
-"GHO":{percent:0.10,type:"payout",salesFeePercent:5},
-"1463 Basin Trail":{percent:0.12,type:"payout",salesFeePercent:5},
-"113B-15S Surfside Beach":{percent:0.12,type:"payout",salesFeePercent:5},
-"113B-13N Surfside Beach":{percent:0.12,type:"payout",salesFeePercent:5},
-"115C-15N Surfside Beach":{percent:0.12,type:"payout",salesFeePercent:5},
-"2131 Sanibel Myrtle Beach":{percent:0.15,type:"payout",salesFeePercent:5},
-"1552 Elizabeth Ln Myrtle Beach":{percent:0.15,type:"payout",salesFeePercent:5},
-"469C White River RD Myrtle Beach":{percent:0.12,type:"payout",salesFeePercent:5},
-"4631-301 Wild Iris Drive Myrtle Beach":{percent:0.12,type:"payout",salesFeePercent:5},
-"4679-204 Wild Iris Drive Myrtle Beach":{percent:0.12,type:"payout",salesFeePercent:5},
-"508-1/2 33rd Ave North Myrtle Beach":{percent:0.15,type:"payout",salesFeePercent:10},
-"214-2S 2nd Ave S. North Myrtle Beach":{percent:0.12,type:"payout",salesFeePercent:10}
+"ERAN":{percent:0.12,type:"draft",salesFeePercent:5,municipalities:{}},
+"GHO":{percent:0.10,type:"payout",salesFeePercent:5,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}},
+"1463 Basin Trail":{percent:0.12,type:"payout",salesFeePercent:5,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}},
+"113B-15S Surfside Beach":{percent:0.12,type:"payout",salesFeePercent:5,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}},
+"113B-13N Surfside Beach":{percent:0.12,type:"payout",salesFeePercent:5,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}},
+"115C-15N Surfside Beach":{percent:0.12,type:"payout",salesFeePercent:5,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}},
+"2131 Sanibel Myrtle Beach":{percent:0.15,type:"payout",salesFeePercent:5,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}},
+"1552 Elizabeth Ln Myrtle Beach":{percent:0.15,type:"payout",salesFeePercent:5,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}},
+"469C White River RD Myrtle Beach":{percent:0.12,type:"payout",salesFeePercent:5,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}},
+"4631-301 Wild Iris Drive Myrtle Beach":{percent:0.12,type:"payout",salesFeePercent:5,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}},
+"4679-204 Wild Iris Drive Myrtle Beach":{percent:0.12,type:"payout",salesFeePercent:5,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}},
+"508-1/2 33rd Ave North Myrtle Beach":{percent:0.15,type:"payout",salesFeePercent:10,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}},
+"214-2S 2nd Ave S. North Myrtle Beach":{percent:0.12,type:"payout",salesFeePercent:10,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}}
 };
 
 function loadSettings(){
@@ -173,26 +177,62 @@ setTimeout(()=>{btn.style.display="none"},3000);
 
 function updateSettingsDisplay(){
 const selectedOwner=document.getElementById("owner").value;
+const ownerData=owners[selectedOwner];
+const isDraft=ownerData.type==="draft";
+
 let html=`
 <div class="owner-item">
 <div class="owner-item-name">👤 ${selectedOwner}</div>
 <div class="owner-item-control">
 <label class="owner-item-label">Commission (%)</label>
-<input type="number" step="0.01" min="0" max="100" value="${(owners[selectedOwner].percent*100)}" onchange="updateOwner('${selectedOwner}','percent',this.value/100)">
+<input type="number" step="0.01" min="0" max="100" value="${(ownerData.percent*100).toFixed(2)}" onchange="updateOwner('${selectedOwner}','percent',this.value/100)">
 </div>
 <div class="owner-item-control">
 <label class="owner-item-label">Type</label>
 <select onchange="updateOwner('${selectedOwner}','type',this.value)">
-<option value="draft" ${owners[selectedOwner].type==='draft'?'selected':''}>Draft</option>
-<option value="payout" ${owners[selectedOwner].type==='payout'?'selected':''}>Payout</option>
+<option value="draft" ${ownerData.type==='draft'?'selected':''}>Draft</option>
+<option value="payout" ${ownerData.type==='payout'?'selected':''}>Payout</option>
 </select>
 </div>
 <div class="owner-item-control">
 <label class="owner-item-label">Sales Person Fee (%)</label>
-<input type="number" step="0.01" min="0" max="100" value="${owners[selectedOwner].salesFeePercent}" onchange="updateOwner('${selectedOwner}','salesFeePercent',this.value)">
+<input type="number" step="0.01" min="0" max="100" value="${(ownerData.salesFeePercent).toFixed(2)}" onchange="updateOwner('${selectedOwner}','salesFeePercent',this.value)">
+</div>
+`;
+
+// Only show municipalities for payout owners
+if(!isDraft){
+html+=`
+<div class="owner-item-control">
+<label class="owner-item-label">Tax Reporting Municipalities</label>
+<div class="checkbox-group">
+<div class="checkbox-item">
+<input type="checkbox" id="mun_SC" ${ownerData.municipalities?.SC?'checked':''} onchange="updateMunicipality('${selectedOwner}','SC',this.checked)">
+<label for="mun_SC">SC</label>
+</div>
+<div class="checkbox-item">
+<input type="checkbox" id="mun_MB" ${ownerData.municipalities?.MB?'checked':''} onchange="updateMunicipality('${selectedOwner}','MB',this.checked)">
+<label for="mun_MB">MB</label>
+</div>
+<div class="checkbox-item">
+<input type="checkbox" id="mun_NMB" ${ownerData.municipalities?.NMB?'checked':''} onchange="updateMunicipality('${selectedOwner}','NMB',this.checked)">
+<label for="mun_NMB">NMB</label>
+</div>
+<div class="checkbox-item">
+<input type="checkbox" id="mun_SSB" ${ownerData.municipalities?.SSB?'checked':''} onchange="updateMunicipality('${selectedOwner}','SSB',this.checked)">
+<label for="mun_SSB">SSB</label>
+</div>
+<div class="checkbox-item">
+<input type="checkbox" id="mun_HC" ${ownerData.municipalities?.HC?'checked':''} onchange="updateMunicipality('${selectedOwner}','HC',this.checked)">
+<label for="mun_HC">HC</label>
+</div>
 </div>
 </div>
 `;
+}
+
+html+=`</div>`;
+
 document.getElementById("ownersList").innerHTML=html;
 document.getElementById("settingsTitle").textContent=`${selectedOwner} - Settings`;
 }
@@ -202,10 +242,17 @@ if(field==='percent'){
 owners[name].percent=parseFloat(value);
 }else if(field==='type'){
 owners[name].type=value;
+updateSettingsDisplay();
 }else if(field==='salesFeePercent'){
 owners[name].salesFeePercent=parseFloat(value)||0;
 }
-console.log(`Updated ${name}: ${field} = ${value}`);
+}
+
+function updateMunicipality(owner,municipality,checked){
+if(!owners[owner].municipalities){
+owners[owner].municipalities={};
+}
+owners[owner].municipalities[municipality]=checked;
 }
 
 function toggleSettings(){
@@ -474,9 +521,10 @@ document.getElementById("report").innerHTML=reportHTML;
 
 function runSummary(){
 const owner=ownerSelect.value;
-const type=owners[owner].type;
-const salesFeePercent=owners[owner].salesFeePercent;
-const percent=owners[owner].percent;
+const ownerData=owners[owner];
+const type=ownerData.type;
+const salesFeePercent=ownerData.salesFeePercent;
+const percent=ownerData.percent;
 const month=parseInt(monthSelect.value);
 const year=parseInt(yearSelect.value);
 const endDay=lastDay(year,month);
@@ -514,6 +562,14 @@ taxByProperty[property].payout+=payout;
 });
 }
 
+// Get selected municipalities
+let selectedMunicipalities=[];
+if(ownerData.municipalities){
+Object.entries(ownerData.municipalities).forEach(([mun,checked])=>{
+if(checked) selectedMunicipalities.push(mun);
+});
+}
+
 let summaryHTML=`
 <button class="back-btn" onclick="goBackToStatement()">← Back to Statement</button>
 
@@ -532,7 +588,7 @@ let summaryHTML=`
 </div>
 <div class="summary-line">
 <span>Sales Person Fee Rate:</span>
-<span class="summary-line-value">${salesFeePercent}%</span>
+<span class="summary-line-value">${salesFeePercent.toFixed(2)}%</span>
 </div>
 <div class="summary-line" style="border-bottom:2px solid #000;padding-top:8px;padding-bottom:8px">
 <span style="font-size:13px"><strong>Sales Person Amount Due:</strong></span>
@@ -544,7 +600,7 @@ ${type==="draft"?`
 <div class="summary-section">
 <div class="summary-section-title">🌐 WEBSITE BOOKING FEE</div>
 <div class="summary-line">
-<span>Total Website Booking Fee (1%):</span>
+<span>Total Website Booking Fee (1.00%):</span>
 <span class="summary-line-value">${money(masterTotals.websiteFee)}</span>
 </div>
 <div style="font-size:11px;margin-top:10px;color:#666">
@@ -565,7 +621,7 @@ Charged on website bookings only (not VRBO or manual)
 </div>
 <div class="summary-line" style="border-bottom:2px solid #000;padding-top:8px;padding-bottom:8px">
 <span style="font-size:13px"><strong>Amount to ${type==="draft"?"Pay":"Payout"}:</strong></span>
-<span class="summary-line-value" style="font-size:13px">${type==="draft"?money(masterTotals.draft):money(masterTotals.owner)}</span>
+<span class="summary-line-value" style="font-size:13px">${money(masterTotals.draft)}</span>
 </div>
 </div>
 
@@ -580,9 +636,10 @@ This amount needs to be transferred to the PMC bank account
 </div>
 </div>
 
-${type==="payout" && hasTaxes?`
+${type==="payout" && hasTaxes && selectedMunicipalities.length>0?`
 <div class="warning-section">
 <div class="warning-title">⚠️ TAX REPORTING REQUIRED - CITY/STATE TAXES COLLECTED</div>
+<div style="font-size:11px;margin-bottom:10px;color:#333"><strong>Municipalities:</strong> ${selectedMunicipalities.join(', ')}</div>
 <table class="tax-table">
 <tr>
 <th>Property Name</th>
@@ -600,7 +657,7 @@ ${Object.entries(taxByProperty).map(([property, data])=>`
 </tr>
 </table>
 <p style="font-size:11px;margin-top:15px;color:#333">
-📝 This is the total payout from reservations with taxes withheld, broken down by property. Report these amounts to your city/state tax authorities.
+📝 This is the total payout from reservations with taxes withheld, broken down by property. Report these amounts to your ${selectedMunicipalities.join(', ')} tax authorities.
 </p>
 </div>
 `:""}
