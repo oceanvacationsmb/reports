@@ -277,6 +277,18 @@
       "invoice": {
         "filename": "Report (16).pdf"
       }
+    },
+    {
+      "id": 1771195613121,
+      "owner": "GHO",
+      "type": "Repair",
+      "property": "MB - 7500",
+      "vendor": "PARADIES HVAC",
+      "amount": 1000,
+      "notes": "",
+      "invoice": {
+        "filename": "Report (15).pdf"
+      }
     }
   ],
   "statements": [],
