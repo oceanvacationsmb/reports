@@ -19,32 +19,38 @@ select,input{width:100%;padding:8px;margin:5px 0;border:1px solid #555;backgroun
 .btn-info{background:#17a2b8}.btn-info:hover{background:#138496}
 .btn-danger{background:#dc3545}.btn-danger:hover{background:#c82333}
 .main{margin-left:280px;padding:20px;width:calc(100% - 280px)}
-.page{background:#fff;padding:30px;border-radius:5px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
+.page{background:#fff;padding:40px;border-radius:5px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
 .hidden{display:none}
-.header{text-align:center;margin-bottom:30px;border-bottom:3px solid #000;padding-bottom:20px}
-.title{font-size:28px;font-weight:bold;margin:10px 0}
-.subtitle{font-size:12px;color:#666}
-.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin:20px 0}
-.summary-card{background:#f9f9f9;border:1px solid #ddd;padding:15px;text-align:center;border-radius:5px}
-.summary-label{font-size:11px;color:#666;font-weight:bold}
-.summary-value{font-size:18px;font-weight:bold;color:#000;margin-top:8px}
+.invoice-header{display:flex;justify-content:space-between;margin-bottom:40px;border-bottom:2px solid #000;padding-bottom:30px}
+.company-info{font-size:11px;line-height:1.8}
+.company-name{font-size:20px;font-weight:bold;margin-bottom:5px}
+.right-header{text-align:right;font-size:11px;line-height:1.8}
+.statement-date{margin-bottom:20px;font-weight:bold}
+.period-date{margin-top:10px}
+.report-title{text-align:center;font-size:32px;font-weight:bold;margin:40px 0 10px 0;letter-spacing:2px}
+.owner-name{text-align:center;font-size:16px;margin-bottom:40px}
 table{width:100%;border-collapse:collapse;margin:20px 0;font-size:11px}
-th,td{border:1px solid #e0e0e0;padding:10px;text-align:left}
+th,td{border:1px solid #e0e0e0;padding:12px;text-align:left}
 th{background:#f5f5f5;color:#000;font-weight:bold}
 tr:nth-child(even){background:#fafafa}
 .back-btn{margin:20px 0;background:#666}
 .back-btn:hover{background:#555}
 .print-btn{background:#e74c3c}
 .print-btn:hover{background:#c0392b}
-.property-section{margin:30px 0;padding:20px;border:2px solid #000;border-radius:5px;background:#fff}
-.property-title{font-size:16px;font-weight:bold;margin-bottom:10px}
+.property-section{margin:40px 0;padding:20px;border:1px solid #ddd;border-radius:5px;background:#fff}
+.property-title{font-size:14px;font-weight:bold;margin-bottom:15px;display:flex;align-items:center}
+.property-icon{font-size:18px;margin-right:10px}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin:20px 0}
+.summary-card{background:#f9f9f9;border:1px solid #ddd;padding:15px;text-align:center;border-radius:5px}
+.summary-label{font-size:11px;color:#666;font-weight:bold}
+.summary-value{font-size:16px;font-weight:bold;color:#000;margin-top:8px}
 .attachment{background:#f0f0f0;padding:10px;margin:10px 0;border-radius:3px;font-size:10px}
 .attachment-link{color:#0066cc;cursor:pointer;text-decoration:underline}
 .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.5)}
 .modal-content{background:#fff;margin:10% auto;padding:20px;border:1px solid #888;width:80%;max-width:600px;border-radius:5px}
 .modal-close{color:#aaa;float:right;font-size:28px;font-weight:bold;cursor:pointer}
 .modal-close:hover{color:#000}
-@media print{.sidebar,.back-btn,.print-btn{display:none}.main{margin-left:0;width:100%}}
+@media print{.sidebar,.back-btn,.print-btn{display:none}.main{margin-left:0;width:100%}.page{padding:20px}}
 </style>
 </head>
 <body>
@@ -123,10 +129,26 @@ tr:nth-child(even){background:#fafafa}
 
 <div class="main">
 <div id="content" class="page">
-<div class="header">
-<div>OCEAN VACATIONS</div>
-<div class="title">Reservation & Statement System</div>
-<div class="subtitle">Select an owner and upload a CSV file to get started</div>
+<div class="invoice-header">
+<div class="company-info">
+<div class="company-name">OCEAN VACATIONS</div>
+<div>www.oceanvacationsmb.com</div>
+<div>oceanvacationsmb@gmail.com</div>
+<div>843-222-6516</div>
+</div>
+<div class="right-header">
+<div class="statement-date" id="statementDate"></div>
+<div class="period-date" id="periodDate"></div>
+</div>
+</div>
+
+<div class="report-title">RESERVATION REPORT</div>
+<div class="owner-name" id="ownerTitle"></div>
+
+<div id="mainContent">
+<div style="text-align:center;padding:40px;color:#666">
+Select an owner and upload a CSV file to get started
+</div>
 </div>
 </div>
 </div>
@@ -235,6 +257,32 @@ function initYears() {
 function onOwnerChange() {
   currentOwner = document.getElementById("ownerSelect").value;
   if (currentOwner) updatePropertySelect();
+}
+
+function getNextMonth(month, year) {
+  let nextMonth = month + 1;
+  let nextYear = year;
+  if (nextMonth > 12) {
+    nextMonth = 1;
+    nextYear++;
+  }
+  return { month: nextMonth, year: nextYear };
+}
+
+function getMonthName(month) {
+  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  return months[month - 1];
+}
+
+function updateHeaderDates() {
+  const month = parseInt(document.getElementById("monthSelect").value);
+  const year = parseInt(document.getElementById("yearSelect").value);
+  const next = getNextMonth(month, year);
+  const daysInMonth = new Date(year, month, 0).getDate();
+
+  document.getElementById("statementDate").innerHTML = `Statement Date:<br><strong>${getMonthName(next.month)} 1st ${next.year}</strong>`;
+  document.getElementById("periodDate").innerHTML = `Period: ${getMonthName(month)} 1st - ${daysInMonth}th ${year}`;
+  document.getElementById("ownerTitle").textContent = currentOwner;
 }
 
 // VENDORS
@@ -390,6 +438,8 @@ async function generateStatement() {
   if (!file) { alert("Upload CSV"); return; }
   if (!currentOwner) { alert("Select owner"); return; }
 
+  updateHeaderDates();
+
   const reader = new FileReader();
   reader.onload = (e) => {
     csvData = Papa.parse(e.target.result, { header: true, skipEmptyLines: true }).data;
@@ -472,25 +522,23 @@ function processData() {
 }
 
 function displayStatement() {
-  const month = parseInt(document.getElementById("monthSelect").value);
-  const year = parseInt(document.getElementById("yearSelect").value);
   const type = OWNERS[currentOwner].type;
 
   let html = `
-    <div class="header">
-      <div>OCEAN VACATIONS</div>
-      <div class="title">RESERVATION STATEMENT</div>
-      <div style="font-size:13px;font-weight:bold">${currentOwner} (${type.toUpperCase()})</div>
-      <div class="subtitle">Period: ${month}/1/${year}</div>
-    </div>
-
     <div class="summary-grid">
-      <div class="summary-card"><div class="summary-label">Net Accommodation</div><div class="summary-value">${money(masterTotals.acc)}</div></div>
-      <div class="summary-card"><div class="summary-label">PMC</div><div class="summary-value">${money(masterTotals.pmc)}</div></div>
-      <div class="summary-card"><div class="summary-label">Cleaning Fee</div><div class="summary-value">${money(masterTotals.clean)}</div></div>
-      ${type === "draft" ? `<div class="summary-card"><div class="summary-label">Website Fee</div><div class="summary-value">${money(masterTotals.websiteFee)}</div></div>` : ""}
-      <div class="summary-card"><div class="summary-label">Expenses</div><div class="summary-value">${money(masterTotals.expenses)}</div></div>
-      <div class="summary-card" style="background:#000;color:#fff;border-color:#000"><div class="summary-label" style="color:#fff">DRAFT AMOUNT</div><div class="summary-value" style="color:#fff">${money(type === "draft" ? masterTotals.draft - masterTotals.expenses : masterTotals.owner - masterTotals.expenses)}</div></div>
+      ${type === "draft" ? `
+        <div class="summary-card"><div class="summary-label">Net Accommodation</div><div class="summary-value">${money(masterTotals.acc)}</div></div>
+        <div class="summary-card"><div class="summary-label">PMC</div><div class="summary-value">${money(masterTotals.pmc)}</div></div>
+        <div class="summary-card"><div class="summary-label">Cleaning Fee</div><div class="summary-value">${money(masterTotals.clean)}</div></div>
+        <div class="summary-card"><div class="summary-label">Website Fee</div><div class="summary-value">${money(masterTotals.websiteFee)}</div></div>
+        <div class="summary-card"><div class="summary-label">Expenses</div><div class="summary-value">${money(masterTotals.expenses)}</div></div>
+        <div class="summary-card" style="background:#000;color:#fff;border-color:#000"><div class="summary-label" style="color:#fff">DRAFT AMOUNT</div><div class="summary-value" style="color:#fff">${money(masterTotals.draft - masterTotals.expenses)}</div></div>
+      ` : `
+        <div class="summary-card"><div class="summary-label">Net Accommodation</div><div class="summary-value">${money(masterTotals.acc)}</div></div>
+        <div class="summary-card"><div class="summary-label">PMC</div><div class="summary-value">${money(masterTotals.pmc)}</div></div>
+        <div class="summary-card"><div class="summary-label">Expenses</div><div class="summary-value">${money(masterTotals.expenses)}</div></div>
+        <div class="summary-card" style="background:#000;color:#fff;border-color:#000"><div class="summary-label" style="color:#fff">PAYOUT AMOUNT</div><div class="summary-value" style="color:#fff">${money(masterTotals.owner - masterTotals.expenses)}</div></div>
+      `}
     </div>
   `;
 
@@ -501,7 +549,10 @@ function displayStatement() {
 
     html += `
       <div class="property-section">
-        <div class="property-title">${prop}</div>
+        <div class="property-title">
+          <span class="property-icon">🏠</span>
+          ${prop}
+        </div>
         
         <table>
           <tr><th>Metric</th><th>Amount</th></tr>
@@ -510,7 +561,7 @@ function displayStatement() {
           ${type === "draft" ? `<tr><td>Cleaning Fee</td><td>${money(p.clean)}</td></tr>` : ""}
           ${type === "draft" ? `<tr><td>Website Fee</td><td>${money(p.websiteFee)}</td></tr>` : ""}
           <tr><td>Expenses</td><td>${money(p.expenses)}</td></tr>
-          <tr><td style="font-weight:bold">DRAFT AMOUNT</td><td style="font-weight:bold">${money(finalPayout)}</td></tr>
+          <tr style="background:#000;color:#fff"><td style="color:#fff"><strong>${type === "draft" ? "DRAFT AMOUNT" : "PAYOUT AMOUNT"}</strong></td><td style="color:#fff"><strong>${money(finalPayout)}</strong></td></tr>
         </table>
 
         ${propExpenseList.length > 0 ? `
@@ -568,14 +619,14 @@ function displayStatement() {
     `;
   });
 
-  document.getElementById("content").innerHTML = html;
+  document.getElementById("mainContent").innerHTML = html;
 }
 
 async function generateSummary() {
   if (!csvData || csvData.length === 0) { alert("Generate statement first"); return; }
 
-  const month = parseInt(document.getElementById("monthSelect").value);
-  const year = parseInt(document.getElementById("yearSelect").value);
+  updateHeaderDates();
+
   const type = OWNERS[currentOwner].type;
   const salesPercent = OWNERS[currentOwner].salesFeePercent;
   const finalPayout = type === "draft" ? masterTotals.draft - masterTotals.expenses : masterTotals.owner - masterTotals.expenses;
@@ -585,8 +636,8 @@ async function generateSummary() {
   const statement = {
     id: Date.now(),
     owner: currentOwner,
-    month: month,
-    year: year,
+    month: parseInt(document.getElementById("monthSelect").value),
+    year: parseInt(document.getElementById("yearSelect").value),
     type: type,
     amount: finalPayout,
     date: new Date().toISOString()
@@ -596,11 +647,7 @@ async function generateSummary() {
 
   let html = `
     <button class="btn back-btn" onclick="generateStatement()">← Back</button>
-    <div class="header">
-      <div class="title">SUMMARY REPORT</div>
-      <div class="subtitle">${currentOwner} (${type.toUpperCase()}) | ${month}/${year}</div>
-    </div>
-
+    
     <div style="background:#f9f9f9;border:1px solid #ddd;padding:20px;border-radius:5px;margin:20px 0">
       <h3 style="margin-bottom:15px">💰 Accommodation & Sales</h3>
       <table>
@@ -615,15 +662,14 @@ async function generateSummary() {
       <h3 style="margin-bottom:15px">💳 Payment Info</h3>
       <table>
         <tr><td>Owner</td><td style="text-align:right;font-weight:bold">${currentOwner}</td></tr>
-        <tr><td>Type</td><td style="text-align:right;font-weight:bold">${type.toUpperCase()}</td></tr>
-        <tr><td style="font-weight:bold">NET DRAFT AMOUNT</td><td style="text-align:right;font-weight:bold">${money(finalPayout)}</td></tr>
+        <tr><td style="font-weight:bold">NET AMOUNT TO SEND</td><td style="text-align:right;font-weight:bold">${money(finalPayout)}</td></tr>
       </table>
     </div>
 
     <button class="btn print-btn" onclick="window.print()">🖨️ Print</button>
   `;
 
-  document.getElementById("content").innerHTML = html;
+  document.getElementById("mainContent").innerHTML = html;
 }
 
 async function generateAnnual() {
@@ -631,28 +677,26 @@ async function generateAnnual() {
   if (type !== "payout") { alert("Annual Report for PAYOUT owners only"); return; }
 
   const year = parseInt(document.getElementById("yearSelect").value);
+  
+  updateHeaderDates();
 
   let html = `
     <button class="btn back-btn" onclick="generateStatement()">← Back</button>
-    <div class="header">
-      <div class="title">ANNUAL REPORT - ${year}</div>
-      <div class="subtitle">${currentOwner}</div>
-    </div>
-
+    
     <div style="background:#f9f9f9;border:1px solid #ddd;padding:20px;border-radius:5px;margin:20px 0">
       <h3 style="margin-bottom:15px">📊 Annual Summary</h3>
       <table>
         <tr><td>Total Accommodation</td><td style="text-align:right;font-weight:bold">${money(masterTotals.acc)}</td></tr>
         <tr><td>PMC Charged</td><td style="text-align:right;font-weight:bold">${money(masterTotals.pmc)}</td></tr>
         <tr><td>Total Expenses</td><td style="text-align:right;font-weight:bold">${money(masterTotals.expenses)}</td></tr>
-        <tr><td style="font-weight:bold">NET ANNUAL AMOUNT</td><td style="text-align:right;font-weight:bold">${money(masterTotals.owner - masterTotals.expenses)}</td></tr>
+        <tr style="background:#000;color:#fff"><td style="color:#fff"><strong>NET ANNUAL AMOUNT</strong></td><td style="text-align:right;color:#fff"><strong>${money(masterTotals.owner - masterTotals.expenses)}</strong></td></tr>
       </table>
     </div>
 
     <button class="btn print-btn" onclick="window.print()">🖨️ Print</button>
   `;
 
-  document.getElementById("content").innerHTML = html;
+  document.getElementById("mainContent").innerHTML = html;
 }
 
 async function viewHistory() {
@@ -661,14 +705,13 @@ async function viewHistory() {
   const allStatements = await getDB("statements");
   const ownerStatements = allStatements.filter(s => s.owner === currentOwner).sort((a, b) => new Date(b.date) - new Date(a.date));
 
+  updateHeaderDates();
+
   let html = `
     <button class="btn back-btn" onclick="generateStatement()">← Back</button>
-    <div class="header">
-      <div class="title">STATEMENT HISTORY</div>
-      <div class="subtitle">${currentOwner}</div>
-    </div>
-
-    <table style="margin-top:20px">
+    
+    <h3 style="margin:30px 0 20px 0">Statement History</h3>
+    <table>
       <tr><th>Month/Year</th><th>Type</th><th>Amount</th><th>Generated</th></tr>
       ${ownerStatements.map(s => `
         <tr>
@@ -681,7 +724,7 @@ async function viewHistory() {
     </table>
   `;
 
-  document.getElementById("content").innerHTML = html;
+  document.getElementById("mainContent").innerHTML = html;
 }
 
 function downloadPDF() {
