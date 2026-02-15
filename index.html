@@ -677,7 +677,7 @@ function displayStatement() {
         <div class="summary-card"><div class="summary-label">Cleaning Fee</div><div class="summary-value">${money(masterTotals.clean)}</div></div>
         <div class="summary-card"><div class="summary-label">Website (1%)</div><div class="summary-value">${money(masterTotals.websiteFee)}</div></div>
         <div class="summary-card"><div class="summary-label">Expenses</div><div class="summary-value">${money(masterTotals.expenses)}</div></div>
-        <div class="summary-card" style="background:#000;color:#fff;border-color:#000"><div class="summary-label" style="color:#fff">DRAFT AMOUNT</div><div class="summary-value" style="color:#fff">${money(masterTotals.draft)}</div></div>
+        <div class="summary-card" style="background:#000;color:#fff;border-color:#000"><div class="summary-label" style="color:#fff">OWNER DUE</div><div class="summary-value" style="color:#fff">${money(masterTotals.draft)}</div></div>
       ` : `
         <div class="summary-card"><div class="summary-label">Accommodation</div><div class="summary-value">${money(masterTotals.acc)}</div></div>
         <div class="summary-card"><div class="summary-label">PMC</div><div class="summary-value">${money(masterTotals.pmc)}</div></div>
@@ -707,7 +707,7 @@ function displayStatement() {
             <div class="summary-card"><div class="summary-label">Cleaning Fee</div><div class="summary-value">${money(p.clean)}</div></div>
             <div class="summary-card"><div class="summary-label">Website (1%)</div><div class="summary-value">${money(p.websiteFee)}</div></div>
             <div class="summary-card"><div class="summary-label">Expenses</div><div class="summary-value">${money(p.expenses)}</div></div>
-            <div class="summary-card" style="background:#000;color:#fff;border-color:#000"><div class="summary-label" style="color:#fff">DRAFT AMOUNT</div><div class="summary-value" style="color:#fff">${money(finalPayout)}</div></div>
+            <div class="summary-card" style="background:#000;color:#fff;border-color:#000"><div class="summary-label" style="color:#fff">OWNER DUE</div><div class="summary-value" style="color:#fff">${money(finalPayout)}</div></div>
           ` : `
             <div class="summary-card"><div class="summary-label">Accommodation</div><div class="summary-value">${money(p.acc)}</div></div>
             <div class="summary-card"><div class="summary-label">PMC</div><div class="summary-value">${money(p.pmc)}</div></div>
@@ -743,7 +743,7 @@ function displayStatement() {
           <div class="section-title">RESERVATIONS</div>
           <table style="margin-top:10px">
             ${type === "draft" ? `
-            <tr><th>Confirmation</th><th>Stay</th><th>Platform</th><th>Gross Payout</th><th>Accommodation</th><th>PMC</th><th>Cleaning Fee</th><th>Website (1%)</th><th>Total Draft</th></tr>
+            <tr><th>Confirmation</th><th>Stay</th><th>Platform</th><th>Gross Payout</th><th>Accommodation</th><th>PMC</th><th>Cleaning Fee</th><th>Website (1%)</th><th>Owner Due</th></tr>
             ${p.reservations.map(r => {
               let acc = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
               let payout = num(r["TOTAL PAYOUT"]);
@@ -770,7 +770,7 @@ function displayStatement() {
                 }
               }
               
-              let totalDraft = pmc + clean + websiteFee;
+              let totalDue = pmc + clean + websiteFee;
               
               let checkin = r["CHECK-IN DATE"] ? r["CHECK-IN DATE"].split("-").slice(1).join("/") : "";
               let checkout = r["CHECK-OUT DATE"] ? r["CHECK-OUT DATE"].split("-").slice(1).join("/") : "";
@@ -787,7 +787,7 @@ function displayStatement() {
                   <td>${money(pmc)}</td>
                   <td>${money(clean)}</td>
                   <td>${money(websiteFee)}</td>
-                  <td>${money(totalDraft)}</td>
+                  <td>${money(totalDue)}</td>
                 </tr>
               `;
             }).join("")}
