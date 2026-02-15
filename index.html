@@ -48,9 +48,22 @@ tr:nth-child(even){background:#fafafa}
 .attachment-left{flex:1}
 .attachment-link{color:#0066cc;cursor:pointer;text-decoration:underline;margin-right:10px}
 .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.5)}
-.modal-content{background:#fff;margin:10% auto;padding:20px;border:1px solid #888;width:80%;max-width:600px;border-radius:5px}
+.modal-content{background:#fff;margin:10% auto;padding:20px;border:1px solid #888;width:80%;max-width:600px;border-radius:5px;max-height:80vh;overflow-y:auto}
 .modal-close{color:#aaa;float:right;font-size:28px;font-weight:bold;cursor:pointer}
 .modal-close:hover{color:#000}
+.tax-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px}
+.tax-table th,.tax-table td{border:1px solid #000;padding:8px;text-align:left}
+.tax-table th{background:#333;color:#fff;font-weight:bold}
+.tax-table tr:nth-child(even){background:#f9f9f9}
+.tax-table .tax-amount{text-align:right;font-weight:bold}
+.warning-section{background:#fff3cd;border:2px solid #ffc104;padding:15px;margin:15px 0;border-radius:5px}
+.warning-title{font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px}
+.tax-info{background:#e8f4f8;border:2px solid #17a2b8;padding:15px;margin:15px 0;border-radius:5px}
+.tax-info-title{font-size:14px;font-weight:bold;color:#0c5460;margin-bottom:10px}
+.checkbox-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:5px}
+.checkbox-item{display:flex;align-items:center;gap:4px}
+.checkbox-item input[type="checkbox"]{width:14px;height:14px;cursor:pointer}
+.checkbox-item label{color:#fff;font-size:10px;cursor:pointer}
 @media print{.sidebar,.back-btn,.print-btn{display:none}.main{margin-left:0;width:100%}.page{padding:20px}}
 </style>
 </head>
@@ -86,6 +99,10 @@ tr:nth-child(even){background:#fafafa}
 <button class="btn btn-warning" onclick="generateAnnual()">📈 Annual Report</button>
 <button class="btn btn-info" onclick="downloadPDF()">📥 Download PDF</button>
 <button class="btn btn-info" onclick="viewHistory()">📋 View History</button>
+
+<hr style="border:1px solid #555;margin:20px 0">
+
+<button class="btn btn-info" onclick="openOwnerSettings()" style="font-size:11px">⚙️ Owner Settings</button>
 
 <hr style="border:1px solid #555;margin:20px 0">
 
@@ -128,6 +145,15 @@ tr:nth-child(even){background:#fafafa}
 </div>
 </div>
 
+<!-- OWNER SETTINGS MODAL -->
+<div id="settingsModal" class="modal">
+<div class="modal-content">
+<span class="modal-close" onclick="closeOwnerSettings()">&times;</span>
+<h2>Owner Settings</h2>
+<div id="settingsContent" style="margin-top:20px;max-height:600px;overflow-y:auto"></div>
+</div>
+</div>
+
 <div class="main">
 <div id="content" class="page">
 <div class="invoice-header">
@@ -167,6 +193,7 @@ function initDB() {
       if (!db.objectStoreNames.contains("vendors")) db.createObjectStore("vendors", { keyPath: "id" });
       if (!db.objectStoreNames.contains("expenses")) db.createObjectStore("expenses", { keyPath: "id" });
       if (!db.objectStoreNames.contains("statements")) db.createObjectStore("statements", { keyPath: "id" });
+      if (!db.objectStoreNames.contains("owners")) db.createObjectStore("owners", { keyPath: "name" });
     };
     request.onsuccess = () => {
       db = request.result;
@@ -195,19 +222,19 @@ function deleteDB(store, id) {
 
 // DATA - ALL 13 OWNERS
 const OWNERS = {
-  "ERAN": { percent: 0.12, type: "draft", salesFeePercent: 5 },
-  "GHO": { percent: 0.10, type: "payout", salesFeePercent: 5 },
-  "1463 Basin Trail": { percent: 0.12, type: "payout", salesFeePercent: 5 },
-  "113B-15S Surfside Beach": { percent: 0.12, type: "payout", salesFeePercent: 5 },
-  "113B-13N Surfside Beach": { percent: 0.12, type: "payout", salesFeePercent: 5 },
-  "115C-15N Surfside Beach": { percent: 0.12, type: "payout", salesFeePercent: 5 },
-  "2131 Sanibel Myrtle Beach": { percent: 0.15, type: "payout", salesFeePercent: 5 },
-  "1552 Elizabeth Ln Myrtle Beach": { percent: 0.15, type: "payout", salesFeePercent: 5 },
-  "469C White River RD Myrtle Beach": { percent: 0.12, type: "payout", salesFeePercent: 5 },
-  "4631-301 Wild Iris Drive Myrtle Beach": { percent: 0.12, type: "payout", salesFeePercent: 5 },
-  "4679-204 Wild Iris Drive Myrtle Beach": { percent: 0.12, type: "payout", salesFeePercent: 5 },
-  "508-1/2 33rd Ave North Myrtle Beach": { percent: 0.15, type: "payout", salesFeePercent: 10 },
-  "214-2S 2nd Ave S. North Myrtle Beach": { percent: 0.12, type: "payout", salesFeePercent: 10 }
+  "ERAN": { percent: 0.12, type: "draft", salesFeePercent: 5, municipalities: {} },
+  "GHO": { percent: 0.10, type: "payout", salesFeePercent: 5, municipalities: { SC: false, MB: false, NMB: false, SSB: false, HC: false } },
+  "1463 Basin Trail": { percent: 0.12, type: "payout", salesFeePercent: 5, municipalities: { SC: false, MB: false, NMB: false, SSB: false, HC: false } },
+  "113B-15S Surfside Beach": { percent: 0.12, type: "payout", salesFeePercent: 5, municipalities: { SC: false, MB: false, NMB: false, SSB: false, HC: false } },
+  "113B-13N Surfside Beach": { percent: 0.12, type: "payout", salesFeePercent: 5, municipalities: { SC: false, MB: false, NMB: false, SSB: false, HC: false } },
+  "115C-15N Surfside Beach": { percent: 0.12, type: "payout", salesFeePercent: 5, municipalities: { SC: false, MB: false, NMB: false, SSB: false, HC: false } },
+  "2131 Sanibel Myrtle Beach": { percent: 0.15, type: "payout", salesFeePercent: 5, municipalities: { SC: false, MB: false, NMB: false, SSB: false, HC: false } },
+  "1552 Elizabeth Ln Myrtle Beach": { percent: 0.15, type: "payout", salesFeePercent: 5, municipalities: { SC: false, MB: false, NMB: false, SSB: false, HC: false } },
+  "469C White River RD Myrtle Beach": { percent: 0.12, type: "payout", salesFeePercent: 5, municipalities: { SC: false, MB: false, NMB: false, SSB: false, HC: false } },
+  "4631-301 Wild Iris Drive Myrtle Beach": { percent: 0.12, type: "payout", salesFeePercent: 5, municipalities: { SC: false, MB: false, NMB: false, SSB: false, HC: false } },
+  "4679-204 Wild Iris Drive Myrtle Beach": { percent: 0.12, type: "payout", salesFeePercent: 5, municipalities: { SC: false, MB: false, NMB: false, SSB: false, HC: false } },
+  "508-1/2 33rd Ave North Myrtle Beach": { percent: 0.15, type: "payout", salesFeePercent: 10, municipalities: { SC: false, MB: false, NMB: false, SSB: false, HC: false } },
+  "214-2S 2nd Ave S. North Myrtle Beach": { percent: 0.12, type: "payout", salesFeePercent: 10, municipalities: { SC: false, MB: false, NMB: false, SSB: false, HC: false } }
 };
 
 let vendors = [];
@@ -217,10 +244,12 @@ let properties = [];
 let currentOwner = "";
 let masterTotals = {};
 let propertyTotals = {};
+let taxByProperty = {};
 
 // INIT
 document.addEventListener("DOMContentLoaded", async function() {
   await initDB();
+  await loadOwnerSettings();
   await loadVendors();
   await loadExpenses();
   initOwners();
@@ -228,6 +257,21 @@ document.addEventListener("DOMContentLoaded", async function() {
   initYears();
   updateVendorList();
 });
+
+async function loadOwnerSettings() {
+  const saved = await getDB("owners");
+  saved.forEach(ownerData => {
+    if (OWNERS[ownerData.name]) {
+      OWNERS[ownerData.name] = { ...OWNERS[ownerData.name], ...ownerData };
+    }
+  });
+}
+
+function saveOwnerSettings() {
+  Object.entries(OWNERS).forEach(([name, data]) => {
+    saveDB("owners", { name, ...data });
+  });
+}
 
 function initOwners() {
   const select = document.getElementById("ownerSelect");
@@ -293,6 +337,68 @@ function updateHeaderDates() {
   document.getElementById("statementDate").innerHTML = `Statement Date:<br><strong>${getMonthName(next.month)} 1st ${next.year}</strong>`;
   document.getElementById("periodDate").innerHTML = `Period: ${getMonthName(month)} 1st - ${daysInMonth}th ${year}`;
   document.getElementById("ownerTitle").textContent = currentOwner;
+}
+
+// OWNER SETTINGS
+function openOwnerSettings() {
+  const modal = document.getElementById("settingsModal");
+  const content = document.getElementById("settingsContent");
+  const selectedOwner = currentOwner || Object.keys(OWNERS)[0];
+
+  let html = `<div><h3 style="margin-bottom:20px">${selectedOwner} Settings</h3>`;
+
+  const ownerData = OWNERS[selectedOwner];
+  const isDraft = ownerData.type === "draft";
+
+  html += `
+    <div style="margin-bottom:15px">
+      <label style="color:#000;font-weight:bold">Commission Percentage (%)</label>
+      <input type="number" step="0.01" value="${(ownerData.percent * 100).toFixed(2)}" 
+             onchange="OWNERS['${selectedOwner}'].percent = this.value / 100; saveOwnerSettings()" 
+             style="width:100%;padding:8px;margin-top:5px;border:1px solid #ddd;border-radius:3px">
+    </div>
+
+    <div style="margin-bottom:15px">
+      <label style="color:#000;font-weight:bold">Sales Person Fee (%)</label>
+      <input type="number" step="0.01" value="${ownerData.salesFeePercent.toFixed(2)}" 
+             onchange="OWNERS['${selectedOwner}'].salesFeePercent = parseFloat(this.value); saveOwnerSettings()" 
+             style="width:100%;padding:8px;margin-top:5px;border:1px solid #ddd;border-radius:3px">
+    </div>
+
+    <div style="margin-bottom:15px">
+      <label style="color:#000;font-weight:bold">Owner Type</label>
+      <select onchange="OWNERS['${selectedOwner}'].type = this.value; openOwnerSettings()" 
+              style="width:100%;padding:8px;margin-top:5px;border:1px solid #ddd;border-radius:3px">
+        <option value="draft" ${isDraft ? 'selected' : ''}>Draft</option>
+        <option value="payout" ${!isDraft ? 'selected' : ''}>Payout</option>
+      </select>
+    </div>
+  `;
+
+  if (!isDraft) {
+    html += `
+      <div style="margin-bottom:15px">
+        <label style="color:#000;font-weight:bold;display:block;margin-bottom:10px">Tax Reporting Municipalities</label>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${['SC', 'MB', 'NMB', 'SSB', 'HC'].map(mun => `
+            <label style="display:flex;align-items:center;gap:8px;color:#000;cursor:pointer">
+              <input type="checkbox" ${ownerData.municipalities && ownerData.municipalities[mun] ? 'checked' : ''} 
+                     onchange="if(!OWNERS['${selectedOwner}'].municipalities) OWNERS['${selectedOwner}'].municipalities = {}; OWNERS['${selectedOwner}'].municipalities['${mun}'] = this.checked; saveOwnerSettings()">
+              <span>${mun}</span>
+            </label>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  html += `</div>`;
+  content.innerHTML = html;
+  modal.style.display = "block";
+}
+
+function closeOwnerSettings() {
+  document.getElementById("settingsModal").style.display = "none";
 }
 
 // VENDORS
@@ -476,6 +582,7 @@ function processData() {
 
   propertyTotals = {};
   masterTotals = { gross: 0, acc: 0, clean: 0, pmc: 0, expenses: 0, draft: 0, owner: 0, websiteFee: 0 };
+  taxByProperty = {};
   properties = [];
 
   let grouped = {};
@@ -503,13 +610,9 @@ function processData() {
       let status = (row["STATUS"] || "").toLowerCase();
       let isCancelled = status.includes("cancelled");
       
-      // If cancelled, cleaning fee is 0
       let clean = isCancelled ? 0 : num(row["CLEANING FARE"]);
-      
-      // PMC calculated on accommodation regardless of cancelled status
       let pmc = acc * percent;
 
-      // Website fee: 1% of payout if there's accommodation (even if cancelled)
       let websiteFee = 0;
       if (type === "draft" && acc > 0) {
         let code = row["CONFIRMATION CODE"] || "";
@@ -524,15 +627,24 @@ function processData() {
       pClean += clean;
       pPMC += pmc;
       pWebsiteFee += websiteFee;
+
+      // Tax tracking
+      if (type === "payout") {
+        let cityTax = num(row["CITY TAX"]) || 0;
+        let stateTax = num(row["STATE TAX"]) || 0;
+        let countyTax = num(row["COUNTY TAX"]) || 0;
+        let occupancyTax = num(row["OCCUPANCY TAX"]) || 0;
+        if (cityTax > 0 || stateTax > 0 || countyTax > 0 || occupancyTax > 0) {
+          if (!taxByProperty[listing]) taxByProperty[listing] = 0;
+          taxByProperty[listing] += payout;
+        }
+      }
     });
 
     let propExpenses = expenses.filter(e => e.property === listing && e.owner === currentOwner).reduce((s, e) => s + e.amount, 0);
     pExpenses = propExpenses;
 
-    // DRAFT AMOUNT = PMC + Cleaning + Website Fee + Expenses
     let draftAmount = pPMC + pClean + pWebsiteFee + pExpenses;
-    
-    // For payout: Accommodation - PMC - Expenses
     let payoutAmount = pAcc - pPMC - pExpenses;
 
     propertyTotals[listing] = { 
@@ -629,7 +741,7 @@ function displayStatement() {
           <strong>Reservations:</strong>
           <table style="margin-top:10px">
             ${type === "draft" ? `
-            <tr><th>Confirmation</th><th>Stay</th><th>Platform</th><th>Accommodation</th><th>PMC</th><th>Cleaning Fee</th><th>Website Fee</th><th>Total Payout</th></tr>
+            <tr><th>Confirmation</th><th>Stay</th><th>Platform</th><th>Gross Payout</th><th>Accommodation</th><th>PMC</th><th>Cleaning Fee</th><th>Website Fee</th><th>Total Draft</th></tr>
             ${p.reservations.map(r => {
               let acc = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
               let payout = num(r["TOTAL PAYOUT"]);
@@ -654,51 +766,7 @@ function displayStatement() {
                 }
               }
               
-              let totalPayout = pmc + clean + websiteFee;
-              
-              let checkin = r["CHECK-IN DATE"] ? r["CHECK-IN DATE"].split("-").slice(1).join("/") : "";
-              let checkout = r["CHECK-OUT DATE"] ? r["CHECK-OUT DATE"].split("-").slice(1).join("/") : "";
-
-              if (payout === 0 && clean === 0) return "";
-
-              return `
-                <tr>
-                  <td>${code.substring(0,8)}</td>
-                  <td>${checkin} - ${checkout}</td>
-                  <td>${displayPlat}</td>
-                  <td>${money(acc)}</td>
-                  <td>${money(pmc)}</td>
-                  <td>${money(clean)}</td>
-                  <td>${money(websiteFee)}</td>
-                  <td>${money(totalPayout)}</td>
-                </tr>
-              `;
-            }).join("")}
-            ` : `
-            <tr><th>Confirmation</th><th>Stay</th><th>Platform</th><th>Gross Payout</th><th>Accommodation</th><th>PMC</th><th>Cleaning Fee</th><th>Website Fee</th></tr>
-            ${p.reservations.map(r => {
-              let acc = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
-              let payout = num(r["TOTAL PAYOUT"]);
-              let status = (r["STATUS"] || "").toLowerCase();
-              let isCancelled = status.includes("cancelled");
-              let clean = isCancelled ? 0 : num(r["CLEANING FARE"]);
-              let percent = OWNERS[currentOwner].percent;
-              let pmc = acc * percent;
-              let code = r["CONFIRMATION CODE"] || "";
-              let platform = r["PLATFORM"] || "";
-              let isVRBO = code.toUpperCase().startsWith("HA");
-              
-              let displayPlat = isVRBO ? "VRBO" : platform;
-              if (displayPlat.toLowerCase().includes("manual")) {
-                displayPlat = displayPlat.replace(/manual/gi, "website");
-              }
-              
-              let websiteFee = 0;
-              if (acc > 0) {
-                if (!isVRBO && (platform.toLowerCase().includes("website") || platform.toLowerCase().includes("manual"))) {
-                  websiteFee = payout * 0.01;
-                }
-              }
+              let totalDraft = pmc + clean + websiteFee;
               
               let checkin = r["CHECK-IN DATE"] ? r["CHECK-IN DATE"].split("-").slice(1).join("/") : "";
               let checkout = r["CHECK-OUT DATE"] ? r["CHECK-OUT DATE"].split("-").slice(1).join("/") : "";
@@ -715,6 +783,45 @@ function displayStatement() {
                   <td>${money(pmc)}</td>
                   <td>${money(clean)}</td>
                   <td>${money(websiteFee)}</td>
+                  <td>${money(totalDraft)}</td>
+                </tr>
+              `;
+            }).join("")}
+            ` : `
+            <tr><th>Confirmation</th><th>Platform</th><th>Stay</th><th>Accommodation</th><th>PMC</th><th>Expenses</th><th>Owner Payout</th></tr>
+            ${p.reservations.map(r => {
+              let acc = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
+              let payout = num(r["TOTAL PAYOUT"]);
+              let status = (r["STATUS"] || "").toLowerCase();
+              let isCancelled = status.includes("cancelled");
+              let percent = OWNERS[currentOwner].percent;
+              let pmc = acc * percent;
+              let code = r["CONFIRMATION CODE"] || "";
+              let platform = r["PLATFORM"] || "";
+              let isVRBO = code.toUpperCase().startsWith("HA");
+              
+              let displayPlat = isVRBO ? "VRBO" : platform;
+              if (displayPlat.toLowerCase().includes("manual")) {
+                displayPlat = displayPlat.replace(/manual/gi, "website");
+              }
+              
+              let reservationExpenses = 0;
+              let ownerPayoutPerReservation = acc - pmc - reservationExpenses;
+              
+              let checkin = r["CHECK-IN DATE"] ? r["CHECK-IN DATE"].split("-").slice(1).join("/") : "";
+              let checkout = r["CHECK-OUT DATE"] ? r["CHECK-OUT DATE"].split("-").slice(1).join("/") : "";
+
+              if (payout === 0) return "";
+
+              return `
+                <tr>
+                  <td>${code.substring(0,8)}</td>
+                  <td>${displayPlat}</td>
+                  <td>${checkin} - ${checkout}</td>
+                  <td>${money(acc)}</td>
+                  <td>${money(pmc)}</td>
+                  <td>${money(reservationExpenses)}</td>
+                  <td>${money(ownerPayoutPerReservation)}</td>
                 </tr>
               `;
             }).join("")}
@@ -771,6 +878,30 @@ async function generateSummary() {
         <tr><td style="font-weight:bold">NET AMOUNT TO SEND</td><td style="text-align:right;font-weight:bold">${money(finalPayout)}</td></tr>
       </table>
     </div>
+
+    ${type === "payout" && Object.keys(OWNERS[currentOwner].municipalities || {}).some(m => OWNERS[currentOwner].municipalities[m]) && Object.keys(taxByProperty).length > 0 ? `
+    <div class="tax-info">
+      <div class="tax-info-title">⚠️ TAX REPORTING - CITIES/STATES REQUIRING PAYMENT</div>
+      <div style="font-size:11px;margin-bottom:10px">
+        <strong>Municipalities:</strong> ${Object.keys(OWNERS[currentOwner].municipalities || {}).filter(m => OWNERS[currentOwner].municipalities[m]).join(', ')}
+      </div>
+      <table class="tax-table">
+        <tr>
+          <th>Property</th>
+          <th class="tax-amount">Payout Amount to Report</th>
+        </tr>
+        ${Object.entries(taxByProperty).map(([prop, amt]) => `
+          <tr>
+            <td>${prop}</td>
+            <td class="tax-amount">${money(amt)}</td>
+          </tr>
+        `).join('')}
+      </table>
+      <p style="font-size:11px;margin-top:15px;color:#333">
+        📝 <strong>Payment Required:</strong> You must pay taxes on these amounts to the selected municipalities listed above.
+      </p>
+    </div>
+    ` : ""}
 
     <button class="btn print-btn" onclick="window.print()">🖨️ Print</button>
   `;
@@ -838,6 +969,8 @@ function downloadPDF() {
 window.onclick = function(event) {
   const modal = document.getElementById("vendorModal");
   if (event.target == modal) modal.style.display = "none";
+  const settingsModal = document.getElementById("settingsModal");
+  if (event.target == settingsModal) settingsModal.style.display = "none";
 };
 
 </script>
