@@ -58,8 +58,8 @@ body{font-family:Arial;background:#f5f5f5;color:#000;display:flex}
 .property{margin-top:20px;background:#fff;padding:12px;border-radius:5px;border:1px solid #ddd}
 .property-title{font-size:14px;font-weight:bold;margin-bottom:3px}
 .property-period{font-size:11px;color:#666;margin-bottom:8px}
-table{width:100%;border-collapse:collapse;font-size:9px;margin-top:8px;background:#fff}
-th,td{border:1px solid #ddd;padding:4px;text-align:center}
+table{width:100%;border-collapse:collapse;font-size:8px;margin-top:8px;background:#fff}
+th,td{border:1px solid #ddd;padding:3px;text-align:center}
 th{background:#333;color:#fff;font-weight:bold}
 tr:nth-child(even){background:#f9f9f9}
 .hidden{display:none}
@@ -399,6 +399,7 @@ ${type==="draft"
 <tr>
 <th>Reservation</th>
 <th>Stay</th>
+<th>Platform</th>
 <th>Accommodation</th>
 <th>PMC</th>
 ${type==="draft"?"<th>Cleaning</th><th>Draft</th>":"<th>Owner</th>"}
@@ -411,11 +412,13 @@ let clean=num(r["CLEANING FARE"]);
 let pmc=acc*percent;
 let draft=pmc+clean;
 let ownerPay=acc-pmc;
+let platform=r["PLATFORM"]||"N/A";
 
 reportHTML+=`
 <tr>
 <td>${r["CONFIRMATION CODE"]}</td>
 <td>${stay(r["CHECK-IN DATE"],r["CHECK-OUT DATE"])}</td>
+<td>${platform}</td>
 <td>${money(acc)}</td>
 <td>${money(pmc)}</td>
 ${type==="draft"
