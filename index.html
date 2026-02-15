@@ -501,14 +501,17 @@ function processData() {
       let payout = num(row["TOTAL PAYOUT"]);
       let acc = num(row["ACCOMMODATION FARE"]) - num(row["MARKUP"]);
       let status = (row["STATUS"] || "").toLowerCase();
+      let isCancelled = status.includes("cancelled");
       
       // If cancelled, cleaning fee is 0
-      let clean = status.includes("cancelled") ? 0 : num(row["CLEANING FARE"]);
+      let clean = isCancelled ? 0 : num(row["CLEANING FARE"]);
       
-      let pmc = payout > 0 ? acc * percent : 0;
+      // PMC calculated on accommodation regardless of cancelled status
+      let pmc = acc * percent;
 
+      // Website fee: 1% of payout if there's accommodation (even if cancelled)
       let websiteFee = 0;
-      if (type === "draft") {
+      if (type === "draft" && acc > 0) {
         let code = row["CONFIRMATION CODE"] || "";
         let platform = row["PLATFORM"] || "";
         if (!code.toUpperCase().startsWith("HA") && (platform.toLowerCase().includes("website") || platform.toLowerCase().includes("manual"))) {
@@ -526,8 +529,8 @@ function processData() {
     let propExpenses = expenses.filter(e => e.property === listing && e.owner === currentOwner).reduce((s, e) => s + e.amount, 0);
     pExpenses = propExpenses;
 
-    // DRAFT AMOUNT = Accommodation - PMC - Cleaning - Expenses - Website Fee
-    let draftAmount = pAcc - pPMC - pClean - pExpenses - pWebsiteFee;
+    // DRAFT AMOUNT = PMC + Cleaning + Website Fee + Expenses
+    let draftAmount = pPMC + pClean + pWebsiteFee + pExpenses;
     
     // For payout: Accommodation - PMC - Expenses
     let payoutAmount = pAcc - pPMC - pExpenses;
@@ -631,9 +634,10 @@ function displayStatement() {
               let acc = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
               let payout = num(r["TOTAL PAYOUT"]);
               let status = (r["STATUS"] || "").toLowerCase();
-              let clean = status.includes("cancelled") ? 0 : num(r["CLEANING FARE"]);
+              let isCancelled = status.includes("cancelled");
+              let clean = isCancelled ? 0 : num(r["CLEANING FARE"]);
               let percent = OWNERS[currentOwner].percent;
-              let pmc = payout > 0 ? acc * percent : 0;
+              let pmc = acc * percent;
               let code = r["CONFIRMATION CODE"] || "";
               let platform = r["PLATFORM"] || "";
               let isVRBO = code.toUpperCase().startsWith("HA");
@@ -644,11 +648,13 @@ function displayStatement() {
               }
               
               let websiteFee = 0;
-              if (!isVRBO && (platform.toLowerCase().includes("website") || platform.toLowerCase().includes("manual"))) {
-                websiteFee = payout * 0.01;
+              if (acc > 0) {
+                if (!isVRBO && (platform.toLowerCase().includes("website") || platform.toLowerCase().includes("manual"))) {
+                  websiteFee = payout * 0.01;
+                }
               }
               
-              let totalPayout = acc - pmc - clean - websiteFee;
+              let totalPayout = pmc + clean + websiteFee;
               
               let checkin = r["CHECK-IN DATE"] ? r["CHECK-IN DATE"].split("-").slice(1).join("/") : "";
               let checkout = r["CHECK-OUT DATE"] ? r["CHECK-OUT DATE"].split("-").slice(1).join("/") : "";
