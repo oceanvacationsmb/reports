@@ -255,16 +255,534 @@
   ],
   "expenses": [
     {
-      "id": 1771187900531,
+      "id": 1771171130663,
       "owner": "ERAN",
-      "type": "Pool Cleaning",
+      "type": "Credit",
       "property": "GC - 1211A",
-      "vendor": "AMAZON",
-      "amount": 300,
-      "notes": ""
+      "vendor": "CREDIT",
+      "amount": -250,
+      "notes": "Cancelled Reservation"
     }
   ],
   "statements": [],
   "lastUpdated": "",
-  "reports": []
+  "reports": [
+    {
+      "id": 1771187977854,
+      "owner": "ERAN",
+      "month": 6,
+      "year": 2026,
+      "type": "draft",
+      "amount": 27477.733300000004,
+      "date": "2/15/2026, 3:39:37 PM",
+      "masterTotals": {
+        "gross": 163361.32,
+        "acc": 143740.38,
+        "clean": 10300,
+        "pmc": 17248.8456,
+        "expenses": -250,
+        "draft": 27477.733300000004,
+        "owner": 126741.53439999999,
+        "websiteFee": 178.8877
+      },
+      "propertyTotals": {
+        "GC - 1211A": {
+          "gross": 27272.61,
+          "acc": 25488.61,
+          "clean": 1850,
+          "pmc": 3058.6332,
+          "websiteFee": 0,
+          "expenses": -250,
+          "draft": 4658.6332,
+          "owner": 22679.9768,
+          "reservations": [
+            {
+              "LISTING'S NICKNAME": "GC - 1211A",
+              "PLATFORM": "Airbnb",
+              "CONFIRMATION CODE": "HMS5Z2ABWE",
+              "CHECK-IN DATE": "2026-06-06",
+              "CHECK-OUT DATE": "2026-06-13",
+              "TOTAL PAYOUT": "4630.84",
+              "ACCOMMODATION FARE": "4371.5",
+              "MARKUP": "682.47",
+              "CLEANING FARE": "250",
+              "COMMUNITY FEE": "808.78",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            },
+            {
+              "LISTING'S NICKNAME": "GC - 1211A",
+              "PLATFORM": "Airbnb",
+              "CONFIRMATION CODE": "HMXQSNTFYQ",
+              "CHECK-IN DATE": "2026-06-20",
+              "CHECK-OUT DATE": "2026-06-27",
+              "TOTAL PAYOUT": "9154.73",
+              "ACCOMMODATION FARE": "10234",
+              "MARKUP": "1597.71",
+              "CLEANING FARE": "500",
+              "COMMUNITY FEE": "0",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            },
+            {
+              "LISTING'S NICKNAME": "GC - 1211A",
+              "PLATFORM": "Airbnb",
+              "CONFIRMATION CODE": "HMAXFHF8XM",
+              "CHECK-IN DATE": "2026-06-13",
+              "CHECK-OUT DATE": "2026-06-20",
+              "TOTAL PAYOUT": "9154.73",
+              "ACCOMMODATION FARE": "10234",
+              "MARKUP": "1597.71",
+              "CLEANING FARE": "500",
+              "COMMUNITY FEE": "0",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            },
+            {
+              "LISTING'S NICKNAME": "GC - 1211A",
+              "PLATFORM": "Airbnb",
+              "CONFIRMATION CODE": "HMQXCZZXSF",
+              "CHECK-IN DATE": "2026-06-02",
+              "CHECK-OUT DATE": "2026-06-06",
+              "TOTAL PAYOUT": "4332.31",
+              "ACCOMMODATION FARE": "4527",
+              "MARKUP": " ",
+              "CLEANING FARE": "600",
+              "COMMUNITY FEE": "0",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            }
+          ]
+        },
+        "GC - 601B": {
+          "gross": 12550.720000000001,
+          "acc": 9460,
+          "clean": 800,
+          "pmc": 1135.2,
+          "websiteFee": 0,
+          "expenses": 0,
+          "draft": 1935.2,
+          "owner": 8324.8,
+          "reservations": [
+            {
+              "LISTING'S NICKNAME": "GC - 601B",
+              "PLATFORM": "HomeAway",
+              "CONFIRMATION CODE": "HA-1KW4T97",
+              "CHECK-IN DATE": "2026-06-03",
+              "CHECK-OUT DATE": "2026-06-07",
+              "TOTAL PAYOUT": "4269.44",
+              "ACCOMMODATION FARE": "3412",
+              "MARKUP": "310.18",
+              "CLEANING FARE": "400",
+              "COMMUNITY FEE": "0",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            },
+            {
+              "LISTING'S NICKNAME": "GC - 601B",
+              "PLATFORM": "HomeAway",
+              "CONFIRMATION CODE": "HA-0rU4HYd",
+              "CHECK-IN DATE": "2026-06-20",
+              "CHECK-OUT DATE": "2026-06-27",
+              "TOTAL PAYOUT": "8281.28",
+              "ACCOMMODATION FARE": "6994",
+              "MARKUP": "635.82",
+              "CLEANING FARE": "400",
+              "COMMUNITY FEE": "0",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            }
+          ]
+        },
+        "GC - 827B": {
+          "gross": 7548,
+          "acc": 7048,
+          "clean": 500,
+          "pmc": 845.76,
+          "websiteFee": 75.48,
+          "expenses": 0,
+          "draft": 1421.24,
+          "owner": 6202.24,
+          "reservations": [
+            {
+              "LISTING'S NICKNAME": "GC - 827B",
+              "PLATFORM": "Manual",
+              "CONFIRMATION CODE": "GY-hUKJVjR3",
+              "CHECK-IN DATE": "2026-06-06",
+              "CHECK-OUT DATE": "2026-06-13",
+              "TOTAL PAYOUT": "7548",
+              "ACCOMMODATION FARE": "7048",
+              "MARKUP": " ",
+              "CLEANING FARE": "500",
+              "COMMUNITY FEE": "0",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            },
+            {
+              "LISTING'S NICKNAME": "GC - 827B",
+              "PLATFORM": "Manual",
+              "CONFIRMATION CODE": "GY-Ria6qiAE",
+              "CHECK-IN DATE": "2026-06-06",
+              "CHECK-OUT DATE": "2026-06-13",
+              "TOTAL PAYOUT": "0",
+              "ACCOMMODATION FARE": "0",
+              "MARKUP": " ",
+              "CLEANING FARE": "0",
+              "COMMUNITY FEE": "0",
+              "CANCELED TOTAL PAYOUT": "7547.14",
+              "BOOKING FEE": "0"
+            }
+          ]
+        },
+        "GCSSB - 113A-12S": {
+          "gross": 9719.82,
+          "acc": 9093,
+          "clean": 500,
+          "pmc": 1091.1599999999999,
+          "websiteFee": 0,
+          "expenses": 0,
+          "draft": 1591.1599999999999,
+          "owner": 8001.84,
+          "reservations": [
+            {
+              "LISTING'S NICKNAME": "GCSSB - 113A-12S",
+              "PLATFORM": "Manual",
+              "CONFIRMATION CODE": "GY-3pnpezzv",
+              "CHECK-IN DATE": "2026-06-20",
+              "CHECK-OUT DATE": "2026-06-27",
+              "TOTAL PAYOUT": "0",
+              "ACCOMMODATION FARE": "0",
+              "MARKUP": " ",
+              "CLEANING FARE": "0",
+              "COMMUNITY FEE": "0",
+              "CANCELED TOTAL PAYOUT": "10095.07",
+              "BOOKING FEE": "0"
+            },
+            {
+              "LISTING'S NICKNAME": "GCSSB - 113A-12S",
+              "PLATFORM": "Airbnb",
+              "CONFIRMATION CODE": "HMXQFZN5XH",
+              "CHECK-IN DATE": "2026-06-13",
+              "CHECK-OUT DATE": "2026-06-20",
+              "TOTAL PAYOUT": "9719.82",
+              "ACCOMMODATION FARE": "9093",
+              "MARKUP": " ",
+              "CLEANING FARE": "500",
+              "COMMUNITY FEE": "272.79",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            }
+          ]
+        },
+        "GCSSB - 113B-12S": {
+          "gross": 31479.21,
+          "acc": 26421.18,
+          "clean": 1500,
+          "pmc": 3170.5416,
+          "websiteFee": 103.4077,
+          "expenses": 0,
+          "draft": 4773.9493,
+          "owner": 23250.6384,
+          "reservations": [
+            {
+              "LISTING'S NICKNAME": "GCSSB - 113B-12S",
+              "PLATFORM": "HomeAway",
+              "CONFIRMATION CODE": "HA-TuqkTUX",
+              "CHECK-IN DATE": "2026-06-13",
+              "CHECK-OUT DATE": "2026-06-20",
+              "TOTAL PAYOUT": "10905.44",
+              "ACCOMMODATION FARE": "8897",
+              "MARKUP": "808.82",
+              "CLEANING FARE": "500",
+              "COMMUNITY FEE": "0",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            },
+            {
+              "LISTING'S NICKNAME": "GCSSB - 113B-12S",
+              "PLATFORM": "Manual",
+              "CONFIRMATION CODE": "GY-pczhcJLZ",
+              "CHECK-IN DATE": "2026-06-27",
+              "CHECK-OUT DATE": "2026-07-04",
+              "TOTAL PAYOUT": "10340.77",
+              "ACCOMMODATION FARE": "8393",
+              "MARKUP": "406",
+              "CLEANING FARE": "500",
+              "COMMUNITY FEE": "0",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            },
+            {
+              "LISTING'S NICKNAME": "GCSSB - 113B-12S",
+              "PLATFORM": "Manual",
+              "CONFIRMATION CODE": "HA-3BKWTJ",
+              "CHECK-IN DATE": "2026-06-20",
+              "CHECK-OUT DATE": "2026-06-27",
+              "TOTAL PAYOUT": "10233",
+              "ACCOMMODATION FARE": "10346",
+              "MARKUP": " ",
+              "CLEANING FARE": "500",
+              "COMMUNITY FEE": "0",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            }
+          ]
+        },
+        "MB - Tuscan C": {
+          "gross": 4099.94,
+          "acc": 3588.19,
+          "clean": 500,
+          "pmc": 430.58279999999996,
+          "websiteFee": 0,
+          "expenses": 0,
+          "draft": 930.5827999999999,
+          "owner": 3157.6072,
+          "reservations": [
+            {
+              "LISTING'S NICKNAME": "MB - Tuscan C",
+              "PLATFORM": "Airbnb",
+              "CONFIRMATION CODE": "HMTWB2BSYP",
+              "CHECK-IN DATE": "2026-06-03",
+              "CHECK-OUT DATE": "2026-06-07",
+              "TOTAL PAYOUT": "4099.94",
+              "ACCOMMODATION FARE": "4252",
+              "MARKUP": "663.81",
+              "CLEANING FARE": "500",
+              "COMMUNITY FEE": "0",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            }
+          ]
+        },
+        "NMB - 1004": {
+          "gross": 17371.61,
+          "acc": 16378.08,
+          "clean": 1000,
+          "pmc": 1965.3696,
+          "websiteFee": 0,
+          "expenses": 0,
+          "draft": 2965.3696,
+          "owner": 14412.7104,
+          "reservations": [
+            {
+              "LISTING'S NICKNAME": "NMB - 1004",
+              "PLATFORM": "Airbnb",
+              "CONFIRMATION CODE": "HM9NB3XQQD",
+              "CHECK-IN DATE": "2026-06-13",
+              "CHECK-OUT DATE": "2026-06-20",
+              "TOTAL PAYOUT": "7829.77",
+              "ACCOMMODATION FARE": "8666",
+              "MARKUP": "1352.92",
+              "CLEANING FARE": "500",
+              "COMMUNITY FEE": "0",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            },
+            {
+              "LISTING'S NICKNAME": "NMB - 1004",
+              "PLATFORM": "Airbnb",
+              "CONFIRMATION CODE": "HMH92EEQJS",
+              "CHECK-IN DATE": "2026-06-20",
+              "CHECK-OUT DATE": "2026-06-27",
+              "TOTAL PAYOUT": "9541.84",
+              "ACCOMMODATION FARE": "9065",
+              "MARKUP": " ",
+              "CLEANING FARE": "500",
+              "COMMUNITY FEE": "271.95",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            },
+            {
+              "LISTING'S NICKNAME": "NMB - 1004",
+              "PLATFORM": "Airbnb",
+              "CONFIRMATION CODE": "HMC5XRED8P",
+              "CHECK-IN DATE": "2026-06-13",
+              "CHECK-OUT DATE": "2026-06-20",
+              "TOTAL PAYOUT": "0",
+              "ACCOMMODATION FARE": "0",
+              "MARKUP": " ",
+              "CLEANING FARE": "0",
+              "COMMUNITY FEE": "0",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            }
+          ]
+        },
+        "NMB - 204-27N": {
+          "gross": 8640.9,
+          "acc": 7031.48,
+          "clean": 450,
+          "pmc": 843.7775999999999,
+          "websiteFee": 0,
+          "expenses": 0,
+          "draft": 1293.7776,
+          "owner": 6187.7024,
+          "reservations": [
+            {
+              "LISTING'S NICKNAME": "NMB - 204-27N",
+              "PLATFORM": "HomeAway",
+              "CONFIRMATION CODE": "HA-r2rmhO5",
+              "CHECK-IN DATE": "2026-06-20",
+              "CHECK-OUT DATE": "2026-06-27",
+              "TOTAL PAYOUT": "8640.9",
+              "ACCOMMODATION FARE": "7031.48",
+              "MARKUP": " ",
+              "CLEANING FARE": "450",
+              "COMMUNITY FEE": "0",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            }
+          ]
+        },
+        "NMB - 204-28N": {
+          "gross": 17171.24,
+          "acc": 16135.86,
+          "clean": 1000,
+          "pmc": 1936.3032,
+          "websiteFee": 0,
+          "expenses": 0,
+          "draft": 2936.3032000000003,
+          "owner": 14199.5568,
+          "reservations": [
+            {
+              "LISTING'S NICKNAME": "NMB - 204-28N",
+              "PLATFORM": "Airbnb",
+              "CONFIRMATION CODE": "HMYQ9Z88ZD",
+              "CHECK-IN DATE": "2026-06-13",
+              "CHECK-OUT DATE": "2026-06-20",
+              "TOTAL PAYOUT": "9586.52",
+              "ACCOMMODATION FARE": "10745",
+              "MARKUP": "1677.49",
+              "CLEANING FARE": "500",
+              "COMMUNITY FEE": "0",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            },
+            {
+              "LISTING'S NICKNAME": "NMB - 204-28N",
+              "PLATFORM": "Airbnb",
+              "CONFIRMATION CODE": "HMF54F433P",
+              "CHECK-IN DATE": "2026-06-06",
+              "CHECK-OUT DATE": "2026-06-13",
+              "TOTAL PAYOUT": "7584.72",
+              "ACCOMMODATION FARE": "8376",
+              "MARKUP": "1307.65",
+              "CLEANING FARE": "500",
+              "COMMUNITY FEE": "0",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            }
+          ]
+        },
+        "NMB - 304B": {
+          "gross": 11603.54,
+          "acc": 10575.529999999999,
+          "clean": 1000,
+          "pmc": 1269.0636,
+          "websiteFee": 0,
+          "expenses": 0,
+          "draft": 2269.0636,
+          "owner": 9306.4664,
+          "reservations": [
+            {
+              "LISTING'S NICKNAME": "NMB - 304B",
+              "PLATFORM": "Airbnb",
+              "CONFIRMATION CODE": "HMT5FYSM2H",
+              "CHECK-IN DATE": "2026-06-01",
+              "CHECK-OUT DATE": "2026-06-06",
+              "TOTAL PAYOUT": "4791.15",
+              "ACCOMMODATION FARE": "5070",
+              "MARKUP": "791.52",
+              "CLEANING FARE": "500",
+              "COMMUNITY FEE": "0",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            },
+            {
+              "LISTING'S NICKNAME": "NMB - 304B",
+              "PLATFORM": "Airbnb",
+              "CONFIRMATION CODE": "HM9WQHRD3P",
+              "CHECK-IN DATE": "2026-06-21",
+              "CHECK-OUT DATE": "2026-06-28",
+              "TOTAL PAYOUT": "6812.39",
+              "ACCOMMODATION FARE": "7462",
+              "MARKUP": "1164.95",
+              "CLEANING FARE": "500",
+              "COMMUNITY FEE": "0",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            }
+          ]
+        },
+        "NMB - 703-2": {
+          "gross": 11623.04,
+          "acc": 8645.45,
+          "clean": 800,
+          "pmc": 1037.454,
+          "websiteFee": 0,
+          "expenses": 0,
+          "draft": 1837.454,
+          "owner": 7607.996000000001,
+          "reservations": [
+            {
+              "LISTING'S NICKNAME": "NMB - 703-2",
+              "PLATFORM": "HomeAway",
+              "CONFIRMATION CODE": "HA-ifgzQZS",
+              "CHECK-IN DATE": "2026-06-21",
+              "CHECK-OUT DATE": "2026-06-27",
+              "TOTAL PAYOUT": "6252.63",
+              "ACCOMMODATION FARE": "4650",
+              "MARKUP": " ",
+              "CLEANING FARE": "400",
+              "COMMUNITY FEE": "0",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            },
+            {
+              "LISTING'S NICKNAME": "NMB - 703-2",
+              "PLATFORM": "HomeAway",
+              "CONFIRMATION CODE": "HA-aI6lnB1",
+              "CHECK-IN DATE": "2026-06-29",
+              "CHECK-OUT DATE": "2026-07-04",
+              "TOTAL PAYOUT": "5370.41",
+              "ACCOMMODATION FARE": "4395",
+              "MARKUP": "399.55",
+              "CLEANING FARE": "400",
+              "COMMUNITY FEE": "0",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            }
+          ]
+        },
+        "NMB - 709-2": {
+          "gross": 4280.69,
+          "acc": 3875,
+          "clean": 400,
+          "pmc": 465,
+          "websiteFee": 0,
+          "expenses": 0,
+          "draft": 865,
+          "owner": 3410,
+          "reservations": [
+            {
+              "LISTING'S NICKNAME": "NMB - 709-2",
+              "PLATFORM": "Airbnb",
+              "CONFIRMATION CODE": "HMBXDWEFJM",
+              "CHECK-IN DATE": "2026-06-25",
+              "CHECK-OUT DATE": "2026-06-30",
+              "TOTAL PAYOUT": "4280.69",
+              "ACCOMMODATION FARE": "3875",
+              "MARKUP": " ",
+              "CLEANING FARE": "400",
+              "COMMUNITY FEE": "0",
+              "CANCELED TOTAL PAYOUT": " ",
+              "BOOKING FEE": "0"
+            }
+          ]
+        }
+      },
+      "taxByProperty": {},
+      "fullStatement": true
+    }
+  ]
 }
