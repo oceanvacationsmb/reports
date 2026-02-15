@@ -61,7 +61,7 @@ tr:nth-child(even){background:#fafafa}
 <div class="section">
 <label class="label">Select Owner</label>
 <select id="ownerSelect" onchange="onOwnerChange()">
-<option value="">-- Loading --</option>
+<option value="">-- Select Owner --</option>
 </select>
 </div>
 
@@ -192,12 +192,21 @@ function deleteDB(store, id) {
   tx.objectStore(store).delete(id);
 }
 
-// DATA
+// DATA - ALL 13 OWNERS
 const OWNERS = {
   "ERAN": { percent: 0.12, type: "draft", salesFeePercent: 5 },
   "GHO": { percent: 0.10, type: "payout", salesFeePercent: 5 },
   "1463 Basin Trail": { percent: 0.12, type: "payout", salesFeePercent: 5 },
-  "113B-15S Surfside Beach": { percent: 0.12, type: "payout", salesFeePercent: 5 }
+  "113B-15S Surfside Beach": { percent: 0.12, type: "payout", salesFeePercent: 5 },
+  "113B-13N Surfside Beach": { percent: 0.12, type: "payout", salesFeePercent: 5 },
+  "115C-15N Surfside Beach": { percent: 0.12, type: "payout", salesFeePercent: 5 },
+  "2131 Sanibel Myrtle Beach": { percent: 0.15, type: "payout", salesFeePercent: 5 },
+  "1552 Elizabeth Ln Myrtle Beach": { percent: 0.15, type: "payout", salesFeePercent: 5 },
+  "469C White River RD Myrtle Beach": { percent: 0.12, type: "payout", salesFeePercent: 5 },
+  "4631-301 Wild Iris Drive Myrtle Beach": { percent: 0.12, type: "payout", salesFeePercent: 5 },
+  "4679-204 Wild Iris Drive Myrtle Beach": { percent: 0.12, type: "payout", salesFeePercent: 5 },
+  "508-1/2 33rd Ave North Myrtle Beach": { percent: 0.15, type: "payout", salesFeePercent: 10 },
+  "214-2S 2nd Ave S. North Myrtle Beach": { percent: 0.12, type: "payout", salesFeePercent: 10 }
 };
 
 let vendors = [];
@@ -222,7 +231,7 @@ document.addEventListener("DOMContentLoaded", async function() {
 function initOwners() {
   const select = document.getElementById("ownerSelect");
   select.innerHTML = '<option value="">-- Select Owner --</option>';
-  Object.keys(OWNERS).forEach(owner => {
+  Object.keys(OWNERS).sort().forEach(owner => {
     const opt = document.createElement("option");
     opt.value = owner;
     opt.textContent = owner;
@@ -477,15 +486,13 @@ function processData() {
   updatePropertySelect();
 
   Object.keys(grouped).forEach(listing => {
-    let pGross = 0, pAcc = 0, pClean = 0, pPMC = 0, pDraft = 0, pOwner = 0, pWebsiteFee = 0, pExpenses = 0;
+    let pAcc = 0, pClean = 0, pPMC = 0, pWebsiteFee = 0, pExpenses = 0;
 
     grouped[listing].forEach(row => {
       let payout = num(row["TOTAL PAYOUT"]);
       let acc = num(row["ACCOMMODATION FARE"]) - num(row["MARKUP"]);
       let clean = num(row["CLEANING FARE"]);
       let pmc = acc * percent;
-      let draft = pmc + clean;
-      let ownerPay = acc - pmc;
 
       let websiteFee = 0;
       if (type === "draft") {
@@ -496,28 +503,39 @@ function processData() {
         }
       }
 
-      pGross += payout;
       pAcc += acc;
       pClean += clean;
       pPMC += pmc;
-      pDraft += draft + websiteFee;
-      pOwner += ownerPay;
       pWebsiteFee += websiteFee;
     });
 
     let propExpenses = expenses.filter(e => e.property === listing && e.owner === currentOwner).reduce((s, e) => s + e.amount, 0);
     pExpenses = propExpenses;
 
-    propertyTotals[listing] = { gross: pGross, acc: pAcc, clean: pClean, pmc: pPMC, draft: pDraft, owner: pOwner, websiteFee: pWebsiteFee, expenses: pExpenses, reservations: grouped[listing] };
+    // DRAFT AMOUNT = Accommodation - PMC - Cleaning - Expenses
+    let draftAmount = pAcc - pPMC - pClean - pExpenses;
+    
+    // For payout: Accommodation - PMC - Expenses
+    let payoutAmount = pAcc - pPMC - pExpenses;
 
-    masterTotals.gross += pGross;
+    propertyTotals[listing] = { 
+      acc: pAcc, 
+      clean: pClean, 
+      pmc: pPMC, 
+      websiteFee: pWebsiteFee, 
+      expenses: pExpenses, 
+      draft: draftAmount,
+      owner: payoutAmount,
+      reservations: grouped[listing] 
+    };
+
     masterTotals.acc += pAcc;
     masterTotals.clean += pClean;
     masterTotals.pmc += pPMC;
-    masterTotals.draft += pDraft;
-    masterTotals.owner += pOwner;
     masterTotals.websiteFee += pWebsiteFee;
     masterTotals.expenses += pExpenses;
+    masterTotals.draft += draftAmount;
+    masterTotals.owner += payoutAmount;
   });
 }
 
@@ -527,24 +545,24 @@ function displayStatement() {
   let html = `
     <div class="summary-grid">
       ${type === "draft" ? `
-        <div class="summary-card"><div class="summary-label">Net Accommodation</div><div class="summary-value">${money(masterTotals.acc)}</div></div>
+        <div class="summary-card"><div class="summary-label">Accommodation</div><div class="summary-value">${money(masterTotals.acc)}</div></div>
         <div class="summary-card"><div class="summary-label">PMC</div><div class="summary-value">${money(masterTotals.pmc)}</div></div>
         <div class="summary-card"><div class="summary-label">Cleaning Fee</div><div class="summary-value">${money(masterTotals.clean)}</div></div>
         <div class="summary-card"><div class="summary-label">Website Fee</div><div class="summary-value">${money(masterTotals.websiteFee)}</div></div>
         <div class="summary-card"><div class="summary-label">Expenses</div><div class="summary-value">${money(masterTotals.expenses)}</div></div>
-        <div class="summary-card" style="background:#000;color:#fff;border-color:#000"><div class="summary-label" style="color:#fff">DRAFT AMOUNT</div><div class="summary-value" style="color:#fff">${money(masterTotals.draft - masterTotals.expenses)}</div></div>
+        <div class="summary-card" style="background:#000;color:#fff;border-color:#000"><div class="summary-label" style="color:#fff">DRAFT AMOUNT</div><div class="summary-value" style="color:#fff">${money(masterTotals.draft)}</div></div>
       ` : `
-        <div class="summary-card"><div class="summary-label">Net Accommodation</div><div class="summary-value">${money(masterTotals.acc)}</div></div>
+        <div class="summary-card"><div class="summary-label">Accommodation</div><div class="summary-value">${money(masterTotals.acc)}</div></div>
         <div class="summary-card"><div class="summary-label">PMC</div><div class="summary-value">${money(masterTotals.pmc)}</div></div>
         <div class="summary-card"><div class="summary-label">Expenses</div><div class="summary-value">${money(masterTotals.expenses)}</div></div>
-        <div class="summary-card" style="background:#000;color:#fff;border-color:#000"><div class="summary-label" style="color:#fff">PAYOUT AMOUNT</div><div class="summary-value" style="color:#fff">${money(masterTotals.owner - masterTotals.expenses)}</div></div>
+        <div class="summary-card" style="background:#000;color:#fff;border-color:#000"><div class="summary-label" style="color:#fff">PAYOUT AMOUNT</div><div class="summary-value" style="color:#fff">${money(masterTotals.owner)}</div></div>
       `}
     </div>
   `;
 
   Object.keys(propertyTotals).forEach(prop => {
     let p = propertyTotals[prop];
-    let finalPayout = type === "draft" ? p.draft - p.expenses : p.owner - p.expenses;
+    let finalPayout = type === "draft" ? p.draft : p.owner;
     let propExpenseList = expenses.filter(e => e.property === prop && e.owner === currentOwner);
 
     html += `
@@ -556,7 +574,7 @@ function displayStatement() {
         
         <table>
           <tr><th>Metric</th><th>Amount</th></tr>
-          <tr><td>Net Accommodation</td><td>${money(p.acc)}</td></tr>
+          <tr><td>Accommodation</td><td>${money(p.acc)}</td></tr>
           <tr><td>PMC (${(OWNERS[currentOwner].percent*100).toFixed(0)}%)</td><td>${money(p.pmc)}</td></tr>
           ${type === "draft" ? `<tr><td>Cleaning Fee</td><td>${money(p.clean)}</td></tr>` : ""}
           ${type === "draft" ? `<tr><td>Website Fee</td><td>${money(p.websiteFee)}</td></tr>` : ""}
@@ -588,7 +606,7 @@ function displayStatement() {
               let payout = num(r["TOTAL PAYOUT"]);
               let percent = OWNERS[currentOwner].percent;
               let pmc = acc * percent;
-              let draft = pmc + clean;
+              let draft = acc - pmc - clean;
               let code = r["CONFIRMATION CODE"] || "";
               let platform = r["PLATFORM"] || "";
               let isVRBO = code.toUpperCase().startsWith("HA");
@@ -629,7 +647,7 @@ async function generateSummary() {
 
   const type = OWNERS[currentOwner].type;
   const salesPercent = OWNERS[currentOwner].salesFeePercent;
-  const finalPayout = type === "draft" ? masterTotals.draft - masterTotals.expenses : masterTotals.owner - masterTotals.expenses;
+  const finalPayout = type === "draft" ? masterTotals.draft : masterTotals.owner;
   const salesAmount = masterTotals.pmc * (salesPercent / 100);
 
   // Save to history
@@ -676,8 +694,6 @@ async function generateAnnual() {
   const type = OWNERS[currentOwner].type;
   if (type !== "payout") { alert("Annual Report for PAYOUT owners only"); return; }
 
-  const year = parseInt(document.getElementById("yearSelect").value);
-  
   updateHeaderDates();
 
   let html = `
@@ -689,7 +705,7 @@ async function generateAnnual() {
         <tr><td>Total Accommodation</td><td style="text-align:right;font-weight:bold">${money(masterTotals.acc)}</td></tr>
         <tr><td>PMC Charged</td><td style="text-align:right;font-weight:bold">${money(masterTotals.pmc)}</td></tr>
         <tr><td>Total Expenses</td><td style="text-align:right;font-weight:bold">${money(masterTotals.expenses)}</td></tr>
-        <tr style="background:#000;color:#fff"><td style="color:#fff"><strong>NET ANNUAL AMOUNT</strong></td><td style="text-align:right;color:#fff"><strong>${money(masterTotals.owner - masterTotals.expenses)}</strong></td></tr>
+        <tr style="background:#000;color:#fff"><td style="color:#fff"><strong>NET ANNUAL AMOUNT</strong></td><td style="text-align:right;color:#fff"><strong>${money(masterTotals.owner)}</strong></td></tr>
       </table>
     </div>
 
