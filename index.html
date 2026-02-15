@@ -310,13 +310,17 @@ let pmc=acc*percent;
 let draft=pmc+clean;
 let ownerPay=acc-pmc;
 
-// Check if website or manual booking (website fee for draft owners only)
+// Check if website booking (website fee for draft owners only - NOT for VRBO or manual)
 let websiteFee=0;
 if(type==="draft"){
+let confirmationCode=r["CONFIRMATION CODE"]||"";
+let isVRBO=confirmationCode.toUpperCase().startsWith("HA");
 let platform=r["PLATFORM"]||"";
 let platformLower=platform.toLowerCase();
-if(platformLower.includes("website") || platformLower.includes("manual")){
-websiteFee=payout*0.01; // 1% of payout for website, website_direct, and manual bookings
+
+// Only charge 1% fee if platform says "website" and NOT VRBO (HA)
+if(!isVRBO && platformLower.includes("website")){
+websiteFee=payout*0.01; // 1% of payout for website bookings only
 pWebsiteFee+=websiteFee;
 }
 }
@@ -422,14 +426,15 @@ let ownerPay=acc-pmc;
 let platform=r["PLATFORM"]||"N/A";
 let confirmationCode=r["CONFIRMATION CODE"]||"N/A";
 
-// Replace "manual" with "website" in display
-let displayPlatform=platform.replace(/manual/gi,"website");
+// Check if VRBO (HA prefix) and replace platform display
+let isVRBO=confirmationCode.toUpperCase().startsWith("HA");
+let displayPlatform=isVRBO?"VRBO":platform;
 
-// Check if website or manual booking for fee calculation
+// Check if website booking for fee calculation (NOT for VRBO)
 let websiteFee=0;
 if(type==="draft"){
 let platformLower=platform.toLowerCase();
-if(platformLower.includes("website") || platformLower.includes("manual")){
+if(!isVRBO && platformLower.includes("website")){
 websiteFee=payout*0.01;
 }
 }
@@ -543,7 +548,7 @@ ${type==="draft"?`
 <span class="summary-line-value">${money(masterTotals.websiteFee)}</span>
 </div>
 <div style="font-size:11px;margin-top:10px;color:#666">
-Charged on website, website_direct, and manual bookings made through your platform
+Charged on website bookings only (not VRBO or manual)
 </div>
 </div>
 `:""}
