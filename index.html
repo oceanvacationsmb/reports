@@ -625,10 +625,10 @@ function displayStatement() {
         </div>
         ` : ""}
 
-        ${type === "draft" ? `
         <div style="margin-top:15px">
           <strong>Reservations:</strong>
           <table style="margin-top:10px">
+            ${type === "draft" ? `
             <tr><th>Confirmation</th><th>Stay</th><th>Platform</th><th>Accommodation</th><th>PMC</th><th>Cleaning Fee</th><th>Website Fee</th><th>Total Payout</th></tr>
             ${p.reservations.map(r => {
               let acc = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
@@ -674,9 +674,53 @@ function displayStatement() {
                 </tr>
               `;
             }).join("")}
+            ` : `
+            <tr><th>Confirmation</th><th>Stay</th><th>Platform</th><th>Gross Payout</th><th>Accommodation</th><th>PMC</th><th>Cleaning Fee</th><th>Website Fee</th></tr>
+            ${p.reservations.map(r => {
+              let acc = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
+              let payout = num(r["TOTAL PAYOUT"]);
+              let status = (r["STATUS"] || "").toLowerCase();
+              let isCancelled = status.includes("cancelled");
+              let clean = isCancelled ? 0 : num(r["CLEANING FARE"]);
+              let percent = OWNERS[currentOwner].percent;
+              let pmc = acc * percent;
+              let code = r["CONFIRMATION CODE"] || "";
+              let platform = r["PLATFORM"] || "";
+              let isVRBO = code.toUpperCase().startsWith("HA");
+              
+              let displayPlat = isVRBO ? "VRBO" : platform;
+              if (displayPlat.toLowerCase().includes("manual")) {
+                displayPlat = displayPlat.replace(/manual/gi, "website");
+              }
+              
+              let websiteFee = 0;
+              if (acc > 0) {
+                if (!isVRBO && (platform.toLowerCase().includes("website") || platform.toLowerCase().includes("manual"))) {
+                  websiteFee = payout * 0.01;
+                }
+              }
+              
+              let checkin = r["CHECK-IN DATE"] ? r["CHECK-IN DATE"].split("-").slice(1).join("/") : "";
+              let checkout = r["CHECK-OUT DATE"] ? r["CHECK-OUT DATE"].split("-").slice(1).join("/") : "";
+
+              if (payout === 0 && clean === 0) return "";
+
+              return `
+                <tr>
+                  <td>${code.substring(0,8)}</td>
+                  <td>${checkin} - ${checkout}</td>
+                  <td>${displayPlat}</td>
+                  <td>${money(payout)}</td>
+                  <td>${money(acc)}</td>
+                  <td>${money(pmc)}</td>
+                  <td>${money(clean)}</td>
+                  <td>${money(websiteFee)}</td>
+                </tr>
+              `;
+            }).join("")}
+            `}
           </table>
         </div>
-        ` : ""}
       </div>
     `;
   });
