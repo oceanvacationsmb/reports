@@ -77,6 +77,7 @@ body{font-family:Arial;background:#f5f5f5;color:#000;display:flex}
 .property{margin-top:12px;background:#fff;padding:10px;border-radius:5px;border:1px solid #ddd}
 .property-title{font-size:12px;font-weight:bold;margin-bottom:2px}
 .property-period{font-size:9px;color:#666;margin-bottom:6px}
+.property-notes{font-size:9px;color:#333;margin-bottom:6px;padding:8px;background:#fafafa;border-left:3px solid #007bff}
 table{width:100%;border-collapse:collapse;font-size:7px;margin-top:6px;background:#fff}
 th,td{border:1px solid #ddd;padding:2px;text-align:center;word-wrap:break-word;overflow-wrap:break-word}
 th{background:#333;color:#fff;font-weight:bold}
@@ -104,6 +105,9 @@ tr:nth-child(even){background:#f9f9f9}
 .history-item:hover{background:#f9f9f9}
 .history-item-date{font-weight:bold;color:#333}
 .history-item-details{font-size:10px;color:#666}
+.file-input-label{background:#666;color:#fff;padding:5px 8px;border-radius:2px;cursor:pointer;font-size:10px;display:inline-block}
+.file-input-label:hover{background:#777}
+.file-name{color:#fff;font-size:10px;margin-top:3px}
 @media print{
 .sidebar,.finish-btn,.add-row button,.back-btn,.save-btn,.print-btn,.delete-btn{display:none}
 .main-content{margin-left:0;width:100%;padding:10px}
@@ -177,6 +181,10 @@ tr:nth-child(even){background:#f9f9f9}
 </select>
 </div>
 <div class="owner-item-control">
+<label class="owner-item-label">Property</label>
+<select id="expenseProperty"></select>
+</div>
+<div class="owner-item-control">
 <label class="owner-item-label">Vendor</label>
 <select id="expenseVendor"></select>
 </div>
@@ -185,12 +193,16 @@ tr:nth-child(even){background:#f9f9f9}
 <input type="number" id="expenseAmount" step="0.01" min="0" placeholder="0.00">
 </div>
 <div class="owner-item-control">
-<label class="owner-item-label">Date</label>
-<input type="date" id="expenseDate">
-</div>
-<div class="owner-item-control">
 <label class="owner-item-label">Notes</label>
 <input type="text" id="expenseNotes" placeholder="Optional notes">
+</div>
+<div class="owner-item-control">
+<label class="owner-item-label">Attach PDF (Optional)</label>
+<label class="file-input-label">
+📎 Choose File
+<input type="file" id="expensePDF" accept=".pdf" style="display:none" onchange="showFileName()">
+</label>
+<div class="file-name" id="fileName"></div>
 </div>
 <button class="add-btn" onclick="addExpense()">➕ Add Expense/Credit</button>
 <h4 style="color:#fff;margin-top:15px;margin-bottom:10px">Recent Expenses</h4>
@@ -264,9 +276,9 @@ const expenses_data=await getFromDB("expenses");
 const statements_data=await getFromDB("statements");
 
 owners=owners_data.length>0?Object.fromEntries(owners_data.map(o=>[o.name,o.data])):owners;
-vendors=vendors_data.map(v=>v.data);
-expenses=expenses_data.map(e=>e.data);
-statementHistory=statements_data.map(s=>s.data);
+vendors=vendors_data.map(v=>v.data||v);
+expenses=expenses_data.map(e=>e.data||e);
+statementHistory=statements_data.map(s=>s.data||s);
 
 updateVendorSelects();
 updateExpensesList();
@@ -320,6 +332,8 @@ let vendors=[];
 let expenses=[];
 let statementHistory=[];
 let lastSummaryHTML="";
+let csvData=[];
+let properties=[];
 
 function saveSettings(){
 Object.entries(owners).forEach(([name,data])=>{
@@ -353,6 +367,13 @@ function saveStatementHistory(){
 statementHistory.forEach(s=>{
 saveToDBStore("statements",s.id,s);
 });
+}
+
+function showFileName(){
+const file=document.getElementById("expensePDF").files[0];
+if(file){
+document.getElementById("fileName").textContent=`✓ ${file.name}`;
+}
 }
 
 function addVendor(){
@@ -400,34 +421,63 @@ list.innerHTML=vendors.map(v=>`
 `).join("");
 }
 
+function updatePropertySelects(){
+const select=document.getElementById("expenseProperty");
+select.innerHTML='<option value="">-- Select Property --</option>';
+properties.forEach(p=>select.innerHTML+=`<option value="${p}">${p}</option>`);
+}
+
 function addExpense(){
 const type=document.getElementById("expenseType").value;
+const property=document.getElementById("expenseProperty").value;
 const vendor=document.getElementById("expenseVendor").value;
 const amount=parseFloat(document.getElementById("expenseAmount").value);
-const date=document.getElementById("expenseDate").value;
 const notes=document.getElementById("expenseNotes").value;
 const owner=document.getElementById("owner").value;
+const fileInput=document.getElementById("expensePDF");
 
-if(!vendor||!amount||!date){alert("Please fill in all required fields");return;}
+if(!property||!vendor||!amount){alert("Please fill in all required fields");return;}
 
 const expense={
 id:Date.now(),
 owner:owner,
 type:type,
+property:property,
 vendor:vendor,
 amount:amount,
-date:date,
-notes:notes
+notes:notes,
+pdf:null
 };
 
+// Read PDF file if provided
+if(fileInput.files.length>0){
+const file=fileInput.files[0];
+const reader=new FileReader();
+reader.onload=(e)=>{
+expense.pdf={
+name:file.name,
+data:e.target.result
+};
 expenses.push(expense);
 saveExpenses();
+resetExpenseForm();
+};
+reader.readAsArrayBuffer(file);
+}else{
+expenses.push(expense);
+saveExpenses();
+resetExpenseForm();
+}
+}
 
+function resetExpenseForm(){
 document.getElementById("expenseType").value="Maintenance";
+document.getElementById("expenseProperty").value="";
 document.getElementById("expenseVendor").value="";
 document.getElementById("expenseAmount").value="";
-document.getElementById("expenseDate").value="";
 document.getElementById("expenseNotes").value="";
+document.getElementById("expensePDF").value="";
+document.getElementById("fileName").textContent="";
 }
 
 function deleteExpense(id){
@@ -438,10 +488,14 @@ updateExpensesList();
 }
 }
 
+function getExpensesForProperty(property){
+return expenses.filter(e=>e.property===property && e.owner===document.getElementById("owner").value);
+}
+
 function updateExpensesList(){
 const list=document.getElementById("expensesList");
 const owner=document.getElementById("owner").value;
-const ownerExpenses=expenses.filter(e=>e.owner===owner).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,10);
+const ownerExpenses=expenses.filter(e=>e.owner===owner).sort((a,b)=>new Date(b.id)-new Date(a.id)).slice(0,10);
 
 if(ownerExpenses.length===0){
 list.innerHTML='<div style="color:#aaa;font-size:10px">No expenses</div>';
@@ -451,10 +505,11 @@ return;
 list.innerHTML=ownerExpenses.map(e=>`
 <div class="expense-item">
 <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
-<div>
+<div style="flex:1">
 <div style="font-weight:bold;color:#fff">${e.type} - ${e.vendor}</div>
-<div style="color:#aaa;font-size:9px">${e.date}</div>
+<div style="color:#aaa;font-size:9px">Property: ${e.property}</div>
 <div style="color:#aaa;font-size:9px">${e.notes}</div>
+${e.pdf?`<div style="color:#4CAF50;font-size:9px">📎 ${e.pdf.name}</div>`:""}
 </div>
 <div style="text-align:right">
 <div style="color:#fff;font-weight:bold;font-size:11px">$${e.amount.toFixed(2)}</div>
@@ -624,8 +679,6 @@ yearSelect.innerHTML+=`<option>${y}</option>`;
 }
 yearSelect.value=now.getFullYear();
 
-document.getElementById("expenseDate").valueAsDate=new Date();
-
 function num(v){return parseFloat((v||"0").toString().replace(/[$,]/g,""))||0}
 function money(x){return "$"+(Number(x)||0).toFixed(2)}
 function stay(i,o){if(!i||!o)return"";let a=i.split("-"),b=o.split("-");return a[1]+"/"+a[2]+" - "+b[1]+"/"+b[2]}
@@ -633,7 +686,6 @@ function lastDay(y,m){return new Date(y,m,0).getDate()}
 
 let propertyTotals={};
 let masterTotals={};
-let csvData=[];
 
 async function runReport(){
 document.getElementById("report").classList.remove("hidden");
@@ -660,6 +712,7 @@ const statementDate=new Date(year,month,1);
 const paymentDate=new Date(year,month,5);
 
 let grouped={};
+properties=[];
 
 csvData.forEach(r=>{
 if(!r["CHECK-IN DATE"])return;
@@ -668,9 +721,12 @@ let y=parseInt(r["CHECK-IN DATE"].split("-")[0]);
 if(m!==month||y!==year)return;
 
 let listing=r["LISTING'S NICKNAME"]||"Unknown";
+if(!properties.includes(listing)) properties.push(listing);
 if(!grouped[listing])grouped[listing]=[];
 grouped[listing].push(r);
 });
+
+updatePropertySelects();
 
 let reportHTML="";
 
@@ -697,7 +753,7 @@ Payment Date: ${paymentDate.toLocaleDateString()}
 
 Object.keys(grouped).forEach(listing=>{
 
-let pGross=0,pAcc=0,pClean=0,pPMC=0,pDraft=0,pOwner=0,pWebsiteFee=0;
+let pGross=0,pAcc=0,pClean=0,pPMC=0,pDraft=0,pOwner=0,pWebsiteFee=0,pExpenses=0;
 
 grouped[listing].forEach(r=>{
 let payout=num(r["TOTAL PAYOUT"]);
@@ -728,7 +784,13 @@ pDraft+=draft+websiteFee;
 pOwner+=ownerPay;
 });
 
-propertyTotals[listing]={gross:pGross,acc:pAcc,clean:pClean,pmc:pPMC,draft:pDraft,owner:pOwner,websiteFee:pWebsiteFee,expenses:0};
+// Add property expenses
+const propertyExpenses=getExpensesForProperty(listing);
+propertyExpenses.forEach(e=>{
+pExpenses+=e.amount;
+});
+
+propertyTotals[listing]={gross:pGross,acc:pAcc,clean:pClean,pmc:pPMC,draft:pDraft,owner:pOwner,websiteFee:pWebsiteFee,expenses:pExpenses};
 
 masterTotals.gross+=pGross;
 masterTotals.acc+=pAcc;
@@ -737,6 +799,7 @@ masterTotals.pmc+=pPMC;
 masterTotals.draft+=pDraft;
 masterTotals.owner+=pOwner;
 masterTotals.websiteFee+=pWebsiteFee;
+masterTotals.expenses+=pExpenses;
 });
 
 reportHTML+=`
@@ -750,14 +813,14 @@ ${type==="draft"
 <div class="summary-item-master"><span class="summary-item-label-master">PMC</span><span class="summary-item-amount-master">${money(masterTotals.pmc)}</span></div>
 <div class="summary-item-master"><span class="summary-item-label-master">CLEANING FEE</span><span class="summary-item-amount-master">${money(masterTotals.clean)}</span></div>
 <div class="summary-item-master"><span class="summary-item-label-master">WEBSITE FEE</span><span class="summary-item-amount-master">${money(masterTotals.websiteFee)}</span></div>
-<div class="summary-item-master"><span class="summary-item-label-master">EXPENSES</span><span class="summary-item-amount-master">$0.00</span></div>
-<div class="summary-item-master"><span class="summary-item-label-master">PAYOUT</span><span class="summary-item-amount-master" id="masterBal">${money(masterTotals.draft)}</span></div>
+<div class="summary-item-master"><span class="summary-item-label-master">EXPENSES</span><span class="summary-item-amount-master">${money(masterTotals.expenses)}</span></div>
+<div class="summary-item-master"><span class="summary-item-label-master">PAYOUT</span><span class="summary-item-amount-master" id="masterBal">${money(masterTotals.draft-masterTotals.expenses)}</span></div>
 `
 :`
 <div class="summary-item-master"><span class="summary-item-label-master">NET ACCOMMODATION</span><span class="summary-item-amount-master">${money(masterTotals.acc)}</span></div>
 <div class="summary-item-master"><span class="summary-item-label-master">PMC</span><span class="summary-item-amount-master">${money(masterTotals.pmc)}</span></div>
-<div class="summary-item-master"><span class="summary-item-label-master">EXPENSES</span><span class="summary-item-amount-master">$0.00</span></div>
-<div class="summary-item-master"><span class="summary-item-label-master">PAYOUT</span><span class="summary-item-amount-master" id="masterBal">${money(masterTotals.owner)}</span></div>
+<div class="summary-item-master"><span class="summary-item-label-master">EXPENSES</span><span class="summary-item-amount-master">${money(masterTotals.expenses)}</span></div>
+<div class="summary-item-master"><span class="summary-item-label-master">PAYOUT</span><span class="summary-item-amount-master" id="masterBal">${money(masterTotals.owner-masterTotals.expenses)}</span></div>
 `}
 </div>
 </div>
@@ -768,11 +831,20 @@ ${type==="draft"
 Object.keys(grouped).forEach(listing=>{
 
 let p=propertyTotals[listing];
+const propExpenses=getExpensesForProperty(listing);
+const finalPayout=type==="draft"?p.draft-p.expenses:p.owner-p.expenses;
 
 reportHTML+=`
 <div class="property">
 <div class="property-title">${listing}</div>
 <div class="property-period"><strong>PERIOD:</strong> ${month}/1/${year} - ${month}/${endDay}/${year}</div>
+
+${propExpenses.length>0?`
+<div class="property-notes">
+<strong>📝 Expenses:</strong><br>
+${propExpenses.map(e=>`${e.type} - ${e.vendor}: $${e.amount.toFixed(2)}${e.notes?` (${e.notes})`:''}`).join('<br>')}
+</div>
+`:""}
 
 <div class="summary-box">
 <div class="summary-header">SUMMARY</div>
@@ -784,14 +856,14 @@ ${type==="draft"
 <div class="summary-item"><span class="summary-item-label">PMC</span><span class="summary-item-amount">${money(p.pmc)}</span></div>
 <div class="summary-item"><span class="summary-item-label">CLEANING FEE</span><span class="summary-item-amount">${money(p.clean)}</span></div>
 <div class="summary-item"><span class="summary-item-label">WEBSITE FEE</span><span class="summary-item-amount">${money(p.websiteFee)}</span></div>
-<div class="summary-item"><span class="summary-item-label">EXPENSES</span><span class="summary-item-amount" id="exp-${listing}">$0.00</span></div>
-<div class="summary-item"><span class="summary-item-label">PAYOUT</span><span class="summary-item-amount" id="bal-${listing}">${money(p.draft)}</span></div>
+<div class="summary-item"><span class="summary-item-label">EXPENSES</span><span class="summary-item-amount">${money(p.expenses)}</span></div>
+<div class="summary-item"><span class="summary-item-label">PAYOUT</span><span class="summary-item-amount" id="bal-${listing}">${money(finalPayout)}</span></div>
 `
 :`
 <div class="summary-item"><span class="summary-item-label">NET ACCOMMODATION</span><span class="summary-item-amount">${money(p.acc)}</span></div>
 <div class="summary-item"><span class="summary-item-label">PMC</span><span class="summary-item-amount">${money(p.pmc)}</span></div>
-<div class="summary-item"><span class="summary-item-label">EXPENSES</span><span class="summary-item-amount" id="exp-${listing}">$0.00</span></div>
-<div class="summary-item"><span class="summary-item-label">PAYOUT</span><span class="summary-item-amount" id="bal-${listing}">${money(p.owner)}</span></div>
+<div class="summary-item"><span class="summary-item-label">EXPENSES</span><span class="summary-item-amount">${money(p.expenses)}</span></div>
+<div class="summary-item"><span class="summary-item-label">PAYOUT</span><span class="summary-item-amount" id="bal-${listing}">${money(finalPayout)}</span></div>
 `}
 </div>
 </div>
@@ -870,6 +942,7 @@ const year=parseInt(yearSelect.value);
 const endDay=lastDay(year,month);
 
 const salesFeeAmount=masterTotals.pmc*(salesFeePercent/100);
+const finalPayout=type==="draft"?masterTotals.draft-masterTotals.expenses:masterTotals.owner-masterTotals.expenses;
 
 let taxByProperty={};
 let hasTaxes=false;
@@ -936,13 +1009,18 @@ let summaryHTML=`
 
 ${type==="draft"?`
 <div class="summary-section">
-<div class="summary-section-title">🌐 WEBSITE BOOKING FEE</div>
+<div class="summary-section-title">🌐 WEBSITE BOOKING FEE & EXPENSES</div>
 <div class="summary-line">
 <span>Total Website Booking Fee (1.00%):</span>
 <span class="summary-line-value">${money(masterTotals.websiteFee)}</span>
 </div>
-<div style="font-size:11px;margin-top:10px;color:#666">
-Charged on website bookings only (not VRBO or manual)
+<div class="summary-line">
+<span>Cleaning Fee:</span>
+<span class="summary-line-value">${money(masterTotals.clean)}</span>
+</div>
+<div class="summary-line" style="border-bottom:2px solid #000;padding-top:8px;padding-bottom:8px">
+<span>Total Expenses/Credits:</span>
+<span class="summary-line-value">${money(masterTotals.expenses)}</span>
 </div>
 </div>
 `:""}
@@ -957,9 +1035,13 @@ Charged on website bookings only (not VRBO or manual)
 <span>Owner Type:</span>
 <span class="summary-line-value">${type.toUpperCase()}</span>
 </div>
+<div class="summary-line">
+<span>Gross Payout:</span>
+<span class="summary-line-value">${money(masterTotals.gross)}</span>
+</div>
 <div class="summary-line" style="border-bottom:2px solid #000;padding-top:8px;padding-bottom:8px">
-<span style="font-size:13px"><strong>Amount to ${type==="draft"?"Pay":"Payout"}:</strong></span>
-<span class="summary-line-value" style="font-size:13px">${money(masterTotals.draft)}</span>
+<span style="font-size:13px"><strong>Net Payout Amount:</strong></span>
+<span class="summary-line-value" style="font-size:13px;color:#000;font-weight:bold;font-size:14px">${money(finalPayout)}</span>
 </div>
 </div>
 
@@ -1003,14 +1085,13 @@ ${Object.entries(taxByProperty).map(([property, data])=>`
 
 lastSummaryHTML=summaryHTML;
 
-// Save to history
 statementHistory.push({
 id:Date.now(),
 owner:owner,
 month:month,
 year:year,
 date:new Date().toISOString(),
-payout:type==="draft"?masterTotals.draft:masterTotals.owner
+payout:finalPayout
 });
 saveStatementHistory();
 
@@ -1037,7 +1118,6 @@ html2pdf().set({margin:5,jsPDF:{unit:"mm",format:"a4"}})
 .from(document.getElementById("report")).save("Reservation_Report.pdf");
 }
 
-// Initialize on page load
 window.addEventListener('DOMContentLoaded',async()=>{
 await initDB();
 await loadFromDB();
