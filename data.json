@@ -248,17 +248,7 @@
       "phone": ""
     }
   ],
-  "expenses": [
-    {
-      "id": 1771150713745,
-      "owner": "GHO",
-      "type": "Maintenance",
-      "property": "MB - 4765",
-      "vendor": "LOWES",
-      "amount": 50,
-      "notes": ""
-    }
-  ],
+  "expenses": [],
   "statements": [],
   "lastUpdated": "",
   "reports": [
