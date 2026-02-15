@@ -93,11 +93,11 @@
     "GHO": {
       "name": "GHO",
       "municipalities": {
-        "SC": false,
-        "MB": false,
-        "NMB": false,
+        "SC": true,
+        "MB": true,
+        "NMB": true,
         "SSB": false,
-        "HC": false
+        "HC": true
       }
     },
     "1463 Basin Trail": {
@@ -113,101 +113,101 @@
     "113B-15S Surfside Beach": {
       "name": "113B-15S Surfside Beach",
       "municipalities": {
-        "SC": false,
+        "SC": true,
         "MB": false,
         "NMB": false,
         "SSB": true,
-        "HC": false
+        "HC": true
       }
     },
     "113B-13N Surfside Beach": {
       "name": "113B-13N Surfside Beach",
       "municipalities": {
-        "SC": false,
+        "SC": true,
         "MB": false,
         "NMB": false,
         "SSB": true,
-        "HC": false
+        "HC": true
       }
     },
     "115C-15N Surfside Beach": {
       "name": "115C-15N Surfside Beach",
       "municipalities": {
-        "SC": false,
+        "SC": true,
         "MB": false,
         "NMB": false,
         "SSB": true,
-        "HC": false
+        "HC": true
       }
     },
     "2131 Sanibel Myrtle Beach": {
       "name": "2131 Sanibel Myrtle Beach",
       "municipalities": {
-        "SC": false,
+        "SC": true,
         "MB": true,
         "NMB": false,
         "SSB": false,
-        "HC": false
+        "HC": true
       }
     },
     "1552 Elizabeth Ln Myrtle Beach": {
       "name": "1552 Elizabeth Ln Myrtle Beach",
       "municipalities": {
-        "SC": false,
+        "SC": true,
         "MB": true,
         "NMB": false,
         "SSB": false,
-        "HC": false
+        "HC": true
       }
     },
     "469C White River RD Myrtle Beach": {
       "name": "469C White River RD Myrtle Beach",
       "municipalities": {
-        "SC": false,
+        "SC": true,
         "MB": true,
         "NMB": false,
         "SSB": false,
-        "HC": false
+        "HC": true
       }
     },
     "4631-301 Wild Iris Drive Myrtle Beach": {
       "name": "4631-301 Wild Iris Drive Myrtle Beach",
       "municipalities": {
-        "SC": false,
+        "SC": true,
         "MB": true,
         "NMB": false,
         "SSB": false,
-        "HC": false
+        "HC": true
       }
     },
     "4679-204 Wild Iris Drive Myrtle Beach": {
       "name": "4679-204 Wild Iris Drive Myrtle Beach",
       "municipalities": {
-        "SC": false,
+        "SC": true,
         "MB": true,
         "NMB": false,
         "SSB": false,
-        "HC": false
+        "HC": true
       }
     },
     "508-1/2 33rd Ave North Myrtle Beach": {
       "name": "508-1/2 33rd Ave North Myrtle Beach",
       "municipalities": {
-        "SC": false,
+        "SC": true,
         "MB": false,
         "NMB": true,
         "SSB": false,
-        "HC": false
+        "HC": true
       }
     },
     "214-2S 2nd Ave S. North Myrtle Beach": {
       "name": "214-2S 2nd Ave S. North Myrtle Beach",
       "municipalities": {
-        "SC": false,
+        "SC": true,
         "MB": false,
         "NMB": true,
         "SSB": false,
-        "HC": false
+        "HC": true
       }
     }
   },
