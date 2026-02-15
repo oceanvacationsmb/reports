@@ -1515,6 +1515,14 @@
       },
       "taxByProperty": {},
       "fullStatement": true
+    },
+    {
+      "id": 1771191697244,
+      "owner": "GHO",
+      "month": 2,
+      "year": 2026,
+      "amount": 1202.202,
+      "date": "2/15/2026, 4:41:37 PM"
     }
   ]
 }
