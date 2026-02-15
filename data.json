@@ -266,6 +266,15 @@
       "vendor": "LOWES",
       "amount": 150,
       "notes": ""
+    },
+    {
+      "id": 1771150841274,
+      "owner": "ERAN",
+      "type": "Maintenance",
+      "property": "GC - 1211A",
+      "vendor": "LOWES",
+      "amount": 20000,
+      "notes": ""
     }
   ],
   "statements": [],
