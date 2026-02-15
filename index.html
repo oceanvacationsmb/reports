@@ -5,66 +5,66 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial;background:#f5f5f5;color:#000;display:flex}.sidebar{width:280px;background:#333;color:#fff;padding:20px;height:100vh;overflow-y:auto;position:fixed;left:0;top:0}.sidebar h3{margin-bottom:20px;font-size:16px;border-bottom:2px solid #fff;padding-bottom:10px}.section{margin-bottom:20px}.label{font-size:11px;font-weight:bold;color:#aaa;margin-bottom:5px;display:block}select,input{width:100%;padding:8px;margin:5px 0;border:1px solid #555;background:#444;color:#fff;border-radius:3px;font-size:11px}.btn{width:100%;padding:12px;margin:8px 0;border:none;font-weight:bold;border-radius:3px;cursor:pointer;font-size:12px;color:#fff}.btn-primary{background:#000}.btn-success{background:#28a745}.btn-warning{background:#ff9800}.btn-info{background:#17a2b8}.btn-danger{background:#dc3545}.main{margin-left:280px;padding:20px;width:calc(100% - 280px)}.page{background:#fff;padding:40px;border-radius:5px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}.invoice-header{display:flex;justify-content:space-between;margin-bottom:40px;border-bottom:2px solid #000;padding-bottom:30px}.company-info{font-size:11px;line-height:1.8}.company-name{font-size:20px;font-weight:bold;margin-bottom:5px}.report-title{text-align:center;font-size:32px;font-weight:bold;margin:40px 0 10px 0;letter-spacing:2px}.owner-name{text-align:center;font-size:28px;margin-bottom:40px;font-weight:bold;color:#000}table{width:100%;border-collapse:collapse;margin:20px 0;font-size:11px}th,td{border:1px solid #e0e0e0;padding:12px;text-align:left}th{background:#f5f5f5;color:#000;font-weight:bold;text-transform:uppercase}tr:nth-child(even){background:#fafafa}.action-buttons{display:flex;gap:10px;margin:20px 0;justify-content:center;flex-wrap:wrap}.action-buttons button{padding:10px 20px;font-size:12px;cursor:pointer;border:none;border-radius:3px;color:#fff;font-weight:bold}.back-btn{background:#666}.print-btn{background:#e74c3c}.property-section{margin:40px 0;padding:20px;border:1px solid #ddd;border-radius:5px;background:#fff}.property-title{font-size:14px;font-weight:bold;margin-bottom:15px;display:flex;align-items:center;text-transform:uppercase}.property-icon{font-size:18px;margin-right:10px}.summary-title{font-size:12px;font-weight:bold;text-transform:uppercase;text-align:center;margin:20px 0}.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}.summary-card{background:#f9f9f9;border:1px solid #ddd;padding:12px;text-align:center;border-radius:5px}.summary-label{font-size:10px;color:#666;font-weight:bold;text-transform:uppercase}.summary-value{font-size:14px;font-weight:bold;color:#000;margin-top:6px}.attachment{background:#f0f0f0;padding:10px;margin:10px 0;border-radius:3px;font-size:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.attachment-left{flex:1}.attachment-actions{display:flex;gap:5px;flex-wrap:wrap}.modal{display:none;position:fixed;z-index:1001;left:50%;top:50%;transform:translate(-50%,-50%);width:90%;max-width:500px;background:#333;color:#fff;border-radius:8px;padding:30px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto}.modal.show{display:block}.modal-title{font-size:20px;font-weight:bold;margin-bottom:20px;text-transform:uppercase;text-align:center;border-bottom:2px solid #fff;padding-bottom:15px}.modal-field{margin-bottom:15px}.modal-label{font-size:11px;font-weight:bold;color:#aaa;margin-bottom:8px;display:block;text-transform:uppercase}.modal-input{width:100%;padding:10px;border:1px solid #555;background:#444;color:#fff;border-radius:3px;font-size:11px}.modal-actions{display:flex;gap:10px;margin-top:25px}.modal-actions button{flex:1;padding:12px;border:none;font-weight:bold;border-radius:3px;cursor:pointer;font-size:12px;color:#fff}.btn-add{background:#28a745}.btn-cancel{background:#666}.modal-overlay{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.7)}.modal-overlay.show{display:block}.copy-link-btn{background:#0066cc;color:#fff;padding:10px 15px;border:none;border-radius:3px;cursor:pointer;font-weight:bold;margin:10px 0;width:100%}.commission-box{background:#fff3cd;border:2px solid #ffc107;padding:15px;margin:15px 0;border-radius:5px}.commission-box-title{font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px;text-transform:uppercase;text-align:center}.calc-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd}.calc-row-total{display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold}.pmc-transfer-box{background:#d4edda;border:2px solid #28a745;padding:15px;margin:15px 0;border-radius:5px}.pmc-transfer-title{font-size:14px;font-weight:bold;color:#155724;margin-bottom:10px;text-transform:uppercase;text-align:center}.pmc-transfer-amount{font-size:18px;font-weight:bold;color:#155724;text-align:center}.tax-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px}.tax-table th{background:#333;color:#fff;font-weight:bold;text-align:center;border:1px solid #000;padding:8px}.tax-table td{border:1px solid #000;padding:8px;text-align:left}.tax-info{background:#e8f4f8;border:2px solid #17a2b8;padding:15px;margin:15px 0;border-radius:5px}.tax-info-title{font-size:14px;font-weight:bold;color:#0c5460;margin-bottom:10px;text-transform:uppercase;text-align:center}.section-title{font-size:12px;font-weight:bold;text-transform:uppercase;margin-top:20px;margin-bottom:10px;color:#000}.invoice-btn{background:#17a2b8;color:#fff;padding:3px 8px;border:none;border-radius:3px;cursor:pointer;font-size:9px;font-weight:bold}.btn-small{padding:5px 10px;font-size:9px;width:auto;margin:0;display:inline-block}@media print{.sidebar,.back-btn,.print-btn,.copy-link-btn{display:none}.main{margin-left:0;width:100%}.page{padding:20px}}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial;background:#f5f5f5;color:#000;display:flex}.sidebar{width:280px;background:#333;color:#fff;padding:20px;height:100vh;overflow-y:auto;position:fixed;left:0;top:0}.sidebar h3{margin-bottom:20px;font-size:16px;border-bottom:2px solid #fff;padding-bottom:10px}.section{margin-bottom:20px}.label{font-size:11px;font-weight:bold;color:#aaa;margin-bottom:5px;display:block}select,input{width:100%;padding:8px;margin:5px 0;border:1px solid #555;background:#444;color:#fff;border-radius:3px;font-size:11px}.btn{width:100%;padding:12px;margin:8px 0;border:none;font-weight:bold;border-radius:3px;cursor:pointer;font-size:12px;color:#fff;text-transform:uppercase}.btn-primary{background:#000}.btn-success{background:#28a745}.btn-warning{background:#ff9800}.btn-info{background:#17a2b8}.btn-danger{background:#dc3545}.main{margin-left:280px;padding:20px;width:calc(100% - 280px)}.page{background:#fff;padding:40px;border-radius:5px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}.invoice-header{display:flex;justify-content:space-between;margin-bottom:40px;border-bottom:2px solid #000;padding-bottom:30px}.company-info{font-size:11px;line-height:1.8}.company-name{font-size:20px;font-weight:bold;margin-bottom:5px}.report-title{text-align:center;font-size:32px;font-weight:bold;margin:40px 0 10px 0;letter-spacing:2px}.owner-name{text-align:center;font-size:28px;margin-bottom:40px;font-weight:bold;color:#000}table{width:100%;border-collapse:collapse;margin:20px 0;font-size:11px}th,td{border:1px solid #e0e0e0;padding:12px;text-align:left}th{background:#f5f5f5;color:#000;font-weight:bold;text-transform:uppercase}tr:nth-child(even){background:#fafafa}.action-buttons{display:flex;gap:10px;margin:20px 0;justify-content:center;flex-wrap:wrap}.action-buttons button{padding:10px 20px;font-size:12px;cursor:pointer;border:none;border-radius:3px;color:#fff;font-weight:bold;text-transform:uppercase}.back-btn{background:#666}.print-btn{background:#e74c3c}.property-section{margin:40px 0;padding:20px;border:1px solid #ddd;border-radius:5px;background:#fff}.property-title{font-size:14px;font-weight:bold;margin-bottom:15px;display:flex;align-items:center;text-transform:uppercase}.property-icon{font-size:18px;margin-right:10px}.summary-title{font-size:12px;font-weight:bold;text-transform:uppercase;text-align:center;margin:20px 0}.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}.summary-card{background:#f9f9f9;border:1px solid #ddd;padding:12px;text-align:center;border-radius:5px}.summary-label{font-size:10px;color:#666;font-weight:bold;text-transform:uppercase}.summary-value{font-size:14px;font-weight:bold;color:#000;margin-top:6px}.attachment{background:#f0f0f0;padding:10px;margin:10px 0;border-radius:3px;font-size:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.attachment-left{flex:1}.attachment-actions{display:flex;gap:5px;flex-wrap:wrap}.modal{display:none;position:fixed;z-index:1001;left:50%;top:50%;transform:translate(-50%,-50%);width:90%;max-width:500px;background:#333;color:#fff;border-radius:8px;padding:30px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto}.modal.show{display:block}.modal-title{font-size:20px;font-weight:bold;margin-bottom:20px;text-transform:uppercase;text-align:center;border-bottom:2px solid #fff;padding-bottom:15px}.modal-field{margin-bottom:15px}.modal-label{font-size:11px;font-weight:bold;color:#aaa;margin-bottom:8px;display:block;text-transform:uppercase}.modal-input{width:100%;padding:10px;border:1px solid #555;background:#444;color:#fff;border-radius:3px;font-size:11px}.modal-actions{display:flex;gap:10px;margin-top:25px}.modal-actions button{flex:1;padding:12px;border:none;font-weight:bold;border-radius:3px;cursor:pointer;font-size:12px;color:#fff;text-transform:uppercase}.btn-add{background:#28a745}.btn-cancel{background:#666}.modal-overlay{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.7)}.modal-overlay.show{display:block}.copy-link-btn{background:#0066cc;color:#fff;padding:10px 15px;border:none;border-radius:3px;cursor:pointer;font-weight:bold;margin:10px 0;width:100%;text-transform:uppercase}.commission-box{background:#fff3cd;border:2px solid #ffc107;padding:15px;margin:15px 0;border-radius:5px}.commission-box-title{font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px;text-transform:uppercase;text-align:center}.calc-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd}.calc-row-total{display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold}.pmc-transfer-box{background:#d4edda;border:2px solid #28a745;padding:15px;margin:15px 0;border-radius:5px}.pmc-transfer-title{font-size:14px;font-weight:bold;color:#155724;margin-bottom:10px;text-transform:uppercase;text-align:center}.pmc-transfer-amount{font-size:18px;font-weight:bold;color:#155724;text-align:center}.tax-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px}.tax-table th{background:#333;color:#fff;font-weight:bold;text-align:center;border:1px solid #000;padding:8px}.tax-table td{border:1px solid #000;padding:8px;text-align:left}.tax-info{background:#e8f4f8;border:2px solid #17a2b8;padding:15px;margin:15px 0;border-radius:5px}.tax-info-title{font-size:14px;font-weight:bold;color:#0c5460;margin-bottom:10px;text-transform:uppercase;text-align:center}.section-title{font-size:12px;font-weight:bold;text-transform:uppercase;margin-top:20px;margin-bottom:10px;color:#000}.invoice-btn{background:#17a2b8;color:#fff;padding:3px 8px;border:none;border-radius:3px;cursor:pointer;font-size:9px;font-weight:bold}.btn-small{padding:5px 10px;font-size:9px;width:auto;margin:0;display:inline-block;text-transform:uppercase}@media print{.sidebar,.back-btn,.print-btn,.copy-link-btn{display:none}.main{margin-left:0;width:100%}.page{padding:20px}}
 </style>
 </head>
 <body>
 <div class="sidebar"><h3>🎯 OCEAN VACATIONS</h3>
-<div class="section"><label class="label">Select Owner</label><select id="ownerSelect" onchange="onOwnerChange()"><option value="">-- Select Owner --</option></select></div>
-<div class="section"><label class="label">Month</label><select id="monthSelect"></select></div>
-<div class="section"><label class="label">Year</label><select id="yearSelect"></select></div>
-<div class="section"><label class="label">Upload CSV</label><input type="file" id="csvFile" accept=".csv"></div>
+<div class="section"><label class="label">SELECT OWNER</label><select id="ownerSelect" onchange="onOwnerChange()"><option value="">-- SELECT --</option></select></div>
+<div class="section"><label class="label">MONTH</label><select id="monthSelect"></select></div>
+<div class="section"><label class="label">YEAR</label><select id="yearSelect"></select></div>
+<div class="section"><label class="label">UPLOAD CSV</label><input type="file" id="csvFile" accept=".csv"></div>
 <button class="btn btn-primary" onclick="generateStatement()">▶ STATEMENT</button>
-<button class="btn btn-success" onclick="generateSummary()">📊 View Summary</button>
-<button class="btn btn-warning" onclick="generateAnnual()">📈 Annual Report</button>
+<button class="btn btn-success" onclick="generateSummary()">📊 SUMMARY REPORT</button>
+<button class="btn btn-warning" onclick="generateAnnual()">📈 ANNUAL REPORT</button>
 <hr style="border:1px solid #555;margin:20px 0">
 <button class="btn btn-success" onclick="openAddExpense()" style="font-size:13px;font-weight:bold">💰 ADD EXPENSE</button>
 <hr style="border:1px solid #555;margin:20px 0">
-<h4 style="color:#fff;margin-bottom:10px">🏢 Vendors</h4>
+<h4 style="color:#fff;margin-bottom:10px;text-transform:uppercase">🏢 VENDORS</h4>
 <input type="text" id="vendorName" placeholder="Vendor name">
 <input type="text" id="vendorPhone" placeholder="Phone/Email">
-<button class="btn btn-success" onclick="addVendor()" style="font-size:11px">Add Vendor</button>
-<button class="btn btn-warning" onclick="showVendors()" style="font-size:11px">View/Manage</button>
+<button class="btn btn-success" onclick="addVendor()" style="font-size:11px">ADD VENDOR</button>
+<button class="btn btn-warning" onclick="showVendors()" style="font-size:11px">VIEW/MANAGE</button>
 <hr style="border:1px solid #555;margin:20px 0">
-<button class="btn btn-info" onclick="openOwners()" style="font-size:11px">⚙️ Owner Settings</button>
-<button class="btn btn-info" onclick="openTax()" style="font-size:11px">⚙️ Tax Settings</button>
-<button class="btn btn-warning" onclick="setupToken()" style="font-size:11px">🔑 GitHub Setup</button>
-<button class="btn btn-warning" onclick="setupDropbox()" style="font-size:11px">📁 Dropbox Setup</button>
+<button class="btn btn-info" onclick="openOwners()" style="font-size:11px">⚙️ OWNER SETTINGS</button>
+<button class="btn btn-info" onclick="openTax()" style="font-size:11px">⚙️ TAX SETTINGS</button>
+<button class="btn btn-warning" onclick="setupToken()" style="font-size:11px">🔑 GITHUB SETUP</button>
+<button class="btn btn-warning" onclick="setupDropbox()" style="font-size:11px">📁 DROPBOX SETUP</button>
 </div>
 
 <div id="modalOverlay" class="modal-overlay" onclick="closeAll()"></div>
 
-<div id="ownerModal" class="modal"><div><div class="modal-title">⚙️ Owner Management</div>
-<div class="modal-field"><label class="modal-label">Owner Name</label><input type="text" id="ownerName" class="modal-input" placeholder="Owner Name"></div>
-<div class="modal-field"><label class="modal-label">Email</label><input type="email" id="ownerEmail" class="modal-input" placeholder="Email"></div>
-<div class="modal-field"><label class="modal-label">Commission %</label><input type="number" id="ownerComm" class="modal-input" placeholder="Commission %" step="0.01"></div>
-<div class="modal-field"><label class="modal-label">Sales Fee %</label><input type="number" id="ownerSales" class="modal-input" placeholder="Sales Fee %" step="0.01"></div>
-<div class="modal-field"><label class="modal-label">Type</label><select id="ownerType" class="modal-input"><option value="draft">Draft</option><option value="payout">Payout</option></select></div>
-<button class="btn btn-success" onclick="addOwner()" style="width:100%;margin-bottom:20px">➕ Add Owner</button>
+<div id="ownerModal" class="modal"><div><div class="modal-title">⚙️ OWNER MANAGEMENT</div>
+<div class="modal-field"><label class="modal-label">OWNER NAME</label><input type="text" id="ownerName" class="modal-input" placeholder="Owner Name"></div>
+<div class="modal-field"><label class="modal-label">EMAIL</label><input type="email" id="ownerEmail" class="modal-input" placeholder="Email"></div>
+<div class="modal-field"><label class="modal-label">COMMISSION %</label><input type="number" id="ownerComm" class="modal-input" placeholder="Commission %" step="0.01"></div>
+<div class="modal-field"><label class="modal-label">SALES FEE %</label><input type="number" id="ownerSales" class="modal-input" placeholder="Sales Fee %" step="0.01"></div>
+<div class="modal-field"><label class="modal-label">TYPE</label><select id="ownerType" class="modal-input"><option value="draft">DRAFT</option><option value="payout">PAYOUT</option></select></div>
+<button class="btn btn-success" onclick="addOwner()" style="width:100%;margin-bottom:20px">➕ ADD OWNER</button>
 <div id="ownersList" style="max-height:350px;overflow-y:auto;margin-bottom:20px"></div>
-<div class="modal-actions"><button class="btn-cancel" onclick="closeAll()">✗ Close</button></div>
+<div class="modal-actions"><button class="btn-cancel" onclick="closeAll()">✗ CLOSE</button></div>
 </div></div>
 
-<div id="taxModal" class="modal"><div><div class="modal-title">⚙️ Tax Settings</div>
+<div id="taxModal" class="modal"><div><div class="modal-title">⚙️ TAX SETTINGS</div>
 <div id="taxContent" style="max-height:400px;overflow-y:auto;margin-bottom:20px"></div>
-<div class="modal-actions"><button class="btn-cancel" onclick="closeAll()">✗ Close</button></div>
+<div class="modal-actions"><button class="btn-cancel" onclick="closeAll()">✗ CLOSE</button></div>
 </div></div>
 
-<div id="vendorModal" class="modal"><div><div class="modal-title">🏢 Manage Vendors</div>
+<div id="vendorModal" class="modal"><div><div class="modal-title">🏢 MANAGE VENDORS</div>
 <div id="vendorsList" style="max-height:300px;overflow-y:auto;margin-bottom:20px"></div>
-<div class="modal-actions"><button class="btn-cancel" onclick="closeAll()">✗ Close</button></div>
+<div class="modal-actions"><button class="btn-cancel" onclick="closeAll()">✗ CLOSE</button></div>
 </div></div>
 
-<div id="expenseModal" class="modal"><div><div class="modal-title">💰 Add Expense</div>
-<div class="modal-field"><label class="modal-label">Type</label><select id="expenseType" class="modal-input"><option>Maintenance</option><option>Repair</option><option>Purchase</option><option>Supplies</option><option>Service</option><option>Pool Cleaning</option><option>Pest Control</option><option>Credit</option><option>Adjustment</option></select></div>
-<div class="modal-field"><label class="modal-label">Property</label><select id="expenseProperty" class="modal-input"></select></div>
-<div class="modal-field"><label class="modal-label">Vendor</label><select id="expenseVendor" class="modal-input"></select></div>
-<div class="modal-field"><label class="modal-label">Amount</label><input type="number" id="expenseAmount" class="modal-input" placeholder="0.00" step="0.01"></div>
-<div class="modal-field"><label class="modal-label">Notes</label><input type="text" id="expenseNotes" class="modal-input" placeholder="Optional notes"></div>
-<div class="modal-actions"><button class="btn-add" onclick="submitExpense()">✓ Add Expense</button><button class="btn-cancel" onclick="closeAll()">✗ Cancel</button></div>
+<div id="expenseModal" class="modal"><div><div class="modal-title">💰 ADD EXPENSE</div>
+<div class="modal-field"><label class="modal-label">TYPE</label><select id="expenseType" class="modal-input"><option>MAINTENANCE</option><option>REPAIR</option><option>PURCHASE</option><option>SUPPLIES</option><option>SERVICE</option><option>POOL CLEANING</option><option>PEST CONTROL</option><option>CREDIT</option><option>ADJUSTMENT</option></select></div>
+<div class="modal-field"><label class="modal-label">PROPERTY</label><select id="expenseProperty" class="modal-input"></select></div>
+<div class="modal-field"><label class="modal-label">VENDOR</label><select id="expenseVendor" class="modal-input"></select></div>
+<div class="modal-field"><label class="modal-label">AMOUNT</label><input type="number" id="expenseAmount" class="modal-input" placeholder="0.00" step="0.01"></div>
+<div class="modal-field"><label class="modal-label">NOTES</label><input type="text" id="expenseNotes" class="modal-input" placeholder="Optional notes"></div>
+<div class="modal-actions"><button class="btn-add" onclick="submitExpense()">✓ ADD EXPENSE</button><button class="btn-cancel" onclick="closeAll()">✗ CANCEL</button></div>
 </div></div>
 
-<div class="main"><div id="content" class="page"><div class="invoice-header"><div class="company-info"><div class="company-name">OCEAN VACATIONS</div><div>www.oceanvacationsmb.com</div><div>oceanvacationsmb@gmail.com</div><div>843-222-6516</div></div><div class="right-header"><div class="statement-date" id="statementDate"></div><div class="period-date" id="periodDate"></div></div></div><div class="report-title">RESERVATION REPORT</div><div class="owner-name" id="ownerTitle"></div><div id="mainContent"><div style="text-align:center;padding:40px;color:#666">Ready to use! Select an owner and upload CSV to begin.</div></div></div></div>
+<div class="main"><div id="content" class="page"><div class="invoice-header"><div class="company-info"><div class="company-name">OCEAN VACATIONS</div><div>www.oceanvacationsmb.com</div><div>oceanvacationsmb@gmail.com</div><div>843-222-6516</div></div><div class="right-header"><div class="statement-date" id="statementDate"></div><div class="period-date" id="periodDate"></div></div></div><div class="report-title" id="reportTitle">RESERVATION REPORT</div><div class="owner-name" id="ownerTitle"></div><div id="mainContent"><div style="text-align:center;padding:40px;color:#666">Ready to use! Select an owner and upload CSV to begin.</div></div></div></div>
 
 <script>
 const GITHUB_URL="https://raw.githubusercontent.com/oceanvacationsmb/reports/main/data.json";
@@ -98,7 +98,7 @@ function init(){
 
 function buildOwners(){
   const sel=document.getElementById("ownerSelect");
-  sel.innerHTML='<option value="">-- Select --</option>';
+  sel.innerHTML='<option value="">-- SELECT --</option>';
   Object.keys(OWNERS).sort().forEach(name=>{
     sel.innerHTML+="<option>"+name+"</option>";
   });
@@ -106,7 +106,7 @@ function buildOwners(){
 
 function buildMonths(){
   const sel=document.getElementById("monthSelect");
-  const months=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
   months.forEach((m,i)=>{
     sel.innerHTML+="<option value='"+(i+1)+"'>"+m+"</option>";
   });
@@ -133,18 +133,18 @@ function openOwners(){
     const o=OWNERS[name];
     html+="<div style='background:#555;padding:15px;margin:10px 0;border-radius:3px'>";
     html+="<div style='font-weight:bold;color:#fff;margin-bottom:10px'>"+name+"</div>";
-    html+="<label class='modal-label'>Email</label>";
+    html+="<label class='modal-label'>EMAIL</label>";
     html+="<input type='email' value='"+(o.email||"")+"' onchange=\"OWNERS['"+name+"'].email=this.value\" class='modal-input'>";
-    html+="<label class='modal-label'>Commission %</label>";
+    html+="<label class='modal-label'>COMMISSION %</label>";
     html+="<input type='number' step='0.01' value='"+(o.percent*100)+"' onchange=\"OWNERS['"+name+"'].percent=this.value/100\" class='modal-input'>";
-    html+="<label class='modal-label'>Sales Fee %</label>";
+    html+="<label class='modal-label'>SALES FEE %</label>";
     html+="<input type='number' step='0.01' value='"+o.salesFeePercent+"' onchange=\"OWNERS['"+name+"'].salesFeePercent=this.value\" class='modal-input'>";
-    html+="<label class='modal-label'>Type</label>";
+    html+="<label class='modal-label'>TYPE</label>";
     html+="<select onchange=\"OWNERS['"+name+"'].type=this.value\" class='modal-input'>";
-    html+="<option value='draft' "+(o.type==='draft'?'selected':'')+">Draft</option>";
-    html+="<option value='payout' "+(o.type==='payout'?'selected':'')+">Payout</option>";
+    html+="<option value='draft' "+(o.type==='draft'?'selected':'')+">DRAFT</option>";
+    html+="<option value='payout' "+(o.type==='payout'?'selected':'')+">PAYOUT</option>";
     html+="</select>";
-    html+="<button class='btn btn-danger' onclick=\"deleteOwner('"+name+"')\" style='width:100%;margin-top:10px;padding:8px'>🗑️ Delete Owner</button>";
+    html+="<button class='btn btn-danger' onclick=\"deleteOwner('"+name+"')\" style='width:100%;margin-top:10px;padding:8px'>🗑️ DELETE OWNER</button>";
     html+="</div>";
   });
   list.innerHTML=html;
@@ -198,7 +198,7 @@ function openTax(){
 
 function updateVendorDropdown(){
   const sel=document.getElementById("expenseVendor");
-  sel.innerHTML="<option>-- Select --</option>";
+  sel.innerHTML="<option>-- SELECT --</option>";
   vendors.forEach(v=>{
     sel.innerHTML+="<option>"+v.name+"</option>";
   });
@@ -225,7 +225,7 @@ function showVendors(){
     html+="<div style='color:#fff;font-weight:bold'>"+v.name+"</div>";
     html+="<div style='color:#aaa;font-size:10px'>"+v.phone+"</div>";
     html+="</div>";
-    html+="<button class='btn btn-danger' onclick='deleteVendor("+v.id+")' style='padding:5px 10px;font-size:9px'>Delete</button>";
+    html+="<button class='btn btn-danger' onclick='deleteVendor("+v.id+")' style='padding:5px 10px;font-size:9px'>DELETE</button>";
     html+="</div>";
   });
   list.innerHTML=html||"<p style='color:#aaa'>No vendors</p>";
@@ -241,7 +241,7 @@ function deleteVendor(id){
 function openAddExpense(){
   if(!currentOwner)return alert("Select owner first");
   const prop=document.getElementById("expenseProperty");
-  prop.innerHTML="<option>-- Select --</option>";
+  prop.innerHTML="<option>-- SELECT --</option>";
   Object.keys(propertyTotals).forEach(p=>{
     prop.innerHTML+="<option>"+p+"</option>";
   });
@@ -262,7 +262,7 @@ function submitExpense(){
 }
 
 function setupToken(){
-  const token=prompt("GitHub Token:");
+  const token=prompt("GITHUB TOKEN:");
   if(token&&token.trim()){
     localStorage.setItem("github_token",token.trim());
     loadData();
@@ -271,7 +271,7 @@ function setupToken(){
 }
 
 function setupDropbox(){
-  const token=prompt("Dropbox Access Token:");
+  const token=prompt("DROPBOX ACCESS TOKEN:");
   if(token&&token.trim()){
     localStorage.setItem("dropbox_token",token.trim());
     alert("✓ Dropbox token saved!");
@@ -312,12 +312,13 @@ function generateStatement(){
 function updateHeaderDates(){
   const month=parseInt(document.getElementById("monthSelect").value);
   const year=parseInt(document.getElementById("yearSelect").value);
-  const months=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
   const last=new Date(year,month,0).getDate();
   let nextMonth=month+1,nextYear=year;
   if(nextMonth>12){nextMonth=1;nextYear++;}
-  document.getElementById("statementDate").innerHTML="Statement Date:<br><strong>"+months[nextMonth-1]+" 1st "+nextYear+"</strong>";
-  document.getElementById("periodDate").innerHTML="Period: "+months[month-1]+" 1st - "+last+"th "+year;
+  document.getElementById("reportTitle").textContent="RESERVATION REPORT";
+  document.getElementById("statementDate").innerHTML="STATEMENT DATE:<br><strong>"+months[nextMonth-1]+" 1ST "+nextYear+"</strong>";
+  document.getElementById("periodDate").innerHTML="PERIOD: "+months[month-1]+" 1ST - "+last+"TH "+year;
   document.getElementById("ownerTitle").textContent=currentOwner.toUpperCase();
 }
 
@@ -385,20 +386,20 @@ function processData(month,year){
 function displayStatement(){
   const t=OWNERS[currentOwner];
   const type=t.type;
-  let html="<div class='action-buttons'><button class='copy-link-btn' onclick='generateLink()'>🔗 Generate & Copy Link</button></div>";
+  let html="<div class='action-buttons'><button class='copy-link-btn' onclick='generateLink()'>🔗 GENERATE & COPY LINK</button></div>";
   html+="<div class='summary-title'>FINANCIAL SUMMARY</div><div class='summary-grid'>";
   if(type==="draft"){
-    html+="<div class='summary-card'><div class='summary-label'>Gross Payout</div><div class='summary-value'>"+money(masterTotals.gross)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>Accommodation</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>GROSS PAYOUT</div><div class='summary-value'>"+money(masterTotals.gross)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>Cleaning Fee</div><div class='summary-value'>"+money(masterTotals.clean)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>Website (1%)</div><div class='summary-value'>"+money(masterTotals.websiteFee)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>Expenses</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>CLEANING FEE</div><div class='summary-value'>"+money(masterTotals.clean)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>WEBSITE (1%)</div><div class='summary-value'>"+money(masterTotals.websiteFee)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
     html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>AMOUNT DUE</div><div class='summary-value' style='color:#fff'>"+money(masterTotals.draft)+"</div></div>";
   }else{
-    html+="<div class='summary-card'><div class='summary-label'>Accommodation</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>Expenses</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
     html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>OWNER PAYOUT</div><div class='summary-value' style='color:#fff'>"+money(masterTotals.owner)+"</div></div>";
   }
   html+="</div>";
@@ -408,22 +409,22 @@ function displayStatement(){
     const exp=expenses.filter(e=>e.property===prop&&e.owner===currentOwner);
     html+="<div class='property-section'><div class='property-title'><span class='property-icon'>🏠</span>"+prop.toUpperCase()+"</div><div class='summary-grid'>";
     if(type==="draft"){
-      html+="<div class='summary-card'><div class='summary-label'>Gross Payout</div><div class='summary-value'>"+money(p.gross)+"</div></div>";
-      html+="<div class='summary-card'><div class='summary-label'>Accommodation</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>GROSS PAYOUT</div><div class='summary-value'>"+money(p.gross)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
       html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
-      html+="<div class='summary-card'><div class='summary-label'>Cleaning Fee</div><div class='summary-value'>"+money(p.clean)+"</div></div>";
-      html+="<div class='summary-card'><div class='summary-label'>Website (1%)</div><div class='summary-value'>"+money(p.websiteFee)+"</div></div>";
-      html+="<div class='summary-card'><div class='summary-label'>Expenses</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>CLEANING FEE</div><div class='summary-value'>"+money(p.clean)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>WEBSITE (1%)</div><div class='summary-value'>"+money(p.websiteFee)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
       html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>AMOUNT DUE</div><div class='summary-value' style='color:#fff'>"+money(r)+"</div></div>";
     }else{
-      html+="<div class='summary-card'><div class='summary-label'>Accommodation</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
       html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
-      html+="<div class='summary-card'><div class='summary-label'>Expenses</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
       html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>OWNER PAYOUT</div><div class='summary-value' style='color:#fff'>"+money(r)+"</div></div>";
     }
     html+="</div><div style='margin-top:15px'><div class='section-title'>RESERVATIONS</div><table style='margin-top:10px'>";
     if(type==="draft"){
-      html+="<tr><th>Code</th><th>Stay</th><th>Platform</th><th>Accommodation</th><th>PMC</th><th>Cleaning</th><th>Website</th><th>Amount Due</th></tr>";
+      html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>ACCOMMODATION</th><th>PMC</th><th>CLEANING</th><th>WEBSITE</th><th>AMOUNT DUE</th></tr>";
       p.reservations.forEach(row=>{
         const a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
         const g=num(row["TOTAL PAYOUT"]);
@@ -436,7 +437,7 @@ function displayStatement(){
         html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8)+"</td><td>"+checkin+"-"+checkout+"</td><td>"+row["PLATFORM"]+"</td><td>"+money(a)+"</td><td>"+money(pm)+"</td><td>"+money(c)+"</td><td>"+money(w)+"</td><td>"+money(pm+c+w)+"</td></tr>";
       });
     }else{
-      html+="<tr><th>Code</th><th>Stay</th><th>Platform</th><th>Accommodation</th><th>PMC</th><th>Owner Payout</th></tr>";
+      html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>ACCOMMODATION</th><th>PMC</th><th>OWNER PAYOUT</th></tr>";
       p.reservations.forEach(row=>{
         const a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
         const g=num(row["TOTAL PAYOUT"]);
@@ -451,7 +452,7 @@ function displayStatement(){
     if(exp.length>0){
       html+="<div style='margin-top:15px'><div class='section-title'>EXPENSES</div>";
       exp.forEach(e=>{
-        html+="<div class='attachment'><div class='attachment-left'><strong>"+e.type+"</strong> - "+e.vendor+": "+money(e.amount)+"</div><div class='attachment-actions'><button class='btn btn-danger btn-small' onclick='deleteExpense("+e.id+")'>Delete</button></div></div>";
+        html+="<div class='attachment'><div class='attachment-left'><strong>"+e.type+"</strong> - "+e.vendor+": "+money(e.amount)+"</div><div class='attachment-actions'><button class='btn btn-danger btn-small' onclick='deleteExpense("+e.id+")'>DELETE</button></div></div>";
       });
       html+="</div>";
     }
@@ -494,7 +495,7 @@ function generateLink(){
 }
 
 function showLinkGenerated(link){
-  const msg="<div style='background:#d4edda;border:2px solid #28a745;padding:15px;margin:20px 0;border-radius:5px;text-align:center'><h3 style='color:#155724'>✓ Statement Generated!</h3><p style='color:#155724;margin:10px 0'>Copy link and paste in Gmail:</p><button class='copy-link-btn' onclick=\"copyToClipboard('"+link+"')\">📋 Copy Link to Clipboard</button><p style='font-size:12px;color:#155724;margin-top:10px;word-break:break-all'><code style='background:#fff;padding:5px;border-radius:3px'>"+link+"</code></p></div>";
+  const msg="<div style='background:#d4edda;border:2px solid #28a745;padding:15px;margin:20px 0;border-radius:5px;text-align:center'><h3 style='color:#155724'>✓ STATEMENT GENERATED!</h3><p style='color:#155724;margin:10px 0'>Copy link and paste in Gmail:</p><button class='copy-link-btn' onclick=\"copyToClipboard('"+link+"')\">📋 COPY LINK TO CLIPBOARD</button><p style='font-size:12px;color:#155724;margin-top:10px;word-break:break-all'><code style='background:#fff;padding:5px;border-radius:3px'>"+link+"</code></p></div>";
   document.getElementById("mainContent").innerHTML+=msg;
 }
 
@@ -505,33 +506,34 @@ function copyToClipboard(text){
 function generateSummary(){
   if(!csvData||csvData.length===0)return alert("Generate statement first");
   updateHeaderDates();
+  document.getElementById("reportTitle").textContent="SUMMARY REPORT";
   const t=OWNERS[currentOwner];
   const type=t.type;
   const salesFee=masterTotals.pmc*(t.salesFeePercent/100);
-  let html="<div class='action-buttons'><button class='back-btn' onclick='displayStatement()'>← Back</button><button class='print-btn' onclick='window.print()'>🖨️ Print</button></div><div class='summary-title'>SUMMARY & CALCULATIONS</div>";
-  html+="<div class='commission-box'><div class='commission-box-title'>Sales Commission Due</div>";
-  html+="<div class='calc-row'><span>Total Accommodation</span><span>"+money(masterTotals.acc)+"</span></div>";
-  html+="<div class='calc-row'><span>PMC % Rate</span><span>"+(t.percent*100).toFixed(2)+"%</span></div>";
-  html+="<div class='calc-row' style='background:#fff;font-weight:bold'><span>Total PMC</span><span>"+money(masterTotals.pmc)+"</span></div>";
-  html+="<div class='calc-row'><span>Sales Fee %</span><span>"+t.salesFeePercent+"%</span></div>";
-  html+="<div class='calc-row-total'><span>Commission Amount</span><span>"+money(salesFee)+"</span></div>";
+  let html="<div class='action-buttons'><button class='back-btn' onclick='displayStatement()'>← BACK</button><button class='print-btn' onclick='window.print()'>🖨️ PRINT</button></div><div class='summary-title'>SUMMARY & CALCULATIONS</div>";
+  html+="<div class='commission-box'><div class='commission-box-title'>SALES COMMISSION DUE</div>";
+  html+="<div class='calc-row'><span>TOTAL ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+  html+="<div class='calc-row'><span>PMC % RATE</span><span>"+(t.percent*100).toFixed(2)+"%</span></div>";
+  html+="<div class='calc-row' style='background:#fff;font-weight:bold'><span>TOTAL PMC</span><span>"+money(masterTotals.pmc)+"</span></div>";
+  html+="<div class='calc-row'><span>SALES FEE %</span><span>"+t.salesFeePercent+"%</span></div>";
+  html+="<div class='calc-row-total'><span>COMMISSION AMOUNT</span><span>"+money(salesFee)+"</span></div>";
   html+="</div>";
   if(type==="draft"){
-    html+="<div class='commission-box'><div class='commission-box-title'>Draft Owner Breakdown</div>";
-    html+="<div class='calc-row'><span>Cleaning Fees</span><span>"+money(masterTotals.clean)+"</span></div>";
-    html+="<div class='calc-row'><span>Website Fee (1%)</span><span>"+money(masterTotals.websiteFee)+"</span></div>";
-    html+="<div class='calc-row'><span>Expenses</span><span>"+money(masterTotals.expenses)+"</span></div>";
-    html+="<div class='calc-row-total'><span>Total Amount Due</span><span>"+money(masterTotals.draft)+"</span></div>";
+    html+="<div class='commission-box'><div class='commission-box-title'>DRAFT OWNER BREAKDOWN</div>";
+    html+="<div class='calc-row'><span>CLEANING FEES</span><span>"+money(masterTotals.clean)+"</span></div>";
+    html+="<div class='calc-row'><span>WEBSITE FEE (1%)</span><span>"+money(masterTotals.websiteFee)+"</span></div>";
+    html+="<div class='calc-row'><span>EXPENSES</span><span>"+money(masterTotals.expenses)+"</span></div>";
+    html+="<div class='calc-row-total'><span>TOTAL AMOUNT DUE</span><span>"+money(masterTotals.draft)+"</span></div>";
     html+="</div>";
   }else{
-    html+="<div class='commission-box'><div class='commission-box-title'>Payout Owner Breakdown</div>";
-    html+="<div class='calc-row'><span>Accommodation</span><span>"+money(masterTotals.acc)+"</span></div>";
-    html+="<div class='calc-row'><span>PMC (Deduction)</span><span>-"+money(masterTotals.pmc)+"</span></div>";
-    html+="<div class='calc-row'><span>Expenses</span><span>-"+money(masterTotals.expenses)+"</span></div>";
-    html+="<div class='calc-row-total'><span>Owner Net Payout</span><span>"+money(masterTotals.owner)+"</span></div>";
+    html+="<div class='commission-box'><div class='commission-box-title'>PAYOUT OWNER BREAKDOWN</div>";
+    html+="<div class='calc-row'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+    html+="<div class='calc-row'><span>PMC (DEDUCTION)</span><span>-"+money(masterTotals.pmc)+"</span></div>";
+    html+="<div class='calc-row'><span>EXPENSES</span><span>-"+money(masterTotals.expenses)+"</span></div>";
+    html+="<div class='calc-row-total'><span>OWNER NET PAYOUT</span><span>"+money(masterTotals.owner)+"</span></div>";
     html+="</div>";
     if(Object.keys(propertyTotals).some(prop=>propertySettings[prop]&&Object.values(propertySettings[prop]||{}).some(v=>v))){
-      html+="<div class='tax-info'><div class='tax-info-title'>⚠️ Tax Payment Required By Municipality</div>";
+      html+="<div class='tax-info'><div class='tax-info-title'>⚠️ TAX PAYMENT REQUIRED BY MUNICIPALITY</div>";
       html+="<table class='tax-table'><tr><th>PROPERTY</th><th>ACCOMMODATION</th><th>MUNICIPALITIES</th><th>AMOUNT TO REPORT</th></tr>";
       Object.keys(propertyTotals).forEach(prop=>{
         const p=propertyTotals[prop];
@@ -543,7 +545,7 @@ function generateSummary(){
       html+="</table></div>";
     }
   }
-  html+="<div class='pmc-transfer-box'><div class='pmc-transfer-title'>💳 PMC Bank Transfer</div><div class='pmc-transfer-amount'>"+money(masterTotals.pmc)+"</div><p style='text-align:center;margin-top:10px;font-size:11px'>Transfer amount to PMC bank</p></div>";
+  html+="<div class='pmc-transfer-box'><div class='pmc-transfer-title'>💳 PMC BANK TRANSFER</div><div class='pmc-transfer-amount'>"+money(masterTotals.pmc)+"</div><p style='text-align:center;margin-top:10px;font-size:11px'>Transfer amount to PMC bank</p></div>";
   document.getElementById("mainContent").innerHTML=html;
 }
 
@@ -551,11 +553,12 @@ function generateAnnual(){
   const t=OWNERS[currentOwner];
   if(t.type!=="payout")return alert("Payout owners only");
   updateHeaderDates();
-  let html="<div class='action-buttons'><button class='back-btn' onclick='displayStatement()'>← Back</button></div><div class='summary-title'>ANNUAL SUMMARY</div>";
+  document.getElementById("reportTitle").textContent="ANNUAL REPORT";
+  let html="<div class='action-buttons'><button class='back-btn' onclick='displayStatement()'>← BACK</button></div><div class='summary-title'>ANNUAL SUMMARY</div>";
   html+="<div style='background:#f9f9f9;padding:20px;border-radius:5px'><table>";
-  html+="<tr><td style='font-weight:bold'>Total Accommodation</td><td style='text-align:right'>"+money(masterTotals.acc)+"</td></tr>";
-  html+="<tr><td style='font-weight:bold'>PMC Charged</td><td style='text-align:right'>"+money(masterTotals.pmc)+"</td></tr>";
-  html+="<tr><td style='font-weight:bold'>Total Expenses</td><td style='text-align:right'>"+money(masterTotals.expenses)+"</td></tr>";
+  html+="<tr><td style='font-weight:bold'>TOTAL ACCOMMODATION</td><td style='text-align:right'>"+money(masterTotals.acc)+"</td></tr>";
+  html+="<tr><td style='font-weight:bold'>PMC CHARGED</td><td style='text-align:right'>"+money(masterTotals.pmc)+"</td></tr>";
+  html+="<tr><td style='font-weight:bold'>TOTAL EXPENSES</td><td style='text-align:right'>"+money(masterTotals.expenses)+"</td></tr>";
   html+="<tr style='background:#000;color:#fff'><td style='font-weight:bold;color:#fff'>NET ANNUAL</td><td style='text-align:right;color:#fff'>"+money(masterTotals.owner)+"</td></tr>";
   html+="</table></div>";
   document.getElementById("mainContent").innerHTML=html;
