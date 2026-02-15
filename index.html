@@ -74,67 +74,502 @@ const municipalities=["SC","MB","NMB","SSB","HC"];
 function num(v){return parseFloat((v||"0").toString().replace(/[$,]/g,""))||0;}
 function money(v){return"$"+(Number(v)||0).toFixed(2);}
 
-function loadData(){fetch(GITHUB_URL+"?t="+Date.now()).then(r=>r.json()).then(data=>{gitHubData=data;OWNERS=data.owners||{};vendors=data.vendors||[];expenses=data.expenses||[];propertySettings=data.properties||{};init();}).catch(e=>{console.error(e);init();});}
+function loadData(){
+  fetch(GITHUB_URL+"?t="+Date.now())
+    .then(r=>r.json())
+    .then(data=>{
+      gitHubData=data;
+      OWNERS=data.owners||{};
+      vendors=data.vendors||[];
+      expenses=data.expenses||[];
+      propertySettings=data.properties||{};
+      init();
+    })
+    .catch(e=>{console.error(e);init();});
+}
 
-function init(){buildOwners();buildMonths();buildYears();updateVendorDropdown();document.getElementById("mainContent").innerHTML="<div style='text-align:center;padding:40px;color:#666'>Ready to use! Select owner and upload CSV to begin.</div>";}
+function init(){
+  buildOwners();
+  buildMonths();
+  buildYears();
+  updateVendorDropdown();
+  document.getElementById("mainContent").innerHTML="<div style='text-align:center;padding:40px;color:#666'>Ready to use! Select an owner and upload CSV to begin.</div>";
+}
 
-function buildOwners(){const sel=document.getElementById("ownerSelect");sel.innerHTML='<option value="">-- Select --</option>';Object.keys(OWNERS).sort().forEach(name=>{sel.innerHTML+="<option>"+name+"</option>";});}
+function buildOwners(){
+  const sel=document.getElementById("ownerSelect");
+  sel.innerHTML='<option value="">-- Select --</option>';
+  Object.keys(OWNERS).sort().forEach(name=>{
+    sel.innerHTML+="<option>"+name+"</option>";
+  });
+}
 
-function buildMonths(){const sel=document.getElementById("monthSelect");const months=["January","February","March","April","May","June","July","August","September","October","November","December"];months.forEach((m,i)=>{sel.innerHTML+="<option value='"+(i+1)+"'>"+m+"</option>";});sel.value=new Date().getMonth()+1;}
+function buildMonths(){
+  const sel=document.getElementById("monthSelect");
+  const months=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  months.forEach((m,i)=>{
+    sel.innerHTML+="<option value='"+(i+1)+"'>"+m+"</option>";
+  });
+  sel.value=new Date().getMonth()+1;
+}
 
-function buildYears(){const sel=document.getElementById("yearSelect");const y=new Date().getFullYear();for(let i=y-2;i<=y+2;i++){sel.innerHTML+="<option>"+i+"</option>";}sel.value=y;}
+function buildYears(){
+  const sel=document.getElementById("yearSelect");
+  const y=new Date().getFullYear();
+  for(let i=y-2;i<=y+2;i++){
+    sel.innerHTML+="<option>"+i+"</option>";
+  }
+  sel.value=y;
+}
 
-function onOwnerChange(){currentOwner=document.getElementById("ownerSelect").value;}
+function onOwnerChange(){
+  currentOwner=document.getElementById("ownerSelect").value;
+}
 
-function openOwners(){const list=document.getElementById("ownersList");let html="";Object.keys(OWNERS).sort().forEach(name=>{const o=OWNERS[name];html+="<div style='background:#555;padding:15px;margin:10px 0;border-radius:3px'><div style='font-weight:bold;color:#fff;margin-bottom:10px'>"+name+"</div><label class='modal-label'>Email</label><input type='email' value='"+(o.email||"")+"' onchange=\"OWNERS['"+name+"'].email=this.value\" class='modal-input'><label class='modal-label'>Commission %</label><input type='number' step='0.01' value='"+(o.percent*100)+"' onchange=\"OWNERS['"+name+"'].percent=this.value/100\" class='modal-input'><label class='modal-label'>Sales Fee %</label><input type='number' step='0.01' value='"+o.salesFeePercent+"' onchange=\"OWNERS['"+name+"'].salesFeePercent=this.value\" class='modal-input'><label class='modal-label'>Type</label><select onchange=\"OWNERS['"+name+"'].type=this.value\" class='modal-input'><option value='draft' "+(o.type==='draft'?'selected':'')+">Draft</option><option value='payout' "+(o.type==='payout'?'selected':'')+">Payout</option></select><button class='btn btn-danger' onclick=\"deleteOwner('"+name+"')\" style='width:100%;margin-top:10px;padding:8px'>🗑️ Delete Owner</button></div>";});list.innerHTML=html;openModal("ownerModal");}
+function openOwners(){
+  const list=document.getElementById("ownersList");
+  let html="";
+  Object.keys(OWNERS).sort().forEach(name=>{
+    const o=OWNERS[name];
+    html+="<div style='background:#555;padding:15px;margin:10px 0;border-radius:3px'>";
+    html+="<div style='font-weight:bold;color:#fff;margin-bottom:10px'>"+name+"</div>";
+    html+="<label class='modal-label'>Email</label>";
+    html+="<input type='email' value='"+(o.email||"")+"' onchange=\"OWNERS['"+name+"'].email=this.value\" class='modal-input'>";
+    html+="<label class='modal-label'>Commission %</label>";
+    html+="<input type='number' step='0.01' value='"+(o.percent*100)+"' onchange=\"OWNERS['"+name+"'].percent=this.value/100\" class='modal-input'>";
+    html+="<label class='modal-label'>Sales Fee %</label>";
+    html+="<input type='number' step='0.01' value='"+o.salesFeePercent+"' onchange=\"OWNERS['"+name+"'].salesFeePercent=this.value\" class='modal-input'>";
+    html+="<label class='modal-label'>Type</label>";
+    html+="<select onchange=\"OWNERS['"+name+"'].type=this.value\" class='modal-input'>";
+    html+="<option value='draft' "+(o.type==='draft'?'selected':'')+">Draft</option>";
+    html+="<option value='payout' "+(o.type==='payout'?'selected':'')+">Payout</option>";
+    html+="</select>";
+    html+="<button class='btn btn-danger' onclick=\"deleteOwner('"+name+"')\" style='width:100%;margin-top:10px;padding:8px'>🗑️ Delete Owner</button>";
+    html+="</div>";
+  });
+  list.innerHTML=html;
+  openModal("ownerModal");
+}
 
-function addOwner(){const name=document.getElementById("ownerName").value.trim();const email=document.getElementById("ownerEmail").value.trim();const comm=parseFloat(document.getElementById("ownerComm").value)||0.12;const sales=parseFloat(document.getElementById("ownerSales").value)||5;const type=document.getElementById("ownerType").value;if(!name)return alert("Enter owner name");OWNERS[name]={email:email,percent:comm/100,salesFeePercent:sales,type:type};document.getElementById("ownerName").value="";document.getElementById("ownerEmail").value="";document.getElementById("ownerComm").value="";document.getElementById("ownerSales").value="";saveData();buildOwners();openOwners();}
+function addOwner(){
+  const name=document.getElementById("ownerName").value.trim();
+  const email=document.getElementById("ownerEmail").value.trim();
+  const comm=parseFloat(document.getElementById("ownerComm").value)||0.12;
+  const sales=parseFloat(document.getElementById("ownerSales").value)||5;
+  const type=document.getElementById("ownerType").value;
+  if(!name)return alert("Enter owner name");
+  OWNERS[name]={email:email,percent:comm/100,salesFeePercent:sales,type:type};
+  document.getElementById("ownerName").value="";
+  document.getElementById("ownerEmail").value="";
+  document.getElementById("ownerComm").value="";
+  document.getElementById("ownerSales").value="";
+  saveData();
+  buildOwners();
+  openOwners();
+}
 
-function deleteOwner(name){if(!confirm("Delete owner "+name+"?"))return;delete OWNERS[name];saveData();buildOwners();openOwners();}
+function deleteOwner(name){
+  if(!confirm("Delete owner "+name+"?"))return;
+  delete OWNERS[name];
+  saveData();
+  buildOwners();
+  openOwners();
+}
 
-function openTax(){const content=document.getElementById("taxContent");let html="";Object.keys(OWNERS).sort().forEach(name=>{const o=propertySettings[name]||{};html+="<div style='background:#555;padding:15px;margin:10px 0;border-radius:3px'><div style='font-weight:bold;color:#fff;margin-bottom:10px'>"+name+"</div>";municipalities.forEach(m=>{const checked=o[m]?"checked":"";html+="<label style='color:#fff;display:flex;align-items:center;margin:8px 0;cursor:pointer'><input type='checkbox' "+checked+" onchange=\"if(!propertySettings['"+name+"'])propertySettings['"+name+"']={};propertySettings['"+name+"']['"+m+"']=this.checked\"><span style='margin-left:8px'>"+m+"</span></label>";});html+="</div>";});content.innerHTML=html;openModal("taxModal");}
+function openTax(){
+  const content=document.getElementById("taxContent");
+  let html="";
+  Object.keys(OWNERS).sort().forEach(name=>{
+    const o=propertySettings[name]||{};
+    html+="<div style='background:#555;padding:15px;margin:10px 0;border-radius:3px'>";
+    html+="<div style='font-weight:bold;color:#fff;margin-bottom:10px'>"+name+"</div>";
+    municipalities.forEach(m=>{
+      const checked=o[m]?"checked":"";
+      html+="<label style='color:#fff;display:flex;align-items:center;margin:8px 0;cursor:pointer'>";
+      html+="<input type='checkbox' "+checked+" onchange=\"if(!propertySettings['"+name+"'])propertySettings['"+name+"']={};propertySettings['"+name+"']['"+m+"']=this.checked\">";
+      html+="<span style='margin-left:8px'>"+m+"</span>";
+      html+="</label>";
+    });
+    html+="</div>";
+  });
+  content.innerHTML=html;
+  openModal("taxModal");
+}
 
-function updateVendorDropdown(){const sel=document.getElementById("expenseVendor");sel.innerHTML="<option>-- Select --</option>";vendors.forEach(v=>{sel.innerHTML+="<option>"+v.name+"</option>";});}
+function updateVendorDropdown(){
+  const sel=document.getElementById("expenseVendor");
+  sel.innerHTML="<option>-- Select --</option>";
+  vendors.forEach(v=>{
+    sel.innerHTML+="<option>"+v.name+"</option>";
+  });
+}
 
-function addVendor(){const name=document.getElementById("vendorName").value.trim();const phone=document.getElementById("vendorPhone").value.trim();if(!name)return alert("Enter vendor name");vendors.push({id:Date.now(),name:name,phone:phone});document.getElementById("vendorName").value="";document.getElementById("vendorPhone").value="";updateVendorDropdown();saveData();alert("✓ Vendor added!");}
+function addVendor(){
+  const name=document.getElementById("vendorName").value.trim();
+  const phone=document.getElementById("vendorPhone").value.trim();
+  if(!name)return alert("Enter vendor name");
+  vendors.push({id:Date.now(),name:name,phone:phone});
+  document.getElementById("vendorName").value="";
+  document.getElementById("vendorPhone").value="";
+  updateVendorDropdown();
+  saveData();
+  alert("✓ Vendor added!");
+}
 
-function showVendors(){const list=document.getElementById("vendorsList");let html="";vendors.forEach(v=>{html+="<div style='background:#555;padding:12px;margin:8px 0;border-radius:3px;display:flex;justify-content:space-between;align-items:center'><div><div style='color:#fff;font-weight:bold'>"+v.name+"</div><div style='color:#aaa;font-size:10px'>"+v.phone+"</div></div><button class='btn btn-danger' onclick='deleteVendor("+v.id+")' style='padding:5px 10px;font-size:9px'>Delete</button></div>";});list.innerHTML=html||"<p style='color:#aaa'>No vendors</p>";openModal("vendorModal");}
+function showVendors(){
+  const list=document.getElementById("vendorsList");
+  let html="";
+  vendors.forEach(v=>{
+    html+="<div style='background:#555;padding:12px;margin:8px 0;border-radius:3px;display:flex;justify-content:space-between;align-items:center'>";
+    html+="<div>";
+    html+="<div style='color:#fff;font-weight:bold'>"+v.name+"</div>";
+    html+="<div style='color:#aaa;font-size:10px'>"+v.phone+"</div>";
+    html+="</div>";
+    html+="<button class='btn btn-danger' onclick='deleteVendor("+v.id+")' style='padding:5px 10px;font-size:9px'>Delete</button>";
+    html+="</div>";
+  });
+  list.innerHTML=html||"<p style='color:#aaa'>No vendors</p>";
+  openModal("vendorModal");
+}
 
-function deleteVendor(id){vendors=vendors.filter(v=>v.id!==id);saveData();showVendors();}
+function deleteVendor(id){
+  vendors=vendors.filter(v=>v.id!==id);
+  saveData();
+  showVendors();
+}
 
-function openAddExpense(){if(!currentOwner)return alert("Select owner first");const prop=document.getElementById("expenseProperty");prop.innerHTML="<option>-- Select --</option>";Object.keys(propertyTotals).forEach(p=>{prop.innerHTML+="<option>"+p+"</option>";});openModal("expenseModal");}
+function openAddExpense(){
+  if(!currentOwner)return alert("Select owner first");
+  const prop=document.getElementById("expenseProperty");
+  prop.innerHTML="<option>-- Select --</option>";
+  Object.keys(propertyTotals).forEach(p=>{
+    prop.innerHTML+="<option>"+p+"</option>";
+  });
+  openModal("expenseModal");
+}
 
-function submitExpense(){const type=document.getElementById("expenseType").value;const prop=document.getElementById("expenseProperty").value;const vendor=document.getElementById("expenseVendor").value;const amount=parseFloat(document.getElementById("expenseAmount").value);if(!currentOwner||!prop||!vendor||!amount)return alert("Fill all fields");expenses.push({id:Date.now(),owner:currentOwner,type:type,property:prop,vendor:vendor,amount:amount,notes:document.getElementById("expenseNotes").value});closeAll();saveData();if(csvData.length)processData(),displayStatement();alert("✓ Expense added!");}
+function submitExpense(){
+  const type=document.getElementById("expenseType").value;
+  const prop=document.getElementById("expenseProperty").value;
+  const vendor=document.getElementById("expenseVendor").value;
+  const amount=parseFloat(document.getElementById("expenseAmount").value);
+  if(!currentOwner||!prop||!vendor||!amount)return alert("Fill all fields");
+  expenses.push({id:Date.now(),owner:currentOwner,type:type,property:prop,vendor:vendor,amount:amount,notes:document.getElementById("expenseNotes").value});
+  closeAll();
+  saveData();
+  if(csvData.length){processData();displayStatement();}
+  alert("✓ Expense added!");
+}
 
-function setupToken(){const token=prompt("GitHub Token:");if(token&&token.trim()){localStorage.setItem("github_token",token.trim());loadData();alert("✓ GitHub token saved!")}}
+function setupToken(){
+  const token=prompt("GitHub Token:");
+  if(token&&token.trim()){
+    localStorage.setItem("github_token",token.trim());
+    loadData();
+    alert("✓ GitHub token saved!");
+  }
+}
 
-function setupDropbox(){const token=prompt("Dropbox Access Token:");if(token&&token.trim()){localStorage.setItem("dropbox_token",token.trim());alert("✓ Dropbox token saved!")}}
+function setupDropbox(){
+  const token=prompt("Dropbox Access Token:");
+  if(token&&token.trim()){
+    localStorage.setItem("dropbox_token",token.trim());
+    alert("✓ Dropbox token saved!");
+  }
+}
 
-function saveData(){const token=localStorage.getItem("github_token");if(!token)return;const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses},null,2);const content=btoa(unescape(encodeURIComponent(data)));fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{headers:{"Authorization":"token "+token}}).then(r=>r.json()).then(file=>{fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{method:"PUT",headers:{"Authorization":"token "+token,"Content-Type":"application/json"},body:JSON.stringify({message:"Update "+new Date().toLocaleString(),content:content,sha:file.sha})});});}
+function saveData(){
+  const token=localStorage.getItem("github_token");
+  if(!token)return;
+  const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses},null,2);
+  const content=btoa(unescape(encodeURIComponent(data)));
+  fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{headers:{"Authorization":"token "+token}})
+    .then(r=>r.json())
+    .then(file=>{
+      fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{
+        method:"PUT",
+        headers:{"Authorization":"token "+token,"Content-Type":"application/json"},
+        body:JSON.stringify({message:"Update "+new Date().toLocaleString(),content:content,sha:file.sha})
+      });
+    });
+}
 
-function generateStatement(){const file=document.getElementById("csvFile").files[0];if(!file||!currentOwner)return;const reader=new FileReader();reader.onload=e=>{csvData=Papa.parse(e.target.result,{header:true,skipEmptyLines:true}).data;const month=parseInt(document.getElementById("monthSelect").value);const year=parseInt(document.getElementById("yearSelect").value);updateHeaderDates();processData(month,year);displayStatement();};reader.readAsText(file);}
+function generateStatement(){
+  const file=document.getElementById("csvFile").files[0];
+  if(!file||!currentOwner)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    csvData=Papa.parse(e.target.result,{header:true,skipEmptyLines:true}).data;
+    const month=parseInt(document.getElementById("monthSelect").value);
+    const year=parseInt(document.getElementById("yearSelect").value);
+    updateHeaderDates();
+    processData(month,year);
+    displayStatement();
+  };
+  reader.readAsText(file);
+}
 
-function updateHeaderDates(){const month=parseInt(document.getElementById("monthSelect").value);const year=parseInt(document.getElementById("yearSelect").value);const months=["January","February","March","April","May","June","July","August","September","October","November","December"];const last=new Date(year,month,0).getDate();let nextMonth=month+1,nextYear=year;if(nextMonth>12){nextMonth=1;nextYear++;}document.getElementById("statementDate").innerHTML="Statement Date:<br><strong>"+months[nextMonth-1]+" 1st "+nextYear+"</strong>";document.getElementById("periodDate").innerHTML="Period: "+months[month-1]+" 1st - "+last+"th "+year;document.getElementById("ownerTitle").textContent=currentOwner.toUpperCase();}
+function updateHeaderDates(){
+  const month=parseInt(document.getElementById("monthSelect").value);
+  const year=parseInt(document.getElementById("yearSelect").value);
+  const months=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const last=new Date(year,month,0).getDate();
+  let nextMonth=month+1,nextYear=year;
+  if(nextMonth>12){nextMonth=1;nextYear++;}
+  document.getElementById("statementDate").innerHTML="Statement Date:<br><strong>"+months[nextMonth-1]+" 1st "+nextYear+"</strong>";
+  document.getElementById("periodDate").innerHTML="Period: "+months[month-1]+" 1st - "+last+"th "+year;
+  document.getElementById("ownerTitle").textContent=currentOwner.toUpperCase();
+}
 
-function processData(month,year){const t=OWNERS[currentOwner];propertyTotals={};masterTotals={gross:0,acc:0,clean:0,pmc:0,expenses:0,draft:0,owner:0,websiteFee:0};taxByProperty={};let byProp={};csvData.forEach(row=>{if(!row["CHECK-IN DATE"])return;const m=parseInt(row["CHECK-IN DATE"].split("-")[1]);const y=parseInt(row["CHECK-IN DATE"].split("-")[0]);if(m!==month||y!==year)return;const prop=row["LISTING'S NICKNAME"]||"Unknown";if(!byProp[prop])byProp[prop]=[];byProp[prop].push(row);});Object.keys(byProp).forEach(prop=>{let gross=0,acc=0,clean=0,pmc=0,websiteFee=0;byProp[prop].forEach(row=>{const g=num(row["TOTAL PAYOUT"]);const a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);const c=(row["STATUS"]||"").toLowerCase().includes("cancelled")?0:num(row["CLEANING FARE"]);const p=a*t.percent;let w=0;if(t.type==="draft"&&a>0){const code=row["CONFIRMATION CODE"]||"";const platform=row["PLATFORM"]||"";if(!code.toUpperCase().startsWith("HA")&&(platform.toLowerCase().includes("website")||platform.toLowerCase().includes("manual"))){w=g*0.01}}gross+=g;acc+=a;clean+=c;pmc+=p;websiteFee+=w;if(t.type==="payout"){const cityTax=num(row["CITY TAX"])||0;const stateTax=num(row["STATE TAX"])||0;const countyTax=num(row["COUNTY TAX"])||0;const occupancyTax=num(row["OCCUPANCY TAX"])||0;if(cityTax>0||stateTax>0||countyTax>0||occupancyTax>0){if(!taxByProperty[prop])taxByProperty[prop]=0;taxByProperty[prop]+=g}}});const exp=expenses.filter(e=>e.property===prop&&e.owner===currentOwner).reduce((sum,e)=>sum+e.amount,0);const draft=pmc+clean+websiteFee+exp;const owner=acc-pmc-exp;propertyTotals[prop]={gross:gross,acc:acc,clean:clean,pmc:pmc,websiteFee:websiteFee,expenses:exp,draft:draft,owner:owner,reservations:byProp[prop]};masterTotals.gross+=gross;masterTotals.acc+=acc;masterTotals.clean+=clean;masterTotals.pmc+=pmc;masterTotals.websiteFee+=websiteFee;masterTotals.expenses+=exp;masterTotals.draft+=draft;masterTotals.owner+=owner;});}
+function processData(month,year){
+  const t=OWNERS[currentOwner];
+  propertyTotals={};
+  masterTotals={gross:0,acc:0,clean:0,pmc:0,expenses:0,draft:0,owner:0,websiteFee:0};
+  taxByProperty={};
+  let byProp={};
+  csvData.forEach(row=>{
+    if(!row["CHECK-IN DATE"])return;
+    const m=parseInt(row["CHECK-IN DATE"].split("-")[1]);
+    const y=parseInt(row["CHECK-IN DATE"].split("-")[0]);
+    if(m!==month||y!==year)return;
+    const prop=row["LISTING'S NICKNAME"]||"Unknown";
+    if(!byProp[prop])byProp[prop]=[];
+    byProp[prop].push(row);
+  });
+  Object.keys(byProp).forEach(prop=>{
+    let gross=0,acc=0,clean=0,pmc=0,websiteFee=0;
+    byProp[prop].forEach(row=>{
+      const g=num(row["TOTAL PAYOUT"]);
+      const a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
+      const c=(row["STATUS"]||"").toLowerCase().includes("cancelled")?0:num(row["CLEANING FARE"]);
+      const p=a*t.percent;
+      let w=0;
+      if(t.type==="draft"&&a>0){
+        const code=row["CONFIRMATION CODE"]||"";
+        const platform=row["PLATFORM"]||"";
+        if(!code.toUpperCase().startsWith("HA")&&(platform.toLowerCase().includes("website")||platform.toLowerCase().includes("manual"))){
+          w=g*0.01;
+        }
+      }
+      gross+=g;
+      acc+=a;
+      clean+=c;
+      pmc+=p;
+      websiteFee+=w;
+      if(t.type==="payout"){
+        const cityTax=num(row["CITY TAX"])||0;
+        const stateTax=num(row["STATE TAX"])||0;
+        const countyTax=num(row["COUNTY TAX"])||0;
+        const occupancyTax=num(row["OCCUPANCY TAX"])||0;
+        if(cityTax>0||stateTax>0||countyTax>0||occupancyTax>0){
+          if(!taxByProperty[prop])taxByProperty[prop]=0;
+          taxByProperty[prop]+=g;
+        }
+      }
+    });
+    const exp=expenses.filter(e=>e.property===prop&&e.owner===currentOwner).reduce((sum,e)=>sum+e.amount,0);
+    const draft=pmc+clean+websiteFee+exp;
+    const owner=acc-pmc-exp;
+    propertyTotals[prop]={gross:gross,acc:acc,clean:clean,pmc:pmc,websiteFee:websiteFee,expenses:exp,draft:draft,owner:owner,reservations:byProp[prop]};
+    masterTotals.gross+=gross;
+    masterTotals.acc+=acc;
+    masterTotals.clean+=clean;
+    masterTotals.pmc+=pmc;
+    masterTotals.websiteFee+=websiteFee;
+    masterTotals.expenses+=exp;
+    masterTotals.draft+=draft;
+    masterTotals.owner+=owner;
+  });
+}
 
-function displayStatement(){const t=OWNERS[currentOwner];const type=t.type;let html="<div class='action-buttons'><button class='copy-link-btn' onclick='generateLink()'>🔗 Generate & Copy Link</button></div>";html+="<div class='summary-title'>FINANCIAL SUMMARY</div><div class='summary-grid'>";if(type==="draft"){html+="<div class='summary-card'><div class='summary-label'>Gross Payout</div><div class='summary-value'>"+money(masterTotals.gross)+"</div></div>";html+="<div class='summary-card'><div class='summary-label'>Accommodation</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";html+="<div class='summary-card'><div class='summary-label'>Cleaning Fee</div><div class='summary-value'>"+money(masterTotals.clean)+"</div></div>";html+="<div class='summary-card'><div class='summary-label'>Website (1%)</div><div class='summary-value'>"+money(masterTotals.websiteFee)+"</div></div>";html+="<div class='summary-card'><div class='summary-label'>Expenses</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>AMOUNT DUE</div><div class='summary-value' style='color:#fff'>"+money(masterTotals.draft)+"</div></div>"}else{html+="<div class='summary-card'><div class='summary-label'>Accommodation</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";html+="<div class='summary-card'><div class='summary-label'>Expenses</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>OWNER PAYOUT</div><div class='summary-value' style='color:#fff'>"+money(masterTotals.owner)+"</div></div>"}html+="</div>";Object.keys(propertyTotals).forEach(prop=>{const p=propertyTotals[prop];const r=type==="draft"?p.draft:p.owner;const exp=expenses.filter(e=>e.property===prop&&e.owner===currentOwner);html+="<div class='property-section'><div class='property-title'><span class='property-icon'>🏠</span>"+prop.toUpperCase()+"</div><div class='summary-grid'>";if(type==="draft"){html+="<div class='summary-card'><div class='summary-label'>Gross Payout</div><div class='summary-value'>"+money(p.gross)+"</div></div>";html+="<div class='summary-card'><div class='summary-label'>Accommodation</div><div class='summary-value'>"+money(p.acc)+"</div></div>";html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";html+="<div class='summary-card'><div class='summary-label'>Cleaning Fee</div><div class='summary-value'>"+money(p.clean)+"</div></div>";html+="<div class='summary-card'><div class='summary-label'>Website (1%)</div><div class='summary-value'>"+money(p.websiteFee)+"</div></div>";html+="<div class='summary-card'><div class='summary-label'>Expenses</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>AMOUNT DUE</div><div class='summary-value' style='color:#fff'>"+money(r)+"</div></div>"}else{html+="<div class='summary-card'><div class='summary-label'>Accommodation</div><div class='summary-value'>"+money(p.acc)+"</div></div>";html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";html+="<div class='summary-card'><div class='summary-label'>Expenses</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>OWNER PAYOUT</div><div class='summary-value' style='color:#fff'>"+money(r)+"</div></div>"}html+="</div><div style='margin-top:15px'><div class='section-title'>RESERVATIONS</div><table style='margin-top:10px'>";if(type==="draft"){html+="<tr><th>Code</th><th>Stay</th><th>Platform</th><th>Accommodation</th><th>PMC</th><th>Cleaning</th><th>Website</th><th>Amount Due</th></tr>";p.reservations.forEach(row=>{const a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);const g=num(row["TOTAL PAYOUT"]);const c=(row["STATUS"]||"").toLowerCase().includes("cancelled")?0:num(row["CLEANING FARE"]);const pm=a*t.percent;const w=a>0&&!row["CONFIRMATION CODE"].toUpperCase().startsWith("HA")&&(row["PLATFORM"]||"").toLowerCase().includes("website")?g*0.01:0;const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";if(g===0)return;html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8)+"</td><td>"+checkin+"-"+checkout+"</td><td>"+row["PLATFORM"]+"</td><td>"+money(a)+"</td><td>"+money(pm)+"</td><td>"+money(c)+"</td><td>"+money(w)+"</td><td>"+money(pm+c+w)+"</td></tr>";})}else{html+="<tr><th>Code</th><th>Stay</th><th>Platform</th><th>Accommodation</th><th>PMC</th><th>Owner Payout</th></tr>";p.reservations.forEach(row=>{const a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);const g=num(row["TOTAL PAYOUT"]);const pm=a*t.percent;const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";if(g===0)return;html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8)+"</td><td>"+checkin+"-"+checkout+"</td><td>"+row["PLATFORM"]+"</td><td>"+money(a)+"</td><td>"+money(pm)+"</td><td>"+money(a-pm)+"</td></tr>";})}html+="</table></div>";if(exp.length>0){html+="<div style='margin-top:15px'><div class='section-title'>EXPENSES</div>";exp.forEach(e=>{html+="<div class='attachment'><div class='attachment-left'><strong>"+e.type+"</strong> - "+e.vendor+": "+money(e.amount)+"</div><div class='attachment-actions'><button class='btn btn-danger btn-small' onclick='deleteExpense("+e.id+")'>Delete</button></div></div>";});html+="</div>"}html+="</div>";});document.getElementById("mainContent").innerHTML=html;}
+function displayStatement(){
+  const t=OWNERS[currentOwner];
+  const type=t.type;
+  let html="<div class='action-buttons'><button class='copy-link-btn' onclick='generateLink()'>🔗 Generate & Copy Link</button></div>";
+  html+="<div class='summary-title'>FINANCIAL SUMMARY</div><div class='summary-grid'>";
+  if(type==="draft"){
+    html+="<div class='summary-card'><div class='summary-label'>Gross Payout</div><div class='summary-value'>"+money(masterTotals.gross)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>Accommodation</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>Cleaning Fee</div><div class='summary-value'>"+money(masterTotals.clean)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>Website (1%)</div><div class='summary-value'>"+money(masterTotals.websiteFee)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>Expenses</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
+    html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>AMOUNT DUE</div><div class='summary-value' style='color:#fff'>"+money(masterTotals.draft)+"</div></div>";
+  }else{
+    html+="<div class='summary-card'><div class='summary-label'>Accommodation</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>Expenses</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
+    html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>OWNER PAYOUT</div><div class='summary-value' style='color:#fff'>"+money(masterTotals.owner)+"</div></div>";
+  }
+  html+="</div>";
+  Object.keys(propertyTotals).forEach(prop=>{
+    const p=propertyTotals[prop];
+    const r=type==="draft"?p.draft:p.owner;
+    const exp=expenses.filter(e=>e.property===prop&&e.owner===currentOwner);
+    html+="<div class='property-section'><div class='property-title'><span class='property-icon'>🏠</span>"+prop.toUpperCase()+"</div><div class='summary-grid'>";
+    if(type==="draft"){
+      html+="<div class='summary-card'><div class='summary-label'>Gross Payout</div><div class='summary-value'>"+money(p.gross)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>Accommodation</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>Cleaning Fee</div><div class='summary-value'>"+money(p.clean)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>Website (1%)</div><div class='summary-value'>"+money(p.websiteFee)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>Expenses</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
+      html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>AMOUNT DUE</div><div class='summary-value' style='color:#fff'>"+money(r)+"</div></div>";
+    }else{
+      html+="<div class='summary-card'><div class='summary-label'>Accommodation</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>Expenses</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
+      html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>OWNER PAYOUT</div><div class='summary-value' style='color:#fff'>"+money(r)+"</div></div>";
+    }
+    html+="</div><div style='margin-top:15px'><div class='section-title'>RESERVATIONS</div><table style='margin-top:10px'>";
+    if(type==="draft"){
+      html+="<tr><th>Code</th><th>Stay</th><th>Platform</th><th>Accommodation</th><th>PMC</th><th>Cleaning</th><th>Website</th><th>Amount Due</th></tr>";
+      p.reservations.forEach(row=>{
+        const a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
+        const g=num(row["TOTAL PAYOUT"]);
+        const c=(row["STATUS"]||"").toLowerCase().includes("cancelled")?0:num(row["CLEANING FARE"]);
+        const pm=a*t.percent;
+        const w=a>0&&!row["CONFIRMATION CODE"].toUpperCase().startsWith("HA")&&(row["PLATFORM"]||"").toLowerCase().includes("website")?g*0.01:0;
+        const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
+        const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
+        if(g===0)return;
+        html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8)+"</td><td>"+checkin+"-"+checkout+"</td><td>"+row["PLATFORM"]+"</td><td>"+money(a)+"</td><td>"+money(pm)+"</td><td>"+money(c)+"</td><td>"+money(w)+"</td><td>"+money(pm+c+w)+"</td></tr>";
+      });
+    }else{
+      html+="<tr><th>Code</th><th>Stay</th><th>Platform</th><th>Accommodation</th><th>PMC</th><th>Owner Payout</th></tr>";
+      p.reservations.forEach(row=>{
+        const a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
+        const g=num(row["TOTAL PAYOUT"]);
+        const pm=a*t.percent;
+        const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
+        const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
+        if(g===0)return;
+        html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8)+"</td><td>"+checkin+"-"+checkout+"</td><td>"+row["PLATFORM"]+"</td><td>"+money(a)+"</td><td>"+money(pm)+"</td><td>"+money(a-pm)+"</td></tr>";
+      });
+    }
+    html+="</table></div>";
+    if(exp.length>0){
+      html+="<div style='margin-top:15px'><div class='section-title'>EXPENSES</div>";
+      exp.forEach(e=>{
+        html+="<div class='attachment'><div class='attachment-left'><strong>"+e.type+"</strong> - "+e.vendor+": "+money(e.amount)+"</div><div class='attachment-actions'><button class='btn btn-danger btn-small' onclick='deleteExpense("+e.id+")'>Delete</button></div></div>";
+      });
+      html+="</div>";
+    }
+    html+="</div>";
+  });
+  document.getElementById("mainContent").innerHTML=html;
+}
 
-function deleteExpense(id){if(!confirm("Delete?"))return;expenses=expenses.filter(e=>e.id!==id);saveData();if(csvData.length)processData(),displayStatement();}
+function deleteExpense(id){
+  if(!confirm("Delete?"))return;
+  expenses=expenses.filter(e=>e.id!==id);
+  saveData();
+  if(csvData.length){processData();displayStatement();}
+}
 
-function generateLink(){const month=parseInt(document.getElementById("monthSelect").value);const year=parseInt(document.getElementById("yearSelect").value);const token=localStorage.getItem("dropbox_token");if(!token)return alert("Setup Dropbox first");const filename=currentOwner+"_"+month+"_"+year+"_"+Date.now()+".html";const html=document.getElementById("content").innerHTML;const fullHtml="<html><head><title>Statement - "+currentOwner+"</title><style>"+document.querySelector("style").innerHTML+"</style></head><body>"+html+"</body></html>";fetch("https://content.dropboxapi.com/2/files/upload",{method:"POST",headers:{"Authorization":"Bearer "+token,"Dropbox-API-Arg":JSON.stringify({path:"/statements/"+filename,mode:"add"})},body:fullHtml}).then(r=>{if(r.ok){fetch("https://www.dropboxapi.com/2/sharing/create_shared_link_with_settings",{method:"POST",headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"},body:JSON.stringify({path:"/statements/"+filename,settings:{requested_visibility:"public"}})}).then(r=>r.json()).then(data=>{const link=data.url.replace("?dl=0","?dl=1");showLinkGenerated(link);});}else alert("Upload failed");}catch(e){alert("Error: "+e.message)}}
+function generateLink(){
+  const month=parseInt(document.getElementById("monthSelect").value);
+  const year=parseInt(document.getElementById("yearSelect").value);
+  const token=localStorage.getItem("dropbox_token");
+  if(!token)return alert("Setup Dropbox first");
+  const filename=currentOwner+"_"+month+"_"+year+"_"+Date.now()+".html";
+  const html=document.getElementById("content").innerHTML;
+  const fullHtml="<html><head><title>Statement - "+currentOwner+"</title><style>"+document.querySelector("style").innerHTML+"</style></head><body>"+html+"</body></html>";
+  fetch("https://content.dropboxapi.com/2/files/upload",{
+    method:"POST",
+    headers:{"Authorization":"Bearer "+token,"Dropbox-API-Arg":JSON.stringify({path:"/statements/"+filename,mode:"add"})},
+    body:fullHtml
+  }).then(r=>{
+    if(r.ok){
+      fetch("https://www.dropboxapi.com/2/sharing/create_shared_link_with_settings",{
+        method:"POST",
+        headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"},
+        body:JSON.stringify({path:"/statements/"+filename,settings:{requested_visibility:"public"}})
+      }).then(r=>r.json()).then(data=>{
+        const link=data.url.replace("?dl=0","?dl=1");
+        showLinkGenerated(link);
+      });
+    }else alert("Upload failed");
+  }).catch(e=>alert("Error: "+e.message));
+}
 
-function showLinkGenerated(link){const msg="<div style='background:#d4edda;border:2px solid #28a745;padding:15px;margin:20px 0;border-radius:5px;text-align:center'><h3 style='color:#155724'>✓ Statement Generated!</h3><p style='color:#155724;margin:10px 0'>Copy link and paste in Gmail:</p><button class='copy-link-btn' onclick=\"copyToClipboard('"+link+"')\">📋 Copy Link to Clipboard</button><p style='font-size:12px;color:#155724;margin-top:10px;word-break:break-all'><code style='background:#fff;padding:5px;border-radius:3px'>"+link+"</code></p></div>";document.getElementById("mainContent").innerHTML+=msg;}
+function showLinkGenerated(link){
+  const msg="<div style='background:#d4edda;border:2px solid #28a745;padding:15px;margin:20px 0;border-radius:5px;text-align:center'><h3 style='color:#155724'>✓ Statement Generated!</h3><p style='color:#155724;margin:10px 0'>Copy link and paste in Gmail:</p><button class='copy-link-btn' onclick=\"copyToClipboard('"+link+"')\">📋 Copy Link to Clipboard</button><p style='font-size:12px;color:#155724;margin-top:10px;word-break:break-all'><code style='background:#fff;padding:5px;border-radius:3px'>"+link+"</code></p></div>";
+  document.getElementById("mainContent").innerHTML+=msg;
+}
 
-function copyToClipboard(text){navigator.clipboard.writeText(text).then(()=>alert("✓ Link copied!")).catch(()=>alert("Failed to copy"));}
+function copyToClipboard(text){
+  navigator.clipboard.writeText(text).then(()=>alert("✓ Link copied!")).catch(()=>alert("Failed to copy"));
+}
 
-function generateSummary(){if(!csvData||csvData.length===0)return alert("Generate statement first");updateHeaderDates();const t=OWNERS[currentOwner];const type=t.type;const salesFee=masterTotals.pmc*(t.salesFeePercent/100);let html="<div class='action-buttons'><button class='back-btn' onclick='displayStatement()'>← Back</button><button class='print-btn' onclick='window.print()'>🖨️ Print</button></div><div class='summary-title'>SUMMARY & CALCULATIONS</div>";html+="<div class='commission-box'><div class='commission-box-title'>Sales Commission Due</div><div class='calc-row'><span>Total Accommodation</span><span>"+money(masterTotals.acc)+"</span></div><div class='calc-row'><span>PMC % Rate</span><span>"+(t.percent*100).toFixed(2)+"%</span></div><div class='calc-row' style='background:#fff;font-weight:bold'><span>Total PMC</span><span>"+money(masterTotals.pmc)+"</span></div><div class='calc-row'><span>Sales Fee %</span><span>"+t.salesFeePercent+"%</span></div><div class='calc-row-total'><span>Commission Amount</span><span>"+money(salesFee)+"</span></div></div>";if(type==="draft"){html+="<div class='commission-box'><div class='commission-box-title'>Draft Owner Breakdown</div><div class='calc-row'><span>Cleaning Fees</span><span>"+money(masterTotals.clean)+"</span></div><div class='calc-row'><span>Website Fee (1%)</span><span>"+money(masterTotals.websiteFee)+"</span></div><div class='calc-row'><span>Expenses</span><span>"+money(masterTotals.expenses)+"</span></div><div class='calc-row-total'><span>Total Amount Due</span><span>"+money(masterTotals.draft)+"</span></div></div>"}else{html+="<div class='commission-box'><div class='commission-box-title'>Payout Owner Breakdown</div><div class='calc-row'><span>Accommodation</span><span>"+money(masterTotals.acc)+"</span></div><div class='calc-row'><span>PMC (Deduction)</span><span>-"+money(masterTotals.pmc)+"</span></div><div class='calc-row'><span>Expenses</span><span>-"+money(masterTotals.expenses)+"</span></div><div class='calc-row-total'><span>Owner Net Payout</span><span>"+money(masterTotals.owner)+"</span></div></div>";if(Object.keys(propertyTotals).some(prop=>propertySettings[prop]&&Object.values(propertySettings[prop]||{}).some(v=>v))){html+="<div class='tax-info'><div class='tax-info-title'>⚠️ Tax Payment Required By Municipality</div><table class='tax-table'><tr><th>PROPERTY</th><th>ACCOMMODATION</th><th>MUNICIPALITIES</th><th>AMOUNT TO REPORT</th></tr>";Object.keys(propertyTotals).forEach(prop=>{const p=propertyTotals[prop];const s=propertySettings[prop];if(!s||!Object.values(s||{}).some(v=>v))return;const muns=Object.keys(s||{}).filter(m=>s[m]).join(", ");html+="<tr><td>"+prop+"</td><td>"+money(p.acc)+"</td><td>"+muns+"</td><td class='tax-amount'>"+money(taxByProperty[prop]||0)+"</td></tr>";});html+="</table></div>"}}html+="<div class='pmc-transfer-box'><div class='pmc-transfer-title'>💳 PMC Bank Transfer</div><div class='pmc-transfer-amount'>"+money(masterTotals.pmc)+"</div><p style='text-align:center;margin-top:10px;font-size:11px'>Transfer amount to PMC bank</p></div>";document.getElementById("mainContent").innerHTML=html;}
+function generateSummary(){
+  if(!csvData||csvData.length===0)return alert("Generate statement first");
+  updateHeaderDates();
+  const t=OWNERS[currentOwner];
+  const type=t.type;
+  const salesFee=masterTotals.pmc*(t.salesFeePercent/100);
+  let html="<div class='action-buttons'><button class='back-btn' onclick='displayStatement()'>← Back</button><button class='print-btn' onclick='window.print()'>🖨️ Print</button></div><div class='summary-title'>SUMMARY & CALCULATIONS</div>";
+  html+="<div class='commission-box'><div class='commission-box-title'>Sales Commission Due</div>";
+  html+="<div class='calc-row'><span>Total Accommodation</span><span>"+money(masterTotals.acc)+"</span></div>";
+  html+="<div class='calc-row'><span>PMC % Rate</span><span>"+(t.percent*100).toFixed(2)+"%</span></div>";
+  html+="<div class='calc-row' style='background:#fff;font-weight:bold'><span>Total PMC</span><span>"+money(masterTotals.pmc)+"</span></div>";
+  html+="<div class='calc-row'><span>Sales Fee %</span><span>"+t.salesFeePercent+"%</span></div>";
+  html+="<div class='calc-row-total'><span>Commission Amount</span><span>"+money(salesFee)+"</span></div>";
+  html+="</div>";
+  if(type==="draft"){
+    html+="<div class='commission-box'><div class='commission-box-title'>Draft Owner Breakdown</div>";
+    html+="<div class='calc-row'><span>Cleaning Fees</span><span>"+money(masterTotals.clean)+"</span></div>";
+    html+="<div class='calc-row'><span>Website Fee (1%)</span><span>"+money(masterTotals.websiteFee)+"</span></div>";
+    html+="<div class='calc-row'><span>Expenses</span><span>"+money(masterTotals.expenses)+"</span></div>";
+    html+="<div class='calc-row-total'><span>Total Amount Due</span><span>"+money(masterTotals.draft)+"</span></div>";
+    html+="</div>";
+  }else{
+    html+="<div class='commission-box'><div class='commission-box-title'>Payout Owner Breakdown</div>";
+    html+="<div class='calc-row'><span>Accommodation</span><span>"+money(masterTotals.acc)+"</span></div>";
+    html+="<div class='calc-row'><span>PMC (Deduction)</span><span>-"+money(masterTotals.pmc)+"</span></div>";
+    html+="<div class='calc-row'><span>Expenses</span><span>-"+money(masterTotals.expenses)+"</span></div>";
+    html+="<div class='calc-row-total'><span>Owner Net Payout</span><span>"+money(masterTotals.owner)+"</span></div>";
+    html+="</div>";
+    if(Object.keys(propertyTotals).some(prop=>propertySettings[prop]&&Object.values(propertySettings[prop]||{}).some(v=>v))){
+      html+="<div class='tax-info'><div class='tax-info-title'>⚠️ Tax Payment Required By Municipality</div>";
+      html+="<table class='tax-table'><tr><th>PROPERTY</th><th>ACCOMMODATION</th><th>MUNICIPALITIES</th><th>AMOUNT TO REPORT</th></tr>";
+      Object.keys(propertyTotals).forEach(prop=>{
+        const p=propertyTotals[prop];
+        const s=propertySettings[prop];
+        if(!s||!Object.values(s||{}).some(v=>v))return;
+        const muns=Object.keys(s||{}).filter(m=>s[m]).join(", ");
+        html+="<tr><td>"+prop+"</td><td>"+money(p.acc)+"</td><td>"+muns+"</td><td class='tax-amount'>"+money(taxByProperty[prop]||0)+"</td></tr>";
+      });
+      html+="</table></div>";
+    }
+  }
+  html+="<div class='pmc-transfer-box'><div class='pmc-transfer-title'>💳 PMC Bank Transfer</div><div class='pmc-transfer-amount'>"+money(masterTotals.pmc)+"</div><p style='text-align:center;margin-top:10px;font-size:11px'>Transfer amount to PMC bank</p></div>";
+  document.getElementById("mainContent").innerHTML=html;
+}
 
-function generateAnnual(){const t=OWNERS[currentOwner];if(t.type!=="payout")return alert("Payout owners only");updateHeaderDates();let html="<div class='action-buttons'><button class='back-btn' onclick='displayStatement()'>← Back</button></div><div class='summary-title'>ANNUAL SUMMARY</div><div style='background:#f9f9f9;padding:20px;border-radius:5px'><table><tr><td style='font-weight:bold'>Total Accommodation</td><td style='text-align:right'>"+money(masterTotals.acc)+"</td></tr><tr><td style='font-weight:bold'>PMC Charged</td><td style='text-align:right'>"+money(masterTotals.pmc)+"</td></tr><tr><td style='font-weight:bold'>Total Expenses</td><td style='text-align:right'>"+money(masterTotals.expenses)+"</td></tr><tr style='background:#000;color:#fff'><td style='font-weight:bold;color:#fff'>NET ANNUAL</td><td style='text-align:right;color:#fff'>"+money(masterTotals.owner)+"</td></tr></table></div>";document.getElementById("mainContent").innerHTML=html;}
+function generateAnnual(){
+  const t=OWNERS[currentOwner];
+  if(t.type!=="payout")return alert("Payout owners only");
+  updateHeaderDates();
+  let html="<div class='action-buttons'><button class='back-btn' onclick='displayStatement()'>← Back</button></div><div class='summary-title'>ANNUAL SUMMARY</div>";
+  html+="<div style='background:#f9f9f9;padding:20px;border-radius:5px'><table>";
+  html+="<tr><td style='font-weight:bold'>Total Accommodation</td><td style='text-align:right'>"+money(masterTotals.acc)+"</td></tr>";
+  html+="<tr><td style='font-weight:bold'>PMC Charged</td><td style='text-align:right'>"+money(masterTotals.pmc)+"</td></tr>";
+  html+="<tr><td style='font-weight:bold'>Total Expenses</td><td style='text-align:right'>"+money(masterTotals.expenses)+"</td></tr>";
+  html+="<tr style='background:#000;color:#fff'><td style='font-weight:bold;color:#fff'>NET ANNUAL</td><td style='text-align:right;color:#fff'>"+money(masterTotals.owner)+"</td></tr>";
+  html+="</table></div>";
+  document.getElementById("mainContent").innerHTML=html;
+}
 
-function openModal(id){document.getElementById("modalOverlay").classList.add("show");document.getElementById(id).classList.add("show");}
+function openModal(id){
+  document.getElementById("modalOverlay").classList.add("show");
+  document.getElementById(id).classList.add("show");
+}
 
-function closeAll(){document.getElementById("modalOverlay").classList.remove("show");document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));}
+function closeAll(){
+  document.getElementById("modalOverlay").classList.remove("show");
+  document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));
+}
 
 loadData();
 </script>
