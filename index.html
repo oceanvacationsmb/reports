@@ -305,12 +305,13 @@ let pmc=acc*percent;
 let draft=pmc+clean;
 let ownerPay=acc-pmc;
 
-// Check if direct booking (website fee for draft owners only)
+// Check if manual, manual_direct, or website booking (website fee for draft owners only)
 let websiteFee=0;
 if(type==="draft"){
 let platform=r["PLATFORM"]||"";
-if(platform.toLowerCase().includes("direct")){
-websiteFee=payout*0.01; // 1% of payout for direct bookings
+let platformLower=platform.toLowerCase();
+if(platformLower.includes("manual") || platformLower.includes("website")){
+websiteFee=payout*0.01; // 1% of payout for manual, manual_direct, and website bookings
 pWebsiteFee+=websiteFee;
 }
 }
@@ -508,13 +509,13 @@ let summaryHTML=`
 
 ${type==="draft"?`
 <div class="summary-section">
-<div class="summary-section-title">🌐 WEBSITE FEE</div>
+<div class="summary-section-title">🌐 WEBSITE BOOKING FEE</div>
 <div class="summary-line">
-<span>Website Fee (1% of Direct Bookings):</span>
+<span>Website Booking Fee (1% of Manual/Website):</span>
 <span class="summary-line-value">${money(masterTotals.websiteFee)}</span>
 </div>
 <div style="font-size:11px;margin-top:10px;color:#666">
-Charged on direct bookings made through your website
+Charged on manual, manual_direct, and website bookings made through your platform
 </div>
 </div>
 `:""}
