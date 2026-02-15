@@ -22,12 +22,24 @@ body{font-family:Arial;background:#f5f5f5;color:#000;display:flex}
 .summary-btn:hover{background:#218838}
 .pdf-btn{background:#444;color:#fff;margin-top:10px}
 .pdf-btn:hover{background:#555}
+.print-btn{background:#ff6b6b;color:#fff;margin-top:5px;font-size:11px}
+.print-btn:hover{background:#ee5a52}
+.history-btn{background:#9b59b6;color:#fff;margin-top:5px;font-size:11px}
+.history-btn:hover{background:#8e44ad}
 .save-btn{background:#007bff;color:#fff;margin-top:5px;font-size:12px}
 .save-btn:hover{background:#0056b3}
+.delete-btn{background:#dc3545;color:#fff;font-size:11px;padding:5px 8px;border:none;cursor:pointer;border-radius:2px;margin-left:5px}
+.delete-btn:hover{background:#c82333}
+.add-btn{background:#28a745;color:#fff;font-size:11px;padding:5px 8px;border:none;cursor:pointer;border-radius:2px;margin-top:5px;width:100%}
+.add-btn:hover{background:#218838}
 .settings-toggle{background:#666;color:#fff;padding:10px;border:none;cursor:pointer;width:100%;text-align:left;font-weight:bold;border-radius:3px;margin-bottom:10px;font-size:14px}
 .settings-toggle:hover{background:#777}
 .settings-box{display:none;background:#444;padding:15px;border-radius:3px;margin-top:10px;max-height:600px;overflow-y:auto}
 .settings-box.open{display:block}
+.expense-box{display:none;background:#444;padding:15px;border-radius:3px;margin-top:10px;max-height:600px;overflow-y:auto}
+.expense-box.open{display:block}
+.vendor-box{display:none;background:#444;padding:15px;border-radius:3px;margin-top:10px;max-height:600px;overflow-y:auto}
+.vendor-box.open{display:block}
 .owner-item{background:#555;padding:12px;margin-bottom:10px;border-radius:3px;font-size:11px;border:1px solid #666}
 .owner-item-name{font-weight:bold;color:#fff;margin-bottom:8px;font-size:12px}
 .owner-item-control{margin-bottom:8px}
@@ -38,6 +50,9 @@ body{font-family:Arial;background:#f5f5f5;color:#000;display:flex}
 .checkbox-item{display:flex;align-items:center;gap:4px}
 .checkbox-item input[type="checkbox"]{width:14px;height:14px;cursor:pointer}
 .checkbox-item label{color:#fff;font-size:10px;cursor:pointer}
+.vendor-item{background:#555;padding:10px;margin-bottom:8px;border-radius:3px;font-size:10px;display:flex;justify-content:space-between;align-items:center}
+.vendor-name{font-weight:bold;color:#fff}
+.expense-item{background:#555;padding:10px;margin-bottom:8px;border-radius:3px;font-size:10px}
 .main-content{margin-left:250px;padding:15px;width:calc(100% - 250px)}
 .page-break{page-break-after:always}
 .header{display:flex;justify-content:space-between;margin-bottom:12px}
@@ -84,8 +99,13 @@ tr:nth-child(even){background:#f9f9f9}
 .save-success{background:#d4edda;color:#155724;padding:10px;border-radius:3px;margin-bottom:10px;display:none}
 .warning-section{background:#fff3cd;border:2px solid #ffc104;padding:15px;margin:15px 0;border-radius:5px}
 .warning-title{font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px}
+.history-list{background:#fff;border:1px solid #ddd;border-radius:5px;max-height:300px;overflow-y:auto;margin-top:10px}
+.history-item{padding:10px;border-bottom:1px solid #eee;cursor:pointer;font-size:11px;display:flex;justify-content:space-between;align-items:center}
+.history-item:hover{background:#f9f9f9}
+.history-item-date{font-weight:bold;color:#333}
+.history-item-details{font-size:10px;color:#666}
 @media print{
-.sidebar,.finish-btn,.add-row button,.back-btn,.save-btn{display:none}
+.sidebar,.finish-btn,.add-row button,.back-btn,.save-btn,.print-btn,.delete-btn{display:none}
 .main-content{margin-left:0;width:100%;padding:10px}
 }
 </style>
@@ -127,8 +147,10 @@ tr:nth-child(even){background:#f9f9f9}
 <button class="run-btn" onclick="runReport()">▶ Run Owner Statement</button>
 <button class="summary-btn" onclick="runSummary()">📊 View Summary</button>
 <button class="pdf-btn" onclick="downloadPDF()">📥 Download PDF</button>
+<button class="print-btn" onclick="printSummary()">🖨️ Print Summary</button>
+<button class="history-btn" onclick="viewHistory()">📋 View History</button>
 
-<button class="settings-toggle" onclick="toggleSettings()">⚙️ Settings</button>
+<button class="settings-toggle" onclick="toggleSettings()">⚙️ Owner Settings</button>
 <div class="settings-box" id="settingsBox">
 <div class="save-success" id="saveSuccess">✓ Settings saved!</div>
 <h4 style="color:#fff;margin-bottom:10px" id="settingsTitle">Owner Settings</h4>
@@ -136,14 +158,147 @@ tr:nth-child(even){background:#f9f9f9}
 <button class="save-btn" onclick="saveSettings()">💾 Save Settings</button>
 </div>
 
+<button class="settings-toggle" onclick="toggleExpense()">💰 Expenses & Credits</button>
+<div class="expense-box" id="expenseBox">
+<div class="save-success" id="expenseSaveSuccess">✓ Expense saved!</div>
+<h4 style="color:#fff;margin-bottom:10px">Add Expense/Credit</h4>
+<div class="owner-item-control">
+<label class="owner-item-label">Type</label>
+<select id="expenseType">
+<option value="Maintenance">Maintenance</option>
+<option value="Repair">Repair</option>
+<option value="Purchase">Purchase</option>
+<option value="Supplies">Supplies</option>
+<option value="Service">Service</option>
+<option value="Pool Cleaning">Pool Cleaning</option>
+<option value="Pest Control">Pest Control</option>
+<option value="Credit">Credit</option>
+<option value="Adjustment">Adjustment</option>
+</select>
+</div>
+<div class="owner-item-control">
+<label class="owner-item-label">Vendor</label>
+<select id="expenseVendor"></select>
+</div>
+<div class="owner-item-control">
+<label class="owner-item-label">Amount ($)</label>
+<input type="number" id="expenseAmount" step="0.01" min="0" placeholder="0.00">
+</div>
+<div class="owner-item-control">
+<label class="owner-item-label">Date</label>
+<input type="date" id="expenseDate">
+</div>
+<div class="owner-item-control">
+<label class="owner-item-label">Notes</label>
+<input type="text" id="expenseNotes" placeholder="Optional notes">
+</div>
+<button class="add-btn" onclick="addExpense()">➕ Add Expense/Credit</button>
+<h4 style="color:#fff;margin-top:15px;margin-bottom:10px">Recent Expenses</h4>
+<div id="expensesList"></div>
+</div>
+
+<button class="settings-toggle" onclick="toggleVendors()">🏢 Vendors</button>
+<div class="vendor-box" id="vendorBox">
+<div class="save-success" id="vendorSaveSuccess">✓ Vendor saved!</div>
+<h4 style="color:#fff;margin-bottom:10px">Add/Edit Vendors</h4>
+<div class="owner-item-control">
+<label class="owner-item-label">Vendor Name</label>
+<input type="text" id="vendorName" placeholder="Enter vendor name">
+</div>
+<div class="owner-item-control">
+<label class="owner-item-label">Contact</label>
+<input type="text" id="vendorContact" placeholder="Phone or email">
+</div>
+<button class="add-btn" onclick="addVendor()">➕ Add Vendor</button>
+<h4 style="color:#fff;margin-top:15px;margin-bottom:10px">Vendor List</h4>
+<div id="vendorsList"></div>
+</div>
+
 </div>
 
 <div class="main-content">
 <div id="report"></div>
 <div id="summaryPage" class="summary-page hidden"></div>
+<div id="historyPage" class="summary-page hidden"></div>
 </div>
 
 <script>
+
+// Initialize IndexedDB
+let db;
+const dbName="OceanVacationsDB";
+const dbVersion=1;
+
+function initDB(){
+return new Promise((resolve,reject)=>{
+const request=indexedDB.open(dbName,dbVersion);
+
+request.onerror=()=>reject("DB failed to open");
+request.onsuccess=()=>{
+db=request.result;
+resolve();
+};
+
+request.onupgradeneeded=(e)=>{
+db=e.target.result;
+if(!db.objectStoreNames.contains("owners")){
+db.createObjectStore("owners",{keyPath:"name"});
+}
+if(!db.objectStoreNames.contains("vendors")){
+db.createObjectStore("vendors",{keyPath:"id"});
+}
+if(!db.objectStoreNames.contains("expenses")){
+db.createObjectStore("expenses",{keyPath:"id"});
+}
+if(!db.objectStoreNames.contains("statements")){
+db.createObjectStore("statements",{keyPath:"id"});
+}
+};
+});
+}
+
+async function loadFromDB(){
+const owners_data=await getFromDB("owners");
+const vendors_data=await getFromDB("vendors");
+const expenses_data=await getFromDB("expenses");
+const statements_data=await getFromDB("statements");
+
+owners=owners_data.length>0?Object.fromEntries(owners_data.map(o=>[o.name,o.data])):owners;
+vendors=vendors_data.map(v=>v.data);
+expenses=expenses_data.map(e=>e.data);
+statementHistory=statements_data.map(s=>s.data);
+
+updateVendorSelects();
+updateExpensesList();
+updateVendorsList();
+}
+
+function getFromDB(store){
+return new Promise((resolve)=>{
+const transaction=db.transaction([store],"readonly");
+const objectStore=transaction.objectStore(store);
+const request=objectStore.getAll();
+request.onsuccess=()=>resolve(request.result);
+});
+}
+
+function saveToDBStore(store,key,data){
+return new Promise((resolve)=>{
+const transaction=db.transaction([store],"readwrite");
+const objectStore=transaction.objectStore(store);
+objectStore.put({...data,id:key||data.id||Date.now()});
+transaction.oncomplete=()=>resolve();
+});
+}
+
+function deleteFromDB(store,key){
+return new Promise((resolve)=>{
+const transaction=db.transaction([store],"readwrite");
+const objectStore=transaction.objectStore(store);
+objectStore.delete(key);
+transaction.oncomplete=()=>resolve();
+});
+}
 
 let owners={
 "ERAN":{percent:0.12,type:"draft",salesFeePercent:5,municipalities:{}},
@@ -161,24 +316,161 @@ let owners={
 "214-2S 2nd Ave S. North Myrtle Beach":{percent:0.12,type:"payout",salesFeePercent:10,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}}
 };
 
-function loadSettings(){
-const saved=localStorage.getItem("ownerSettings");
-if(saved){
-owners=JSON.parse(saved);
-}
-}
+let vendors=[];
+let expenses=[];
+let statementHistory=[];
+let lastSummaryHTML="";
 
 function saveSettings(){
-localStorage.setItem("ownerSettings",JSON.stringify(owners));
+Object.entries(owners).forEach(([name,data])=>{
+saveToDBStore("owners",name,{name,data});
+});
 const btn=document.getElementById("saveSuccess");
 btn.style.display="block";
 setTimeout(()=>{btn.style.display="none"},3000);
+}
+
+function saveVendors(){
+vendors.forEach(v=>{
+saveToDBStore("vendors",v.id,v);
+});
+const btn=document.getElementById("vendorSaveSuccess");
+btn.style.display="block";
+setTimeout(()=>{btn.style.display="none"},3000);
+updateVendorSelects();
+}
+
+function saveExpenses(){
+expenses.forEach(e=>{
+saveToDBStore("expenses",e.id,e);
+});
+const btn=document.getElementById("expenseSaveSuccess");
+btn.style.display="block";
+setTimeout(()=>{btn.style.display="none"},3000);
+}
+
+function saveStatementHistory(){
+statementHistory.forEach(s=>{
+saveToDBStore("statements",s.id,s);
+});
+}
+
+function addVendor(){
+const name=document.getElementById("vendorName").value.trim();
+const contact=document.getElementById("vendorContact").value.trim();
+
+if(!name){alert("Please enter vendor name");return;}
+
+vendors.push({id:Date.now(),name:name,contact:contact});
+saveVendors();
+
+document.getElementById("vendorName").value="";
+document.getElementById("vendorContact").value="";
+}
+
+function deleteVendor(id){
+if(confirm("Delete this vendor?")){
+vendors=vendors.filter(v=>v.id!==id);
+deleteFromDB("vendors",id);
+updateVendorsList();
+updateVendorSelects();
+}
+}
+
+function updateVendorSelects(){
+const select=document.getElementById("expenseVendor");
+select.innerHTML='<option value="">-- Select Vendor --</option>';
+vendors.forEach(v=>select.innerHTML+=`<option value="${v.name}">${v.name}</option>`);
+}
+
+function updateVendorsList(){
+const list=document.getElementById("vendorsList");
+if(vendors.length===0){
+list.innerHTML='<div style="color:#aaa;font-size:10px">No vendors yet</div>';
+return;
+}
+list.innerHTML=vendors.map(v=>`
+<div class="vendor-item">
+<div>
+<div class="vendor-name">${v.name}</div>
+<div style="color:#aaa;font-size:9px">${v.contact||'No contact'}</div>
+</div>
+<button class="delete-btn" onclick="deleteVendor(${v.id})">🗑</button>
+</div>
+`).join("");
+}
+
+function addExpense(){
+const type=document.getElementById("expenseType").value;
+const vendor=document.getElementById("expenseVendor").value;
+const amount=parseFloat(document.getElementById("expenseAmount").value);
+const date=document.getElementById("expenseDate").value;
+const notes=document.getElementById("expenseNotes").value;
+const owner=document.getElementById("owner").value;
+
+if(!vendor||!amount||!date){alert("Please fill in all required fields");return;}
+
+const expense={
+id:Date.now(),
+owner:owner,
+type:type,
+vendor:vendor,
+amount:amount,
+date:date,
+notes:notes
+};
+
+expenses.push(expense);
+saveExpenses();
+
+document.getElementById("expenseType").value="Maintenance";
+document.getElementById("expenseVendor").value="";
+document.getElementById("expenseAmount").value="";
+document.getElementById("expenseDate").value="";
+document.getElementById("expenseNotes").value="";
+}
+
+function deleteExpense(id){
+if(confirm("Delete this expense?")){
+expenses=expenses.filter(e=>e.id!==id);
+deleteFromDB("expenses",id);
+updateExpensesList();
+}
+}
+
+function updateExpensesList(){
+const list=document.getElementById("expensesList");
+const owner=document.getElementById("owner").value;
+const ownerExpenses=expenses.filter(e=>e.owner===owner).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,10);
+
+if(ownerExpenses.length===0){
+list.innerHTML='<div style="color:#aaa;font-size:10px">No expenses</div>';
+return;
+}
+
+list.innerHTML=ownerExpenses.map(e=>`
+<div class="expense-item">
+<div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+<div>
+<div style="font-weight:bold;color:#fff">${e.type} - ${e.vendor}</div>
+<div style="color:#aaa;font-size:9px">${e.date}</div>
+<div style="color:#aaa;font-size:9px">${e.notes}</div>
+</div>
+<div style="text-align:right">
+<div style="color:#fff;font-weight:bold;font-size:11px">$${e.amount.toFixed(2)}</div>
+<button class="delete-btn" onclick="deleteExpense(${e.id})">🗑</button>
+</div>
+</div>
+</div>
+`).join("");
 }
 
 function updateSettingsDisplay(){
 const selectedOwner=document.getElementById("owner").value;
 const ownerData=owners[selectedOwner];
 const isDraft=ownerData.type==="draft";
+
+updateExpensesList();
 
 let html=`
 <div class="owner-item">
@@ -200,7 +492,6 @@ let html=`
 </div>
 `;
 
-// Only show municipalities for payout owners
 if(!isDraft){
 html+=`
 <div class="owner-item-control">
@@ -259,6 +550,63 @@ function toggleSettings(){
 document.getElementById("settingsBox").classList.toggle("open");
 }
 
+function toggleExpense(){
+document.getElementById("expenseBox").classList.toggle("open");
+}
+
+function toggleVendors(){
+document.getElementById("vendorBox").classList.toggle("open");
+}
+
+function viewHistory(){
+const owner=document.getElementById("owner").value;
+
+let html=`
+<button class="back-btn" onclick="goBackFromHistory()">← Back</button>
+<h2 style="text-align:center;margin-bottom:20px">Statement History - ${owner}</h2>
+<div class="history-list">
+`;
+
+const ownerHistory=statementHistory.filter(s=>s.owner===owner).sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+if(ownerHistory.length===0){
+html+=`<div style="padding:20px;text-align:center;color:#666">No statements generated yet</div>`;
+}else{
+ownerHistory.forEach(s=>{
+html+=`
+<div class="history-item">
+<div>
+<div style="font-weight:bold;color:#333">${s.month}/${s.year}</div>
+<div style="color:#666;font-size:10px">Generated: ${new Date(s.date).toLocaleString()}</div>
+<div style="color:#666;font-size:10px">Payout: $${s.payout.toFixed(2)}</div>
+</div>
+<button class="delete-btn" onclick="deleteStatement(${s.id})">🗑 Delete</button>
+</div>
+`;
+});
+}
+
+html+=`</div>`;
+
+document.getElementById("report").classList.add("hidden");
+document.getElementById("summaryPage").classList.add("hidden");
+document.getElementById("historyPage").classList.remove("hidden");
+document.getElementById("historyPage").innerHTML=html;
+}
+
+function deleteStatement(id){
+if(confirm("Delete this statement from history?")){
+statementHistory=statementHistory.filter(s=>s.id!==id);
+deleteFromDB("statements",id);
+viewHistory();
+}
+}
+
+function goBackFromHistory(){
+document.getElementById("historyPage").classList.add("hidden");
+document.getElementById("report").classList.remove("hidden");
+}
+
 const ownerSelect=document.getElementById("owner");
 Object.keys(owners).forEach(o=>ownerSelect.innerHTML+=`<option>${o}</option>`);
 
@@ -276,6 +624,8 @@ yearSelect.innerHTML+=`<option>${y}</option>`;
 }
 yearSelect.value=now.getFullYear();
 
+document.getElementById("expenseDate").valueAsDate=new Date();
+
 function num(v){return parseFloat((v||"0").toString().replace(/[$,]/g,""))||0}
 function money(x){return "$"+(Number(x)||0).toFixed(2)}
 function stay(i,o){if(!i||!o)return"";let a=i.split("-"),b=o.split("-");return a[1]+"/"+a[2]+" - "+b[1]+"/"+b[2]}
@@ -288,6 +638,7 @@ let csvData=[];
 async function runReport(){
 document.getElementById("report").classList.remove("hidden");
 document.getElementById("summaryPage").classList.add("hidden");
+document.getElementById("historyPage").classList.add("hidden");
 
 propertyTotals={};
 masterTotals={gross:0,acc:0,clean:0,pmc:0,expenses:0,draft:0,owner:0,websiteFee:0};
@@ -323,7 +674,6 @@ grouped[listing].push(r);
 
 let reportHTML="";
 
-/* HEADER */
 reportHTML+=`
 <div class="header">
 <div>
@@ -357,7 +707,6 @@ let pmc=acc*percent;
 let draft=pmc+clean;
 let ownerPay=acc-pmc;
 
-// Check if website booking (website fee for draft owners only - NOT for VRBO or manual)
 let websiteFee=0;
 if(type==="draft"){
 let confirmationCode=r["CONFIRMATION CODE"]||"";
@@ -365,9 +714,8 @@ let isVRBO=confirmationCode.toUpperCase().startsWith("HA");
 let platform=r["PLATFORM"]||"";
 let platformLower=platform.toLowerCase();
 
-// Only charge 1% fee if platform says "website" and NOT VRBO (HA)
 if(!isVRBO && platformLower.includes("website")){
-websiteFee=payout*0.01; // 1% of payout for website bookings only
+websiteFee=payout*0.01;
 pWebsiteFee+=websiteFee;
 }
 }
@@ -390,8 +738,6 @@ masterTotals.draft+=pDraft;
 masterTotals.owner+=pOwner;
 masterTotals.websiteFee+=pWebsiteFee;
 });
-
-/* MASTER SUMMARY PAGE */
 
 reportHTML+=`
 <div class="summary-box-master">
@@ -418,8 +764,6 @@ ${type==="draft"
 
 <div class="page-break"></div>
 `;
-
-/* PROPERTY PAGES */
 
 Object.keys(grouped).forEach(listing=>{
 
@@ -473,11 +817,9 @@ let ownerPay=acc-pmc;
 let platform=r["PLATFORM"]||"N/A";
 let confirmationCode=r["CONFIRMATION CODE"]||"N/A";
 
-// Check if VRBO (HA prefix) and replace platform display
 let isVRBO=confirmationCode.toUpperCase().startsWith("HA");
 let displayPlatform=isVRBO?"VRBO":platform;
 
-// Check if website booking for fee calculation (NOT for VRBO)
 let websiteFee=0;
 if(type==="draft"){
 let platformLower=platform.toLowerCase();
@@ -486,12 +828,10 @@ websiteFee=payout*0.01;
 }
 }
 
-// Skip if payout is 0 AND cleaning fee is 0
 if(payout===0 && clean===0){
 return;
 }
 
-// Add website fee to draft for display
 let draftDisplay=draft+websiteFee;
 
 reportHTML+=`
@@ -529,10 +869,8 @@ const month=parseInt(monthSelect.value);
 const year=parseInt(yearSelect.value);
 const endDay=lastDay(year,month);
 
-// Calculate sales fee (PMC * sales fee %)
 const salesFeeAmount=masterTotals.pmc*(salesFeePercent/100);
 
-// Get tax data by property - group by property name
 let taxByProperty={};
 let hasTaxes=false;
 
@@ -562,7 +900,6 @@ taxByProperty[property].payout+=payout;
 });
 }
 
-// Get selected municipalities
 let selectedMunicipalities=[];
 if(ownerData.municipalities){
 Object.entries(ownerData.municipalities).forEach(([mun,checked])=>{
@@ -572,9 +909,10 @@ if(checked) selectedMunicipalities.push(mun);
 
 let summaryHTML=`
 <button class="back-btn" onclick="goBackToStatement()">← Back to Statement</button>
+<button class="print-btn" onclick="printSummary()" style="position:absolute;top:20px;right:20px;padding:8px 15px">🖨️ Print this page</button>
 
-<div class="summary-page-header">OWNER SUMMARY REPORT</div>
-<div class="summary-page-period"><strong>PERIOD:</strong> ${month}/1/${year} - ${month}/${endDay}/${year}</div>
+<div class="summary-page-header">SUMMARY REPORT</div>
+<div class="summary-page-period"><strong>OWNER:</strong> ${owner} | <strong>PERIOD:</strong> ${month}/1/${year} - ${month}/${endDay}/${year}</div>
 
 <div class="summary-section">
 <div class="summary-section-title">💰 ACCOMMODATION & SALES PERSON FEE</div>
@@ -663,6 +1001,19 @@ ${Object.entries(taxByProperty).map(([property, data])=>`
 `:""}
 `;
 
+lastSummaryHTML=summaryHTML;
+
+// Save to history
+statementHistory.push({
+id:Date.now(),
+owner:owner,
+month:month,
+year:year,
+date:new Date().toISOString(),
+payout:type==="draft"?masterTotals.draft:masterTotals.owner
+});
+saveStatementHistory();
+
 document.getElementById("report").classList.add("hidden");
 document.getElementById("summaryPage").classList.remove("hidden");
 document.getElementById("summaryPage").innerHTML=summaryHTML;
@@ -671,6 +1022,14 @@ document.getElementById("summaryPage").innerHTML=summaryHTML;
 function goBackToStatement(){
 document.getElementById("report").classList.remove("hidden");
 document.getElementById("summaryPage").classList.add("hidden");
+document.getElementById("historyPage").classList.add("hidden");
+}
+
+function printSummary(){
+const printWindow=window.open('','','width=800,height=600');
+printWindow.document.write(lastSummaryHTML);
+printWindow.document.close();
+setTimeout(()=>printWindow.print(),250);
 }
 
 function downloadPDF(){
@@ -678,8 +1037,12 @@ html2pdf().set({margin:5,jsPDF:{unit:"mm",format:"a4"}})
 .from(document.getElementById("report")).save("Reservation_Report.pdf");
 }
 
-loadSettings();
+// Initialize on page load
+window.addEventListener('DOMContentLoaded',async()=>{
+await initDB();
+await loadFromDB();
 updateSettingsDisplay();
+});
 
 </script>
 
