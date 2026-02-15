@@ -248,18 +248,7 @@
       "phone": ""
     }
   ],
-  "expenses": [
-    {
-      "id": 1771149614487,
-      "owner": "GHO",
-      "type": "Repair",
-      "property": "MB - 4765",
-      "vendor": "ECIA",
-      "amount": 100,
-      "notes": "",
-      "date": "2/15/2026, 5:00:14 AM"
-    }
-  ],
+  "expenses": [],
   "statements": [],
   "lastUpdated": "",
   "reports": []
