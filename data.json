@@ -248,7 +248,17 @@
       "phone": ""
     }
   ],
-  "expenses": [],
+  "expenses": [
+    {
+      "id": 1771170639313,
+      "owner": "GHO",
+      "type": "Maintenance",
+      "property": "MB - 4765",
+      "vendor": "ECIA",
+      "amount": 659,
+      "notes": ""
+    }
+  ],
   "statements": [],
   "lastUpdated": "",
   "reports": [
