@@ -267,18 +267,6 @@
       }
     },
     {
-      "id": 1771194977694,
-      "owner": "GHO",
-      "type": "Maintenance",
-      "property": "MB - 7500",
-      "vendor": "QUICKFIX",
-      "amount": 100,
-      "notes": "",
-      "invoice": {
-        "filename": "Report (16).pdf"
-      }
-    },
-    {
       "id": 1771195613121,
       "owner": "GHO",
       "type": "Repair",
