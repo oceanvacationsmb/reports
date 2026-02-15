@@ -265,16 +265,6 @@
       "invoice": {
         "filename": "Report (16).pdf"
       }
-    },
-    {
-      "id": 1771194947470,
-      "owner": "GHO",
-      "type": "Maintenance",
-      "property": "MB - 4765",
-      "vendor": "QUICKFIX",
-      "amount": 300,
-      "notes": "",
-      "invoice": null
     }
   ],
   "statements": [],
