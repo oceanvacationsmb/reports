@@ -265,15 +265,6 @@
       "invoice": {
         "filename": "Report (16).pdf"
       }
-    },
-    {
-      "id": 1771198925501,
-      "owner": "GHO",
-      "type": "Maintenance",
-      "property": "MB - 4765",
-      "vendor": "ECIA",
-      "amount": 500,
-      "notes": ""
     }
   ]
 }
