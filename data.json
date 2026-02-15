@@ -211,13 +211,7 @@
       }
     }
   },
-  "vendors": [
-    {
-      "id": 1,
-      "name": "ABC Cleaning Services",
-      "phone": "843-123-4567"
-    }
-  ],
+  "vendors": [],
   "expenses": [],
   "statements": [],
   "lastUpdated": "",
