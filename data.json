@@ -253,7 +253,17 @@
       "phone": ""
     }
   ],
-  "expenses": [],
+  "expenses": [
+    {
+      "id": 1771187900531,
+      "owner": "ERAN",
+      "type": "Pool Cleaning",
+      "property": "GC - 1211A",
+      "vendor": "AMAZON",
+      "amount": 300,
+      "notes": ""
+    }
+  ],
   "statements": [],
   "lastUpdated": "",
   "reports": []
