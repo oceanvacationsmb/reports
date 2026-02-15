@@ -211,7 +211,13 @@
       }
     }
   },
-  "vendors": [],
+  "vendors": [
+    {
+      "id": 1771149458191,
+      "name": "ECIA",
+      "phone": ""
+    }
+  ],
   "expenses": [],
   "statements": [],
   "lastUpdated": "",
