@@ -216,11 +216,6 @@
       "id": 1,
       "name": "ABC Cleaning Services",
       "phone": "843-123-4567"
-    },
-    {
-      "id": 2,
-      "name": "XYZ Repairs Inc",
-      "phone": "843-987-6543"
     }
   ],
   "expenses": [],
