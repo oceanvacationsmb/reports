@@ -266,16 +266,16 @@ function deleteDB(store, id) {
   tx.objectStore(store).delete(id);
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+async function initApp() {
   await initDB();
   await loadOwnerSettings();
   await loadPropertySettings();
   await loadVendors();
   await loadExpenses();
-  initOwners();
-  initMonths();
-  initYears();
-});
+  initOwnerSelect();
+  initMonthSelect();
+  initYearSelect();
+}
 
 async function loadOwnerSettings() {
   const saved = await getDB("owners");
@@ -303,9 +303,14 @@ function savePropertySettings() {
   });
 }
 
-function initOwners() {
+function initOwnerSelect() {
   const select = document.getElementById("ownerSelect");
-  select.innerHTML = '<option value="">-- Select Owner --</option>';
+  if (!select) return;
+  select.innerHTML = '';
+  const defaultOpt = document.createElement("option");
+  defaultOpt.value = "";
+  defaultOpt.textContent = "-- Select Owner --";
+  select.appendChild(defaultOpt);
   Object.keys(OWNERS).sort().forEach(owner => {
     const opt = document.createElement("option");
     opt.value = owner;
@@ -314,8 +319,10 @@ function initOwners() {
   });
 }
 
-function initMonths() {
+function initMonthSelect() {
   const select = document.getElementById("monthSelect");
+  if (!select) return;
+  select.innerHTML = '';
   const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   months.forEach((m, i) => {
     const opt = document.createElement("option");
@@ -326,8 +333,10 @@ function initMonths() {
   select.value = new Date().getMonth() + 1;
 }
 
-function initYears() {
+function initYearSelect() {
   const select = document.getElementById("yearSelect");
+  if (!select) return;
+  select.innerHTML = '';
   const year = new Date().getFullYear();
   for (let y = year - 2; y <= year + 2; y++) {
     const opt = document.createElement("option");
@@ -819,6 +828,9 @@ window.onclick = function(event) {
   const settingsModal = document.getElementById("propertySettingsModal");
   if (event.target === settingsModal) settingsModal.style.display = "none";
 };
+
+// Initialize when page loads
+initApp();
 </script>
 
 </body>
