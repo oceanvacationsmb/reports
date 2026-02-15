@@ -59,7 +59,7 @@ body{font-family:Arial;background:#f5f5f5;color:#000;display:flex}
 .property-title{font-size:12px;font-weight:bold;margin-bottom:2px}
 .property-period{font-size:9px;color:#666;margin-bottom:6px}
 table{width:100%;border-collapse:collapse;font-size:7px;margin-top:6px;background:#fff}
-th,td{border:1px solid #ddd;padding:2px;text-align:center}
+th,td{border:1px solid #ddd;padding:2px;text-align:center;word-wrap:break-word;overflow-wrap:break-word}
 th{background:#333;color:#fff;font-weight:bold}
 tr:nth-child(even){background:#f9f9f9}
 .hidden{display:none}
@@ -305,7 +305,7 @@ let pmc=acc*percent;
 let draft=pmc+clean;
 let ownerPay=acc-pmc;
 
-// Check if website or website_direct or website booking (website fee for draft owners only)
+// Check if website booking (website fee for draft owners only)
 let websiteFee=0;
 if(type==="draft"){
 let platform=r["PLATFORM"]||"";
@@ -431,15 +431,18 @@ if(payout===0 && clean===0){
 return;
 }
 
+// Add website fee to draft for display
+let draftDisplay=draft+websiteFee;
+
 reportHTML+=`
 <tr>
 <td>${confirmationCode.substring(0,8)}</td>
 <td>${stay(r["CHECK-IN DATE"],r["CHECK-OUT DATE"])}</td>
-<td>${platform.substring(0,5)}</td>
+<td style="max-width:80px;word-wrap:break-word;">${platform}</td>
 <td>${money(acc)}</td>
 <td>${money(pmc)}</td>
 ${type==="draft"
-?`<td>${money(clean)}</td><td>${money(websiteFee)}</td><td>${money(draft)}</td>`
+?`<td>${money(clean)}</td><td>${money(websiteFee)}</td><td>${money(draftDisplay)}</td>`
 :`<td>${money(ownerPay)}</td>`}
 </tr>
 `;
