@@ -2,115 +2,48 @@
 <html>
 <head>
 <title>Reservation Report</title>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:Arial;background:#f5f5f5;color:#000;display:flex}
-.sidebar{width:250px;background:#333;color:#fff;padding:20px;height:100vh;overflow-y:auto;position:fixed;left:0;top:0}
+.sidebar{width:280px;background:#333;color:#fff;padding:20px;height:100vh;overflow-y:auto;position:fixed;left:0;top:0}
 .sidebar h3{margin-bottom:20px;font-size:16px;border-bottom:2px solid #fff;padding-bottom:10px}
-.sidebar-section{margin-bottom:20px}
-.sidebar-label{font-size:12px;font-weight:bold;color:#aaa;margin-bottom:5px;display:block}
-.sidebar-control{margin-bottom:12px}
-.sidebar-control select,.sidebar-control input{width:100%;padding:8px;border:1px solid #555;background:#444;color:#fff;border-radius:3px;font-size:12px}
-.sidebar-control button{width:100%;padding:10px;margin-top:5px;font-weight:bold;border:none;cursor:pointer;border-radius:3px;font-size:13px}
-.run-btn{background:#000;color:#fff}
-.run-btn:hover{background:#222}
-.summary-btn{background:#28a745;color:#fff;margin-top:10px}
-.summary-btn:hover{background:#218838}
-.annual-btn{background:#ff9800;color:#fff;margin-top:5px;font-size:11px}
-.annual-btn:hover{background:#e68900}
-.pdf-btn{background:#444;color:#fff;margin-top:10px}
-.pdf-btn:hover{background:#555}
-.print-btn{background:#ff6b6b;color:#fff;margin-top:5px;font-size:11px}
-.print-btn:hover{background:#ee5a52}
-.history-btn{background:#9b59b6;color:#fff;margin-top:5px;font-size:11px}
-.history-btn:hover{background:#8e44ad}
-.save-btn{background:#007bff;color:#fff;margin-top:5px;font-size:12px}
-.save-btn:hover{background:#0056b3}
-.delete-btn{background:#dc3545;color:#fff;font-size:11px;padding:5px 8px;border:none;cursor:pointer;border-radius:2px;margin-left:5px}
-.delete-btn:hover{background:#c82333}
-.add-btn{background:#28a745;color:#fff;font-size:11px;padding:5px 8px;border:none;cursor:pointer;border-radius:2px;margin-top:5px;width:100%}
-.add-btn:hover{background:#218838}
-.settings-toggle{background:#666;color:#fff;padding:10px;border:none;cursor:pointer;width:100%;text-align:left;font-weight:bold;border-radius:3px;margin-bottom:10px;font-size:14px}
-.settings-toggle:hover{background:#777}
-.settings-box{display:none;background:#444;padding:15px;border-radius:3px;margin-top:10px;max-height:600px;overflow-y:auto}
-.settings-box.open{display:block}
-.expense-box{display:none;background:#444;padding:15px;border-radius:3px;margin-top:10px;max-height:600px;overflow-y:auto}
-.expense-box.open{display:block}
-.vendor-box{display:none;background:#444;padding:15px;border-radius:3px;margin-top:10px;max-height:600px;overflow-y:auto}
-.vendor-box.open{display:block}
-.owner-item{background:#555;padding:12px;margin-bottom:10px;border-radius:3px;font-size:11px;border:1px solid #666}
-.owner-item-name{font-weight:bold;color:#fff;margin-bottom:8px;font-size:12px}
-.owner-item-control{margin-bottom:8px}
-.owner-item-label{font-size:10px;color:#bbb;display:block;margin-bottom:3px}
-.owner-item-control input,.owner-item-control select{width:100%;padding:5px;background:#666;color:#fff;border:1px solid #777;border-radius:2px;font-size:10px}
-.owner-item-control input:focus,.owner-item-control select:focus{outline:none;border-color:#fff}
-.checkbox-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:5px}
-.checkbox-item{display:flex;align-items:center;gap:4px}
-.checkbox-item input[type="checkbox"]{width:14px;height:14px;cursor:pointer}
-.checkbox-item label{color:#fff;font-size:10px;cursor:pointer}
-.vendor-item{background:#555;padding:10px;margin-bottom:8px;border-radius:3px;font-size:10px;display:flex;justify-content:space-between;align-items:center}
-.vendor-name{font-weight:bold;color:#fff}
-.expense-item{background:#555;padding:10px;margin-bottom:8px;border-radius:3px;font-size:10px}
-.main-content{margin-left:250px;padding:15px;width:calc(100% - 250px)}
-.page-break{page-break-after:always}
-.header{display:flex;justify-content:space-between;margin-bottom:12px}
-.company{font-size:18px;font-weight:900}
-.company-info{font-size:9px;line-height:1.4}
-.title{text-align:center;font-size:18px;font-weight:900;margin-top:6px}
-.owner{text-align:center;font-size:14px;font-weight:bold;margin-top:3px;margin-bottom:4px}
-.period{text-align:center;font-size:10px;margin-bottom:6px}
-.section-title{font-size:14px;font-weight:bold;margin-top:6px;margin-bottom:6px}
-.summary-box{border:2px solid #000;padding:10px;margin:8px 0;background:#fafafa;border-radius:5px}
-.summary-box-master{border:2px solid #000;padding:6px;margin:6px 0;background:#fafafa;border-radius:5px}
-.summary-header{font-weight:bold;font-size:11px;margin-bottom:8px;color:#333;text-align:center}
-.summary-header-master{font-weight:bold;font-size:10px;margin-bottom:6px;color:#333;text-align:center}
-.summary{display:flex;justify-content:space-around;font-size:9px;gap:6px;flex-wrap:wrap}
-.summary-master{display:flex;justify-content:space-around;font-size:8px;gap:4px;flex-wrap:wrap}
-.summary-item{text-align:center;flex:1;min-width:100px}
-.summary-item-master{text-align:center;flex:1;min-width:80px}
-.summary-item-label{display:block;font-size:8px;font-weight:bold;color:#333;margin-bottom:3px}
-.summary-item-label-master{display:block;font-size:7px;font-weight:bold;color:#333;margin-bottom:2px}
-.summary-item-amount{display:block;font-size:11px;font-weight:bold;color:#000}
-.summary-item-amount-master{display:block;font-size:9px;font-weight:bold;color:#000}
-.property{margin-top:12px;background:#fff;padding:10px;border-radius:5px;border:1px solid #ddd}
-.property-title{font-size:12px;font-weight:bold;margin-bottom:2px}
-.property-period{font-size:9px;color:#666;margin-bottom:6px}
-.property-notes{font-size:9px;color:#333;margin-bottom:6px;padding:8px;background:#fafafa;border-left:3px solid #007bff}
-table{width:100%;border-collapse:collapse;font-size:7px;margin-top:6px;background:#fff}
-th,td{border:1px solid #ddd;padding:2px;text-align:center;word-wrap:break-word;overflow-wrap:break-word}
-th{background:#333;color:#fff;font-weight:bold}
-tr:nth-child(even){background:#f9f9f9}
+.sidebar-section{margin-bottom:15px}
+.sidebar-label{font-size:11px;font-weight:bold;color:#aaa;margin-bottom:5px;display:block}
+.sidebar-control{margin-bottom:10px}
+.sidebar-control select,.sidebar-control input{width:100%;padding:8px;border:1px solid #555;background:#444;color:#fff;border-radius:3px;font-size:11px}
+.btn{width:100%;padding:10px;margin:5px 0;font-weight:bold;border:none;cursor:pointer;border-radius:3px;font-size:12px;color:#fff}
+.btn-primary{background:#000}
+.btn-primary:hover{background:#222}
+.btn-success{background:#28a745}
+.btn-success:hover{background:#218838}
+.btn-warning{background:#ff9800}
+.btn-warning:hover{background:#e68900}
+.btn-info{background:#17a2b8}
+.btn-info:hover{background:#138496}
+.main-content{margin-left:280px;padding:20px;width:calc(100% - 280px)}
 .hidden{display:none}
-.summary-page{background:#fff;padding:20px;border-radius:5px}
-.summary-page-header{font-size:24px;font-weight:bold;text-align:center;margin-bottom:10px}
-.summary-page-period{font-size:11px;text-align:center;margin-bottom:20px;color:#666}
-.summary-section{background:#f9f9f9;border:2px solid #000;padding:15px;margin:15px 0;border-radius:5px}
-.summary-section-title{font-size:14px;font-weight:bold;margin-bottom:10px;color:#333}
-.summary-line{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd;font-size:12px}
-.summary-line-value{font-weight:bold;color:#000}
-.tax-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px}
-.tax-table th,.tax-table td{border:1px solid #000;padding:6px;text-align:left}
-.tax-table th{background:#333;color:#fff;font-weight:bold}
-.tax-table tr:nth-child(even){background:#f9f9f9}
-.tax-table .tax-amount{text-align:right;font-weight:bold}
-.back-btn{background:#666;color:#fff;padding:10px 20px;border:none;cursor:pointer;border-radius:3px;font-weight:bold;margin-bottom:20px}
+.page{background:#fff;padding:20px;border-radius:5px;min-height:600px}
+.header{text-align:center;margin-bottom:30px}
+.company-name{font-size:24px;font-weight:bold;margin-bottom:5px}
+.report-title{font-size:20px;font-weight:bold;margin:15px 0}
+.summary-box{border:2px solid #000;padding:15px;margin:15px 0;background:#f9f9f9;border-radius:5px}
+.summary-items{display:flex;justify-content:space-around;flex-wrap:wrap;gap:15px}
+.summary-item{text-align:center;flex:1;min-width:120px}
+.summary-label{font-size:11px;font-weight:bold;color:#666;margin-bottom:8px}
+.summary-value{font-size:18px;font-weight:bold;color:#000}
+.back-btn{background:#666;color:#fff;padding:10px 20px;margin-bottom:20px}
 .back-btn:hover{background:#555}
-.save-success{background:#d4edda;color:#155724;padding:10px;border-radius:3px;margin-bottom:10px;display:none}
-.warning-section{background:#fff3cd;border:2px solid #ffc104;padding:15px;margin:15px 0;border-radius:5px}
-.warning-title{font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px}
-.history-list{background:#fff;border:1px solid #ddd;border-radius:5px;max-height:300px;overflow-y:auto;margin-top:10px}
-.history-item{padding:10px;border-bottom:1px solid #eee;cursor:pointer;font-size:11px;display:flex;justify-content:space-between;align-items:center}
-.history-item:hover{background:#f9f9f9}
-.file-input-label{background:#666;color:#fff;padding:5px 8px;border-radius:2px;cursor:pointer;font-size:10px;display:inline-block}
-.file-input-label:hover{background:#777}
-.file-name{color:#fff;font-size:10px;margin-top:3px}
+.print-btn{background:#e74c3c;margin-top:5px;font-size:11px}
+.print-btn:hover{background:#c0392b}
+table{width:100%;border-collapse:collapse;margin:15px 0;font-size:10px}
+th,td{border:1px solid #ddd;padding:8px;text-align:left}
+th{background:#333;color:#fff}
+tr:nth-child(even){background:#f9f9f9}
 @media print{
-.sidebar,.finish-btn,.add-row button,.back-btn,.save-btn,.print-btn,.delete-btn{display:none}
-.main-content{margin-left:0;width:100%;padding:10px}
+.sidebar,.back-btn,.print-btn{display:none}
+.main-content{margin-left:0;width:100%}
 }
 </style>
 </head>
@@ -118,1044 +51,480 @@ tr:nth-child(even){background:#f9f9f9}
 <body>
 
 <div class="sidebar">
-<h3>🎯 REPORT CONTROLS</h3>
+<h3>🎯 OCEAN VACATIONS</h3>
 
 <div class="sidebar-section">
 <label class="sidebar-label">Select Owner</label>
-<div class="sidebar-control">
-<select id="owner" onchange="updateSettingsDisplay()"></select>
-</div>
+<select id="ownerSelect" onchange="onOwnerChange()"></select>
 </div>
 
 <div class="sidebar-section">
-<label class="sidebar-label">Select Month</label>
-<div class="sidebar-control">
-<select id="month"></select>
-</div>
+<label class="sidebar-label">Month</label>
+<select id="monthSelect"></select>
 </div>
 
 <div class="sidebar-section">
-<label class="sidebar-label">Select Year</label>
-<div class="sidebar-control">
-<select id="year"></select>
-</div>
+<label class="sidebar-label">Year</label>
+<select id="yearSelect"></select>
 </div>
 
 <div class="sidebar-section">
-<label class="sidebar-label">Upload CSV File</label>
-<div class="sidebar-control">
-<input type="file" id="fileInput" accept=".csv">
-</div>
+<label class="sidebar-label">Upload CSV</label>
+<input type="file" id="csvFile" accept=".csv">
 </div>
 
-<button class="run-btn" onclick="runReport()">▶ Run Owner Statement</button>
-<button class="summary-btn" onclick="runSummary()">📊 View Summary</button>
-<button class="annual-btn" onclick="runAnnual()">📈 Annual Report (PAYOUT)</button>
-<button class="pdf-btn" onclick="downloadPDF()">📥 Download PDF</button>
-<button class="print-btn" onclick="printSummary()">🖨️ Print Summary</button>
-<button class="history-btn" onclick="viewHistory()">📋 View History</button>
+<button class="btn btn-primary" onclick="generateReport()">▶ Run Report</button>
+<button class="btn btn-success" onclick="generateSummary()">📊 View Summary</button>
+<button class="btn btn-warning" onclick="generateAnnual()">📈 Annual Report</button>
+<button class="btn btn-info" onclick="downloadPDF()">📥 Download PDF</button>
 
-<button class="settings-toggle" onclick="toggleSettings()">⚙️ Owner Settings</button>
-<div class="settings-box" id="settingsBox">
-<div class="save-success" id="saveSuccess">✓ Settings saved!</div>
-<h4 style="color:#fff;margin-bottom:10px" id="settingsTitle">Owner Settings</h4>
-<div id="ownersList"></div>
-<button class="save-btn" onclick="saveSettings()">💾 Save Settings</button>
-</div>
+<hr style="border:1px solid #555;margin:15px 0">
 
-<button class="settings-toggle" onclick="toggleExpense()">💰 Expenses & Credits</button>
-<div class="expense-box" id="expenseBox">
-<div class="save-success" id="expenseSaveSuccess">✓ Expense saved!</div>
-<h4 style="color:#fff;margin-bottom:10px">Add Expense/Credit</h4>
-<div class="owner-item-control">
-<label class="owner-item-label">Type</label>
+<h4 style="color:#fff;margin:15px 0 10px 0;font-size:13px">⚙️ Vendors</h4>
+<input type="text" id="vendorName" placeholder="Vendor name">
+<input type="text" id="vendorPhone" placeholder="Phone/Email" style="margin-top:5px">
+<button class="btn btn-success" style="font-size:11px" onclick="addVendor()">Add Vendor</button>
+<div id="vendorList" style="font-size:10px;margin-top:10px;max-height:150px;overflow-y:auto"></div>
+
+<hr style="border:1px solid #555;margin:15px 0">
+
+<h4 style="color:#fff;margin:15px 0 10px 0;font-size:13px">💰 Add Expense</h4>
 <select id="expenseType">
-<option value="Maintenance">Maintenance</option>
-<option value="Repair">Repair</option>
-<option value="Purchase">Purchase</option>
-<option value="Supplies">Supplies</option>
-<option value="Service">Service</option>
-<option value="Pool Cleaning">Pool Cleaning</option>
-<option value="Pest Control">Pest Control</option>
-<option value="Credit">Credit</option>
-<option value="Adjustment">Adjustment</option>
+<option>Maintenance</option>
+<option>Repair</option>
+<option>Purchase</option>
+<option>Supplies</option>
+<option>Service</option>
+<option>Pool Cleaning</option>
+<option>Pest Control</option>
+<option>Credit</option>
+<option>Adjustment</option>
 </select>
-</div>
-<div class="owner-item-control">
-<label class="owner-item-label">Property</label>
-<select id="expenseProperty"></select>
-</div>
-<div class="owner-item-control">
-<label class="owner-item-label">Vendor</label>
-<select id="expenseVendor"></select>
-</div>
-<div class="owner-item-control">
-<label class="owner-item-label">Amount ($)</label>
-<input type="number" id="expenseAmount" step="0.01" min="0" placeholder="0.00">
-</div>
-<div class="owner-item-control">
-<label class="owner-item-label">Notes</label>
-<input type="text" id="expenseNotes" placeholder="Optional notes">
-</div>
-<div class="owner-item-control">
-<label class="owner-item-label">Attach PDF (Optional)</label>
-<label class="file-input-label">
-📎 Choose File
-<input type="file" id="expensePDF" accept=".pdf" style="display:none" onchange="showFileName()">
-</label>
-<div class="file-name" id="fileName"></div>
-</div>
-<button class="add-btn" onclick="addExpense()">➕ Add Expense/Credit</button>
-<h4 style="color:#fff;margin-top:15px;margin-bottom:10px">Recent Expenses</h4>
-<div id="expensesList"></div>
-</div>
-
-<button class="settings-toggle" onclick="toggleVendors()">🏢 Vendors</button>
-<div class="vendor-box" id="vendorBox">
-<div class="save-success" id="vendorSaveSuccess">✓ Vendor saved!</div>
-<h4 style="color:#fff;margin-bottom:10px">Add/Edit Vendors</h4>
-<div class="owner-item-control">
-<label class="owner-item-label">Vendor Name</label>
-<input type="text" id="vendorName" placeholder="Enter vendor name">
-</div>
-<div class="owner-item-control">
-<label class="owner-item-label">Contact</label>
-<input type="text" id="vendorContact" placeholder="Phone or email">
-</div>
-<button class="add-btn" onclick="addVendor()">➕ Add Vendor</button>
-<h4 style="color:#fff;margin-top:15px;margin-bottom:10px">Vendor List</h4>
-<div id="vendorsList"></div>
-</div>
+<select id="expenseProperty" style="margin-top:5px"></select>
+<select id="expenseVendor" style="margin-top:5px"></select>
+<input type="number" id="expenseAmount" placeholder="Amount" step="0.01" style="margin-top:5px">
+<input type="text" id="expenseNotes" placeholder="Notes" style="margin-top:5px">
+<button class="btn btn-success" style="font-size:11px" onclick="addExpense()">Add Expense</button>
 
 </div>
 
 <div class="main-content">
-<div id="report"></div>
-<div id="summaryPage" class="summary-page hidden"></div>
-<div id="annualPage" class="summary-page hidden"></div>
-<div id="historyPage" class="summary-page hidden"></div>
+<div id="reportContainer" class="page"></div>
 </div>
 
 <script>
 
-let db;
-const dbName="OceanVacationsDB";
-const dbVersion=1;
-
-function initDB(){
-return new Promise((resolve,reject)=>{
-const request=indexedDB.open(dbName,dbVersion);
-request.onerror=()=>reject("DB failed to open");
-request.onsuccess=()=>{
-db=request.result;
-resolve();
-};
-request.onupgradeneeded=(e)=>{
-db=e.target.result;
-if(!db.objectStoreNames.contains("owners")) db.createObjectStore("owners",{keyPath:"name"});
-if(!db.objectStoreNames.contains("vendors")) db.createObjectStore("vendors",{keyPath:"id"});
-if(!db.objectStoreNames.contains("expenses")) db.createObjectStore("expenses",{keyPath:"id"});
-if(!db.objectStoreNames.contains("statements")) db.createObjectStore("statements",{keyPath:"id"});
-if(!db.objectStoreNames.contains("annualReports")) db.createObjectStore("annualReports",{keyPath:"id"});
-};
-});
-}
-
-async function loadFromDB(){
-const owners_data=await getFromDB("owners");
-const vendors_data=await getFromDB("vendors");
-const expenses_data=await getFromDB("expenses");
-const statements_data=await getFromDB("statements");
-const annual_data=await getFromDB("annualReports");
-
-owners=owners_data.length>0?Object.fromEntries(owners_data.map(o=>[o.name,o.data])):owners;
-vendors=vendors_data.map(v=>v.data||v).filter(v=>v);
-expenses=expenses_data.map(e=>e.data||e).filter(e=>e);
-statementHistory=statements_data.map(s=>s.data||s).filter(s=>s);
-annualReports=annual_data.map(a=>a.data||a).filter(a=>a);
-
-updateVendorSelects();
-updateExpensesList();
-updateVendorsList();
-}
-
-function getFromDB(store){
-return new Promise((resolve)=>{
-const transaction=db.transaction([store],"readonly");
-const objectStore=transaction.objectStore(store);
-const request=objectStore.getAll();
-request.onsuccess=()=>resolve(request.result||[]);
-});
-}
-
-function saveToDBStore(store,key,data){
-return new Promise((resolve)=>{
-const transaction=db.transaction([store],"readwrite");
-const objectStore=transaction.objectStore(store);
-objectStore.put({...data,id:key||data.id||Date.now()});
-transaction.oncomplete=()=>resolve();
-});
-}
-
-function deleteFromDB(store,key){
-return new Promise((resolve)=>{
-const transaction=db.transaction([store],"readwrite");
-const objectStore=transaction.objectStore(store);
-objectStore.delete(key);
-transaction.oncomplete=()=>resolve();
-});
-}
-
-let owners={
-"ERAN":{percent:0.12,type:"draft",salesFeePercent:5,municipalities:{}},
-"GHO":{percent:0.10,type:"payout",salesFeePercent:5,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}},
-"1463 Basin Trail":{percent:0.12,type:"payout",salesFeePercent:5,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}},
-"113B-15S Surfside Beach":{percent:0.12,type:"payout",salesFeePercent:5,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}},
-"113B-13N Surfside Beach":{percent:0.12,type:"payout",salesFeePercent:5,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}},
-"115C-15N Surfside Beach":{percent:0.12,type:"payout",salesFeePercent:5,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}},
-"2131 Sanibel Myrtle Beach":{percent:0.15,type:"payout",salesFeePercent:5,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}},
-"1552 Elizabeth Ln Myrtle Beach":{percent:0.15,type:"payout",salesFeePercent:5,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}},
-"469C White River RD Myrtle Beach":{percent:0.12,type:"payout",salesFeePercent:5,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}},
-"4631-301 Wild Iris Drive Myrtle Beach":{percent:0.12,type:"payout",salesFeePercent:5,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}},
-"4679-204 Wild Iris Drive Myrtle Beach":{percent:0.12,type:"payout",salesFeePercent:5,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}},
-"508-1/2 33rd Ave North Myrtle Beach":{percent:0.15,type:"payout",salesFeePercent:10,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}},
-"214-2S 2nd Ave S. North Myrtle Beach":{percent:0.12,type:"payout",salesFeePercent:10,municipalities:{SC:false,MB:false,NMB:false,SSB:false,HC:false}}
+// Sample owners data
+const owners = {
+  "ERAN": { percent: 0.12, type: "draft", salesFeePercent: 5 },
+  "GHO": { percent: 0.10, type: "payout", salesFeePercent: 5 },
+  "1463 Basin Trail": { percent: 0.12, type: "payout", salesFeePercent: 5 },
+  "113B-15S Surfside Beach": { percent: 0.12, type: "payout", salesFeePercent: 5 }
 };
 
-let vendors=[];
-let expenses=[];
-let statementHistory=[];
-let annualReports=[];
-let lastSummaryHTML="";
-let csvData=[];
-let properties=[];
+let vendors = [];
+let expenses = [];
+let csvData = [];
+let properties = [];
+let currentOwner = "ERAN";
+let masterTotals = {};
+let propertyTotals = {};
 
-function saveSettings(){
-Object.entries(owners).forEach(([name,data])=>{
-saveToDBStore("owners",name,{name,data});
-});
-const btn=document.getElementById("saveSuccess");
-btn.style.display="block";
-setTimeout(()=>{btn.style.display="none"},3000);
+// Initialize dropdowns
+function initDropdowns() {
+  const ownerSelect = document.getElementById("ownerSelect");
+  Object.keys(owners).forEach(owner => {
+    const option = document.createElement("option");
+    option.value = owner;
+    option.textContent = owner;
+    ownerSelect.appendChild(option);
+  });
+  currentOwner = "ERAN";
+
+  const monthSelect = document.getElementById("monthSelect");
+  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  months.forEach((m, i) => {
+    const option = document.createElement("option");
+    option.value = i + 1;
+    option.textContent = m;
+    monthSelect.appendChild(option);
+  });
+  monthSelect.value = new Date().getMonth() + 1;
+
+  const yearSelect = document.getElementById("yearSelect");
+  const currentYear = new Date().getFullYear();
+  for (let y = currentYear - 2; y <= currentYear + 2; y++) {
+    const option = document.createElement("option");
+    option.value = y;
+    option.textContent = y;
+    yearSelect.appendChild(option);
+  }
+  yearSelect.value = currentYear;
+
+  loadVendors();
+  updateVendorList();
 }
 
-async function saveVendors(){
-vendors.forEach(v=>{
-saveToDBStore("vendors",v.id,v);
-});
-const btn=document.getElementById("vendorSaveSuccess");
-btn.style.display="block";
-setTimeout(()=>{btn.style.display="none"},3000);
-await new Promise(r=>setTimeout(r,100));
-updateVendorSelects();
-updateVendorsList();
+function onOwnerChange() {
+  currentOwner = document.getElementById("ownerSelect").value;
+  updatePropertySelect();
 }
 
-function saveExpenses(){
-expenses.forEach(e=>{
-saveToDBStore("expenses",e.id,e);
-});
-const btn=document.getElementById("expenseSaveSuccess");
-btn.style.display="block";
-setTimeout(()=>{btn.style.display="none"},3000);
+function loadVendors() {
+  const saved = localStorage.getItem("vendors");
+  if (saved) vendors = JSON.parse(saved);
 }
 
-function saveStatementHistory(){
-statementHistory.forEach(s=>{
-saveToDBStore("statements",s.id,s);
-});
+function saveVendors() {
+  localStorage.setItem("vendors", JSON.stringify(vendors));
+  updateVendorList();
 }
 
-function saveAnnualReports(){
-annualReports.forEach(a=>{
-saveToDBStore("annualReports",a.id,a);
-});
+function addVendor() {
+  const name = document.getElementById("vendorName").value.trim();
+  const phone = document.getElementById("vendorPhone").value.trim();
+  if (!name) { alert("Enter vendor name"); return; }
+  vendors.push({ id: Date.now(), name, phone });
+  saveVendors();
+  document.getElementById("vendorName").value = "";
+  document.getElementById("vendorPhone").value = "";
 }
 
-function showFileName(){
-const file=document.getElementById("expensePDF").files[0];
-if(file){
-document.getElementById("fileName").textContent=`✓ ${file.name}`;
-}
-}
-
-function addVendor(){
-const name=document.getElementById("vendorName").value.trim();
-const contact=document.getElementById("vendorContact").value.trim();
-
-if(!name){alert("Please enter vendor name");return;}
-
-vendors.push({id:Date.now(),name:name,contact:contact});
-saveVendors();
-
-document.getElementById("vendorName").value="";
-document.getElementById("vendorContact").value="";
+function deleteVendor(id) {
+  if (confirm("Delete vendor?")) {
+    vendors = vendors.filter(v => v.id !== id);
+    saveVendors();
+  }
 }
 
-function deleteVendor(id){
-if(confirm("Delete this vendor?")){
-vendors=vendors.filter(v=>v.id!==id);
-deleteFromDB("vendors",id);
-updateVendorsList();
-updateVendorSelects();
-}
-}
-
-function updateVendorSelects(){
-const select=document.getElementById("expenseVendor");
-select.innerHTML='<option value="">-- Select Vendor --</option>';
-vendors.forEach(v=>select.innerHTML+=`<option value="${v.name}">${v.name}</option>`);
+function updateVendorList() {
+  const list = document.getElementById("vendorList");
+  list.innerHTML = vendors.map(v => `
+    <div style="background:#555;padding:8px;margin:5px 0;border-radius:3px;display:flex;justify-content:space-between;align-items:center">
+      <div><strong>${v.name}</strong><br><span style="color:#aaa;font-size:9px">${v.phone}</span></div>
+      <button onclick="deleteVendor(${v.id})" style="background:#dc3545;color:#fff;border:none;padding:3px 8px;border-radius:2px;cursor:pointer;font-size:9px">Delete</button>
+    </div>
+  `).join("");
+  updateExpenseVendorSelect();
 }
 
-function updateVendorsList(){
-const list=document.getElementById("vendorsList");
-if(!vendors || vendors.length===0){
-list.innerHTML='<div style="color:#aaa;font-size:10px">No vendors yet</div>';
-return;
-}
-list.innerHTML=vendors.map(v=>`
-<div class="vendor-item">
-<div>
-<div class="vendor-name">${v.name}</div>
-<div style="color:#aaa;font-size:9px">${v.contact||'No contact'}</div>
-</div>
-<button class="delete-btn" onclick="deleteVendor(${v.id})">🗑</button>
-</div>
-`).join("");
+function updateExpenseVendorSelect() {
+  const select = document.getElementById("expenseVendor");
+  select.innerHTML = '<option value="">-- Select Vendor --</option>';
+  vendors.forEach(v => {
+    const option = document.createElement("option");
+    option.value = v.name;
+    option.textContent = v.name;
+    select.appendChild(option);
+  });
 }
 
-function updatePropertySelects(){
-const select=document.getElementById("expenseProperty");
-select.innerHTML='<option value="">-- Select Property --</option>';
-properties.forEach(p=>select.innerHTML+=`<option value="${p}">${p}</option>`);
+function updatePropertySelect() {
+  const select = document.getElementById("expenseProperty");
+  select.innerHTML = '<option value="">-- Select Property --</option>';
+  properties.forEach(p => {
+    const option = document.createElement("option");
+    option.value = p;
+    option.textContent = p;
+    select.appendChild(option);
+  });
 }
 
-function addExpense(){
-const type=document.getElementById("expenseType").value;
-const property=document.getElementById("expenseProperty").value;
-const vendor=document.getElementById("expenseVendor").value;
-const amount=parseFloat(document.getElementById("expenseAmount").value);
-const notes=document.getElementById("expenseNotes").value;
-const owner=document.getElementById("owner").value;
-const fileInput=document.getElementById("expensePDF");
+function addExpense() {
+  const type = document.getElementById("expenseType").value;
+  const property = document.getElementById("expenseProperty").value;
+  const vendor = document.getElementById("expenseVendor").value;
+  const amount = parseFloat(document.getElementById("expenseAmount").value);
+  const notes = document.getElementById("expenseNotes").value;
 
-if(!property||!vendor||!amount){alert("Please fill in all required fields");return;}
+  if (!property || !vendor || !amount) { alert("Fill all fields"); return; }
 
-const expense={
-id:Date.now(),
-owner:owner,
-type:type,
-property:property,
-vendor:vendor,
-amount:amount,
-notes:notes,
-pdf:null
-};
+  expenses.push({
+    id: Date.now(),
+    owner: currentOwner,
+    type, property, vendor, amount, notes
+  });
 
-if(fileInput.files.length>0){
-const file=fileInput.files[0];
-const reader=new FileReader();
-reader.onload=(e)=>{
-expense.pdf={name:file.name,data:e.target.result};
-expenses.push(expense);
-saveExpenses();
-resetExpenseForm();
-};
-reader.readAsArrayBuffer(file);
-}else{
-expenses.push(expense);
-saveExpenses();
-resetExpenseForm();
-}
+  localStorage.setItem("expenses", JSON.stringify(expenses));
+
+  document.getElementById("expenseAmount").value = "";
+  document.getElementById("expenseNotes").value = "";
+  alert("Expense added!");
 }
 
-function resetExpenseForm(){
-document.getElementById("expenseType").value="Maintenance";
-document.getElementById("expenseProperty").value="";
-document.getElementById("expenseVendor").value="";
-document.getElementById("expenseAmount").value="";
-document.getElementById("expenseNotes").value="";
-document.getElementById("expensePDF").value="";
-document.getElementById("fileName").textContent="";
+function money(x) {
+  return "$" + (Number(x) || 0).toFixed(2);
 }
 
-function deleteExpense(id){
-if(confirm("Delete this expense?")){
-expenses=expenses.filter(e=>e.id!==id);
-deleteFromDB("expenses",id);
-updateExpensesList();
-}
+function num(v) {
+  return parseFloat((v || "0").toString().replace(/[$,]/g, "")) || 0;
 }
 
-function getExpensesForProperty(property){
-return expenses.filter(e=>e.property===property && e.owner===document.getElementById("owner").value);
+function generateReport() {
+  const file = document.getElementById("csvFile").files[0];
+  if (!file) { alert("Upload CSV first"); return; }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    csvData = Papa.parse(e.target.result, { header: true, skipEmptyLines: true }).data;
+    processData();
+    displayReport();
+  };
+  reader.readAsText(file);
 }
 
-function updateExpensesList(){
-const list=document.getElementById("expensesList");
-const owner=document.getElementById("owner").value;
-const ownerExpenses=expenses.filter(e=>e.owner===owner).sort((a,b)=>new Date(b.id)-new Date(a.id)).slice(0,10);
+function processData() {
+  const month = parseInt(document.getElementById("monthSelect").value);
+  const year = parseInt(document.getElementById("yearSelect").value);
+  const ownerData = owners[currentOwner];
+  const percent = ownerData.percent;
+  const type = ownerData.type;
 
-if(ownerExpenses.length===0){
-list.innerHTML='<div style="color:#aaa;font-size:10px">No expenses</div>';
-return;
+  propertyTotals = {};
+  masterTotals = { gross: 0, acc: 0, clean: 0, pmc: 0, expenses: 0, draft: 0, owner: 0, websiteFee: 0 };
+  properties = [];
+
+  let grouped = {};
+
+  csvData.forEach(row => {
+    if (!row["CHECK-IN DATE"]) return;
+    let m = parseInt(row["CHECK-IN DATE"].split("-")[1]);
+    let y = parseInt(row["CHECK-IN DATE"].split("-")[0]);
+    if (m !== month || y !== year) return;
+
+    let listing = row["LISTING'S NICKNAME"] || "Unknown";
+    if (!properties.includes(listing)) properties.push(listing);
+    if (!grouped[listing]) grouped[listing] = [];
+    grouped[listing].push(row);
+  });
+
+  updatePropertySelect();
+
+  Object.keys(grouped).forEach(listing => {
+    let pGross = 0, pAcc = 0, pClean = 0, pPMC = 0, pDraft = 0, pOwner = 0, pWebsiteFee = 0, pExpenses = 0;
+
+    grouped[listing].forEach(row => {
+      let payout = num(row["TOTAL PAYOUT"]);
+      let acc = num(row["ACCOMMODATION FARE"]) - num(row["MARKUP"]);
+      let clean = num(row["CLEANING FARE"]);
+      let pmc = acc * percent;
+      let draft = pmc + clean;
+      let ownerPay = acc - pmc;
+
+      let websiteFee = 0;
+      if (type === "draft") {
+        let code = row["CONFIRMATION CODE"] || "";
+        let platform = row["PLATFORM"] || "";
+        if (!code.toUpperCase().startsWith("HA") && platform.toLowerCase().includes("website")) {
+          websiteFee = payout * 0.01;
+        }
+      }
+
+      pGross += payout;
+      pAcc += acc;
+      pClean += clean;
+      pPMC += pmc;
+      pDraft += draft + websiteFee;
+      pOwner += ownerPay;
+      pWebsiteFee += websiteFee;
+    });
+
+    let propExpenses = expenses.filter(e => e.property === listing && e.owner === currentOwner).reduce((s, e) => s + e.amount, 0);
+    pExpenses = propExpenses;
+
+    propertyTotals[listing] = { gross: pGross, acc: pAcc, clean: pClean, pmc: pPMC, draft: pDraft, owner: pOwner, websiteFee: pWebsiteFee, expenses: pExpenses };
+
+    masterTotals.gross += pGross;
+    masterTotals.acc += pAcc;
+    masterTotals.clean += pClean;
+    masterTotals.pmc += pPMC;
+    masterTotals.draft += pDraft;
+    masterTotals.owner += pOwner;
+    masterTotals.websiteFee += pWebsiteFee;
+    masterTotals.expenses += pExpenses;
+  });
 }
 
-list.innerHTML=ownerExpenses.map(e=>`
-<div class="expense-item">
-<div style="display:flex;justify-content:space-between;align-items:center;width:100%">
-<div style="flex:1">
-<div style="font-weight:bold;color:#fff">${e.type} - ${e.vendor}</div>
-<div style="color:#aaa;font-size:9px">Property: ${e.property}</div>
-<div style="color:#aaa;font-size:9px">${e.notes}</div>
-${e.pdf?`<div style="color:#4CAF50;font-size:9px">📎 ${e.pdf.name}</div>`:""}
-</div>
-<div style="text-align:right">
-<div style="color:#fff;font-weight:bold;font-size:11px">$${e.amount.toFixed(2)}</div>
-<button class="delete-btn" onclick="deleteExpense(${e.id})">🗑</button>
-</div>
-</div>
-</div>
-`).join("");
+function displayReport() {
+  const month = parseInt(document.getElementById("monthSelect").value);
+  const year = parseInt(document.getElementById("yearSelect").value);
+  const type = owners[currentOwner].type;
+
+  let html = `
+    <div class="header">
+      <div class="company-name">OCEAN VACATIONS</div>
+      <p>www.oceanvacationsmb.com | oceanvacationsmb@gmail.com | 843-222-6516</p>
+    </div>
+
+    <div class="report-title">RESERVATION REPORT</div>
+    <p style="text-align:center;font-size:14px;font-weight:bold">${currentOwner} (${type.toUpperCase()})</p>
+    <p style="text-align:center;font-size:12px">Period: ${month}/1/${year} - ${month}/30/${year}</p>
+
+    <div class="summary-box">
+      <div style="font-weight:bold;margin-bottom:15px;text-align:center;font-size:13px">MASTER SUMMARY</div>
+      <div class="summary-items">
+        <div class="summary-item">
+          <div class="summary-label">Gross Payout</div>
+          <div class="summary-value">${money(masterTotals.gross)}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Net Accommodation</div>
+          <div class="summary-value">${money(masterTotals.acc)}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">PMC</div>
+          <div class="summary-value">${money(masterTotals.pmc)}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Cleaning Fee</div>
+          <div class="summary-value">${money(masterTotals.clean)}</div>
+        </div>
+        ${type === "draft" ? `
+        <div class="summary-item">
+          <div class="summary-label">Website Fee</div>
+          <div class="summary-value">${money(masterTotals.websiteFee)}</div>
+        </div>
+        ` : ""}
+        <div class="summary-item">
+          <div class="summary-label">Expenses</div>
+          <div class="summary-value">${money(masterTotals.expenses)}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label" style="background:#333;color:#fff;padding:8px;border-radius:3px">TOTAL PAYOUT</div>
+          <div class="summary-value" style="color:#0066cc">${money(type === "draft" ? masterTotals.draft - masterTotals.expenses : masterTotals.owner - masterTotals.expenses)}</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  Object.keys(propertyTotals).forEach(prop => {
+    let p = propertyTotals[prop];
+    let finalPayout = type === "draft" ? p.draft - p.expenses : p.owner - p.expenses;
+
+    html += `
+      <div style="margin-top:30px;padding:15px;border:1px solid #ddd;border-radius:5px">
+        <h3 style="margin-bottom:10px;color:#333">${prop}</h3>
+        
+        <table>
+          <tr>
+            <th>Metric</th>
+            <th>Amount</th>
+          </tr>
+          <tr><td>Gross Payout</td><td>${money(p.gross)}</td></tr>
+          <tr><td>Net Accommodation</td><td>${money(p.acc)}</td></tr>
+          <tr><td>PMC</td><td>${money(p.pmc)}</td></tr>
+          ${type === "draft" ? `
+          <tr><td>Cleaning Fee</td><td>${money(p.clean)}</td></tr>
+          <tr><td>Website Fee</td><td>${money(p.websiteFee)}</td></tr>
+          ` : ""}
+          <tr><td>Expenses</td><td>${money(p.expenses)}</td></tr>
+          <tr style="background:#333;color:#fff"><td><strong>TOTAL PAYOUT</strong></td><td><strong>${money(finalPayout)}</strong></td></tr>
+        </table>
+      </div>
+    `;
+  });
+
+  document.getElementById("reportContainer").innerHTML = html;
 }
 
-function updateSettingsDisplay(){
-const selectedOwner=document.getElementById("owner").value;
-const ownerData=owners[selectedOwner];
-const isDraft=ownerData.type==="draft";
+function generateSummary() {
+  if (!csvData || csvData.length === 0) { alert("Generate report first"); return; }
 
-updateExpensesList();
+  const month = parseInt(document.getElementById("monthSelect").value);
+  const year = parseInt(document.getElementById("yearSelect").value);
+  const ownerData = owners[currentOwner];
+  const type = ownerData.type;
+  const salesFeePercent = ownerData.salesFeePercent;
+  const finalPayout = type === "draft" ? masterTotals.draft - masterTotals.expenses : masterTotals.owner - masterTotals.expenses;
+  const salesFeeAmount = masterTotals.pmc * (salesFeePercent / 100);
 
-let html=`
-<div class="owner-item">
-<div class="owner-item-name">👤 ${selectedOwner}</div>
-<div class="owner-item-control">
-<label class="owner-item-label">Commission (%)</label>
-<input type="number" step="0.01" min="0" max="100" value="${(ownerData.percent*100).toFixed(2)}" onchange="updateOwner('${selectedOwner}','percent',this.value/100)">
-</div>
-<div class="owner-item-control">
-<label class="owner-item-label">Type</label>
-<select onchange="updateOwner('${selectedOwner}','type',this.value)">
-<option value="draft" ${ownerData.type==='draft'?'selected':''}>Draft</option>
-<option value="payout" ${ownerData.type==='payout'?'selected':''}>Payout</option>
-</select>
-</div>
-<div class="owner-item-control">
-<label class="owner-item-label">Sales Person Fee (%)</label>
-<input type="number" step="0.01" min="0" max="100" value="${(ownerData.salesFeePercent).toFixed(2)}" onchange="updateOwner('${selectedOwner}','salesFeePercent',this.value)">
-</div>
-`;
+  let html = `
+    <button class="btn back-btn" onclick="generateReport()">← Back to Report</button>
+    <button class="btn print-btn" onclick="window.print()">🖨️ Print</button>
 
-if(!isDraft){
-html+=`
-<div class="owner-item-control">
-<label class="owner-item-label">Tax Reporting Municipalities</label>
-<div class="checkbox-group">
-<div class="checkbox-item"><input type="checkbox" id="mun_SC" ${ownerData.municipalities?.SC?'checked':''} onchange="updateMunicipality('${selectedOwner}','SC',this.checked)"><label for="mun_SC">SC</label></div>
-<div class="checkbox-item"><input type="checkbox" id="mun_MB" ${ownerData.municipalities?.MB?'checked':''} onchange="updateMunicipality('${selectedOwner}','MB',this.checked)"><label for="mun_MB">MB</label></div>
-<div class="checkbox-item"><input type="checkbox" id="mun_NMB" ${ownerData.municipalities?.NMB?'checked':''} onchange="updateMunicipality('${selectedOwner}','NMB',this.checked)"><label for="mun_NMB">NMB</label></div>
-<div class="checkbox-item"><input type="checkbox" id="mun_SSB" ${ownerData.municipalities?.SSB?'checked':''} onchange="updateMunicipality('${selectedOwner}','SSB',this.checked)"><label for="mun_SSB">SSB</label></div>
-<div class="checkbox-item"><input type="checkbox" id="mun_HC" ${ownerData.municipalities?.HC?'checked':''} onchange="updateMunicipality('${selectedOwner}','HC',this.checked)"><label for="mun_HC">HC</label></div>
-</div>
-</div>
-`;
+    <div class="header">
+      <div class="company-name">OCEAN VACATIONS</div>
+      <div class="report-title">SUMMARY REPORT</div>
+      <p>${currentOwner} (${type.toUpperCase()}) | Period: ${month}/1/${year}</p>
+    </div>
+
+    <div class="summary-box">
+      <h3 style="margin-bottom:15px">💰 ACCOMMODATION & SALES</h3>
+      <table>
+        <tr><td>Total Accommodation</td><td style="text-align:right;font-weight:bold">${money(masterTotals.acc)}</td></tr>
+        <tr><td>PMC Amount</td><td style="text-align:right;font-weight:bold">${money(masterTotals.pmc)}</td></tr>
+        <tr><td>Sales Fee Rate</td><td style="text-align:right;font-weight:bold">${salesFeePercent.toFixed(2)}%</td></tr>
+        <tr style="background:#333;color:#fff"><td><strong>Sales Amount Due</strong></td><td style="text-align:right"><strong>${money(salesFeeAmount)}</strong></td></tr>
+      </table>
+    </div>
+
+    <div class="summary-box">
+      <h3 style="margin-bottom:15px">💳 PAYMENT INFO</h3>
+      <table>
+        <tr><td>Owner Name</td><td style="text-align:right;font-weight:bold">${currentOwner}</td></tr>
+        <tr><td>Owner Type</td><td style="text-align:right;font-weight:bold">${type.toUpperCase()}</td></tr>
+        <tr><td>Gross Payout</td><td style="text-align:right;font-weight:bold">${money(masterTotals.gross)}</td></tr>
+        <tr><td>Expenses</td><td style="text-align:right;font-weight:bold">${money(masterTotals.expenses)}</td></tr>
+        <tr style="background:#0066cc;color:#fff"><td><strong>NET PAYOUT</strong></td><td style="text-align:right"><strong>${money(finalPayout)}</strong></td></tr>
+      </table>
+    </div>
+
+    <div class="summary-box">
+      <h3 style="margin-bottom:15px">🏦 PMC TRANSFER</h3>
+      <table>
+        <tr><td>Transfer to PMC Account</td><td style="text-align:right;font-weight:bold">${money(masterTotals.pmc)}</td></tr>
+      </table>
+    </div>
+  `;
+
+  document.getElementById("reportContainer").innerHTML = html;
 }
 
-html+=`</div>`;
+function generateAnnual() {
+  const type = owners[currentOwner].type;
+  if (type !== "payout") { alert("Annual Report is for PAYOUT owners only"); return; }
 
-document.getElementById("ownersList").innerHTML=html;
-document.getElementById("settingsTitle").textContent=`${selectedOwner} - Settings`;
+  const year = parseInt(document.getElementById("yearSelect").value);
+
+  let html = `
+    <button class="btn back-btn" onclick="generateReport()">← Back to Report</button>
+    <button class="btn print-btn" onclick="window.print()">🖨️ Print</button>
+
+    <div class="header">
+      <div class="company-name">OCEAN VACATIONS</div>
+      <div class="report-title">ANNUAL REPORT - ${year}</div>
+      <p>${currentOwner}</p>
+    </div>
+
+    <div class="summary-box">
+      <h3 style="margin-bottom:15px">📊 ANNUAL INCOME SUMMARY</h3>
+      <table>
+        <tr><td>Total Accommodation</td><td style="text-align:right;font-weight:bold">${money(masterTotals.acc)}</td></tr>
+        <tr><td>PMC Charged</td><td style="text-align:right;font-weight:bold">${money(masterTotals.pmc)}</td></tr>
+        <tr><td>Total Expenses</td><td style="text-align:right;font-weight:bold">${money(masterTotals.expenses)}</td></tr>
+        <tr style="background:#0066cc;color:#fff"><td><strong>NET ANNUAL AMOUNT</strong></td><td style="text-align:right"><strong>${money(masterTotals.owner - masterTotals.expenses)}</strong></td></tr>
+      </table>
+    </div>
+  `;
+
+  document.getElementById("reportContainer").innerHTML = html;
 }
 
-function updateOwner(name,field,value){
-if(field==='percent'){
-owners[name].percent=parseFloat(value);
-}else if(field==='type'){
-owners[name].type=value;
-updateSettingsDisplay();
-}else if(field==='salesFeePercent'){
-owners[name].salesFeePercent=parseFloat(value)||0;
-}
+function downloadPDF() {
+  html2pdf().set({ margin: 10, jsPDF: { unit: "mm", format: "a4" } })
+    .from(document.getElementById("reportContainer"))
+    .save("Report.pdf");
 }
 
-function updateMunicipality(owner,municipality,checked){
-if(!owners[owner].municipalities){
-owners[owner].municipalities={};
-}
-owners[owner].municipalities[municipality]=checked;
-}
-
-function toggleSettings(){
-document.getElementById("settingsBox").classList.toggle("open");
-}
-
-function toggleExpense(){
-document.getElementById("expenseBox").classList.toggle("open");
-}
-
-function toggleVendors(){
-document.getElementById("vendorBox").classList.toggle("open");
-}
-
-function viewHistory(){
-const owner=document.getElementById("owner").value;
-
-let html=`
-<button class="back-btn" onclick="goBackFromHistory()">← Back</button>
-<h2 style="text-align:center;margin-bottom:20px">Statement History - ${owner}</h2>
-<div class="history-list">
-`;
-
-const ownerHistory=statementHistory.filter(s=>s.owner===owner).sort((a,b)=>new Date(b.date)-new Date(a.date));
-
-if(ownerHistory.length===0){
-html+=`<div style="padding:20px;text-align:center;color:#666">No statements generated yet</div>`;
-}else{
-ownerHistory.forEach(s=>{
-html+=`
-<div class="history-item">
-<div>
-<div style="font-weight:bold;color:#333">${s.month}/${s.year}</div>
-<div style="color:#666;font-size:10px">Generated: ${new Date(s.date).toLocaleString()}</div>
-<div style="color:#666;font-size:10px">Payout: $${s.payout.toFixed(2)}</div>
-</div>
-<button class="delete-btn" onclick="deleteStatement(${s.id})">🗑 Delete</button>
-</div>
-`;
-});
-}
-
-html+=`</div>`;
-
-document.getElementById("report").classList.add("hidden");
-document.getElementById("summaryPage").classList.add("hidden");
-document.getElementById("annualPage").classList.add("hidden");
-document.getElementById("historyPage").classList.remove("hidden");
-document.getElementById("historyPage").innerHTML=html;
-}
-
-function deleteStatement(id){
-if(confirm("Delete this statement from history?")){
-statementHistory=statementHistory.filter(s=>s.id!==id);
-deleteFromDB("statements",id);
-viewHistory();
-}
-}
-
-function goBackFromHistory(){
-document.getElementById("historyPage").classList.add("hidden");
-document.getElementById("report").classList.remove("hidden");
-}
-
-const ownerSelect=document.getElementById("owner");
-Object.keys(owners).forEach(o=>ownerSelect.innerHTML+=`<option>${o}</option>`);
-
-const monthSelect=document.getElementById("month");
-const yearSelect=document.getElementById("year");
-const now=new Date();
-
-for(let m=1;m<=12;m++){
-monthSelect.innerHTML+=`<option value="${m}">${new Date(0,m-1).toLocaleString('default',{month:'long'})}</option>`;
-}
-monthSelect.value=now.getMonth()+1;
-
-for(let y=now.getFullYear()-2;y<=now.getFullYear()+2;y++){
-yearSelect.innerHTML+=`<option>${y}</option>`;
-}
-yearSelect.value=now.getFullYear();
-
-function num(v){return parseFloat((v||"0").toString().replace(/[$,]/g,""))||0}
-function money(x){return "$"+(Number(x)||0).toFixed(2)}
-function stay(i,o){if(!i||!o)return"";let a=i.split("-"),b=o.split("-");return a[1]+"/"+a[2]+" - "+b[1]+"/"+b[2]}
-function lastDay(y,m){return new Date(y,m,0).getDate()}
-
-let propertyTotals={};
-let masterTotals={};
-
-async function runReport(){
-document.getElementById("report").classList.remove("hidden");
-document.getElementById("summaryPage").classList.add("hidden");
-document.getElementById("annualPage").classList.add("hidden");
-document.getElementById("historyPage").classList.add("hidden");
-
-propertyTotals={};
-masterTotals={gross:0,acc:0,clean:0,pmc:0,expenses:0,draft:0,owner:0,websiteFee:0};
-
-const file=document.getElementById("fileInput").files[0];
-if(!file)return;
-
-const text=await file.text();
-csvData=Papa.parse(text,{header:true,skipEmptyLines:true}).data;
-
-const owner=ownerSelect.value;
-const percent=owners[owner].percent;
-const type=owners[owner].type;
-const month=parseInt(monthSelect.value);
-const year=parseInt(yearSelect.value);
-const endDay=lastDay(year,month);
-
-const statementDate=new Date(year,month,1);
-const paymentDate=new Date(year,month,5);
-
-let grouped={};
-properties=[];
-
-csvData.forEach(r=>{
-if(!r["CHECK-IN DATE"])return;
-let m=parseInt(r["CHECK-IN DATE"].split("-")[1]);
-let y=parseInt(r["CHECK-IN DATE"].split("-")[0]);
-if(m!==month||y!==year)return;
-
-let listing=r["LISTING'S NICKNAME"]||"Unknown";
-if(!properties.includes(listing)) properties.push(listing);
-if(!grouped[listing])grouped[listing]=[];
-grouped[listing].push(r);
-});
-
-updatePropertySelects();
-
-let reportHTML="";
-
-reportHTML+=`
-<div class="header">
-<div>
-<div class="company">OCEAN VACATIONS</div>
-<div class="company-info">
-www.oceanvacationsmb.com<br>
-oceanvacationsmb@gmail.com<br>
-843-222-6516
-</div>
-</div>
-<div style="text-align:right;font-size:9px">
-Statement Date: ${statementDate.toLocaleDateString()}<br>
-Payment Date: ${paymentDate.toLocaleDateString()}
-</div>
-</div>
-
-<div class="title">RESERVATION REPORT</div>
-<div class="owner">${owner}</div>
-<div class="period"><strong>PERIOD:</strong> ${month}/1/${year} - ${month}/${endDay}/${year}</div>
-`;
-
-Object.keys(grouped).forEach(listing=>{
-
-let pGross=0,pAcc=0,pClean=0,pPMC=0,pDraft=0,pOwner=0,pWebsiteFee=0,pExpenses=0;
-
-grouped[listing].forEach(r=>{
-let payout=num(r["TOTAL PAYOUT"]);
-let acc=num(r["ACCOMMODATION FARE"])-num(r["MARKUP"]);
-let clean=num(r["CLEANING FARE"]);
-let pmc=acc*percent;
-let draft=pmc+clean;
-let ownerPay=acc-pmc;
-
-let websiteFee=0;
-if(type==="draft"){
-let confirmationCode=r["CONFIRMATION CODE"]||"";
-let isVRBO=confirmationCode.toUpperCase().startsWith("HA");
-let platform=r["PLATFORM"]||"";
-let platformLower=platform.toLowerCase();
-
-if(!isVRBO && platformLower.includes("website")){
-websiteFee=payout*0.01;
-pWebsiteFee+=websiteFee;
-}
-}
-
-pGross+=payout;
-pAcc+=acc;
-pClean+=clean;
-pPMC+=pmc;
-pDraft+=draft+websiteFee;
-pOwner+=ownerPay;
+// Initialize on load
+window.addEventListener("DOMContentLoaded", () => {
+  initDropdowns();
+  loadVendors();
+  const saved = localStorage.getItem("expenses");
+  if (saved) expenses = JSON.parse(saved);
 });
 
-const propertyExpenses=getExpensesForProperty(listing);
-propertyExpenses.forEach(e=>{
-pExpenses+=e.amount;
-});
+</script>
 
-propertyTotals[listing]={gross:pGross,acc:pAcc,clean:pClean,pmc:pPMC,draft:pDraft,owner:pOwner,websiteFee:pWebsiteFee,expenses:pExpenses};
-
-masterTotals.gross+=pGross;
-masterTotals.acc+=pAcc;
-masterTotals.clean+=pClean;
-masterTotals.pmc+=pPMC;
-masterTotals.draft+=pDraft;
-masterTotals.owner+=pOwner;
-masterTotals.websiteFee+=pWebsiteFee;
-masterTotals.expenses+=pExpenses;
-});
-
-reportHTML+=`
-<div class="summary-box-master">
-<div class="summary-header-master">SUMMARY</div>
-<div class="summary-master">
-${type==="draft"
-?`
-<div class="summary-item-master"><span class="summary-item-label-master">GROSS PAYOUT</span><span class="summary-item-amount-master">${money(masterTotals.gross)}</span></div>
-<div class="summary-item-master"><span class="summary-item-label-master">NET ACCOMMODATION</span><span class="summary-item-amount-master">${money(masterTotals.acc)}</span></div>
-<div class="summary-item-master"><span class="summary-item-label-master">PMC</span><span class="summary-item-amount-master">${money(masterTotals.pmc)}</span></div>
-<div class="summary-item-master"><span class="summary-item-label-master">CLEANING FEE</span><span class="summary-item-amount-master">${money(masterTotals.clean)}</span></div>
-<div class="summary-item-master"><span class="summary-item-label-master">WEBSITE FEE</span><span class="summary-item-amount-master">${money(masterTotals.websiteFee)}</span></div>
-<div class="summary-item-master"><span class="summary-item-label-master">EXPENSES</span><span class="summary-item-amount-master">${money(masterTotals.expenses)}</span></div>
-<div class="summary-item-master"><span class="summary-item-label-master">TOTAL PAYOUT</span><span class="summary-item-amount-master" id="masterBal">${money(masterTotals.draft-masterTotals.expenses)}</span></div>
-`
-:`
-<div class="summary-item-master"><span class="summary-item-label-master">NET ACCOMMODATION</span><span class="summary-item-amount-master">${money(masterTotals.acc)}</span></div>
-<div class="summary-item-master"><span class="summary-item-label-master">PMC</span><span class="summary-item-amount-master">${money(masterTotals.pmc)}</span></div>
-<div class="summary-item-master"><span class="summary-item-label-master">EXPENSES</span><span class="summary-item-amount-master">${money(masterTotals.expenses)}</span></div>
-<div class="summary-item-master"><span class="summary-item-label-master">TOTAL PAYOUT</span><span class="summary-item-amount-master" id="masterBal">${money(masterTotals.owner-masterTotals.expenses)}</span></div>
-`}
-</div>
-</div>
-
-<div class="page-break"></div>
-`;
-
-Object.keys(grouped).forEach(listing=>{
-
-let p=propertyTotals[listing];
-const propExpenses=getExpensesForProperty(listing);
-const finalPayout=type==="draft"?p.draft-p.expenses:p.owner-p.expenses;
-
-reportHTML+=`
-<div class="property">
-<div class="property-title">${listing}</div>
-<div class="property-period"><strong>PERIOD:</strong> ${month}/1/${year} - ${month}/${endDay}/${year}</div>
-
-${propExpenses.length>0?`
-<div class="property-notes">
-<strong>📝 Expenses:</strong><br>
-${propExpenses.map(e=>`${e.type} - ${e.vendor}: $${e.amount.toFixed(2)}${e.notes?` (${e.notes})`:''}`).join('<br>')}
-</div>
-`:""}
-
-<div class="summary-box">
-<div class="summary-header">SUMMARY</div>
-<div class="summary">
-${type==="draft"
-?`
-<div class="summary-item"><span class="summary-item-label">GROSS PAYOUT</span><span class="summary-item-amount">${money(p.gross)}</span></div>
-<div class="summary-item"><span class="summary-item-label">NET ACCOMMODATION</span><span class="summary-item-amount">${money(p.acc)}</span></div>
-<div class="summary-item"><span class="summary-item-label">PMC</span><span class="summary-item-amount">${money(p.pmc)}</span></div>
-<div class="summary-item"><span class="summary-item-label">CLEANING FEE</span><span class="summary-item-amount">${money(p.clean)}</span></div>
-<div class="summary-item"><span class="summary-item-label">WEBSITE FEE</span><span class="summary-item-amount">${money(p.websiteFee)}</span></div>
-<div class="summary-item"><span class="summary-item-label">EXPENSES</span><span class="summary-item-amount">${money(p.expenses)}</span></div>
-<div class="summary-item"><span class="summary-item-label">TOTAL PAYOUT</span><span class="summary-item-amount" id="bal-${listing}">${money(finalPayout)}</span></div>
-`
-:`
-<div class="summary-item"><span class="summary-item-label">NET ACCOMMODATION</span><span class="summary-item-amount">${money(p.acc)}</span></div>
-<div class="summary-item"><span class="summary-item-label">PMC</span><span class="summary-item-amount">${money(p.pmc)}</span></div>
-<div class="summary-item"><span class="summary-item-label">EXPENSES</span><span class="summary-item-amount">${money(p.expenses)}</span></div>
-<div class="summary-item"><span class="summary-item-label">TOTAL PAYOUT</span><span class="summary-item-amount" id="bal-${listing}">${money(finalPayout)}</span></div>
-`}
-</div>
-</div>
-
-<table>
-<tr>
-<th>Reservation</th>
-<th>Stay</th>
-<th>Platform</th>
-<th>Accommodation</th>
-<th>PMC</th>
-${type==="draft"?"<th>Cleaning Fee</th><th>Website Fee</th><th>Payout</th>":"<th>Owner</th>"}
-</tr>
-`;
-
-grouped[listing].forEach(r=>{
-let acc=num(r["ACCOMMODATION FARE"])-num(r["MARKUP"]);
-let clean=num(r["CLEANING FARE"]);
-let payout=num(r["TOTAL PAYOUT"]);
-let pmc=acc*percent;
-let draft=pmc+clean;
-let ownerPay=acc-pmc;
-let platform=r["PLATFORM"]||"N/A";
-let confirmationCode=r["CONFIRMATION CODE"]||"N/A";
-
-let isVRBO=confirmationCode.toUpperCase().startsWith("HA");
-let displayPlatform=isVRBO?"VRBO":platform;
-
-let websiteFee=0;
-if(type==="draft"){
-let platformLower=platform.toLowerCase();
-if(!isVRBO && platformLower.includes("website")){
-websiteFee=payout*0.01;
-}
-}
-
-if(payout===0 && clean===0){
-return;
-}
-
-let draftDisplay=draft+websiteFee;
-
-reportHTML+=`
-<tr>
-<td>${confirmationCode.substring(0,8)}</td>
-<td>${stay(r["CHECK-IN DATE"],r["CHECK-OUT DATE"])}</td>
-<td style="max-width:80px;word-wrap:break-word;">${displayPlatform}</td>
-<td>${money(acc)}</td>
-<td>${money(pmc)}</td>
-${type==="draft"
-?`<td>${money(clean)}</td><td>${money(websiteFee)}</td><td>${money(draftDisplay)}</td>`
-:`<td>${money(ownerPay)}</td>`}
-</tr>
-`;
-});
-
-reportHTML+=`
-</table>
-</div>
-
-<div class="page-break"></div>
-`;
-});
-
-document.getElementById("report").innerHTML=reportHTML;
-}
-
-function runSummary(){
-const owner=ownerSelect.value;
-const ownerData=owners[owner];
-const type=ownerData.type;
-const salesFeePercent=ownerData.salesFeePercent;
-const percent=ownerData.percent;
-const month=parseInt(monthSelect.value);
-const year=parseInt(yearSelect.value);
-const endDay=lastDay(year,month);
-
-const salesFeeAmount=masterTotals.pmc*(salesFeePercent/100);
-const finalPayout=type==="draft"?masterTotals.draft-masterTotals.expenses:masterTotals.owner-masterTotals.expenses;
-
-let taxByProperty={};
-let hasTaxes=false;
-
-if(type==="payout"){
-csvData.forEach(r=>{
-if(!r["CHECK-IN DATE"])return;
-let m=parseInt(r["CHECK-IN DATE"].split("-")[1]);
-let y=parseInt(r["CHECK-IN DATE"].split("-")[0]);
-if(m!==month||y!==year)return;
-
-let cityTax=num(r["CITY TAX"])||0;
-let stateTax=num(r["STATE TAX"])||0;
-let countyTax=num(r["COUNTY TAX"])||0;
-let occupancyTax=num(r["OCCUPANCY TAX"])||0;
-let totalTax=cityTax+stateTax+countyTax+occupancyTax;
-
-if(totalTax>0){
-hasTaxes=true;
-let payout=num(r["TOTAL PAYOUT"])||0;
-let property=r["LISTING'S NICKNAME"]||"Unknown";
-
-if(!taxByProperty[property]){
-taxByProperty[property]={payout:0};
-}
-taxByProperty[property].payout+=payout;
-}
-});
-}
-
-let selectedMunicipalities=[];
-if(ownerData.municipalities){
-Object.entries(ownerData.municipalities).forEach(([mun,checked])=>{
-if(checked) selectedMunicipalities.push(mun);
-});
-}
-
-let summaryHTML=`
-<button class="back-btn" onclick="goBackToStatement()">← Back to Statement</button>
-<button class="print-btn" onclick="printSummary()" style="position:absolute;top:20px;right:20px;padding:8px 15px">🖨️ Print this page</button>
-
-<div class="summary-page-header">SUMMARY REPORT</div>
-<div class="summary-page-period"><strong>OWNER:</strong> ${owner} (${type.toUpperCase()}) | <strong>PERIOD:</strong> ${month}/1/${year} - ${month}/${endDay}/${year}</div>
-
-<div class="summary-section">
-<div class="summary-section-title">💰 ACCOMMODATION & SALES PERSON FEE</div>
-<div class="summary-line">
-<span>Total Accommodation:</span>
-<span class="summary-line-value">${money(masterTotals.acc)}</span>
-</div>
-<div class="summary-line">
-<span>PMC Amount (Base):</span>
-<span class="summary-line-value">${money(masterTotals.pmc)}</span>
-</div>
-<div class="summary-line">
-<span>Sales Person Fee Rate:</span>
-<span class="summary-line-value">${salesFeePercent.toFixed(2)}%</span>
-</div>
-<div class="summary-line" style="border-bottom:2px solid #000;padding-top:8px;padding-bottom:8px">
-<span style="font-size:13px"><strong>Sales Person Amount Due:</strong></span>
-<span class="summary-line-value" style="font-size:13px">${money(salesFeeAmount)}</span>
-</div>
-</div>
-
-${type==="draft"?`
-<div class="summary-section">
-<div class="summary-section-title">🌐 WEBSITE BOOKING FEE & EXPENSES</div>
-<div class="summary-line">
-<span>Total Website Booking Fee (1.00%):</span>
-<span class="summary-line-value">${money(masterTotals.websiteFee)}</span>
-</div>
-<div class="summary-line">
-<span>Cleaning Fee:</span>
-<span class="summary-line-value">${money(masterTotals.clean)}</span>
-</div>
-<div class="summary-line" style="border-bottom:2px solid #000;padding-top:8px;padding-bottom:8px">
-<span>Total Expenses/Credits:</span>
-<span class="summary-line-value">${money(masterTotals.expenses)}</span>
-</div>
-</div>
-`:""}
-
-<div class="summary-section">
-<div class="summary-section-title">💳 PAYMENT INFORMATION</div>
-<div class="summary-line">
-<span>Owner Name:</span>
-<span class="summary-line-value">${owner}</span>
-</div>
-<div class="summary-line">
-<span>Owner Type:</span>
-<span class="summary-line-value">${type.toUpperCase()}</span>
-</div>
-<div class="summary-line">
-<span>Gross Payout:</span>
-<span class="summary-line-value">${money(masterTotals.gross)}</span>
-</div>
-<div class="summary-line" style="border-bottom:2px solid #000;padding-top:8px;padding-bottom:8px">
-<span style="font-size:13px"><strong>Net Payout Amount:</strong></span>
-<span class="summary-line-value" style="font-size:13px;color:#000;font-weight:bold;font-size:14px">${money(finalPayout)}</span>
-</div>
-</div>
-
-<div class="summary-section">
-<div class="summary-section-title">🏦 PMC TRANSFER</div>
-<div class="summary-line">
-<span>Transfer to PMC Account:</span>
-<span class="summary-line-value">${money(masterTotals.pmc)}</span>
-</div>
-<div style="font-size:10px;color:#666;margin-top:10px">
-This amount needs to be transferred to the PMC bank account
-</div>
-</div>
-
-${type==="payout" && hasTaxes && selectedMunicipalities.length>0?`
-<div class="warning-section">
-<div class="warning-title">⚠️ TAX REPORTING REQUIRED - CITY/STATE TAXES COLLECTED</div>
-<div style="font-size:11px;margin-bottom:10px;color:#333"><strong>Municipalities:</strong> ${selectedMunicipalities.join(', ')}</div>
-<table class="tax-table">
-<tr>
-<th>Property Name</th>
-<th>Total Payout Amount to Report</th>
-</tr>
-${Object.entries(taxByProperty).map(([property, data])=>`
-<tr>
-<td>${property}</td>
-<td class="tax-amount">${money(data.payout)}</td>
-</tr>
-`).join("")}
-<tr style="background:#ffc104;font-weight:bold">
-<td>TOTAL</td>
-<td class="tax-amount">${money(Object.values(taxByProperty).reduce((sum, p) => sum + p.payout, 0))}</td>
-</tr>
-</table>
-<p style="font-size:11px;margin-top:15px;color:#333">
-📝 This is the total payout from reservations with taxes withheld, broken down by property. Report these amounts to your ${selectedMunicipalities.join(', ')} tax authorities.
-</p>
-</div>
-`:""}
-`;
-
-lastSummaryHTML=summaryHTML;
-
-statementHistory.push({
-id:Date.now(),
-owner:owner,
-month:month,
-year:year,
-date:new Date().toISOString(),
-payout:finalPayout
-});
-saveStatementHistory();
-
-document.getElementById("report").classList.add("hidden");
-document.getElementById("summaryPage").classList.remove("hidden");
-document.getElementById("annualPage").classList.add("hidden");
-document.getElementById("historyPage").classList.add("hidden");
-document.getElementById("summaryPage").innerHTML=summaryHTML;
-}
-
-function runAnnual(){
-const owner=ownerSelect.value;
-const ownerData=owners[owner];
-const type=ownerData.type;
-
-if(type==="draft"){
-alert("Annual Report is only for PAYOUT owners");
-return;
-}
-
-const year=parseInt(yearSelect.value);
-let annualData={accommodation:0,pmc:0,expenses:0};
-
-// Calculate for all months of the year
-for(let m=1;m<=12;m++){
-const ownerExpenses=expenses.filter(e=>e.owner===owner);
-annualData.expenses+=ownerExpenses.reduce((sum,e)=>sum+e.amount,0);
-}
-
-// Get from statements for this owner and year
-statementHistory.forEach(s=>{
-if(s.owner===owner && s.year===year){
-annualData.accommodation+=s.payout*0.8; // approx
-annualData.pmc+=s.payout*0.2; // approx
-}
-});
-
-let annualHTML=`
-<button class="back-btn" onclick="goBackToStatement()">← Back to Statement</button>
-<button class="print-btn" onclick="printAnnual()" style="position:absolute;top:20px;right:20px;padding:8px 15px">🖨️ Print</button>
-
-<div class="summary-page-header">ANNUAL REPORT - ${year}</div>
-<div class="summary-page-period"><strong>OWNER:</strong> ${owner}</div>
-
-<div class="summary-section">
-<div class="summary-section-title">📊 ANNUAL INCOME SUMMARY</div>
-<div class="summary-line">
-<span>Total Accommodation:</span>
-<span class="summary-line-value">${money(annualData.accommodation)}</span>
-</div>
-<div class="summary-line">
-<span>PMC Charged:</span>
-<span class="summary-line-value">${money(annualData.pmc)}</span>
-</div>
-<div class="summary-line" style="border-bottom:2px solid #000;padding-top:8px;padding-bottom:8px">
-<span>Total Expenses/Credits:</span>
-<span class="summary-line-value">${money(annualData.expenses)}</span>
-</div>
-</div>
-
-<div class="summary-section">
-<div class="summary-section-title">💰 NET ANNUAL SUMMARY</div>
-<div class="summary-line">
-<span style="font-size:13px"><strong>Annual Net Amount:</strong></span>
-<span class="summary-line-value" style="font-size:14px;font-weight:bold">${money(annualData.accommodation-annualData.expenses)}</span>
-</div>
-</div>
-`;
-
-annualReports.push({
-id:Date.now(),
-owner:owner,
-year:year,
-date:new Date().toISOString(),
-data:annualData
-});
-saveAnnualReports();
-
-document.getElementById("report").classList.add("hidden");
-document.getElementById("summaryPage").classList.add("hidden");
-document.getElementById("annualPage").classList.remove("hidden");
-document.getElementById("historyPage").classList.add("hidden");
+</body>
+</html>
