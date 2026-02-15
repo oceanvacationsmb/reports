@@ -305,13 +305,13 @@ let pmc=acc*percent;
 let draft=pmc+clean;
 let ownerPay=acc-pmc;
 
-// Check if manual, manual_direct, or website booking (website fee for draft owners only)
+// Check if website or website_direct or website booking (website fee for draft owners only)
 let websiteFee=0;
 if(type==="draft"){
 let platform=r["PLATFORM"]||"";
 let platformLower=platform.toLowerCase();
-if(platformLower.includes("manual") || platformLower.includes("website")){
-websiteFee=payout*0.01; // 1% of payout for manual, manual_direct, and website bookings
+if(platformLower.includes("website")){
+websiteFee=payout*0.01; // 1% of payout for website and website_direct bookings
 pWebsiteFee+=websiteFee;
 }
 }
@@ -403,18 +403,33 @@ ${type==="draft"
 <th>Platform</th>
 <th>Accom</th>
 <th>PMC</th>
-${type==="draft"?"<th>Clean</th><th>Draft</th>":"<th>Owner</th>"}
+${type==="draft"?"<th>Clean</th><th>Web Fee</th><th>Draft</th>":"<th>Owner</th>"}
 </tr>
 `;
 
 grouped[listing].forEach(r=>{
 let acc=num(r["ACCOMMODATION FARE"])-num(r["MARKUP"]);
 let clean=num(r["CLEANING FARE"]);
+let payout=num(r["TOTAL PAYOUT"]);
 let pmc=acc*percent;
 let draft=pmc+clean;
 let ownerPay=acc-pmc;
 let platform=r["PLATFORM"]||"N/A";
 let confirmationCode=r["CONFIRMATION CODE"]||"N/A";
+
+// Check if website booking for fee calculation
+let websiteFee=0;
+if(type==="draft"){
+let platformLower=platform.toLowerCase();
+if(platformLower.includes("website")){
+websiteFee=payout*0.01;
+}
+}
+
+// Skip if payout is 0 AND cleaning fee is 0
+if(payout===0 && clean===0){
+return;
+}
 
 reportHTML+=`
 <tr>
@@ -424,7 +439,7 @@ reportHTML+=`
 <td>${money(acc)}</td>
 <td>${money(pmc)}</td>
 ${type==="draft"
-?`<td>${money(clean)}</td><td>${money(draft)}</td>`
+?`<td>${money(clean)}</td><td>${money(websiteFee)}</td><td>${money(draft)}</td>`
 :`<td>${money(ownerPay)}</td>`}
 </tr>
 `;
@@ -512,7 +527,7 @@ ${type==="draft"?`
 <span class="summary-line-value">${money(masterTotals.websiteFee)}</span>
 </div>
 <div style="font-size:11px;margin-top:10px;color:#666">
-Charged on manual, manual_direct, and website bookings made through your platform
+Charged on website and website_direct bookings made through your platform
 </div>
 </div>
 `:""}
