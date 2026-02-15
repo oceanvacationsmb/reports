@@ -40,12 +40,13 @@ tr:nth-child(even){background:#fafafa}
 .property-section{margin:40px 0;padding:20px;border:1px solid #ddd;border-radius:5px;background:#fff}
 .property-title{font-size:14px;font-weight:bold;margin-bottom:15px;display:flex;align-items:center}
 .property-icon{font-size:18px;margin-right:10px}
-.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin:20px 0}
-.summary-card{background:#f9f9f9;border:1px solid #ddd;padding:15px;text-align:center;border-radius:5px}
-.summary-label{font-size:11px;color:#666;font-weight:bold}
-.summary-value{font-size:16px;font-weight:bold;color:#000;margin-top:8px}
-.attachment{background:#f0f0f0;padding:10px;margin:10px 0;border-radius:3px;font-size:10px}
-.attachment-link{color:#0066cc;cursor:pointer;text-decoration:underline}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}
+.summary-card{background:#f9f9f9;border:1px solid #ddd;padding:12px;text-align:center;border-radius:5px}
+.summary-label{font-size:10px;color:#666;font-weight:bold}
+.summary-value{font-size:14px;font-weight:bold;color:#000;margin-top:6px}
+.attachment{background:#f0f0f0;padding:10px;margin:10px 0;border-radius:3px;font-size:10px;display:flex;justify-content:space-between;align-items:center}
+.attachment-left{flex:1}
+.attachment-link{color:#0066cc;cursor:pointer;text-decoration:underline;margin-right:10px}
 .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.5)}
 .modal-content{background:#fff;margin:10% auto;padding:20px;border:1px solid #888;width:80%;max-width:600px;border-radius:5px}
 .modal-close{color:#aaa;float:right;font-size:28px;font-weight:bold;cursor:pointer}
@@ -421,6 +422,14 @@ async function addExpense() {
   }
 }
 
+async function deleteExpense(id) {
+  if (confirm("Delete this expense?")) {
+    expenses = expenses.filter(e => e.id !== id);
+    deleteDB("expenses", id);
+    generateStatement();
+  }
+}
+
 function resetExpenseForm() {
   document.getElementById("expenseAmount").value = "";
   document.getElementById("expenseNotes").value = "";
@@ -486,23 +495,28 @@ function processData() {
   updatePropertySelect();
 
   Object.keys(grouped).forEach(listing => {
-    let pAcc = 0, pClean = 0, pPMC = 0, pWebsiteFee = 0, pExpenses = 0;
+    let pGross = 0, pAcc = 0, pClean = 0, pPMC = 0, pWebsiteFee = 0, pExpenses = 0;
 
     grouped[listing].forEach(row => {
       let payout = num(row["TOTAL PAYOUT"]);
       let acc = num(row["ACCOMMODATION FARE"]) - num(row["MARKUP"]);
-      let clean = num(row["CLEANING FARE"]);
-      let pmc = acc * percent;
+      let status = (row["STATUS"] || "").toLowerCase();
+      
+      // If cancelled, cleaning fee is 0
+      let clean = status.includes("cancelled") ? 0 : num(row["CLEANING FARE"]);
+      
+      let pmc = payout > 0 ? acc * percent : 0;
 
       let websiteFee = 0;
       if (type === "draft") {
         let code = row["CONFIRMATION CODE"] || "";
         let platform = row["PLATFORM"] || "";
-        if (!code.toUpperCase().startsWith("HA") && platform.toLowerCase().includes("website")) {
+        if (!code.toUpperCase().startsWith("HA") && (platform.toLowerCase().includes("website") || platform.toLowerCase().includes("manual"))) {
           websiteFee = payout * 0.01;
         }
       }
 
+      pGross += payout;
       pAcc += acc;
       pClean += clean;
       pPMC += pmc;
@@ -512,13 +526,14 @@ function processData() {
     let propExpenses = expenses.filter(e => e.property === listing && e.owner === currentOwner).reduce((s, e) => s + e.amount, 0);
     pExpenses = propExpenses;
 
-    // DRAFT AMOUNT = Accommodation - PMC - Cleaning - Expenses
-    let draftAmount = pAcc - pPMC - pClean - pExpenses;
+    // DRAFT AMOUNT = Accommodation - PMC - Cleaning - Expenses - Website Fee
+    let draftAmount = pAcc - pPMC - pClean - pExpenses - pWebsiteFee;
     
     // For payout: Accommodation - PMC - Expenses
     let payoutAmount = pAcc - pPMC - pExpenses;
 
     propertyTotals[listing] = { 
+      gross: pGross,
       acc: pAcc, 
       clean: pClean, 
       pmc: pPMC, 
@@ -529,6 +544,7 @@ function processData() {
       reservations: grouped[listing] 
     };
 
+    masterTotals.gross += pGross;
     masterTotals.acc += pAcc;
     masterTotals.clean += pClean;
     masterTotals.pmc += pPMC;
@@ -545,6 +561,7 @@ function displayStatement() {
   let html = `
     <div class="summary-grid">
       ${type === "draft" ? `
+        <div class="summary-card"><div class="summary-label">Gross Payout</div><div class="summary-value">${money(masterTotals.gross)}</div></div>
         <div class="summary-card"><div class="summary-label">Accommodation</div><div class="summary-value">${money(masterTotals.acc)}</div></div>
         <div class="summary-card"><div class="summary-label">PMC</div><div class="summary-value">${money(masterTotals.pmc)}</div></div>
         <div class="summary-card"><div class="summary-label">Cleaning Fee</div><div class="summary-value">${money(masterTotals.clean)}</div></div>
@@ -572,24 +589,34 @@ function displayStatement() {
           ${prop}
         </div>
         
-        <table>
-          <tr><th>Metric</th><th>Amount</th></tr>
-          <tr><td>Accommodation</td><td>${money(p.acc)}</td></tr>
-          <tr><td>PMC (${(OWNERS[currentOwner].percent*100).toFixed(0)}%)</td><td>${money(p.pmc)}</td></tr>
-          ${type === "draft" ? `<tr><td>Cleaning Fee</td><td>${money(p.clean)}</td></tr>` : ""}
-          ${type === "draft" ? `<tr><td>Website Fee</td><td>${money(p.websiteFee)}</td></tr>` : ""}
-          <tr><td>Expenses</td><td>${money(p.expenses)}</td></tr>
-          <tr style="background:#000;color:#fff"><td style="color:#fff"><strong>${type === "draft" ? "DRAFT AMOUNT" : "PAYOUT AMOUNT"}</strong></td><td style="color:#fff"><strong>${money(finalPayout)}</strong></td></tr>
-        </table>
+        <div class="summary-grid">
+          ${type === "draft" ? `
+            <div class="summary-card"><div class="summary-label">Gross Payout</div><div class="summary-value">${money(p.gross)}</div></div>
+            <div class="summary-card"><div class="summary-label">Accommodation</div><div class="summary-value">${money(p.acc)}</div></div>
+            <div class="summary-card"><div class="summary-label">PMC</div><div class="summary-value">${money(p.pmc)}</div></div>
+            <div class="summary-card"><div class="summary-label">Cleaning Fee</div><div class="summary-value">${money(p.clean)}</div></div>
+            <div class="summary-card"><div class="summary-label">Website Fee</div><div class="summary-value">${money(p.websiteFee)}</div></div>
+            <div class="summary-card"><div class="summary-label">Expenses</div><div class="summary-value">${money(p.expenses)}</div></div>
+            <div class="summary-card" style="background:#000;color:#fff;border-color:#000"><div class="summary-label" style="color:#fff">DRAFT AMOUNT</div><div class="summary-value" style="color:#fff">${money(finalPayout)}</div></div>
+          ` : `
+            <div class="summary-card"><div class="summary-label">Accommodation</div><div class="summary-value">${money(p.acc)}</div></div>
+            <div class="summary-card"><div class="summary-label">PMC</div><div class="summary-value">${money(p.pmc)}</div></div>
+            <div class="summary-card"><div class="summary-label">Expenses</div><div class="summary-value">${money(p.expenses)}</div></div>
+            <div class="summary-card" style="background:#000;color:#fff;border-color:#000"><div class="summary-label" style="color:#fff">PAYOUT AMOUNT</div><div class="summary-value" style="color:#fff">${money(finalPayout)}</div></div>
+          `}
+        </div>
 
         ${propExpenseList.length > 0 ? `
         <div style="margin-top:15px">
           <strong>Expenses:</strong>
           ${propExpenseList.map(e => `
             <div class="attachment">
-              <strong>${e.type}</strong> - ${e.vendor}: ${money(e.amount)}
-              ${e.notes ? `<br><span style="color:#666">Notes: ${e.notes}</span>` : ""}
-              ${e.file ? `<br><span class="attachment-link" onclick="downloadFile({name:'${e.file.name}',type:'${e.file.type}',data:new Uint8Array([${Array.from(new Uint8Array(e.file.data)).join(',')}])})"📎 ${e.file.name}</span>` : ""}
+              <div class="attachment-left">
+                <strong>${e.type}</strong> - ${e.vendor}: ${money(e.amount)}
+                ${e.notes ? `<br><span style="color:#666">Notes: ${e.notes}</span>` : ""}
+                ${e.file ? `<br><span class="attachment-link" onclick="downloadFile({name:'${e.file.name}',type:'${e.file.type}',data:new Uint8Array([${Array.from(new Uint8Array(e.file.data)).join(',')}])})"📎 ${e.file.name}</span>` : ""}
+              </div>
+              <button onclick="deleteExpense(${e.id})" class="btn btn-danger" style="width:60px;margin:0;padding:3px;font-size:9px">Delete</button>
             </div>
           `).join("")}
         </div>
@@ -599,19 +626,30 @@ function displayStatement() {
         <div style="margin-top:15px">
           <strong>Reservations:</strong>
           <table style="margin-top:10px">
-            <tr><th>Confirmation</th><th>Stay</th><th>Platform</th><th>Accom</th><th>PMC</th><th>Clean</th><th>Web Fee</th><th>Draft</th></tr>
+            <tr><th>Confirmation</th><th>Stay</th><th>Platform</th><th>Accommodation</th><th>PMC</th><th>Cleaning Fee</th><th>Website Fee</th><th>Total Payout</th></tr>
             ${p.reservations.map(r => {
               let acc = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
-              let clean = num(r["CLEANING FARE"]);
               let payout = num(r["TOTAL PAYOUT"]);
+              let status = (r["STATUS"] || "").toLowerCase();
+              let clean = status.includes("cancelled") ? 0 : num(r["CLEANING FARE"]);
               let percent = OWNERS[currentOwner].percent;
-              let pmc = acc * percent;
-              let draft = acc - pmc - clean;
+              let pmc = payout > 0 ? acc * percent : 0;
               let code = r["CONFIRMATION CODE"] || "";
               let platform = r["PLATFORM"] || "";
               let isVRBO = code.toUpperCase().startsWith("HA");
+              
               let displayPlat = isVRBO ? "VRBO" : platform;
-              let websiteFee = !isVRBO && platform.toLowerCase().includes("website") ? payout * 0.01 : 0;
+              if (displayPlat.toLowerCase().includes("manual")) {
+                displayPlat = displayPlat.replace(/manual/gi, "website");
+              }
+              
+              let websiteFee = 0;
+              if (!isVRBO && (platform.toLowerCase().includes("website") || platform.toLowerCase().includes("manual"))) {
+                websiteFee = payout * 0.01;
+              }
+              
+              let totalPayout = acc - pmc - clean - websiteFee;
+              
               let checkin = r["CHECK-IN DATE"] ? r["CHECK-IN DATE"].split("-").slice(1).join("/") : "";
               let checkout = r["CHECK-OUT DATE"] ? r["CHECK-OUT DATE"].split("-").slice(1).join("/") : "";
 
@@ -626,7 +664,7 @@ function displayStatement() {
                   <td>${money(pmc)}</td>
                   <td>${money(clean)}</td>
                   <td>${money(websiteFee)}</td>
-                  <td>${money(draft + websiteFee)}</td>
+                  <td>${money(totalPayout)}</td>
                 </tr>
               `;
             }).join("")}
