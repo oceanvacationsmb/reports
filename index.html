@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Reservation Report</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial;background:#f5f5f5;color:#000;display:flex}
+.sidebar{width:250px;background:#333;color:#fff;padding:20px;height:100vh;overflow-y:auto;position:fixed;left:0;top:0}
+.sidebar h3{margin-bottom:20px;font-size:16px;border-bottom:2px solid #fff;padding-bottom:10px}
+.sidebar-section{margin-bottom:20px}
+.sidebar-label{font-size:12px;font-weight:bold;color:#aaa;margin-bottom:5px;display:block}
+.sidebar-control{margin-bottom:12px}
+.sidebar-control select,.sidebar-control input{width:100%;padding:8px;border:1px solid #555;background:#444;color:#fff;border-radius:3px;font-size:12px}
+.sidebar-control button{width:100%;padding:10px;margin-top:5px;font-weight:bold;border:none;cursor:pointer;border-radius:3px;font-size:13px}
+.run-btn{background:#000;color:#fff}
+.run-btn:hover{background:#222}
+.summary-btn{background:#28a745;color:#fff;margin-top:10px}
+.summary-btn:hover{background:#218838}
+.pdf-btn{background:#444;color:#fff;margin-top:10px}
+.pdf-btn:hover{background:#555}
+.save-btn{background:#007bff;color:#fff;margin-top:5px;font-size:12px}
+.save-btn:hover{background:#0056b3}
+.settings-toggle{background:#666;color:#fff;padding:10px;border:none;cursor:pointer;width:100%;text-align:left;font-weight:bold;border-radius:3px;margin-bottom:10px;font-size:14px}
+.settings-toggle:hover{background:#777}
+.settings-box{display:none;background:#444;padding:15px;border-radius:3px;margin-top:10px;max-height:600px;overflow-y:auto}
+.settings-box.open{display:block}
+.owner-item{background:#555;padding:12px;margin-bottom:10px;border-radius:3px;font-size:11px;border:1px solid #666}
+.owner-item-name{font-weight:bold;color:#fff;margin-bottom:8px;font-size:12px}
+.owner-item-control{margin-bottom:8px}
+.owner-item-label{font-size:10px;color:#bbb;display:block;margin-bottom:3px}
+.owner-item-control input,.owner-item-control select{width:100%;padding:5px;background:#666;color:#fff;border:1px solid #777;border-radius:2px;font-size:10px}
+.owner-item-control input:focus,.owner-item-control select:focus{outline:none;border-color:#fff}
+.main-content{margin-left:250px;padding:20px;width:calc(100% - 250px)}
+.page-break{page-break-after:always}
+.header{display:flex;justify-content:space-between;margin-bottom:15px}
+.company{font-size:20px;font-weight:900}
+.company-info{font-size:10px;line-height:1.5}
+.title{text-align:center;font-size:20px;font-weight:900;margin-top:8px}
+.owner{text-align:center;font-size:16px;font-weight:bold;margin-top:4px;margin-bottom:6px}
+.period{text-align:center;font-size:11px;margin-bottom:8px}
+.section-title{font-size:16px;font-weight:bold;margin-top:8px;margin-bottom:8px}
+.summary-box{border:2px solid #000;padding:12px;margin:10px 0;background:#fafafa;border-radius:5px}
+.summary-box-master{border:2px solid #000;padding:8px;margin:8px 0;background:#fafafa;border-radius:5px}
+.summary-header{font-weight:bold;font-size:12px;margin-bottom:10px;color:#333;text-align:center}
+.summary-header-master{font-weight:bold;font-size:11px;margin-bottom:8px;color:#333;text-align:center}
+.summary{display:flex;justify-content:space-around;font-size:10px;gap:8px;flex-wrap:wrap}
+.summary-master{display:flex;justify-content:space-around;font-size:9px;gap:6px;flex-wrap:wrap}
+.summary-item{text-align:center;flex:1;min-width:110px}
+.summary-item-master{text-align:center;flex:1;min-width:90px}
+.summary-item-label{display:block;font-size:9px;font-weight:bold;color:#333;margin-bottom:4px}
+.summary-item-label-master{display:block;font-size:8px;font-weight:bold;color:#333;margin-bottom:2px}
+.summary-item-amount{display:block;font-size:13px;font-weight:bold;color:#000}
+.summary-item-amount-master{display:block;font-size:11px;font-weight:bold;color:#000}
+.property{margin-top:20px;background:#fff;padding:12px;border-radius:5px;border:1px solid #ddd}
+.property-title{font-size:14px;font-weight:bold;margin-bottom:3px}
+.property-period{font-size:11px;color:#666;margin-bottom:8px}
+table{width:100%;border-collapse:collapse;font-size:9px;margin-top:8px;background:#fff}
+th,td{border:1px solid #ddd;padding:4px;text-align:center}
+th{background:#333;color:#fff;font-weight:bold}
+tr:nth-child(even){background:#f9f9f9}
+.hidden{display:none}
+.summary-page{background:#fff;padding:20px;border-radius:5px}
+.summary-page-header{font-size:24px;font-weight:bold;text-align:center;margin-bottom:10px}
+.summary-page-period{font-size:11px;text-align:center;margin-bottom:20px;color:#666}
+.summary-section{background:#f9f9f9;border:2px solid #000;padding:15px;margin:15px 0;border-radius:5px}
+.summary-section-title{font-size:14px;font-weight:bold;margin-bottom:10px;color:#333}
+.summary-line{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd;font-size:12px}
+.summary-line-value{font-weight:bold;color:#000}
+.back-btn{background:#666;color:#fff;padding:10px 20px;border:none;cursor:pointer;border-radius:3px;font-weight:bold;margin-bottom:20px}
+.back-btn:hover{background:#555}
+.save-success{background:#d4edda;color:#155724;padding:10px;border-radius:3px;margin-bottom:10px;display:none}
+.warning-section{background:#fff3cd;border:2px solid #ffc107;padding:15px;margin:15px 0;border-radius:5px}
+.warning-title{font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px}
+@media print{
+.sidebar,.finish-btn,.add-row button,.back-btn,.save-btn{display:none}
+.main-content{margin-left:0;width:100%}
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+<h3>🎯 REPORT CONTROLS</h3>
+
+<div class="sidebar-section">
+<label class="sidebar-label">Select Owner</label>
+<div class="sidebar-control">
+<select id="owner" onchange="updateSettingsDisplay()"></select>
+</div>
+</div>
+
+<div class="sidebar-section">
+<label class="sidebar-label">Select Month</label>
+<div class="sidebar-control">
+<select id="month"></select>
+</div>
+</div>
+
+<div class="sidebar-section">
+<label class="sidebar-label">Select Year</label>
+<div class="sidebar-control">
+<select id="year"></select>
+</div>
+</div>
+
+<div class="sidebar-section">
+<label class="sidebar-label">Upload CSV File</label>
+<div class="sidebar-control">
+<input type="file" id="fileInput" accept=".csv">
+</div>
+</div>
+
+<button class="run-btn" onclick="runReport()">▶ Run Owner Statement</button>
+<button class="summary-btn" onclick="runSummary()">📊 View Summary</button>
+<button class="pdf-btn" onclick="downloadPDF()">📥 Download PDF</button>
+
+<button class="settings-toggle" onclick="toggleSettings()">⚙️ Settings</button>
+<div class="settings-box" id="settingsBox">
+<div class="save-success" id="saveSuccess">✓ Settings saved!</div>
+<h4 style="color:#fff;margin-bottom:10px" id="settingsTitle">Owner Settings</h4>
+<div id="ownersList"></div>
+<button class="save-btn" onclick="saveSettings()">💾 Save Settings</button>
+</div>
+
+</div>
+
+<div class="main-content">
+<div id="report"></div>
+<div id="summaryPage" class="summary-page hidden"></div>
+</div>
+
+<script>
+
+let owners={
+"ERAN":{percent:0.12,type:"draft",salesFeePercent:5},
+"GHO":{percent:0.10,type:"payout",salesFeePercent:5},
+"1463 Basin Trail":{percent:0.12,type:"payout",salesFeePercent:5},
+"113B-15S Surfside Beach":{percent:0.12,type:"payout",salesFeePercent:5},
+"113B-13N Surfside Beach":{percent:0.12,type:"payout",salesFeePercent:5},
+"115C-15N Surfside Beach":{percent:0.12,type:"payout",salesFeePercent:5},
+"2131 Sanibel Myrtle Beach":{percent:0.15,type:"payout",salesFeePercent:5},
+"1552 Elizabeth Ln Myrtle Beach":{percent:0.15,type:"payout",salesFeePercent:5},
+"469C White River RD Myrtle Beach":{percent:0.12,type:"payout",salesFeePercent:5},
+"4631-301 Wild Iris Drive Myrtle Beach":{percent:0.12,type:"payout",salesFeePercent:5},
+"4679-204 Wild Iris Drive Myrtle Beach":{percent:0.12,type:"payout",salesFeePercent:5},
+"508-1/2 33rd Ave North Myrtle Beach":{percent:0.15,type:"payout",salesFeePercent:10},
+"214-2S 2nd Ave S. North Myrtle Beach":{percent:0.12,type:"payout",salesFeePercent:10}
+};
+
+function loadSettings(){
+const saved=localStorage.getItem("ownerSettings");
+if(saved){
+owners=JSON.parse(saved);
+}
+}
+
+function saveSettings(){
+localStorage.setItem("ownerSettings",JSON.stringify(owners));
+const btn=document.getElementById("saveSuccess");
+btn.style.display="block";
+setTimeout(()=>{btn.style.display="none"},3000);
+}
+
+function updateSettingsDisplay(){
+const selectedOwner=document.getElementById("owner").value;
+let html=`
+<div class="owner-item">
+<div class="owner-item-name">👤 ${selectedOwner}</div>
+<div class="owner-item-control">
+<label class="owner-item-label">Commission (%)</label>
+<input type="number" step="0.01" min="0" max="100" value="${(owners[selectedOwner].percent*100)}" onchange="updateOwner('${selectedOwner}','percent',this.value/100)">
+</div>
+<div class="owner-item-control">
+<label class="owner-item-label">Type</label>
+<select onchange="updateOwner('${selectedOwner}','type',this.value)">
+<option value="draft" ${owners[selectedOwner].type==='draft'?'selected':''}>Draft</option>
+<option value="payout" ${owners[selectedOwner].type==='payout'?'selected':''}>Payout</option>
+</select>
+</div>
+<div class="owner-item-control">
+<label class="owner-item-label">Sales Person Fee (%)</label>
+<input type="number" step="0.01" min="0" max="100" value="${owners[selectedOwner].salesFeePercent}" onchange="updateOwner('${selectedOwner}','salesFeePercent',this.value)">
+</div>
+</div>
+`;
+document.getElementById("ownersList").innerHTML=html;
+document.getElementById("settingsTitle").textContent=`${selectedOwner} - Settings`;
+}
+
+function updateOwner(name,field,value){
+if(field==='percent'){
+owners[name].percent=parseFloat(value);
+}else if(field==='type'){
+owners[name].type=value;
+}else if(field==='salesFeePercent'){
+owners[name].salesFeePercent=parseFloat(value)||0;
+}
+console.log(`Updated ${name}: ${field} = ${value}`);
+}
+
+function toggleSettings(){
+document.getElementById("settingsBox").classList.toggle("open");
+}
+
+const ownerSelect=document.getElementById("owner");
+Object.keys(owners).forEach(o=>ownerSelect.innerHTML+=`<option>${o}</option>`);
+
+const monthSelect=document.getElementById("month");
+const yearSelect=document.getElementById("year");
+const now=new Date();
+
+for(let m=1;m<=12;m++){
+monthSelect.innerHTML+=`<option value="${m}">${new Date(0,m-1).toLocaleString('default',{month:'long'})}</option>`;
+}
+monthSelect.value=now.getMonth()+1;
+
+for(let y=now.getFullYear()-2;y<=now.getFullYear()+2;y++){
+yearSelect.innerHTML+=`<option>${y}</option>`;
+}
+yearSelect.value=now.getFullYear();
+
+function num(v){return parseFloat((v||"0").toString().replace(/[$,]/g,""))||0}
+function money(x){return "$"+(Number(x)||0).toFixed(2)}
+function stay(i,o){if(!i||!o)return"";let a=i.split("-"),b=o.split("-");return a[1]+"/"+a[2]+" - "+b[1]+"/"+b[2]}
+function lastDay(y,m){return new Date(y,m,0).getDate()}
+
+let propertyTotals={};
+let masterTotals={};
+let csvData=[];
+
+async function runReport(){
+document.getElementById("report").classList.remove("hidden");
+document.getElementById("summaryPage").classList.add("hidden");
+
+propertyTotals={};
+masterTotals={gross:0,acc:0,clean:0,pmc:0,expenses:0,draft:0,owner:0,websiteFee:0};
+
+const file=document.getElementById("fileInput").files[0];
+if(!file)return;
+
+const text=await file.text();
+csvData=Papa.parse(text,{header:true,skipEmptyLines:true}).data;
+
+const owner=ownerSelect.value;
+const percent=owners[owner].percent;
+const type=owners[owner].type;
+const month=parseInt(monthSelect.value);
+const year=parseInt(yearSelect.value);
+const endDay=lastDay(year,month);
+
+const statementDate=new Date(year,month,1);
+const paymentDate=new Date(year,month,5);
+
+let grouped={};
+
+csvData.forEach(r=>{
+if(!r["CHECK-IN DATE"])return;
+let m=parseInt(r["CHECK-IN DATE"].split("-")[1]);
+let y=parseInt(r["CHECK-IN DATE"].split("-")[0]);
+if(m!==month||y!==year)return;
+
+let listing=r["LISTING'S NICKNAME"]||"Unknown";
+if(!grouped[listing])grouped[listing]=[];
+grouped[listing].push(r);
+});
+
+let reportHTML="";
+
+/* HEADER */
+reportHTML+=`
+<div class="header">
+<div>
+<div class="company">OCEAN VACATIONS</div>
+<div class="company-info">
+www.oceanvacationsmb.com<br>
+oceanvacationsmb@gmail.com<br>
+843-222-6516
+</div>
+</div>
+<div style="text-align:right;font-size:10px">
+Statement Date: ${statementDate.toLocaleDateString()}<br>
+Payment Date: ${paymentDate.toLocaleDateString()}
+</div>
+</div>
+
+<div class="title">RESERVATION REPORT</div>
+<div class="owner">${owner}</div>
+<div class="period"><strong>PERIOD:</strong> ${month}/1/${year} - ${month}/${endDay}/${year}</div>
+`;
+
+Object.keys(grouped).forEach(listing=>{
+
+let pGross=0,pAcc=0,pClean=0,pPMC=0,pDraft=0,pOwner=0,pWebsiteFee=0;
+
+grouped[listing].forEach(r=>{
+let payout=num(r["TOTAL PAYOUT"]);
+let acc=num(r["ACCOMMODATION FARE"])-num(r["MARKUP"]);
+let clean=num(r["CLEANING FARE"]);
+let pmc=acc*percent;
+let draft=pmc+clean;
+let ownerPay=acc-pmc;
+
+// Check if direct booking (website fee for draft owners only)
+let websiteFee=0;
+if(type==="draft"){
+let platform=r["PLATFORM"]||"";
+if(platform.toLowerCase().includes("direct")){
+websiteFee=payout*0.01; // 1% of payout for direct bookings
+pWebsiteFee+=websiteFee;
+}
+}
+
+pGross+=payout;
+pAcc+=acc;
+pClean+=clean;
+pPMC+=pmc;
+pDraft+=draft+websiteFee;
+pOwner+=ownerPay;
+});
+
+propertyTotals[listing]={gross:pGross,acc:pAcc,clean:pClean,pmc:pPMC,draft:pDraft,owner:pOwner,websiteFee:pWebsiteFee,expenses:0};
+
+masterTotals.gross+=pGross;
+masterTotals.acc+=pAcc;
+masterTotals.clean+=pClean;
+masterTotals.pmc+=pPMC;
+masterTotals.draft+=pDraft;
+masterTotals.owner+=pOwner;
+masterTotals.websiteFee+=pWebsiteFee;
+});
+
+/* MASTER SUMMARY PAGE */
+
+reportHTML+=`
+<div class="summary-box-master">
+<div class="summary-header-master">SUMMARY</div>
+<div class="summary-master">
+${type==="draft"
+?`
+<div class="summary-item-master"><span class="summary-item-label-master">GROSS PAYOUT</span><span class="summary-item-amount-master">${money(masterTotals.gross)}</span></div>
+<div class="summary-item-master"><span class="summary-item-label-master">NET ACCOMMODATION</span><span class="summary-item-amount-master">${money(masterTotals.acc)}</span></div>
+<div class="summary-item-master"><span class="summary-item-label-master">PMC</span><span class="summary-item-amount-master">${money(masterTotals.pmc)}</span></div>
+<div class="summary-item-master"><span class="summary-item-label-master">CLEANING FEE</span><span class="summary-item-amount-master">${money(masterTotals.clean)}</span></div>
+<div class="summary-item-master"><span class="summary-item-label-master">EXPENSES</span><span class="summary-item-amount-master">$0.00</span></div>
+<div class="summary-item-master"><span class="summary-item-label-master">PAYOUT</span><span class="summary-item-amount-master" id="masterBal">${money(masterTotals.draft)}</span></div>
+`
+:`
+<div class="summary-item-master"><span class="summary-item-label-master">NET ACCOMMODATION</span><span class="summary-item-amount-master">${money(masterTotals.acc)}</span></div>
+<div class="summary-item-master"><span class="summary-item-label-master">PMC</span><span class="summary-item-amount-master">${money(masterTotals.pmc)}</span></div>
+<div class="summary-item-master"><span class="summary-item-label-master">EXPENSES</span><span class="summary-item-amount-master">$0.00</span></div>
+<div class="summary-item-master"><span class="summary-item-label-master">PAYOUT</span><span class="summary-item-amount-master" id="masterBal">${money(masterTotals.owner)}</span></div>
+`}
+</div>
+</div>
+
+<div class="page-break"></div>
+`;
+
+/* PROPERTY PAGES */
+
+Object.keys(grouped).forEach(listing=>{
+
+let p=propertyTotals[listing];
+
+reportHTML+=`
+<div class="property">
+<div class="property-title">${listing}</div>
+<div class="property-period"><strong>PERIOD:</strong> ${month}/1/${year} - ${month}/${endDay}/${year}</div>
+
+<div class="summary-box">
+<div class="summary-header">SUMMARY</div>
+<div class="summary">
+${type==="draft"
+?`
+<div class="summary-item"><span class="summary-item-label">GROSS PAYOUT</span><span class="summary-item-amount">${money(p.gross)}</span></div>
+<div class="summary-item"><span class="summary-item-label">NET ACCOMMODATION</span><span class="summary-item-amount">${money(p.acc)}</span></div>
+<div class="summary-item"><span class="summary-item-label">PMC</span><span class="summary-item-amount">${money(p.pmc)}</span></div>
+<div class="summary-item"><span class="summary-item-label">CLEANING FEE</span><span class="summary-item-amount">${money(p.clean)}</span></div>
+<div class="summary-item"><span class="summary-item-label">WEBSITE FEE</span><span class="summary-item-amount">${money(p.websiteFee)}</span></div>
+<div class="summary-item"><span class="summary-item-label">EXPENSES</span><span class="summary-item-amount" id="exp-${listing}">$0.00</span></div>
+<div class="summary-item"><span class="summary-item-label">PAYOUT</span><span class="summary-item-amount" id="bal-${listing}">${money(p.draft)}</span></div>
+`
+:`
+<div class="summary-item"><span class="summary-item-label">NET ACCOMMODATION</span><span class="summary-item-amount">${money(p.acc)}</span></div>
+<div class="summary-item"><span class="summary-item-label">PMC</span><span class="summary-item-amount">${money(p.pmc)}</span></div>
+<div class="summary-item"><span class="summary-item-label">EXPENSES</span><span class="summary-item-amount" id="exp-${listing}">$0.00</span></div>
+<div class="summary-item"><span class="summary-item-label">PAYOUT</span><span class="summary-item-amount" id="bal-${listing}">${money(p.owner)}</span></div>
+`}
+</div>
+</div>
+
+<table>
+<tr>
+<th>Reservation</th>
+<th>Stay</th>
+<th>Accommodation</th>
+<th>PMC</th>
+${type==="draft"?"<th>Cleaning</th><th>Draft</th>":"<th>Owner</th>"}
+</tr>
+`;
+
+grouped[listing].forEach(r=>{
+let acc=num(r["ACCOMMODATION FARE"])-num(r["MARKUP"]);
+let clean=num(r["CLEANING FARE"]);
+let pmc=acc*percent;
+let draft=pmc+clean;
+let ownerPay=acc-pmc;
+
+reportHTML+=`
+<tr>
+<td>${r["CONFIRMATION CODE"]}</td>
+<td>${stay(r["CHECK-IN DATE"],r["CHECK-OUT DATE"])}</td>
+<td>${money(acc)}</td>
+<td>${money(pmc)}</td>
+${type==="draft"
+?`<td>${money(clean)}</td><td>${money(draft)}</td>`
+:`<td>${money(ownerPay)}</td>`}
+</tr>
+`;
+});
+
+reportHTML+=`
+</table>
+</div>
+
+<div class="page-break"></div>
+`;
+});
+
+document.getElementById("report").innerHTML=reportHTML;
+}
+
+function runSummary(){
+const owner=ownerSelect.value;
+const type=owners[owner].type;
+const salesFeePercent=owners[owner].salesFeePercent;
+const percent=owners[owner].percent;
+const month=parseInt(monthSelect.value);
+const year=parseInt(yearSelect.value);
+const endDay=lastDay(year,month);
+
+// Calculate sales fee (PMC * sales fee %)
+const salesFeeAmount=masterTotals.pmc*(salesFeePercent/100);
+
+// Get tax data for payout owners - check all 4 tax columns
+let totalTaxablePayouts=0;
+let hasTaxes=false;
+let cityTaxTotal=0;
+let stateTaxTotal=0;
+let countyTaxTotal=0;
+let occupancyTaxTotal=0;
+
+if(type==="payout"){
+csvData.forEach(r=>{
+if(!r["CHECK-IN DATE"])return;
+let m=parseInt(r["CHECK-IN DATE"].split("-")[1]);
+let y=parseInt(r["CHECK-IN DATE"].split("-")[0]);
+if(m!==month||y!==year)return;
+
+let cityTax=num(r["CITY TAX"])||0;
+let stateTax=num(r["STATE TAX"])||0;
+let countyTax=num(r["COUNTY TAX"])||0;
+let occupancyTax=num(r["OCCUPANCY TAX"])||0;
+let totalTax=cityTax+stateTax+countyTax+occupancyTax;
+
+if(totalTax>0){
+hasTaxes=true;
+let payout=num(r["TOTAL PAYOUT"])||0;
+totalTaxablePayouts+=payout;
+cityTaxTotal+=cityTax;
+stateTaxTotal+=stateTax;
+countyTaxTotal+=countyTax;
+occupancyTaxTotal+=occupancyTax;
+}
+});
+}
+
+let summaryHTML=`
+<button class="back-btn" onclick="goBackToStatement()">← Back to Statement</button>
+
+<div class="summary-page-header">OWNER SUMMARY REPORT</div>
+<div class="summary-page-period"><strong>PERIOD:</strong> ${month}/1/${year} - ${month}/${endDay}/${year}</div>
+
+<div class="summary-section">
+<div class="summary-section-title">💰 ACCOMMODATION & SALES PERSON FEE</div>
+<div class="summary-line">
+<span>Total Accommodation:</span>
+<span class="summary-line-value">${money(masterTotals.acc)}</span>
+</div>
+<div class="summary-line">
+<span>PMC Amount (Base):</span>
+<span class="summary-line-value">${money(masterTotals.pmc)}</span>
+</div>
+<div class="summary-line">
+<span>Sales Person Fee Rate:</span>
+<span class="summary-line-value">${salesFeePercent}%</span>
+</div>
+<div class="summary-line" style="border-bottom:2px solid #000;padding-top:8px;padding-bottom:8px">
+<span style="font-size:13px"><strong>Sales Person Amount Due:</strong></span>
+<span class="summary-line-value" style="font-size:13px">${money(salesFeeAmount)}</span>
+</div>
+</div>
+
+${type==="draft"?`
+<div class="summary-section">
+<div class="summary-section-title">🌐 WEBSITE FEE</div>
+<div class="summary-line">
+<span>Website Fee (1% of Direct Bookings):</span>
+<span class="summary-line-value">${money(masterTotals.websiteFee)}</span>
+</div>
+<div style="font-size:11px;margin-top:10px;color:#666">
+Charged on direct bookings made through your website
+</div>
+</div>
+`:""}
+
+${type==="payout" && hasTaxes?`
+<div class="warning-section">
+<div class="warning-title">⚠️ TAX REPORTING REQUIRED - CITY/STATE TAXES COLLECTED</div>
+<div class="summary-line">
+<span>City Tax Withheld:</span>
+<span class="summary-line-value">${money(cityTaxTotal)}</span>
+</div>
+<div class="summary-line">
+<span>State Tax Withheld:</span>
+<span class="summary-line-value">${money(stateTaxTotal)}</span>
+</div>
+<div class="summary-line">
+<span>County Tax Withheld:</span>
+<span class="summary-line-value">${money(countyTaxTotal)}</span>
+</div>
+<div class="summary-line">
+<span>Occupancy Tax Withheld:</span>
+<span class="summary-line-value">${money(occupancyTaxTotal)}</span>
+</div>
+<div class="summary-line" style="border-bottom:2px solid #ffc107;padding-top:8px;padding-bottom:8px">
+<span style="font-size:13px"><strong>Total Payout Amount to Report:</strong></span>
+<span class="summary-line-value" style="font-size:13px;border-bottom:2px solid #ffc107">${money(totalTaxablePayouts)}</span>
+</div>
+<p style="font-size:11px;margin-top:10px;color:#333">
+📝 This is the total amount from reservations with taxes withheld. Report this amount to your city/state tax authorities.
+</p>
+</div>
+`:""}
+
+<div class="summary-section">
+<div class="summary-section-title">💳 PAYMENT INFORMATION</div>
+<div class="summary-line">
+<span>Owner Name:</span>
+<span class="summary-line-value">${owner}</span>
+</div>
+<div class="summary-line">
+<span>Owner Type:</span>
+<span class="summary-line-value">${type.toUpperCase()}</span>
+</div>
+<div class="summary-line" style="border-bottom:2px solid #000;padding-top:8px;padding-bottom:8px">
+<span style="font-size:13px"><strong>Amount to ${type==="draft"?"Pay":"Payout"}:</strong></span>
+<span class="summary-line-value" style="font-size:13px">${type==="draft"?money(masterTotals.draft):money(masterTotals.owner)}</span>
+</div>
+</div>
+
+<div class="summary-section">
+<div class="summary-section-title">🏦 PMC TRANSFER</div>
+<div class="summary-line">
+<span>Transfer to PMC Account:</span>
+<span class="summary-line-value">${money(masterTotals.pmc)}</span>
+</div>
+<div style="font-size:10px;color:#666;margin-top:10px">
+This amount needs to be transferred to the PMC bank account
+</div>
+</div>
+`;
+
+document.getElementById("report").classList.add("hidden");
+document.getElementById("summaryPage").classList.remove("hidden");
+document.getElementById("summaryPage").innerHTML=summaryHTML;
+}
+
+function goBackToStatement(){
+document.getElementById("report").classList.remove("hidden");
+document.getElementById("summaryPage").classList.add("hidden");
+}
+
+function downloadPDF(){
+html2pdf().set({margin:5,jsPDF:{unit:"mm",format:"a4"}})
+.from(document.getElementById("report")).save("Reservation_Report.pdf");
+}
+
+loadSettings();
+updateSettingsDisplay();
+
+</script>
+
+</body>
+</html>
