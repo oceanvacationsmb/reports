@@ -1,30 +1,827 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Reports</title>
+<title>Ocean Vacations - Reservation Report</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial;background:#f5f5f5;color:#000;display:flex}
+.sidebar{width:280px;background:#333;color:#fff;padding:20px;height:100vh;overflow-y:auto;position:fixed;left:0;top:0}
+.sidebar h3{margin-bottom:20px;font-size:16px;border-bottom:2px solid #fff;padding-bottom:10px}
+.section{margin-bottom:20px}
+.label{font-size:11px;font-weight:bold;color:#aaa;margin-bottom:5px;display:block}
+select,input{width:100%;padding:8px;margin:5px 0;border:1px solid #555;background:#444;color:#fff;border-radius:3px;font-size:11px}
+.btn{width:100%;padding:12px;margin:8px 0;border:none;font-weight:bold;border-radius:3px;cursor:pointer;font-size:12px;color:#fff;transition:all 0.3s}
+.btn-primary{background:#000}.btn-primary:hover{background:#222}
+.btn-success{background:#28a745}.btn-success:hover{background:#218838}
+.btn-warning{background:#ff9800}.btn-warning:hover{background:#e68900}
+.btn-info{background:#17a2b8}.btn-info:hover{background:#138496}
+.btn-danger{background:#dc3545}.btn-danger:hover{background:#c82333}
+.main{margin-left:280px;padding:20px;width:calc(100% - 280px)}
+.page{background:#fff;padding:40px;border-radius:5px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
+.invoice-header{display:flex;justify-content:space-between;margin-bottom:40px;border-bottom:2px solid #000;padding-bottom:30px}
+.company-info{font-size:11px;line-height:1.8}
+.company-name{font-size:20px;font-weight:bold;margin-bottom:5px}
+.right-header{text-align:right;font-size:11px;line-height:1.8}
+.statement-date{margin-bottom:20px;font-weight:bold}
+.period-date{margin-top:10px}
+.report-title{text-align:center;font-size:32px;font-weight:bold;margin:40px 0 10px 0;letter-spacing:2px}
+.owner-name{text-align:center;font-size:16px;margin-bottom:40px}
+table{width:100%;border-collapse:collapse;margin:20px 0;font-size:11px}
+th,td{border:1px solid #e0e0e0;padding:12px;text-align:left}
+th{background:#f5f5f5;color:#000;font-weight:bold;text-align:center;text-transform:uppercase}
+tr:nth-child(even){background:#fafafa}
+.back-btn{margin:20px 0;background:#666;width:auto;display:inline-block;padding:10px 20px;cursor:pointer}
+.back-btn:hover{background:#555}
+.print-btn{background:#e74c3c;width:auto;display:inline-block;padding:10px 20px;margin-right:10px;cursor:pointer}
+.print-btn:hover{background:#c0392b}
+.property-section{margin:40px 0;padding:20px;border:1px solid #ddd;border-radius:5px;background:#fff}
+.property-title{font-size:14px;font-weight:bold;margin-bottom:15px;display:flex;align-items:center;text-transform:uppercase;text-align:center;justify-content:center}
+.property-icon{font-size:18px;margin-right:10px}
+.summary-title{font-size:12px;font-weight:bold;text-transform:uppercase;text-align:center;margin:20px 0}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}
+.summary-card{background:#f9f9f9;border:1px solid #ddd;padding:12px;text-align:center;border-radius:5px}
+.summary-label{font-size:10px;color:#666;font-weight:bold;text-transform:uppercase}
+.summary-value{font-size:14px;font-weight:bold;color:#000;margin-top:6px}
+.attachment{background:#f0f0f0;padding:10px;margin:10px 0;border-radius:3px;font-size:10px;display:flex;justify-content:space-between;align-items:center}
+.attachment-left{flex:1}
+.attachment-file{background:#e8f4f8;padding:8px;margin:8px 0;border-left:3px solid #17a2b8;border-radius:3px;display:flex;justify-content:space-between;align-items:center}
+.file-info{flex:1}
+.file-name{font-weight:bold;color:#0c5460}
+.file-download{color:#0066cc;cursor:pointer;text-decoration:underline;font-size:9px}
+.modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.5)}
+.modal-content{background:#fff;margin:10% auto;padding:20px;border:1px solid #888;width:80%;max-width:600px;border-radius:5px;max-height:80vh;overflow-y:auto}
+.modal-close{color:#aaa;float:right;font-size:28px;font-weight:bold;cursor:pointer}
+.modal-close:hover{color:#000}
+.tax-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px}
+.tax-table th{background:#333;color:#fff;font-weight:bold;text-align:center;text-transform:uppercase;border:1px solid #000;padding:8px}
+.tax-table td{border:1px solid #000;padding:8px;text-align:left}
+.tax-table tr:nth-child(even){background:#f9f9f9}
+.tax-amount{text-align:right;font-weight:bold}
+.tax-info{background:#e8f4f8;border:2px solid #17a2b8;padding:15px;margin:15px 0;border-radius:5px}
+.tax-info-title{font-size:14px;font-weight:bold;color:#0c5460;margin-bottom:10px;text-transform:uppercase;text-align:center}
+.history-row{display:flex;justify-content:space-between;align-items:center;background:#f0f0f0;padding:12px;margin:8px 0;border-radius:3px}
+.history-info{flex:1;font-size:11px}
+.history-actions{display:flex;gap:8px}
+.history-actions button{padding:5px 10px;font-size:9px;cursor:pointer;border:none;border-radius:3px;color:#fff}
+.section-title{font-size:12px;font-weight:bold;text-transform:uppercase;margin-top:20px;margin-bottom:10px;color:#000}
+.property-settings-box{margin-bottom:20px;padding:15px;background:#f0f0f0;border-radius:3px;border-left:4px solid #17a2b8}
+.property-name-label{font-weight:bold;color:#000;margin-bottom:10px;display:block;text-transform:uppercase;font-size:12px}
+.checkbox-group{display:flex;flex-wrap:wrap;gap:15px;align-items:center}
+.checkbox-item{display:flex;align-items:center;gap:8px}
+.checkbox-item input{width:18px;height:18px;cursor:pointer}
+.checkbox-item label{color:#000;font-weight:bold;cursor:pointer;margin:0;font-size:12px}
+.btn-small{padding:5px 10px;font-size:9px;width:auto;margin:0;display:inline-block}
+.owner-settings-box{background:#f0f0f0;padding:15px;margin-bottom:15px;border-radius:3px;border-left:4px solid #17a2b8}
+.owner-settings-label{font-weight:bold;color:#000;margin-bottom:8px;display:block;text-transform:uppercase;font-size:11px}
+.owner-settings-input{width:100%;padding:8px;border:1px solid #ddd;border-radius:3px;font-size:11px;margin-bottom:10px}
+.status-msg{padding:10px;margin:10px 0;border-radius:3px;font-size:11px;display:none}
+.status-success{background:#d4edda;color:#155724;border:1px solid #c3e6cb}
+.status-error{background:#f8d7da;color:#721c24;border:1px solid #f5c6cb}
+@media print{.sidebar,.back-btn,.print-btn,.history-actions{display:none}.main{margin-left:0;width:100%}.page{padding:20px}}
+</style>
 </head>
 <body>
-    <h1>GitHub Data Reports</h1>
-    <button id="tokenSetupBtn">Setup GitHub Token</button>
-    <div id="report"></div>
 
-    <script>
-        async function fetchData() {
-            const response = await fetch('data.json');
-            const data = await response.json();
-            document.getElementById('report').innerText = JSON.stringify(data, null, 2);
+<div class="sidebar">
+<h3>🎯 OCEAN VACATIONS</h3>
+
+<div id="statusMessage" class="status-msg"></div>
+
+<div class="section">
+<label class="label">Select Owner</label>
+<select id="ownerSelect" onchange="onOwnerChange()">
+<option value="">-- Loading Owners --</option>
+</select>
+</div>
+
+<div class="section">
+<label class="label">Month</label>
+<select id="monthSelect"></select>
+</div>
+
+<div class="section">
+<label class="label">Year</label>
+<select id="yearSelect"></select>
+</div>
+
+<div class="section">
+<label class="label">Upload CSV</label>
+<input type="file" id="csvFile" accept=".csv">
+</div>
+
+<button class="btn btn-primary" onclick="generateStatement()">▶ STATEMENT</button>
+<button class="btn btn-success" onclick="generateSummary()">📊 View Summary</button>
+<button class="btn btn-warning" onclick="generateAnnual()">📈 Annual Report</button>
+<button class="btn btn-info" onclick="downloadPDF()">📥 Download PDF</button>
+<button class="btn btn-info" onclick="viewHistory()">📋 View History</button>
+
+<hr style="border:1px solid #555;margin:20px 0">
+
+<button class="btn btn-info" onclick="openOwnerSettings()" style="font-size:11px">⚙️ Owner Settings</button>
+<button class="btn btn-info" onclick="openPropertySettings()" style="font-size:11px">⚙️ Property Tax Settings</button>
+<button class="btn btn-warning" onclick="setupGitHub()" style="font-size:11px">🔑 GitHub Setup</button>
+
+<hr style="border:1px solid #555;margin:20px 0">
+
+<h4 style="color:#fff;margin-bottom:10px">🏢 Vendors</h4>
+<input type="text" id="vendorName" placeholder="Vendor name">
+<input type="text" id="vendorPhone" placeholder="Phone/Email">
+<button class="btn btn-success" onclick="addVendor()" style="font-size:11px">Add Vendor</button>
+<button class="btn btn-warning" onclick="showVendorModal()" style="font-size:11px">View/Manage</button>
+
+<hr style="border:1px solid #555;margin:20px 0">
+
+<h4 style="color:#fff;margin-bottom:10px">💰 Add Expense</h4>
+<select id="expenseType">
+<option>Maintenance</option>
+<option>Repair</option>
+<option>Purchase</option>
+<option>Supplies</option>
+<option>Service</option>
+<option>Pool Cleaning</option>
+<option>Pest Control</option>
+<option>Credit</option>
+<option>Adjustment</option>
+</select>
+<select id="expenseProperty"></select>
+<select id="expenseVendor"></select>
+<input type="number" id="expenseAmount" placeholder="Amount" step="0.01">
+<input type="text" id="expenseNotes" placeholder="Notes">
+<button class="btn btn-success" onclick="addExpense()" style="font-size:11px">Add Expense</button>
+
+</div>
+
+<div id="vendorModal" class="modal">
+<div class="modal-content">
+<span class="modal-close" onclick="closeVendorModal()">&times;</span>
+<h2>Manage Vendors</h2>
+<div id="vendorListModal" style="margin-top:20px;max-height:400px;overflow-y:auto"></div>
+</div>
+</div>
+
+<div id="ownerSettingsModal" class="modal">
+<div class="modal-content">
+<span class="modal-close" onclick="closeOwnerSettings()">&times;</span>
+<h2 style="text-transform:uppercase;text-align:center">OWNER SETTINGS</h2>
+<div id="ownerSettingsContent" style="margin-top:20px;max-height:600px;overflow-y:auto"></div>
+<button class="btn btn-success" onclick="saveOwnerSettingsToGitHub()" style="margin-top:20px">💾 Save to GitHub</button>
+</div>
+</div>
+
+<div id="propertySettingsModal" class="modal">
+<div class="modal-content">
+<span class="modal-close" onclick="closePropertySettings()">&times;</span>
+<h2 style="text-transform:uppercase;text-align:center">PROPERTY TAX SETTINGS</h2>
+<div id="propertySettingsContent" style="margin-top:20px;max-height:600px;overflow-y:auto"></div>
+<button class="btn btn-success" onclick="savePropertySettingsToGitHub()" style="margin-top:20px">💾 Save to GitHub</button>
+</div>
+</div>
+
+<div class="main">
+<div id="content" class="page">
+<div class="invoice-header">
+<div class="company-info">
+<div class="company-name">OCEAN VACATIONS</div>
+<div>www.oceanvacationsmb.com</div>
+<div>oceanvacationsmb@gmail.com</div>
+<div>843-222-6516</div>
+</div>
+<div class="right-header">
+<div class="statement-date" id="statementDate"></div>
+<div class="period-date" id="periodDate"></div>
+</div>
+</div>
+
+<div class="report-title">RESERVATION REPORT</div>
+<div class="owner-name" id="ownerTitle"></div>
+
+<div id="mainContent">
+<div style="text-align:center;padding:40px;color:#666">
+Loading from GitHub... Please wait.
+</div>
+</div>
+</div>
+</div>
+
+<script>
+const GITHUB_REPO = "oceanvacationsmb/reports";
+const GITHUB_BRANCH = "main";
+const RAW_GITHUB_URL = "https://raw.githubusercontent.com/oceanvacationsmb/reports/main/data.json";
+
+let gitHubData = {};
+let vendors = [];
+let expenses = [];
+let csvData = [];
+let properties = [];
+let propertySettings = {};
+let ownerSettings = {};
+let currentOwner = "";
+let masterTotals = {};
+let propertyTotals = {};
+let taxByProperty = {};
+const municipalities = ["SC", "MB", "NMB", "SSB", "HC"];
+
+const OWNERS = {
+  "ERAN": { percent: 0.12, type: "draft", salesFeePercent: 5 },
+  "GHO": { percent: 0.10, type: "payout", salesFeePercent: 5 },
+  "1463 Basin Trail": { percent: 0.12, type: "payout", salesFeePercent: 5 },
+  "113B-15S Surfside Beach": { percent: 0.12, type: "payout", salesFeePercent: 5 },
+  "113B-13N Surfside Beach": { percent: 0.12, type: "payout", salesFeePercent: 5 },
+  "115C-15N Surfside Beach": { percent: 0.12, type: "payout", salesFeePercent: 5 },
+  "2131 Sanibel Myrtle Beach": { percent: 0.15, type: "payout", salesFeePercent: 5 },
+  "1552 Elizabeth Ln Myrtle Beach": { percent: 0.15, type: "payout", salesFeePercent: 5 },
+  "469C White River RD Myrtle Beach": { percent: 0.12, type: "payout", salesFeePercent: 5 },
+  "4631-301 Wild Iris Drive Myrtle Beach": { percent: 0.12, type: "payout", salesFeePercent: 5 },
+  "4679-204 Wild Iris Drive Myrtle Beach": { percent: 0.12, type: "payout", salesFeePercent: 5 },
+  "508-1/2 33rd Ave North Myrtle Beach": { percent: 0.15, type: "payout", salesFeePercent: 10 },
+  "214-2S 2nd Ave S. North Myrtle Beach": { percent: 0.12, type: "payout", salesFeePercent: 10 }
+};
+
+function showStatus(message, isError) {
+  const statusDiv = document.getElementById("statusMessage");
+  statusDiv.textContent = message;
+  statusDiv.className = "status-msg " + (isError ? "status-error" : "status-success");
+  statusDiv.style.display = "block";
+  setTimeout(function() { statusDiv.style.display = "none"; }, 5000);
+}
+
+async function loadDataFromGitHub() {
+  try {
+    const response = await fetch(RAW_GITHUB_URL);
+    if (!response.ok) throw new Error("Failed to load data.json");
+    gitHubData = await response.json();
+    
+    if (gitHubData.owners) {
+      Object.keys(gitHubData.owners).forEach(function(ownerName) {
+        ownerSettings[ownerName] = gitHubData.owners[ownerName];
+        if (gitHubData.owners[ownerName].percent) OWNERS[ownerName].percent = gitHubData.owners[ownerName].percent;
+        if (gitHubData.owners[ownerName].type) OWNERS[ownerName].type = gitHubData.owners[ownerName].type;
+        if (gitHubData.owners[ownerName].salesFeePercent) OWNERS[ownerName].salesFeePercent = gitHubData.owners[ownerName].salesFeePercent;
+      });
+    }
+    
+    if (gitHubData.vendors) vendors = gitHubData.vendors;
+    if (gitHubData.properties) {
+      Object.keys(gitHubData.properties).forEach(function(propName) {
+        propertySettings[propName] = gitHubData.properties[propName];
+      });
+    }
+    if (gitHubData.expenses) expenses = gitHubData.expenses;
+    
+    buildOwnerDropdown();
+    updateVendorList();
+    document.getElementById("mainContent").innerHTML = '<div style="text-align:center;padding:40px;color:#666">Ready! Select an owner and upload CSV to begin.</div>';
+    showStatus("✓ Data loaded from GitHub", false);
+    return true;
+  } catch(error) {
+    console.error("Error:", error);
+    showStatus("✗ Error loading from GitHub: " + error.message, true);
+    buildOwnerDropdown();
+    return false;
+  }
+}
+
+function setupGitHub() {
+  const token = localStorage.getItem("github_token") || "";
+  const newToken = prompt("GitHub Personal Access Token:\n(Get from https://github.com/settings/tokens)\nSelect 'repo' scope only", token);
+  if (newToken && newToken.trim()) {
+    localStorage.setItem("github_token", newToken.trim());
+    showStatus("✓ Token saved! Reloading...", false);
+    location.reload();
+  }
+}
+
+async function saveToGitHub(dataToSave) {
+  const token = localStorage.getItem("github_token");
+  if (!token) {
+    showStatus("✗ No GitHub token. Click 🔑 GitHub Setup first.", true);
+    return false;
+  }
+  
+  try {
+    const fileContent = JSON.stringify(dataToSave, null, 2);
+    const encodedContent = btoa(unescape(encodeURIComponent(fileContent)));
+    
+    const shaResponse = await fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json", {
+      headers: { "Authorization": "token " + token }
+    });
+    
+    if (!shaResponse.ok) throw new Error("Could not fetch file");
+    const shaData = await shaResponse.json();
+    
+    const response = await fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json", {
+      method: "PUT",
+      headers: {
+        "Authorization": "token " + token,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: "Update: " + new Date().toLocaleString(),
+        content: encodedContent,
+        sha: shaData.sha,
+        branch: "main"
+      })
+    });
+    
+    if (!response.ok) throw new Error("Save failed");
+    showStatus("✓ Saved to GitHub!", false);
+    gitHubData = dataToSave;
+    return true;
+  } catch(error) {
+    showStatus("✗ Error: " + error.message, true);
+    return false;
+  }
+}
+
+function buildOwnerDropdown() {
+  const select = document.getElementById("ownerSelect");
+  select.innerHTML = '<option value="">-- Select Owner --</option>';
+  Object.keys(OWNERS).sort().forEach(function(owner) {
+    const opt = document.createElement("option");
+    opt.value = owner;
+    opt.textContent = owner;
+    select.appendChild(opt);
+  });
+}
+
+function buildMonthDropdown() {
+  const select = document.getElementById("monthSelect");
+  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  months.forEach(function(m, i) {
+    const opt = document.createElement("option");
+    opt.value = i + 1;
+    opt.textContent = m;
+    select.appendChild(opt);
+  });
+  select.value = new Date().getMonth() + 1;
+}
+
+function buildYearDropdown() {
+  const select = document.getElementById("yearSelect");
+  const year = new Date().getFullYear();
+  for (let y = year - 2; y <= year + 2; y++) {
+    const opt = document.createElement("option");
+    opt.value = y;
+    opt.textContent = y;
+    select.appendChild(opt);
+  }
+  select.value = year;
+}
+
+function onOwnerChange() {
+  currentOwner = document.getElementById("ownerSelect").value;
+  if (currentOwner) updatePropertySelect();
+}
+
+function getMonthName(month) {
+  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  return months[month - 1];
+}
+
+function getNextMonth(month, year) {
+  let nextMonth = month + 1;
+  let nextYear = year;
+  if (nextMonth > 12) {
+    nextMonth = 1;
+    nextYear++;
+  }
+  return { month: nextMonth, year: nextYear };
+}
+
+function updateHeaderDates() {
+  const month = parseInt(document.getElementById("monthSelect").value);
+  const year = parseInt(document.getElementById("yearSelect").value);
+  const next = getNextMonth(month, year);
+  const daysInMonth = new Date(year, month, 0).getDate();
+  document.getElementById("statementDate").innerHTML = "Statement Date:<br><strong>" + getMonthName(next.month) + " 1st " + next.year + "</strong>";
+  document.getElementById("periodDate").innerHTML = "Period: " + getMonthName(month) + " 1st - " + daysInMonth + "th " + year;
+  document.getElementById("ownerTitle").textContent = currentOwner.toUpperCase();
+}
+
+function openOwnerSettings() {
+  const modal = document.getElementById("ownerSettingsModal");
+  const content = document.getElementById("ownerSettingsContent");
+  let html = "";
+  Object.keys(OWNERS).sort().forEach(function(ownerName) {
+    const settings = ownerSettings[ownerName] || { name: ownerName, percent: OWNERS[ownerName].percent, salesFeePercent: OWNERS[ownerName].salesFeePercent, type: OWNERS[ownerName].type };
+    const isDraft = settings.type === "draft";
+    html += "<div class='owner-settings-box'>";
+    html += "<span class='property-name-label'>" + ownerName + "</span>";
+    html += "<label class='owner-settings-label'>Commission %:</label>";
+    html += "<input type='number' step='0.01' value='" + (settings.percent * 100).toFixed(2) + "' onchange=\"updateOwnerSettingLocal('" + ownerName + "', 'percent', this.value / 100)\" class='owner-settings-input'>";
+    html += "<label class='owner-settings-label'>Sales Fee %:</label>";
+    html += "<input type='number' step='0.01' value='" + settings.salesFeePercent.toFixed(2) + "' onchange=\"updateOwnerSettingLocal('" + ownerName + "', 'salesFeePercent', parseFloat(this.value))\" class='owner-settings-input'>";
+    html += "<label class='owner-settings-label'>Type:</label>";
+    html += "<select onchange=\"updateOwnerSettingLocal('" + ownerName + "', 'type', this.value)\" class='owner-settings-input'><option value='draft' " + (isDraft ? "selected" : "") + ">Draft</option><option value='payout' " + (!isDraft ? "selected" : "") + ">Payout</option></select>";
+    html += "</div>";
+  });
+  content.innerHTML = html;
+  modal.style.display = "block";
+}
+
+function updateOwnerSettingLocal(ownerName, field, value) {
+  if (!ownerSettings[ownerName]) {
+    ownerSettings[ownerName] = { name: ownerName, percent: OWNERS[ownerName].percent, salesFeePercent: OWNERS[ownerName].salesFeePercent, type: OWNERS[ownerName].type };
+  }
+  ownerSettings[ownerName][field] = value;
+  OWNERS[ownerName][field] = value;
+}
+
+async function saveOwnerSettingsToGitHub() {
+  const dataToSave = Object.assign({}, gitHubData, { owners: ownerSettings });
+  const success = await saveToGitHub(dataToSave);
+  if (success) {
+    gitHubData = dataToSave;
+    closeOwnerSettings();
+  }
+}
+
+function closeOwnerSettings() {
+  document.getElementById("ownerSettingsModal").style.display = "none";
+}
+
+function openPropertySettings() {
+  const modal = document.getElementById("propertySettingsModal");
+  const content = document.getElementById("propertySettingsContent");
+  let html = "";
+  Object.keys(OWNERS).sort().forEach(function(propName) {
+    const settings = propertySettings[propName] || { name: propName, municipalities: {} };
+    html += "<div class='property-settings-box'>";
+    html += "<span class='property-name-label'>" + propName + "</span>";
+    html += "<div class='checkbox-group'>";
+    municipalities.forEach(function(mun) {
+      html += "<div class='checkbox-item'>";
+      html += "<input type='checkbox' id='mun_" + propName + "_" + mun + "' " + (settings.municipalities && settings.municipalities[mun] ? "checked" : "") + " onchange=\"updateMunicipalityLocal('" + propName + "', '" + mun + "', this.checked)\">";
+      html += "<label for='mun_" + propName + "_" + mun + "'>" + mun + "</label>";
+      html += "</div>";
+    });
+    html += "</div></div>";
+  });
+  content.innerHTML = html;
+  modal.style.display = "block";
+}
+
+function updateMunicipalityLocal(propName, mun, checked) {
+  if (!propertySettings[propName]) propertySettings[propName] = { name: propName, municipalities: {} };
+  if (!propertySettings[propName].municipalities) propertySettings[propName].municipalities = {};
+  propertySettings[propName].municipalities[mun] = checked;
+}
+
+async function savePropertySettingsToGitHub() {
+  const dataToSave = Object.assign({}, gitHubData, { properties: propertySettings });
+  const success = await saveToGitHub(dataToSave);
+  if (success) {
+    gitHubData = dataToSave;
+    closePropertySettings();
+  }
+}
+
+function closePropertySettings() {
+  document.getElementById("propertySettingsModal").style.display = "none";
+}
+
+async function addVendor() {
+  const name = document.getElementById("vendorName").value.trim();
+  const phone = document.getElementById("vendorPhone").value.trim();
+  if (!name) { alert("Enter vendor name"); return; }
+  const vendor = { id: Date.now(), name: name, phone: phone };
+  vendors.push(vendor);
+  updateVendorList();
+  document.getElementById("vendorName").value = "";
+  document.getElementById("vendorPhone").value = "";
+  const dataToSave = Object.assign({}, gitHubData, { vendors: vendors });
+  await saveToGitHub(dataToSave);
+}
+
+async function deleteVendor(id) {
+  vendors = vendors.filter(function(v) { return v.id !== id; });
+  updateVendorList();
+  const dataToSave = Object.assign({}, gitHubData, { vendors: vendors });
+  await saveToGitHub(dataToSave);
+}
+
+function updateVendorList() {
+  const select = document.getElementById("expenseVendor");
+  select.innerHTML = "<option value=''>-- Select Vendor --</option>";
+  vendors.forEach(function(v) {
+    const opt = document.createElement("option");
+    opt.value = v.name;
+    opt.textContent = v.name;
+    select.appendChild(opt);
+  });
+}
+
+function showVendorModal() {
+  const modal = document.getElementById("vendorModal");
+  const list = document.getElementById("vendorListModal");
+  if (vendors.length === 0) {
+    list.innerHTML = "<p>No vendors yet</p>";
+  } else {
+    let html = "";
+    vendors.forEach(function(v) {
+      html += "<div style='background:#f0f0f0;padding:15px;margin:10px 0;border-radius:3px;display:flex;justify-content:space-between;align-items:center'>";
+      html += "<div><strong>" + v.name + "</strong><br><span style='color:#666;font-size:11px'>" + v.phone + "</span></div>";
+      html += "<button onclick='deleteVendor(" + v.id + ")' class='btn btn-danger btn-small'>Delete</button>";
+      html += "</div>";
+    });
+    list.innerHTML = html;
+  }
+  modal.style.display = "block";
+}
+
+function closeVendorModal() {
+  document.getElementById("vendorModal").style.display = "none";
+}
+
+function updatePropertySelect() {
+  const select = document.getElementById("expenseProperty");
+  select.innerHTML = "<option value=''>-- Select Property --</option>";
+  properties.forEach(function(p) {
+    const opt = document.createElement("option");
+    opt.value = p;
+    opt.textContent = p;
+    select.appendChild(opt);
+  });
+}
+
+async function addExpense() {
+  const type = document.getElementById("expenseType").value;
+  const property = document.getElementById("expenseProperty").value;
+  const vendor = document.getElementById("expenseVendor").value;
+  const amount = parseFloat(document.getElementById("expenseAmount").value);
+  const notes = document.getElementById("expenseNotes").value;
+  if (!currentOwner || !property || !vendor || !amount) { alert("Fill all fields"); return; }
+  const expense = { id: Date.now(), owner: currentOwner, type: type, property: property, vendor: vendor, amount: amount, notes: notes, date: new Date().toLocaleString() };
+  expenses.push(expense);
+  document.getElementById("expenseAmount").value = "";
+  document.getElementById("expenseNotes").value = "";
+  document.getElementById("expenseProperty").value = "";
+  const dataToSave = Object.assign({}, gitHubData, { expenses: expenses });
+  await saveToGitHub(dataToSave);
+}
+
+async function deleteExpense(id) {
+  if (confirm("Delete this expense?")) {
+    expenses = expenses.filter(function(e) { return e.id !== id; });
+    const dataToSave = Object.assign({}, gitHubData, { expenses: expenses });
+    await saveToGitHub(dataToSave);
+    generateStatement();
+  }
+}
+
+function money(x) { return "$" + (Number(x) || 0).toFixed(2); }
+function num(v) { return parseFloat((v || "0").toString().replace(/[$,]/g, "")) || 0; }
+
+async function generateStatement() {
+  const file = document.getElementById("csvFile").files[0];
+  if (!file) { alert("Upload CSV"); return; }
+  if (!currentOwner) { alert("Select owner"); return; }
+  updateHeaderDates();
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    csvData = Papa.parse(e.target.result, { header: true, skipEmptyLines: true }).data;
+    processData();
+    displayStatement();
+  };
+  reader.readAsText(file);
+}
+
+function processData() {
+  const month = parseInt(document.getElementById("monthSelect").value);
+  const year = parseInt(document.getElementById("yearSelect").value);
+  const ownerData = ownerSettings[currentOwner] || OWNERS[currentOwner];
+  const percent = ownerData.percent;
+  const type = ownerData.type;
+  propertyTotals = {};
+  masterTotals = { gross: 0, acc: 0, clean: 0, pmc: 0, expenses: 0, draft: 0, owner: 0, websiteFee: 0 };
+  taxByProperty = {};
+  properties = [];
+  let grouped = {};
+  csvData.forEach(function(row) {
+    if (!row["CHECK-IN DATE"]) return;
+    let m = parseInt(row["CHECK-IN DATE"].split("-")[1]);
+    let y = parseInt(row["CHECK-IN DATE"].split("-")[0]);
+    if (m !== month || y !== year) return;
+    let listing = row["LISTING'S NICKNAME"] || "Unknown";
+    if (!properties.includes(listing)) properties.push(listing);
+    if (!grouped[listing]) grouped[listing] = [];
+    grouped[listing].push(row);
+  });
+  updatePropertySelect();
+  Object.keys(grouped).forEach(function(listing) {
+    let pGross = 0, pAcc = 0, pClean = 0, pPMC = 0, pWebsiteFee = 0, pExpenses = 0;
+    grouped[listing].forEach(function(row) {
+      let payout = num(row["TOTAL PAYOUT"]);
+      let acc = num(row["ACCOMMODATION FARE"]) - num(row["MARKUP"]);
+      let status = (row["STATUS"] || "").toLowerCase();
+      let isCancelled = status.includes("cancelled");
+      let clean = isCancelled ? 0 : num(row["CLEANING FARE"]);
+      let pmc = acc * percent;
+      let websiteFee = 0;
+      if (type === "draft" && acc > 0) {
+        let code = row["CONFIRMATION CODE"] || "";
+        let platform = row["PLATFORM"] || "";
+        if (!code.toUpperCase().startsWith("HA") && (platform.toLowerCase().includes("website") || platform.toLowerCase().includes("manual"))) {
+          websiteFee = payout * 0.01;
         }
+      }
+      pGross += payout;
+      pAcc += acc;
+      pClean += clean;
+      pPMC += pmc;
+      pWebsiteFee += websiteFee;
+      if (type === "payout") {
+        let cityTax = num(row["CITY TAX"]) || 0;
+        let stateTax = num(row["STATE TAX"]) || 0;
+        let countyTax = num(row["COUNTY TAX"]) || 0;
+        let occupancyTax = num(row["OCCUPANCY TAX"]) || 0;
+        if (cityTax > 0 || stateTax > 0 || countyTax > 0 || occupancyTax > 0) {
+          if (!taxByProperty[listing]) taxByProperty[listing] = 0;
+          taxByProperty[listing] += payout;
+        }
+      }
+    });
+    let propExpenses = expenses.filter(function(e) { return e.property === listing && e.owner === currentOwner; }).reduce(function(s, e) { return s + e.amount; }, 0);
+    let draftAmount = pPMC + pClean + pWebsiteFee + propExpenses;
+    let payoutAmount = pAcc - pPMC - propExpenses;
+    propertyTotals[listing] = { gross: pGross, acc: pAcc, clean: pClean, pmc: pPMC, websiteFee: pWebsiteFee, expenses: propExpenses, draft: draftAmount, owner: payoutAmount, reservations: grouped[listing] };
+    masterTotals.gross += pGross;
+    masterTotals.acc += pAcc;
+    masterTotals.clean += pClean;
+    masterTotals.pmc += pPMC;
+    masterTotals.websiteFee += pWebsiteFee;
+    masterTotals.expenses += propExpenses;
+    masterTotals.draft += draftAmount;
+    masterTotals.owner += payoutAmount;
+  });
+}
 
-        document.getElementById('tokenSetupBtn').addEventListener('click', () => {
-            // Placeholder for GitHub token setup logic
-            alert('GitHub Token Setup Functionality');
-        });
+function displayStatement() {
+  const ownerData = ownerSettings[currentOwner] || OWNERS[currentOwner];
+  const type = ownerData.type;
+  let html = "<div class='summary-title'>FINANCIAL SUMMARY</div><div class='summary-grid'>";
+  if (type === "draft") {
+    html += "<div class='summary-card'><div class='summary-label'>Gross Payout</div><div class='summary-value'>" + money(masterTotals.gross) + "</div></div>";
+    html += "<div class='summary-card'><div class='summary-label'>Accommodation</div><div class='summary-value'>" + money(masterTotals.acc) + "</div></div>";
+    html += "<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>" + money(masterTotals.pmc) + "</div></div>";
+    html += "<div class='summary-card'><div class='summary-label'>Cleaning Fee</div><div class='summary-value'>" + money(masterTotals.clean) + "</div></div>";
+    html += "<div class='summary-card'><div class='summary-label'>Website (1%)</div><div class='summary-value'>" + money(masterTotals.websiteFee) + "</div></div>";
+    html += "<div class='summary-card'><div class='summary-label'>Expenses</div><div class='summary-value'>" + money(masterTotals.expenses) + "</div></div>";
+    html += "<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>AMOUNT DUE</div><div class='summary-value' style='color:#fff'>" + money(masterTotals.draft) + "</div></div>";
+  } else {
+    html += "<div class='summary-card'><div class='summary-label'>Accommodation</div><div class='summary-value'>" + money(masterTotals.acc) + "</div></div>";
+    html += "<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>" + money(masterTotals.pmc) + "</div></div>";
+    html += "<div class='summary-card'><div class='summary-label'>Expenses</div><div class='summary-value'>" + money(masterTotals.expenses) + "</div></div>";
+    html += "<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>OWNER PAYOUT</div><div class='summary-value' style='color:#fff'>" + money(masterTotals.owner) + "</div></div>";
+  }
+  html += "</div>";
+  Object.keys(propertyTotals).forEach(function(prop) {
+    let p = propertyTotals[prop];
+    let finalPayout = type === "draft" ? p.draft : p.owner;
+    let propExpenseList = expenses.filter(function(e) { return e.property === prop && e.owner === currentOwner; });
+    html += "<div class='property-section'><div class='property-title'><span class='property-icon'>🏠</span>" + prop.toUpperCase() + "</div><div class='summary-grid'>";
+    if (type === "draft") {
+      html += "<div class='summary-card'><div class='summary-label'>Gross Payout</div><div class='summary-value'>" + money(p.gross) + "</div></div>";
+      html += "<div class='summary-card'><div class='summary-label'>Accommodation</div><div class='summary-value'>" + money(p.acc) + "</div></div>";
+      html += "<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>" + money(p.pmc) + "</div></div>";
+      html += "<div class='summary-card'><div class='summary-label'>Cleaning Fee</div><div class='summary-value'>" + money(p.clean) + "</div></div>";
+      html += "<div class='summary-card'><div class='summary-label'>Website (1%)</div><div class='summary-value'>" + money(p.websiteFee) + "</div></div>";
+      html += "<div class='summary-card'><div class='summary-label'>Expenses</div><div class='summary-value'>" + money(p.expenses) + "</div></div>";
+      html += "<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>AMOUNT DUE</div><div class='summary-value' style='color:#fff'>" + money(finalPayout) + "</div></div>";
+    } else {
+      html += "<div class='summary-card'><div class='summary-label'>Accommodation</div><div class='summary-value'>" + money(p.acc) + "</div></div>";
+      html += "<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>" + money(p.pmc) + "</div></div>";
+      html += "<div class='summary-card'><div class='summary-label'>Expenses</div><div class='summary-value'>" + money(p.expenses) + "</div></div>";
+      html += "<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>OWNER PAYOUT</div><div class='summary-value' style='color:#fff'>" + money(finalPayout) + "</div></div>";
+    }
+    html += "</div>";
+    if (propExpenseList.length > 0) {
+      html += "<div style='margin-top:15px'><div class='section-title'>EXPENSES</div>";
+      propExpenseList.forEach(function(e) {
+        html += "<div class='attachment'><div class='attachment-left'><strong>" + e.type + "</strong> - " + e.vendor + ": " + money(e.amount) + "<br><span style='color:#666;font-size:10px'>" + e.date + "</span>";
+        if (e.notes) html += "<br><span style='color:#666'>Notes: " + e.notes + "</span>";
+        html += "</div><button onclick='deleteExpense(" + e.id + ")' class='btn btn-danger btn-small'>Delete</button></div>";
+      });
+      html += "</div>";
+    }
+    html += "<div style='margin-top:15px'><div class='section-title'>RESERVATIONS</div><table style='margin-top:10px'>";
+    if (type === "draft") {
+      html += "<tr><th>Confirmation</th><th>Stay</th><th>Platform</th><th>Gross</th><th>Accommodation</th><th>PMC</th><th>Cleaning</th><th>Website</th><th>Amount Due</th></tr>";
+      p.reservations.forEach(function(r) {
+        let acc = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
+        let payout = num(r["TOTAL PAYOUT"]);
+        let status = (r["STATUS"] || "").toLowerCase();
+        let clean = status.includes("cancelled") ? 0 : num(r["CLEANING FARE"]);
+        let percent = ownerData.percent;
+        let pmc = acc * percent;
+        let code = r["CONFIRMATION CODE"] || "";
+        let platform = r["PLATFORM"] || "";
+        let isVRBO = code.toUpperCase().startsWith("HA");
+        let displayPlat = isVRBO ? "VRBO" : platform;
+        if (displayPlat.toLowerCase().includes("website") || displayPlat.toLowerCase().includes("manual")) displayPlat = "Website";
+        let websiteFee = (acc > 0 && !isVRBO && (platform.toLowerCase().includes("website") || platform.toLowerCase().includes("manual"))) ? payout * 0.01 : 0;
+        let checkin = r["CHECK-IN DATE"] ? r["CHECK-IN DATE"].split("-").slice(1).join("/") : "";
+        let checkout = r["CHECK-OUT DATE"] ? r["CHECK-OUT DATE"].split("-").slice(1).join("/") : "";
+        if (payout === 0) return;
+        html += "<tr><td>" + code.substring(0,8) + "</td><td>" + checkin + " - " + checkout + "</td><td>" + displayPlat + "</td><td>" + money(payout) + "</td><td>" + money(acc) + "</td><td>" + money(pmc) + "</td><td>" + money(clean) + "</td><td>" + money(websiteFee) + "</td><td>" + money(pmc + clean + websiteFee) + "</td></tr>";
+      });
+    } else {
+      html += "<tr><th>Code</th><th>Stay</th><th>Platform</th><th>Accommodation</th><th>PMC</th><th>Owner Payout</th></tr>";
+      p.reservations.forEach(function(r) {
+        let acc = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
+        let payout = num(r["TOTAL PAYOUT"]);
+        let percent = ownerData.percent;
+        let pmc = acc * percent;
+        let code = r["CONFIRMATION CODE"] || "";
+        let platform = r["PLATFORM"] || "";
+        let isVRBO = code.toUpperCase().startsWith("HA");
+        let displayPlat = isVRBO ? "VRBO" : platform;
+        let checkin = r["CHECK-IN DATE"] ? r["CHECK-IN DATE"].split("-").slice(1).join("/") : "";
+        let checkout = r["CHECK-OUT DATE"] ? r["CHECK-OUT DATE"].split("-").slice(1).join("/") : "";
+        if (payout === 0) return;
+        html += "<tr><td>" + code.substring(0,8) + "</td><td>" + checkin + " - " + checkout + "</td><td>" + displayPlat + "</td><td>" + money(acc) + "</td><td>" + money(pmc) + "</td><td>" + money(acc - pmc) + "</td></tr>";
+      });
+    }
+    html += "</table></div></div>";
+  });
+  document.getElementById("mainContent").innerHTML = html;
+}
 
-        // Auto-sync functionality
-        setInterval(fetchData, 30000); // Fetch data every 30 seconds
-        fetchData(); // Initial fetch
-    </script>
+async function generateSummary() {
+  if (!csvData || csvData.length === 0) { alert("Generate statement first"); return; }
+  updateHeaderDates();
+  const ownerData = ownerSettings[currentOwner] || OWNERS[currentOwner];
+  const type = ownerData.type;
+  const salesPercent = ownerData.salesFeePercent;
+  const finalPayout = type === "draft" ? masterTotals.draft : masterTotals.owner;
+  const salesAmount = masterTotals.pmc * (salesPercent / 100);
+  let html = "<button class='btn back-btn' onclick='generateStatement()'>← Back</button><div class='summary-title'>SUMMARY</div><div style='background:#f9f9f9;border:1px solid #ddd;padding:20px;border-radius:5px'>";
+  html += "<table><tr><td style='font-weight:bold'>Total Accommodation</td><td style='text-align:right'>" + money(masterTotals.acc) + "</td></tr>";
+  html += "<tr><td style='font-weight:bold'>PMC Amount</td><td style='text-align:right'>" + money(masterTotals.pmc) + "</td></tr>";
+  html += "<tr><td style='font-weight:bold'>Sales Fee Rate</td><td style='text-align:right'>" + salesPercent + "%</td></tr>";
+  html += "<tr><td style='font-weight:bold'>Sales Amount Due</td><td style='text-align:right'>" + money(salesAmount) + "</td></tr>";
+  html += "<tr style='background:#000;color:#fff'><td style='font-weight:bold;color:#fff'>FINAL AMOUNT</td><td style='text-align:right;color:#fff'>" + money(finalPayout) + "</td></tr>";
+  html += "</table></div>";
+  if (type === "payout" && Object.keys(propertyTotals).some(function(prop) { return propertySettings[prop] && propertySettings[prop].municipalities && Object.values(propertySettings[prop].municipalities).some(function(v) { return v; }); })) {
+    html += "<div class='tax-info'><div class='tax-info-title'>TAX PAYMENT REQUIRED</div><table class='tax-table'><tr><th>PROPERTY</th><th>MUNICIPALITIES</th><th>AMOUNT</th></tr>";
+    Object.keys(propertyTotals).forEach(function(prop) {
+      const settings = propertySettings[prop];
+      if (!settings || !settings.municipalities || !Object.values(settings.municipalities).some(function(v) { return v; })) return;
+      const munis = Object.keys(settings.municipalities || {}).filter(function(m) { return settings.municipalities[m]; }).join(", ");
+      html += "<tr><td>" + prop + "</td><td>" + munis + "</td><td class='tax-amount'>" + money(taxByProperty[prop] || 0) + "</td></tr>";
+    });
+    html += "</table></div>";
+  }
+  html += "<button class='btn print-btn' onclick='window.print()'>🖨️ Print</button>";
+  document.getElementById("mainContent").innerHTML = html;
+}
+
+async function generateAnnual() {
+  const ownerData = ownerSettings[currentOwner] || OWNERS[currentOwner];
+  if (ownerData.type !== "payout") { alert("Payout owners only"); return; }
+  updateHeaderDates();
+  let html = "<button class='btn back-btn' onclick='generateStatement()'>← Back</button><div class='summary-title'>ANNUAL SUMMARY</div><div style='background:#f9f9f9;padding:20px;border-radius:5px'>";
+  html += "<table><tr><td style='font-weight:bold'>Total Accommodation</td><td style='text-align:right'>" + money(masterTotals.acc) + "</td></tr>";
+  html += "<tr><td style='font-weight:bold'>PMC Charged</td><td style='text-align:right'>" + money(masterTotals.pmc) + "</td></tr>";
+  html += "<tr><td style='font-weight:bold'>Total Expenses</td><td style='text-align:right'>" + money(masterTotals.expenses) + "</td></tr>";
+  html += "<tr style='background:#000;color:#fff'><td style='font-weight:bold;color:#fff'>NET ANNUAL</td><td style='text-align:right;color:#fff'>" + money(masterTotals.owner) + "</td></tr>";
+  html += "</table></div><button class='btn print-btn' onclick='window.print()'>🖨️ Print</button>";
+  document.getElementById("mainContent").innerHTML = html;
+}
+
+async function viewHistory() {
+  if (!currentOwner) { alert("Select owner"); return; }
+  updateHeaderDates();
+  let html = "<button class='btn back-btn' onclick='generateStatement()'>← Back</button><div class='summary-title'>EXPENSE HISTORY</div>";
+  const ownerExpenses = expenses.filter(function(e) { return e.owner === currentOwner; }).sort(function(a, b) { return b.id - a.id; });
+  if (ownerExpenses.length === 0) {
+    html += "<p style='text-align:center;padding:20px;color:#666'>No expenses</p>";
+  } else {
+    ownerExpenses.forEach(function(e) {
+      html += "<div class='history-row'><div class='history-info'><strong>" + e.type + "</strong> - " + e.vendor + ": " + money(e.amount) + " (" + e.property + ")<br><span style='color:#666;font-size:10px'>" + e.date + "</span></div><div class='history-actions'><button onclick='deleteExpense(" + e.id + ")' class='btn btn-danger btn-small'>Delete</button></div></div>";
+    });
+  }
+  document.getElementById("mainContent").innerHTML = html;
+}
+
+function downloadPDF() {
+  html2pdf().set({ margin: 10, jsPDF: { unit: "mm", format: "a4" } }).from(document.getElementById("content")).save("Report.pdf");
+}
+
+window.onclick = function(event) {
+  if (event.target === document.getElementById("vendorModal")) document.getElementById("vendorModal").style.display = "none";
+  if (event.target === document.getElementById("ownerSettingsModal")) document.getElementById("ownerSettingsModal").style.display = "none";
+  if (event.target === document.getElementById("propertySettingsModal")) document.getElementById("propertySettingsModal").style.display = "none";
+};
+
+document.addEventListener("DOMContentLoaded", function() {
+  buildMonthDropdown();
+  buildYearDropdown();
+  loadDataFromGitHub();
+});
+</script>
+
 </body>
 </html>
