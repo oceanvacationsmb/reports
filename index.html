@@ -78,7 +78,7 @@ tr:nth-child(even){background:#f9f9f9}
 .back-btn{background:#666;color:#fff;padding:10px 20px;border:none;cursor:pointer;border-radius:3px;font-weight:bold;margin-bottom:20px}
 .back-btn:hover{background:#555}
 .save-success{background:#d4edda;color:#155724;padding:10px;border-radius:3px;margin-bottom:10px;display:none}
-.warning-section{background:#fff3cd;border:2px solid #ffc107;padding:15px;margin:15px 0;border-radius:5px}
+.warning-section{background:#fff3cd;border:2px solid #ffc104;padding:15px;margin:15px 0;border-radius:5px}
 .warning-title{font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px}
 @media print{
 .sidebar,.finish-btn,.add-row button,.back-btn,.save-btn{display:none}
@@ -310,13 +310,13 @@ let pmc=acc*percent;
 let draft=pmc+clean;
 let ownerPay=acc-pmc;
 
-// Check if website booking (website fee for draft owners only)
+// Check if website or manual booking (website fee for draft owners only)
 let websiteFee=0;
 if(type==="draft"){
 let platform=r["PLATFORM"]||"";
 let platformLower=platform.toLowerCase();
-if(platformLower.includes("website")){
-websiteFee=payout*0.01; // 1% of payout for website and website_direct bookings
+if(platformLower.includes("website") || platformLower.includes("manual")){
+websiteFee=payout*0.01; // 1% of payout for website, website_direct, and manual bookings
 pWebsiteFee+=websiteFee;
 }
 }
@@ -403,12 +403,12 @@ ${type==="draft"
 
 <table>
 <tr>
-<th>Res</th>
+<th>Reservation</th>
 <th>Stay</th>
 <th>Platform</th>
-<th>Accom</th>
+<th>Accommodation</th>
 <th>PMC</th>
-${type==="draft"?"<th>Clean</th><th>Web Fee</th><th>Draft</th>":"<th>Owner</th>"}
+${type==="draft"?"<th>Cleaning Fee</th><th>Website Fee</th><th>Payout</th>":"<th>Owner</th>"}
 </tr>
 `;
 
@@ -422,11 +422,14 @@ let ownerPay=acc-pmc;
 let platform=r["PLATFORM"]||"N/A";
 let confirmationCode=r["CONFIRMATION CODE"]||"N/A";
 
-// Check if website booking for fee calculation
+// Replace "manual" with "website" in display
+let displayPlatform=platform.replace(/manual/gi,"website");
+
+// Check if website or manual booking for fee calculation
 let websiteFee=0;
 if(type==="draft"){
 let platformLower=platform.toLowerCase();
-if(platformLower.includes("website")){
+if(platformLower.includes("website") || platformLower.includes("manual")){
 websiteFee=payout*0.01;
 }
 }
@@ -443,7 +446,7 @@ reportHTML+=`
 <tr>
 <td>${confirmationCode.substring(0,8)}</td>
 <td>${stay(r["CHECK-IN DATE"],r["CHECK-OUT DATE"])}</td>
-<td style="max-width:80px;word-wrap:break-word;">${platform}</td>
+<td style="max-width:80px;word-wrap:break-word;">${displayPlatform}</td>
 <td>${money(acc)}</td>
 <td>${money(pmc)}</td>
 ${type==="draft"
@@ -540,7 +543,7 @@ ${type==="draft"?`
 <span class="summary-line-value">${money(masterTotals.websiteFee)}</span>
 </div>
 <div style="font-size:11px;margin-top:10px;color:#666">
-Charged on website and website_direct bookings made through your platform
+Charged on website, website_direct, and manual bookings made through your platform
 </div>
 </div>
 `:""}
@@ -586,7 +589,7 @@ ${Object.entries(taxByProperty).map(([property, data])=>`
 <td class="tax-amount">${money(data.payout)}</td>
 </tr>
 `).join("")}
-<tr style="background:#ffc107;font-weight:bold">
+<tr style="background:#ffc104;font-weight:bold">
 <td>TOTAL</td>
 <td class="tax-amount">${money(Object.values(taxByProperty).reduce((sum, p) => sum + p.payout, 0))}</td>
 </tr>
