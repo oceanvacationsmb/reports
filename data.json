@@ -73,6 +73,15 @@
       "vendor": "ECIA",
       "amount": 100,
       "notes": ""
+    },
+    {
+      "id": 1771224510392,
+      "owner": "GHO",
+      "type": "PEST CONTROL",
+      "property": "MB - 209/5112",
+      "vendor": "ECIA",
+      "amount": 100,
+      "notes": ""
     }
   ]
 }
