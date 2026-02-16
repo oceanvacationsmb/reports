@@ -30,7 +30,10 @@
     "GCSSB - 204-2D": {},
     "MB - 209/5113": {},
     "MB - 2000": {},
-    "MB - 209/5112": {}
+    "MB - 209/5112": {},
+    "GCSSB - 113B-12S": {},
+    "MB - Tuscan A": {},
+    "NMB - 204-28N": {}
   },
   "expenses": [
     {
@@ -67,6 +70,15 @@
       "property": "MB - 209/5112",
       "vendor": "ECIA",
       "amount": 100,
+      "notes": ""
+    },
+    {
+      "id": 1771225386771,
+      "owner": "ERAN MARON",
+      "type": "MAINTENANCE",
+      "property": "GCSSB - 113B-12S",
+      "vendor": "ECIA",
+      "amount": 1000,
       "notes": ""
     }
   ]
