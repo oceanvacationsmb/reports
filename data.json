@@ -28,5 +28,15 @@
     "MB - 2000": {},
     "MB - 209/5112": {}
   },
-  "expenses": []
+  "expenses": [
+    {
+      "id": 1771224406025,
+      "owner": "GHO",
+      "type": "MAINTENANCE",
+      "property": "MB - 4765",
+      "vendor": "ECIA",
+      "amount": 1000,
+      "notes": ""
+    }
+  ]
 }
