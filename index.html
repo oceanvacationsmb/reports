@@ -95,8 +95,7 @@ function loadData(){
       propertySettings=data.properties||{};
       githubToken=data.github_token||"";
       console.log("✓ Data loaded from GitHub");
-      console.log("Token found:",githubToken?"YES":"NO");
-      if(githubToken)localStorage.setItem("github_token",githubToken);
+      console.log("Token:",githubToken?"FOUND":"NOT FOUND");
       init();
       updateTokenStatus();
     })
@@ -341,14 +340,8 @@ function setupToken(){
   const token=prompt("PASTE YOUR GITHUB TOKEN:\n\n(Token name: 'ocean vacations')");
   if(!token)return;
   githubToken=token.trim();
-  localStorage.setItem("github_token",githubToken);
   alert("✓ Saving token to GitHub...");
   saveToGitHub("GitHub token");
-  
-  setTimeout(()=>{
-    console.log("Reloading data...");
-    loadData();
-  },2000);
 }
 
 function setupDropbox(){
