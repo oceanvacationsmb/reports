@@ -611,7 +611,7 @@ function generateStatement(){
   document.getElementById("mainContent").innerHTML =
     "<div style='text-align:center;padding:40px;color:#666'>Loading data from Guesty...</div>";
 
-  fetch(`https://guesty-backend-11qf.onrender.com/api/guesty-report?month=${month}&year=${year}`)
+fetch(`https://guesty-backend-llqf.onrender.com/api/guesty-report?month=${month}&year=${year}`)
     .then(res => {
         if(!res.ok) throw new Error("Guesty backend error");
         return res.json();
