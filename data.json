@@ -1,5 +1,18 @@
 {
-  "owners": {},
+  "owners": {
+    "ERAN MARON": {
+      "email": "",
+      "percent": 0.12,
+      "salesFeePercent": 5,
+      "type": "draft"
+    },
+    "GHO": {
+      "email": "",
+      "percent": 0.1,
+      "salesFeePercent": 5,
+      "type": "payout"
+    }
+  },
   "vendors": [],
   "properties": {},
   "expenses": []
