@@ -75,7 +75,7 @@ function money(v){return"$"+(Number(v)||0).toFixed(2);}
 function updateTokenStatus(){
   const status=document.getElementById("tokenStatus");
   if(githubToken){
-    status.textContent="🟢 TOKEN ACTIVE (reports)";
+    status.textContent="🟢 TOKEN ACTIVE (ocean vacations)";
     status.className="token-status token-active";
   }else{
     status.textContent="🔴 NO TOKEN";
@@ -353,7 +353,7 @@ function saveExpenseData(){
 }
 
 function setupToken(){
-  const token=prompt("PASTE YOUR GITHUB TOKEN:\n\n(Your token name is 'reports')\n\nIf you lost it, create a new one at:\nhttps://github.com/settings/tokens");
+  const token=prompt("PASTE YOUR GITHUB TOKEN:\n\n(Token name: 'ocean vacations')\n\nIf you lost it, create new at:\nhttps://github.com/settings/tokens");
   if(token&&token.trim()){
     githubToken=token.trim();
     localStorage.setItem("github_token",githubToken);
