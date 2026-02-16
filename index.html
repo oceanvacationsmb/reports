@@ -86,7 +86,7 @@ tr:nth-child(even){background:#fafafa}
 <button class="btn btn-primary" onclick="generateStatement()">▶ STATEMENT</button>
 <button class="btn btn-success" onclick="openAddExpense()" style="font-size:13px;font-weight:bold">💰 ADD EXPENSE</button>
 <button class="btn btn-success" onclick="generateSummary()">📊 SUMMARY REPORT</button>
-<button class="btn btn-success" onclick="generateIncomeReport()">📈 INCOME REPORTS</button>
+<button class="btn btn-success" onclick="generateIncomeReport()" style="font-size:13px;font-weight:bold">📈 INCOME REPORTS</button>
 <div class="settings-header">⚙️ SETTINGS</div>
 <button class="btn btn-info" onclick="openOwners()" style="font-size:11px">⚙️ OWNER SETTINGS</button>
 <button class="btn btn-info" onclick="openTax()" style="font-size:11px">⚙️ TAX SETTINGS</button>
@@ -855,7 +855,4 @@ function generateSummary(){
     html+="<div style='display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold'><span>COMMISSION DUE</span><span>"+money(salesFee)+"</span></div></div></div>";
   }
   
-  html+="<div style='background:#d4edda;border:2px solid #28a745;padding:15px;margin:15px 0;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#155724;text-transform:uppercase;margin-bottom:10px'>🏦 PMC BANK TRANSFER</div><div style='font-size:18px;font-weight:bold;color:#155724'>"+money(masterTotals.pmc)+"</div></div>";
-  
-  document.getElementById("mainContent").innerHTML=html;
-}
+  html+="<div style='background:#d4edda;border:2px solid #28a745;padding:15px;margin:15px 0;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#155724;text-transform:uppercase;margin-bottom:10px'>🏦 PMC BANK TRANSFER</div><div style='font-size
