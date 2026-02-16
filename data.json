@@ -4,13 +4,15 @@
       "email": "",
       "percent": 0.12,
       "salesFeePercent": 5,
-      "type": "draft"
+      "type": "draft",
+      "guestyReportUrl": "https://app.guesty.com/reservations?viewId=69390343d28c76ee8b49fd18"
     },
     "GHO": {
       "email": "",
       "percent": 0.1,
       "salesFeePercent": 5,
-      "type": "payout"
+      "type": "payout",
+      "guestyReportUrl": "https://app.guesty.com/reservations?viewId=6939020d5c8b6c44c508d42b&soft-nav=true"
     }
   },
   "vendors": [
@@ -66,35 +68,8 @@
     "NMB - 204-27N": {},
     "NMB - 304B": {},
     "NMB - 703-2": {},
-    "NMB - 709-2": {}
+    "NMB - 709-2": {},
+    "GC - 601A": {}
   },
-  "expenses": [
-    {
-      "id": 1771228619711,
-      "owner": "GHO",
-      "type": "MAINTENANCE",
-      "property": "MB - 7500",
-      "vendor": "ECIA",
-      "amount": 100,
-      "notes": ""
-    },
-    {
-      "id": 1771229251756,
-      "owner": "ERAN MARON",
-      "type": "MAINTENANCE",
-      "property": "GC - 1211A",
-      "vendor": "ECIA",
-      "amount": 100,
-      "notes": ""
-    },
-    {
-      "id": 1771229360425,
-      "owner": "GHO",
-      "type": "MAINTENANCE",
-      "property": "MB - 7500",
-      "vendor": "ECIA",
-      "amount": 200,
-      "notes": ""
-    }
-  ]
+  "expenses": []
 }
