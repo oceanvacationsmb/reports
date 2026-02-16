@@ -62,6 +62,15 @@
       "vendor": "ECIA",
       "amount": 100,
       "notes": ""
+    },
+    {
+      "id": 1771226925874,
+      "owner": "ERAN MARON",
+      "type": "PURCHASE",
+      "property": "GCSSB - 113B-12S",
+      "vendor": "ECIA",
+      "amount": 100,
+      "notes": ""
     }
   ]
 }
