@@ -68,5 +68,15 @@
     "NMB - 703-2": {},
     "NMB - 709-2": {}
   },
-  "expenses": []
+  "expenses": [
+    {
+      "id": 1771228324035,
+      "owner": "ERAN MARON",
+      "type": "MAINTENANCE",
+      "property": "GC - 1211A",
+      "vendor": "ECIA",
+      "amount": 100,
+      "notes": ""
+    }
+  ]
 }
