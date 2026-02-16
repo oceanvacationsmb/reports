@@ -265,31 +265,45 @@ function saveToGitHub(type){
   const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken},null,2);
   const content=btoa(unescape(encodeURIComponent(data)));
   
-  fetch(GITHUB_API,{headers:{"Authorization":"token "+githubToken,"Accept":"application/vnd.github.v3+json"}})
-    .then(r=>{
-      if(!r.ok)throw new Error(r.status+" "+r.statusText);
-      return r.json();
+  fetch(GITHUB_API,{
+    headers:{
+      "Authorization":"token "+githubToken,
+      "Accept":"application/vnd.github.v3+json"
+    }
+  })
+  .then(r=>r.json())
+  .then(file=>{
+    if(file.message){
+      alert("❌ Error: "+file.message);
+      return;
+    }
+    
+    return fetch(GITHUB_API,{
+      method:"PUT",
+      headers:{
+        "Authorization":"token "+githubToken,
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        message:"Update "+type,
+        content:content,
+        sha:file.sha
+      })
     })
-    .then(file=>{
-      if(file.message)throw new Error(file.message);
-      return fetch(GITHUB_API,{
-        method:"PUT",
-        headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json","Accept":"application/vnd.github.v3+json"},
-        body:JSON.stringify({message:"Update "+type,content:content,sha:file.sha})
-      });
-    })
-    .then(r=>{
-      if(!r.ok)throw new Error(r.status+" "+r.statusText);
-      return r.json();
-    })
-    .then(data=>{
-      alert("✓ "+type.toUpperCase()+" SAVED!");
-      loadData();
-    })
-    .catch(e=>{
-      console.error("Error:",e);
-      alert("❌ Failed to save: "+e.message);
+    .then(r=>r.json())
+    .then(result=>{
+      if(result.message&&result.message.includes("error")){
+        alert("❌ Save failed: "+result.message);
+      }else{
+        alert("✓ "+type.toUpperCase()+" SAVED!");
+        setTimeout(()=>loadData(),1000);
+      }
     });
+  })
+  .catch(e=>{
+    console.error("Error:",e);
+    alert("❌ Error: "+e.message);
+  });
 }
 
 function updateVendorDropdown(){
@@ -318,25 +332,18 @@ function submitExpense(){
   if(!currentOwner||!prop||!vendor||!amount)return alert("Fill all fields");
   expenses.push({id:Date.now(),owner:currentOwner,type:type,property:prop,vendor:vendor,amount:amount,notes:document.getElementById("expenseNotes").value});
   closeAll();
-  saveExpenseData();
+  saveToGitHub("expenses");
   if(csvData.length){processData();displayStatement();}
   alert("✓ Expense added!");
 }
 
-function saveExpenseData(){
-  if(!githubToken)return;
-  saveToGitHub("expenses");
-}
-
 function setupToken(){
-  const token=prompt("PASTE YOUR GITHUB TOKEN:\n\n(Token name: 'ocean vacations')\n\nMake sure token has 'repo' scope.");
-  if(token&&token.trim()){
-    githubToken=token.trim();
-    localStorage.setItem("github_token",githubToken);
-    alert("✓ TOKEN SAVED!\n\nYou can now use any computer!");
-    saveToGitHub("GitHub token setup");
-    updateTokenStatus();
-  }
+  const token=prompt("PASTE YOUR GITHUB TOKEN:\n\n(Token name: 'ocean vacations')");
+  if(!token)return;
+  githubToken=token.trim();
+  localStorage.setItem("github_token",githubToken);
+  alert("✓ Saving token to GitHub...");
+  saveToGitHub("GitHub token");
 }
 
 function setupDropbox(){
@@ -517,7 +524,7 @@ function displayStatement(){
 function deleteExpense(id){
   if(!confirm("Delete?"))return;
   expenses=expenses.filter(e=>e.id!==id);
-  saveExpenseData();
+  saveToGitHub("expenses");
   if(csvData.length){processData();displayStatement();}
 }
 
