@@ -70,19 +70,19 @@
   },
   "expenses": [
     {
-      "id": 1771228324035,
-      "owner": "ERAN MARON",
+      "id": 1771228619711,
+      "owner": "GHO",
       "type": "MAINTENANCE",
-      "property": "GC - 1211A",
+      "property": "MB - 7500",
       "vendor": "ECIA",
       "amount": 100,
       "notes": ""
     },
     {
-      "id": 1771228619711,
-      "owner": "GHO",
+      "id": 1771229251756,
+      "owner": "ERAN MARON",
       "type": "MAINTENANCE",
-      "property": "MB - 7500",
+      "property": "GC - 1211A",
       "vendor": "ECIA",
       "amount": 100,
       "notes": ""
