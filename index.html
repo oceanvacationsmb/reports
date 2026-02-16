@@ -94,7 +94,7 @@ function loadData(){
     return;
   }
   
-  console.log("Fetching from GitHub API (not cached)...");
+  console.log("Fetching from GitHub API...");
   fetch(GITHUB_API,{
     headers:{"Authorization":"token "+githubToken,"Accept":"application/vnd.github.v3.raw"}
   })
@@ -110,6 +110,8 @@ function loadData(){
     expenses=data.expenses||[];
     propertySettings=data.properties||{};
     console.log("✓ Data loaded fresh from GitHub API");
+    console.log("Vendors:",vendors.length);
+    console.log("Properties:",Object.keys(propertySettings).length);
     init();
     updateTokenStatus();
   })
@@ -214,19 +216,25 @@ function saveOwnerData(){
 function openTax(){
   const content=document.getElementById("taxContent");
   let html="";
-  Object.keys(propertySettings).sort().forEach(prop=>{
-    const o=propertySettings[prop]||{};
-    html+="<div style='background:#555;padding:15px;margin:10px 0;border-radius:3px'>";
-    html+="<div style='font-weight:bold;color:#fff;margin-bottom:10px'>"+prop.toUpperCase()+"</div>";
-    municipalities.forEach(m=>{
-      const checked=o[m]?"checked":"";
-      html+="<label style='color:#fff;display:flex;align-items:center;margin:8px 0;cursor:pointer'>";
-      html+="<input type='checkbox' "+checked+" onchange=\"if(!propertySettings['"+prop+"'])propertySettings['"+prop+"']={};propertySettings['"+prop+"']['"+m+"']=this.checked\">";
-      html+="<span style='margin-left:8px'>"+m+"</span>";
-      html+="</label>";
+  const allProps=Object.keys(propertySettings);
+  
+  if(allProps.length===0){
+    html="<p style='color:#aaa;text-align:center;padding:20px'>Upload a CSV first to create properties, then configure tax settings.</p>";
+  }else{
+    allProps.sort().forEach(prop=>{
+      const o=propertySettings[prop]||{};
+      html+="<div style='background:#555;padding:15px;margin:10px 0;border-radius:3px'>";
+      html+="<div style='font-weight:bold;color:#fff;margin-bottom:10px'>"+prop.toUpperCase()+"</div>";
+      municipalities.forEach(m=>{
+        const checked=o[m]?"checked":"";
+        html+="<label style='color:#fff;display:flex;align-items:center;margin:8px 0;cursor:pointer'>";
+        html+="<input type='checkbox' "+checked+" onchange=\"if(!propertySettings['"+prop+"'])propertySettings['"+prop+"']={};propertySettings['"+prop+"']['"+m+"']=this.checked\">";
+        html+="<span style='margin-left:8px'>"+m+"</span>";
+        html+="</label>";
+      });
+      html+="</div>";
     });
-    html+="</div>";
-  });
+  }
   content.innerHTML=html;
   openModal("taxModal");
 }
@@ -239,16 +247,21 @@ function saveTaxData(){
 function openVendorSettings(){
   const list=document.getElementById("vendorSettingsList");
   let html="";
-  vendors.forEach(v=>{
-    html+="<div style='background:#555;padding:12px;margin:8px 0;border-radius:3px;display:flex;justify-content:space-between;align-items:center'>";
-    html+="<div>";
-    html+="<div style='color:#fff;font-weight:bold'>"+v.name+"</div>";
-    html+="<div style='color:#aaa;font-size:10px'>"+v.phone+"</div>";
-    html+="</div>";
-    html+="<button class='btn btn-danger' onclick='deleteVendor("+v.id+")' style='padding:5px 10px;font-size:9px'>DELETE</button>";
-    html+="</div>";
-  });
-  list.innerHTML=html||"<p style='color:#aaa'>NO VENDORS</p>";
+  
+  if(vendors.length===0){
+    html="<p style='color:#aaa;text-align:center;padding:20px'>No vendors yet. Add one above!</p>";
+  }else{
+    vendors.forEach(v=>{
+      html+="<div style='background:#555;padding:12px;margin:8px 0;border-radius:3px;display:flex;justify-content:space-between;align-items:center'>";
+      html+="<div>";
+      html+="<div style='color:#fff;font-weight:bold'>"+v.name+"</div>";
+      html+="<div style='color:#aaa;font-size:10px'>"+v.phone+"</div>";
+      html+="</div>";
+      html+="<button class='btn btn-danger' onclick='deleteVendor("+v.id+")' style='padding:5px 10px;font-size:9px'>DELETE</button>";
+      html+="</div>";
+    });
+  }
+  list.innerHTML=html;
   openModal("vendorSettingsModal");
 }
 
@@ -282,6 +295,9 @@ function saveToGitHub(type){
   
   const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken},null,2);
   const content=btoa(unescape(encodeURIComponent(data)));
+  
+  console.log("Saving "+type+"...");
+  console.log("Vendors to save:",vendors.length);
   
   fetch(GITHUB_API,{headers:{"Authorization":"token "+githubToken}})
     .then(r=>r.json())
@@ -407,6 +423,7 @@ function processData(){
   masterTotals={gross:0,acc:0,clean:0,pmc:0,expenses:0,draft:0,owner:0,websiteFee:0};
   taxByProperty={};
   let byProp={};
+  
   csvData.forEach(row=>{
     if(!row["CHECK-IN DATE"])return;
     const m=parseInt(row["CHECK-IN DATE"].split("-")[1]);
@@ -415,7 +432,10 @@ function processData(){
     const prop=row["LISTING'S NICKNAME"]||"Unknown";
     if(!byProp[prop])byProp[prop]=[];
     byProp[prop].push(row);
+    
+    if(!propertySettings[prop])propertySettings[prop]={};
   });
+  
   Object.keys(byProp).forEach(prop=>{
     let gross=0,acc=0,clean=0,pmc=0,websiteFee=0;
     byProp[prop].forEach(row=>{
@@ -547,8 +567,6 @@ function deleteExpense(id){
 }
 
 function generateLink(){
-  const token=localStorage.getItem("dropbox_token");
-  if(!token)return alert("Setup Dropbox first");
   alert("✓ Dropbox feature coming soon!");
 }
 
@@ -558,42 +576,52 @@ function generateSummary(){
   document.getElementById("reportTitle").textContent="SUMMARY REPORT";
   const t=OWNERS[currentOwner];
   const type=t.type;
-  const salesFee=masterTotals.pmc*(t.salesFeePercent/100);
   let html="<div class='action-buttons'><button class='back-btn' onclick='displayStatement()'>← BACK</button><button class='print-btn' onclick='window.print()'>🖨️ PRINT</button></div>";
-  html+="<div class='commission-box'><div class='commission-box-title'>SALES COMMISSION DUE</div>";
-  html+="<div class='calc-row'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
-  html+="<div class='calc-row'><span>PMC RATE</span><span>"+(t.percent*100).toFixed(2)+"%</span></div>";
-  html+="<div class='calc-row-total'><span>TOTAL PMC</span><span>"+money(masterTotals.pmc)+"</span></div>";
+  html+="<div style='background:#fff3cd;border:2px solid #ffc107;padding:15px;margin:15px 0;border-radius:5px'>";
+  html+="<div style='font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px;text-transform:uppercase;text-align:center'>SALES COMMISSION DUE</div>";
+  html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+  html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>PMC RATE</span><span>"+(t.percent*100).toFixed(2)+"%</span></div>";
+  html+="<div style='display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold'><span>TOTAL PMC</span><span>"+money(masterTotals.pmc)+"</span></div>";
   html+="</div>";
   if(type==="draft"){
-    html+="<div class='commission-box'><div class='commission-box-title'>DRAFT BREAKDOWN</div>";
-    html+="<div class='calc-row'><span>CLEANING</span><span>"+money(masterTotals.clean)+"</span></div>";
-    html+="<div class='calc-row'><span>WEBSITE (1%)</span><span>"+money(masterTotals.websiteFee)+"</span></div>";
-    html+="<div class='calc-row'><span>EXPENSES</span><span>"+money(masterTotals.expenses)+"</span></div>";
-    html+="<div class='calc-row-total'><span>TOTAL DUE</span><span>"+money(masterTotals.draft)+"</span></div>";
+    html+="<div style='background:#fff3cd;border:2px solid #ffc107;padding:15px;margin:15px 0;border-radius:5px'>";
+    html+="<div style='font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px;text-transform:uppercase;text-align:center'>DRAFT BREAKDOWN</div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>CLEANING</span><span>"+money(masterTotals.clean)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>WEBSITE (1%)</span><span>"+money(masterTotals.websiteFee)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>EXPENSES</span><span>"+money(masterTotals.expenses)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold'><span>TOTAL DUE</span><span>"+money(masterTotals.draft)+"</span></div>";
     html+="</div>";
   }else{
-    html+="<div class='commission-box'><div class='commission-box-title'>PAYOUT BREAKDOWN</div>";
-    html+="<div class='calc-row'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
-    html+="<div class='calc-row'><span>PMC (DEDUCT)</span><span>-"+money(masterTotals.pmc)+"</span></div>";
-    html+="<div class='calc-row'><span>EXPENSES</span><span>-"+money(masterTotals.expenses)+"</span></div>";
-    html+="<div class='calc-row-total'><span>OWNER PAYOUT</span><span>"+money(masterTotals.owner)+"</span></div>";
+    html+="<div style='background:#fff3cd;border:2px solid #ffc107;padding:15px;margin:15px 0;border-radius:5px'>";
+    html+="<div style='font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px;text-transform:uppercase;text-align:center'>PAYOUT BREAKDOWN</div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>PMC (DEDUCT)</span><span>-"+money(masterTotals.pmc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>EXPENSES</span><span>-"+money(masterTotals.expenses)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold'><span>OWNER PAYOUT</span><span>"+money(masterTotals.owner)+"</span></div>";
     html+="</div>";
     let hasTaxes=false;
     Object.keys(propertyTotals).forEach(prop=>{if(taxByProperty[prop])hasTaxes=true;});
     if(hasTaxes){
-      html+="<div class='tax-box'><div class='tax-box-title'>⚠️ TAX REPORTING</div>";
+      html+="<div style='background:#e8f4f8;border:2px solid #17a2b8;padding:15px;margin:15px 0;border-radius:5px'>";
+      html+="<div style='font-size:14px;font-weight:bold;color:#0c5460;margin-bottom:10px;text-transform:uppercase;text-align:center'>⚠️ TAX REPORTING</div>";
       Object.keys(propertyTotals).forEach(prop=>{
         if(taxByProperty[prop]){
           const s=propertySettings[prop];
           const muns=s?Object.keys(s).filter(m=>s[m]).join(", "):"None";
-          html+="<div class='tax-property'><div class='tax-property-name'>"+prop.toUpperCase()+"</div><div class='tax-property-amount'>Payout: "+money(taxByProperty[prop])+"</div><div class='tax-municipalities'>Report To: "+muns+"</div></div>";
+          html+="<div style='background:#fff;padding:12px;margin:10px 0;border-radius:3px;border-left:4px solid #17a2b8'>";
+          html+="<div style='font-weight:bold;color:#0c5460;font-size:12px'>"+prop.toUpperCase()+"</div>";
+          html+="<div style='font-size:14px;font-weight:bold;color:#0c5460;margin:5px 0'>Payout: "+money(taxByProperty[prop])+"</div>";
+          html+="<div style='font-size:11px;color:#0c5460'>Report To: "+muns+"</div>";
+          html+="</div>";
         }
       });
       html+="</div>";
     }
   }
-  html+="<div class='pmc-transfer-box'><div class='pmc-transfer-title'>💳 PMC TRANSFER</div><div class='pmc-transfer-amount'>"+money(masterTotals.pmc)+"</div></div>";
+  html+="<div style='background:#d4edda;border:2px solid #28a745;padding:15px;margin:15px 0;border-radius:5px;text-align:center'>";
+  html+="<div style='font-size:14px;font-weight:bold;color:#155724;text-transform:uppercase;margin-bottom:10px'>💳 PMC BANK TRANSFER</div>";
+  html+="<div style='font-size:18px;font-weight:bold;color:#155724'>"+money(masterTotals.pmc)+"</div>";
+  html+="</div>";
   document.getElementById("mainContent").innerHTML=html;
 }
 
