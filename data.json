@@ -20,6 +20,13 @@
       "salesFeePercent": 5,
       "type": "payout",
       "guestyReportUrl": "https://app.guesty.com/reservations?viewId=693900705c8b6c44c508d239&soft-nav=true"
+    },
+    "MAT 11315": {
+      "email": "",
+      "percent": 0.12,
+      "salesFeePercent": 5,
+      "type": "payout",
+      "guestyReportUrl": "https://app.guesty.com/reservations?viewId=693900585c8b6c44c508d1ee&soft-nav=true"
     }
   },
   "vendors": [
