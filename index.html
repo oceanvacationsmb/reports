@@ -76,7 +76,7 @@ function money(v){return"$"+(Number(v)||0).toFixed(2);}
 function updateTokenStatus(){
   const status=document.getElementById("tokenStatus");
   if(githubToken){
-    status.textContent="🟢 TOKEN ACTIVE (ocean vacations)";
+    status.textContent="🟢 TOKEN ACTIVE";
     status.className="token-status token-active";
   }else{
     status.textContent="🔴 NO TOKEN";
@@ -85,6 +85,9 @@ function updateTokenStatus(){
 }
 
 function loadData(){
+  githubToken=localStorage.getItem("github_token")||"";
+  console.log("Loaded token from localStorage:",githubToken?"YES":"NO");
+  
   fetch(GITHUB_URL+"?t="+Date.now())
     .then(r=>r.json())
     .then(data=>{
@@ -93,7 +96,6 @@ function loadData(){
       vendors=data.vendors||[];
       expenses=data.expenses||[];
       propertySettings=data.properties||{};
-      githubToken=data.github_token||"";
       console.log("✓ Data loaded from GitHub");
       init();
       updateTokenStatus();
@@ -268,38 +270,20 @@ function saveToGitHub(type){
   const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken},null,2);
   const content=btoa(unescape(encodeURIComponent(data)));
   
-  console.log("Fetching current file SHA...");
-  
-  fetch(GITHUB_API,{
-    headers:{"Authorization":"token "+githubToken}
-  })
-  .then(r=>{
-    console.log("Status:",r.status);
-    if(r.status===409){
-      alert("⚠️ Conflict - trying alternative method...");
-      throw new Error("409");
-    }
-    return r.json();
-  })
-  .then(file=>{
-    console.log("File SHA:",file.sha);
-    if(!file.sha)throw new Error("No SHA");
-    
-    return fetch(GITHUB_API,{
-      method:"PUT",
-      headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},
-      body:JSON.stringify({message:"Update "+type,content:content,sha:file.sha})
+  fetch(GITHUB_API,{headers:{"Authorization":"token "+githubToken}})
+    .then(r=>r.json())
+    .then(file=>{
+      if(!file.sha)throw new Error("Cannot read file");
+      return fetch(GITHUB_API,{method:"PUT",headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},body:JSON.stringify({message:"Update "+type,content:content,sha:file.sha})});
+    })
+    .then(r=>r.json())
+    .then(result=>{
+      alert("✓ "+type.toUpperCase()+" SAVED!");
+      setTimeout(()=>loadData(),500);
+    })
+    .catch(e=>{
+      alert("❌ Error: "+e.message);
     });
-  })
-  .then(r=>r.json())
-  .then(result=>{
-    alert("✓ "+type.toUpperCase()+" SAVED!");
-    setTimeout(()=>loadData(),500);
-  })
-  .catch(e=>{
-    console.error("Error:",e.message);
-    alert("❌ Failed: "+e.message+"\n\nTry refreshing the page and try again.");
-  });
 }
 
 function updateVendorDropdown(){
@@ -338,16 +322,18 @@ function setupToken(){
   if(!token)return;
   
   githubToken=token.trim();
-  console.log("Testing token...");
+  localStorage.setItem("github_token",githubToken);
+  console.log("Token saved to localStorage");
   
   fetch("https://api.github.com/user",{headers:{"Authorization":"token "+githubToken}})
     .then(r=>r.json())
     .then(u=>{
       if(u.message){
         alert("❌ Invalid token");
+        localStorage.removeItem("github_token");
         return;
       }
-      alert("✓ Token verified!\n\nSaving...");
+      alert("✓ Token verified!\n\nSaving to GitHub...");
       const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken},null,2);
       const content=btoa(unescape(encodeURIComponent(data)));
       
@@ -359,8 +345,10 @@ function setupToken(){
         });
     })
     .then(r=>{
-      alert("✓ TOKEN SAVED!");
-      setTimeout(()=>loadData(),500);
+      if(r.ok){
+        alert("✓ TOKEN SAVED!\n\nReady to use!");
+        updateTokenStatus();
+      }
     })
     .catch(e=>{
       alert("❌ Error: "+e.message);
@@ -546,14 +534,9 @@ function deleteExpense(id){
 }
 
 function generateLink(){
-  const month=parseInt(document.getElementById("monthSelect").value);
-  const year=parseInt(document.getElementById("yearSelect").value);
   const token=localStorage.getItem("dropbox_token");
   if(!token)return alert("Setup Dropbox first");
-  const filename=currentOwner+"_"+month+"_"+year+"_"+Date.now()+".html";
-  const html=document.getElementById("content").innerHTML;
-  const fullHtml="<html><head><title>Statement</title><style>"+document.querySelector("style").innerHTML+"</style></head><body>"+html+"</body></html>";
-  fetch("https://content.dropboxapi.com/2/files/upload",{method:"POST",headers:{"Authorization":"Bearer "+token,"Dropbox-API-Arg":JSON.stringify({path:"/"+filename,mode:"add"})},body:fullHtml}).then(r=>{if(r.ok)alert("✓ Uploaded!");else alert("❌ Failed");});
+  alert("✓ Dropbox feature coming soon!");
 }
 
 function generateSummary(){
