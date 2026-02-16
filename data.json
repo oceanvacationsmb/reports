@@ -1,17 +1,6 @@
 {
   "owners": {},
-  "vendors": [
-    {
-      "id": 1771223867385,
-      "name": "TEST 1000",
-      "phone": ""
-    },
-    {
-      "id": 1771223986231,
-      "name": "abcdefg",
-      "phone": ""
-    }
-  ],
+  "vendors": [],
   "properties": {},
   "expenses": []
 }
