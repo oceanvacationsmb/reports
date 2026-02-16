@@ -264,45 +264,61 @@ function saveToGitHub(type){
   const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken},null,2);
   const content=btoa(unescape(encodeURIComponent(data)));
   
-  fetch(GITHUB_API,{
-    headers:{
-      "Authorization":"token "+githubToken,
-      "Accept":"application/vnd.github.v3+json"
-    }
-  })
-  .then(r=>r.json())
-  .then(file=>{
-    if(file.message){
-      alert("❌ Error: "+file.message);
-      return;
-    }
-    
-    return fetch(GITHUB_API,{
-      method:"PUT",
+  function attemptSave(retries=0){
+    fetch(GITHUB_API,{
       headers:{
         "Authorization":"token "+githubToken,
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({
-        message:"Update "+type,
-        content:content,
-        sha:file.sha
-      })
+        "Accept":"application/vnd.github.v3+json"
+      }
     })
     .then(r=>r.json())
-    .then(result=>{
-      if(result.message&&result.message.includes("error")){
-        alert("❌ Save failed: "+result.message);
+    .then(file=>{
+      if(file.message){
+        alert("❌ Error: "+file.message);
+        return;
+      }
+      
+      return fetch(GITHUB_API,{
+        method:"PUT",
+        headers:{
+          "Authorization":"token "+githubToken,
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          message:"Update "+type,
+          content:content,
+          sha:file.sha
+        })
+      })
+      .then(r=>{
+        if(r.status===409&&retries<2){
+          console.log("Conflict detected (409), retrying... attempt "+(retries+1));
+          setTimeout(()=>attemptSave(retries+1),1000);
+        }else if(!r.ok){
+          throw new Error(r.status+" "+r.statusText);
+        }else{
+          return r.json();
+        }
+      })
+      .then(result=>{
+        if(result){
+          alert("✓ "+type.toUpperCase()+" SAVED!");
+          setTimeout(()=>loadData(),500);
+        }
+      });
+    })
+    .catch(e=>{
+      console.error("Error:",e);
+      if(retries<2){
+        console.log("Retrying... attempt "+(retries+1));
+        setTimeout(()=>attemptSave(retries+1),1000);
       }else{
-        alert("✓ "+type.toUpperCase()+" SAVED!");
-        setTimeout(()=>loadData(),500);
+        alert("❌ Failed to save: "+e.message);
       }
     });
-  })
-  .catch(e=>{
-    console.error("Error:",e);
-    alert("❌ Error: "+e.message);
-  });
+  }
+  
+  attemptSave();
 }
 
 function updateVendorDropdown(){
