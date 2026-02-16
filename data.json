@@ -94,15 +94,6 @@
   },
   "expenses": [
     {
-      "id": 1771278801726,
-      "owner": "GHO",
-      "type": "MAINTENANCE",
-      "property": "MB - 4765",
-      "vendor": "ECIA",
-      "amount": 1000,
-      "notes": ""
-    },
-    {
       "id": 1771282290676,
       "owner": "ERAN MARON",
       "type": "SERVICE",
