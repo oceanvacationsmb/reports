@@ -35,6 +35,7 @@
 <div class="modal-field"><label class="modal-label">COMMISSION %</label><input type="number" id="ownerComm" class="modal-input" placeholder="Commission %" step="0.01"></div>
 <div class="modal-field"><label class="modal-label">SALES FEE %</label><input type="number" id="ownerSales" class="modal-input" placeholder="Sales Fee %" step="0.01"></div>
 <div class="modal-field"><label class="modal-label">TYPE</label><select id="ownerType" class="modal-input"><option value="draft">DRAFT</option><option value="payout">PAYOUT</option></select></div>
+<div class="modal-field"><label class="modal-label">🔗 GUESTY REPORT URL</label><input type="text" id="ownerGuestyUrl" class="modal-input" placeholder="https://guesty.com/..."></div>
 <button class="btn btn-success" onclick="addOwner()" style="width:100%;margin-bottom:20px">➕ ADD OWNER</button>
 <div id="ownersList" style="max-height:350px;overflow-y:auto;margin-bottom:20px"></div>
 <div class="modal-actions"><button class="btn-save" onclick="saveOwnerData()">💾 SAVE ALL</button><button class="btn-cancel" onclick="closeAll()">✗ CLOSE</button></div>
@@ -188,6 +189,8 @@ function openOwners(){
     html+="<option value='draft' "+(o.type==='draft'?'selected':'')+">DRAFT</option>";
     html+="<option value='payout' "+(o.type==='payout'?'selected':'')+">PAYOUT</option>";
     html+="</select>";
+    html+="<label class='modal-label'>🔗 GUESTY REPORT URL</label>";
+    html+="<input type='text' value='"+(o.guestyReportUrl||"")+"' onchange=\"OWNERS['"+name+"'].guestyReportUrl=this.value\" class='modal-input' placeholder='https://guesty.com/...'>";
     html+="<button class='btn btn-danger' onclick=\"deleteOwner('"+name+"')\" style='width:100%;margin-top:10px;padding:8px'>🗑️ DELETE OWNER</button>";
     html+="</div>";
   });
@@ -201,12 +204,14 @@ function addOwner(){
   const comm=parseFloat(document.getElementById("ownerComm").value)||0.12;
   const sales=parseFloat(document.getElementById("ownerSales").value)||5;
   const type=document.getElementById("ownerType").value;
+  const guestyUrl=document.getElementById("ownerGuestyUrl").value.trim();
   if(!name)return alert("Enter owner name");
-  OWNERS[name]={email:email,percent:comm/100,salesFeePercent:sales,type:type};
+  OWNERS[name]={email:email,percent:comm/100,salesFeePercent:sales,type:type,guestyReportUrl:guestyUrl};
   document.getElementById("ownerName").value="";
   document.getElementById("ownerEmail").value="";
   document.getElementById("ownerComm").value="";
   document.getElementById("ownerSales").value="";
+  document.getElementById("ownerGuestyUrl").value="";
   buildOwners();
   openOwners();
 }
@@ -773,17 +778,4 @@ function generateSummary(){
   }
   
   html+="<div style='background:#d4edda;border:2px solid #28a745;padding:15px;margin:15px 0;border-radius:5px;text-align:center'>";
-  html+="<div style='font-size:14px;font-weight:bold;color:#155724;text-transform:uppercase;margin-bottom:10px'>🏦 PMC BANK TRANSFER</div>";
-  html+="<div style='font-size:18px;font-weight:bold;color:#155724'>"+money(masterTotals.pmc)+"</div>";
-  html+="</div>";
-  
-  document.getElementById("mainContent").innerHTML=html;
-}
-
-function openModal(id){document.getElementById("modalOverlay").classList.add("show");document.getElementById(id).classList.add("show");}
-function closeAll(){document.getElementById("modalOverlay").classList.remove("show");document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));}
-
-loadData();
-</script>
-</body>
-</html>
+  html+="<div style='font-size:14px;font-weight:bold;color:#155724;text-transform:uppercase;margin-bottom:10px'>🏦 
