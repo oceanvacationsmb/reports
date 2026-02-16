@@ -101,6 +101,15 @@
       "vendor": "ECIA",
       "amount": 1000,
       "notes": ""
+    },
+    {
+      "id": 1771282290676,
+      "owner": "ERAN MARON",
+      "type": "SERVICE",
+      "property": "MB - Tuscan A",
+      "vendor": "ECIA",
+      "amount": 32000,
+      "notes": ""
     }
   ]
 }
