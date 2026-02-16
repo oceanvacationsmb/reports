@@ -13,7 +13,20 @@
       "type": "payout"
     }
   },
-  "vendors": [],
-  "properties": {},
+  "vendors": [
+    {
+      "id": 1771224380686,
+      "name": "ECIA",
+      "phone": ""
+    }
+  ],
+  "properties": {
+    "MB - 4765": {},
+    "MB - 7500": {},
+    "GCSSB - 204-2D": {},
+    "MB - 209/5113": {},
+    "MB - 2000": {},
+    "MB - 209/5112": {}
+  },
   "expenses": []
 }
