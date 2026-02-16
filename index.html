@@ -261,64 +261,44 @@ function saveVendorData(){
 
 function saveToGitHub(type){
   if(!githubToken){
-    alert("❌ No token available");
+    alert("❌ No token");
     return;
   }
   
   const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken},null,2);
   const content=btoa(unescape(encodeURIComponent(data)));
   
-  console.log("Attempting to save with token: "+githubToken.substring(0,10)+"...");
+  console.log("Fetching current file SHA...");
   
   fetch(GITHUB_API,{
-    method:"GET",
-    headers:{
-      "Authorization":"token "+githubToken,
-      "User-Agent":"Ocean-Vacations-App"
-    }
-  })
-  .then(r=>r.json())
-  .then(file=>{
-    console.log("File info:",file);
-    if(file.message||!file.sha){
-      alert("❌ Cannot read file: "+(file.message||"No SHA found"));
-      return;
-    }
-    
-    console.log("Current SHA:",file.sha);
-    
-    return fetch(GITHUB_API,{
-      method:"PUT",
-      headers:{
-        "Authorization":"token "+githubToken,
-        "User-Agent":"Ocean-Vacations-App",
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({
-        message:"Update "+type,
-        content:content,
-        sha:file.sha
-      })
-    });
+    headers:{"Authorization":"token "+githubToken}
   })
   .then(r=>{
-    console.log("Save response status:",r.status);
-    if(!r.ok){
-      return r.json().then(err=>{
-        console.error("Error:",err);
-        throw new Error(err.message||r.statusText);
-      });
+    console.log("Status:",r.status);
+    if(r.status===409){
+      alert("⚠️ Conflict - trying alternative method...");
+      throw new Error("409");
     }
     return r.json();
   })
+  .then(file=>{
+    console.log("File SHA:",file.sha);
+    if(!file.sha)throw new Error("No SHA");
+    
+    return fetch(GITHUB_API,{
+      method:"PUT",
+      headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},
+      body:JSON.stringify({message:"Update "+type,content:content,sha:file.sha})
+    });
+  })
+  .then(r=>r.json())
   .then(result=>{
-    console.log("Save successful");
     alert("✓ "+type.toUpperCase()+" SAVED!");
     setTimeout(()=>loadData(),500);
   })
   .catch(e=>{
-    console.error("Full error:",e);
-    alert("❌ Error: "+e.message);
+    console.error("Error:",e.message);
+    alert("❌ Failed: "+e.message+"\n\nTry refreshing the page and try again.");
   });
 }
 
@@ -354,55 +334,42 @@ function submitExpense(){
 }
 
 function setupToken(){
-  const token=prompt("PASTE YOUR GITHUB TOKEN:\n\n(Token name: 'ocean vacations')");
+  const token=prompt("PASTE YOUR GITHUB TOKEN");
   if(!token)return;
   
   githubToken=token.trim();
   console.log("Testing token...");
   
-  fetch("https://api.github.com/user",{
-    headers:{"Authorization":"token "+githubToken,"User-Agent":"Ocean-Vacations"}
-  })
-  .then(r=>r.json())
-  .then(user=>{
-    if(user.message){
-      alert("❌ Token invalid: "+user.message);
-      return;
-    }
-    console.log("✓ Token valid for user:",user.login);
-    alert("✓ Token verified!\n\nSaving to GitHub...");
-    
-    const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken},null,2);
-    const content=btoa(unescape(encodeURIComponent(data)));
-    
-    return fetch(GITHUB_API,{
-      method:"GET",
-      headers:{"Authorization":"token "+githubToken,"User-Agent":"Ocean-Vacations"}
-    }).then(r=>r.json()).then(file=>{
-      if(file.message)throw new Error(file.message);
-      return fetch(GITHUB_API,{
-        method:"PUT",
-        headers:{"Authorization":"token "+githubToken,"User-Agent":"Ocean-Vacations","Content-Type":"application/json"},
-        body:JSON.stringify({message:"Setup GitHub token",content:content,sha:file.sha})
-      });
+  fetch("https://api.github.com/user",{headers:{"Authorization":"token "+githubToken}})
+    .then(r=>r.json())
+    .then(u=>{
+      if(u.message){
+        alert("❌ Invalid token");
+        return;
+      }
+      alert("✓ Token verified!\n\nSaving...");
+      const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken},null,2);
+      const content=btoa(unescape(encodeURIComponent(data)));
+      
+      return fetch(GITHUB_API,{headers:{"Authorization":"token "+githubToken}})
+        .then(r=>r.json())
+        .then(file=>{
+          if(!file.sha)throw new Error("Cannot read file");
+          return fetch(GITHUB_API,{method:"PUT",headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},body:JSON.stringify({message:"Setup token",content:content,sha:file.sha})});
+        });
+    })
+    .then(r=>{
+      alert("✓ TOKEN SAVED!");
+      setTimeout(()=>loadData(),500);
+    })
+    .catch(e=>{
+      alert("❌ Error: "+e.message);
     });
-  })
-  .then(r=>{
-    if(!r.ok)throw new Error(r.statusText);
-    alert("✓ TOKEN SAVED!\n\nReloading...");
-    setTimeout(()=>loadData(),500);
-  })
-  .catch(e=>{
-    alert("❌ Failed: "+e.message);
-  });
 }
 
 function setupDropbox(){
-  const token=prompt("DROPBOX ACCESS TOKEN:");
-  if(token&&token.trim()){
-    localStorage.setItem("dropbox_token",token.trim());
-    alert("✓ Dropbox token saved!");
-  }
+  const token=prompt("DROPBOX TOKEN:");
+  if(token)localStorage.setItem("dropbox_token",token.trim());
 }
 
 function generateStatement(){
@@ -411,10 +378,8 @@ function generateStatement(){
   const reader=new FileReader();
   reader.onload=e=>{
     csvData=Papa.parse(e.target.result,{header:true,skipEmptyLines:true}).data;
-    const month=parseInt(document.getElementById("monthSelect").value);
-    const year=parseInt(document.getElementById("yearSelect").value);
     updateHeaderDates();
-    processData(month,year);
+    processData();
     displayStatement();
   };
   reader.readAsText(file);
@@ -433,7 +398,9 @@ function updateHeaderDates(){
   document.getElementById("ownerTitle").textContent=currentOwner.toUpperCase();
 }
 
-function processData(month,year){
+function processData(){
+  const month=parseInt(document.getElementById("monthSelect").value);
+  const year=parseInt(document.getElementById("yearSelect").value);
   const t=OWNERS[currentOwner];
   propertyTotals={};
   masterTotals={gross:0,acc:0,clean:0,pmc:0,expenses:0,draft:0,owner:0,websiteFee:0};
@@ -585,32 +552,8 @@ function generateLink(){
   if(!token)return alert("Setup Dropbox first");
   const filename=currentOwner+"_"+month+"_"+year+"_"+Date.now()+".html";
   const html=document.getElementById("content").innerHTML;
-  const fullHtml="<html><head><title>Statement - "+currentOwner+"</title><style>"+document.querySelector("style").innerHTML+"</style></head><body>"+html+"</body></html>";
-  fetch("https://content.dropboxapi.com/2/files/upload",{
-    method:"POST",
-    headers:{"Authorization":"Bearer "+token,"Dropbox-API-Arg":JSON.stringify({path:"/statements/"+filename,mode:"add"})},
-    body:fullHtml
-  }).then(r=>{
-    if(r.ok){
-      fetch("https://www.dropboxapi.com/2/sharing/create_shared_link_with_settings",{
-        method:"POST",
-        headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"},
-        body:JSON.stringify({path:"/statements/"+filename,settings:{requested_visibility:"public"}})
-      }).then(r=>r.json()).then(data=>{
-        const link=data.url.replace("?dl=0","?dl=1");
-        showLinkGenerated(link);
-      });
-    }else alert("Upload failed");
-  }).catch(e=>alert("Error: "+e.message));
-}
-
-function showLinkGenerated(link){
-  const msg="<div style='background:#d4edda;border:2px solid #28a745;padding:15px;margin:20px 0;border-radius:5px;text-align:center'><h3 style='color:#155724'>✓ STATEMENT GENERATED!</h3><p style='color:#155724;margin:10px 0'>Copy link and paste in Gmail:</p><button class='copy-link-btn' onclick=\"copyToClipboard('"+link+"')\">📋 COPY LINK TO CLIPBOARD</button><p style='font-size:12px;color:#155724;margin-top:10px;word-break:break-all'><code style='background:#fff;padding:5px;border-radius:3px'>"+link+"</code></p></div>";
-  document.getElementById("mainContent").innerHTML+=msg;
-}
-
-function copyToClipboard(text){
-  navigator.clipboard.writeText(text).then(()=>alert("✓ Link copied!")).catch(()=>alert("Failed to copy"));
+  const fullHtml="<html><head><title>Statement</title><style>"+document.querySelector("style").innerHTML+"</style></head><body>"+html+"</body></html>";
+  fetch("https://content.dropboxapi.com/2/files/upload",{method:"POST",headers:{"Authorization":"Bearer "+token,"Dropbox-API-Arg":JSON.stringify({path:"/"+filename,mode:"add"})},body:fullHtml}).then(r=>{if(r.ok)alert("✓ Uploaded!");else alert("❌ Failed");});
 }
 
 function generateSummary(){
@@ -620,67 +563,46 @@ function generateSummary(){
   const t=OWNERS[currentOwner];
   const type=t.type;
   const salesFee=masterTotals.pmc*(t.salesFeePercent/100);
-  let html="<div class='action-buttons'><button class='back-btn' onclick='displayStatement()'>← BACK</button><button class='print-btn' onclick='window.print()'>🖨️ PRINT</button></div><div class='summary-title'>SUMMARY & CALCULATIONS</div>";
+  let html="<div class='action-buttons'><button class='back-btn' onclick='displayStatement()'>← BACK</button><button class='print-btn' onclick='window.print()'>🖨️ PRINT</button></div>";
   html+="<div class='commission-box'><div class='commission-box-title'>SALES COMMISSION DUE</div>";
-  html+="<div class='calc-row'><span>TOTAL ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
-  html+="<div class='calc-row'><span>PMC % RATE</span><span>"+(t.percent*100).toFixed(2)+"%</span></div>";
-  html+="<div class='calc-row' style='background:#fff;font-weight:bold'><span>TOTAL PMC</span><span>"+money(masterTotals.pmc)+"</span></div>";
-  html+="<div class='calc-row'><span>SALES FEE %</span><span>"+t.salesFeePercent+"%</span></div>";
-  html+="<div class='calc-row-total'><span>COMMISSION AMOUNT</span><span>"+money(salesFee)+"</span></div>";
+  html+="<div class='calc-row'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+  html+="<div class='calc-row'><span>PMC RATE</span><span>"+(t.percent*100).toFixed(2)+"%</span></div>";
+  html+="<div class='calc-row-total'><span>TOTAL PMC</span><span>"+money(masterTotals.pmc)+"</span></div>";
   html+="</div>";
-  
   if(type==="draft"){
-    html+="<div class='commission-box'><div class='commission-box-title'>DRAFT OWNER BREAKDOWN</div>";
-    html+="<div class='calc-row'><span>CLEANING FEES</span><span>"+money(masterTotals.clean)+"</span></div>";
-    html+="<div class='calc-row'><span>WEBSITE FEE (1%)</span><span>"+money(masterTotals.websiteFee)+"</span></div>";
+    html+="<div class='commission-box'><div class='commission-box-title'>DRAFT BREAKDOWN</div>";
+    html+="<div class='calc-row'><span>CLEANING</span><span>"+money(masterTotals.clean)+"</span></div>";
+    html+="<div class='calc-row'><span>WEBSITE (1%)</span><span>"+money(masterTotals.websiteFee)+"</span></div>";
     html+="<div class='calc-row'><span>EXPENSES</span><span>"+money(masterTotals.expenses)+"</span></div>";
-    html+="<div class='calc-row-total'><span>TOTAL AMOUNT DUE</span><span>"+money(masterTotals.draft)+"</span></div>";
+    html+="<div class='calc-row-total'><span>TOTAL DUE</span><span>"+money(masterTotals.draft)+"</span></div>";
     html+="</div>";
   }else{
-    html+="<div class='commission-box'><div class='commission-box-title'>PAYOUT OWNER BREAKDOWN</div>";
+    html+="<div class='commission-box'><div class='commission-box-title'>PAYOUT BREAKDOWN</div>";
     html+="<div class='calc-row'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
-    html+="<div class='calc-row'><span>PMC (DEDUCTION)</span><span>-"+money(masterTotals.pmc)+"</span></div>";
+    html+="<div class='calc-row'><span>PMC (DEDUCT)</span><span>-"+money(masterTotals.pmc)+"</span></div>";
     html+="<div class='calc-row'><span>EXPENSES</span><span>-"+money(masterTotals.expenses)+"</span></div>";
-    html+="<div class='calc-row-total'><span>OWNER NET PAYOUT</span><span>"+money(masterTotals.owner)+"</span></div>";
+    html+="<div class='calc-row-total'><span>OWNER PAYOUT</span><span>"+money(masterTotals.owner)+"</span></div>";
     html+="</div>";
-    
     let hasTaxes=false;
-    Object.keys(propertyTotals).forEach(prop=>{
-      if(taxByProperty[prop]){
-        hasTaxes=true;
-      }
-    });
-    
+    Object.keys(propertyTotals).forEach(prop=>{if(taxByProperty[prop])hasTaxes=true;});
     if(hasTaxes){
-      html+="<div class='tax-box'><div class='tax-box-title'>⚠️ TAX REPORTING REQUIRED</div>";
+      html+="<div class='tax-box'><div class='tax-box-title'>⚠️ TAX REPORTING</div>";
       Object.keys(propertyTotals).forEach(prop=>{
         if(taxByProperty[prop]){
           const s=propertySettings[prop];
-          const muns=s?Object.keys(s||{}).filter(m=>s[m]).join(", "):"No municipalities selected";
-          html+="<div class='tax-property'>";
-          html+="<div class='tax-property-name'>📍 "+prop.toUpperCase()+"</div>";
-          html+="<div class='tax-property-amount'>Payout: "+money(taxByProperty[prop])+"</div>";
-          html+="<div class='tax-municipalities'><strong>Report To:</strong> "+muns+"</div>";
-          html+="</div>";
+          const muns=s?Object.keys(s).filter(m=>s[m]).join(", "):"None";
+          html+="<div class='tax-property'><div class='tax-property-name'>"+prop.toUpperCase()+"</div><div class='tax-property-amount'>Payout: "+money(taxByProperty[prop])+"</div><div class='tax-municipalities'>Report To: "+muns+"</div></div>";
         }
       });
       html+="</div>";
     }
   }
-  
-  html+="<div style='background:#d4edda;border:2px solid #28a745;padding:15px;margin:15px 0;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#155724;text-transform:uppercase;margin-bottom:10px'>💳 PMC BANK TRANSFER</div><div style='font-size:18px;font-weight:bold;color:#155724'>"+money(masterTotals.pmc)+"</div><p style='text-align:center;margin-top:10px;font-size:11px;color:#155724'>Transfer amount to PMC bank</p></div>";
+  html+="<div class='pmc-transfer-box'><div class='pmc-transfer-title'>💳 PMC TRANSFER</div><div class='pmc-transfer-amount'>"+money(masterTotals.pmc)+"</div></div>";
   document.getElementById("mainContent").innerHTML=html;
 }
 
-function openModal(id){
-  document.getElementById("modalOverlay").classList.add("show");
-  document.getElementById(id).classList.add("show");
-}
-
-function closeAll(){
-  document.getElementById("modalOverlay").classList.remove("show");
-  document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));
-}
+function openModal(id){document.getElementById("modalOverlay").classList.add("show");document.getElementById(id).classList.add("show");}
+function closeAll(){document.getElementById("modalOverlay").classList.remove("show");document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));}
 
 loadData();
 </script>
