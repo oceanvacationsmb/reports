@@ -300,7 +300,7 @@ function saveToGitHub(type){
   
   console.log("Starting save for: "+type);
   
-  const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken},null,2);
+  const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses},null,2);
   const content=btoa(unescape(encodeURIComponent(data)));
   
   function attemptSave(retryCount=0){
@@ -410,22 +410,13 @@ function setupToken(){
       if(u.message){
         alert("❌ Invalid token");
         localStorage.removeItem("github_token");
+        githubToken="";
+        updateTokenStatus();
         return;
       }
-      alert("✓ Token verified!\n\nSaving to GitHub...");
-      const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken},null,2);
-      const content=btoa(unescape(encodeURIComponent(data)));
-      
-      const body={message:"Setup token",content:content};
-      return fetch(GITHUB_API,{method:"PUT",headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},body:JSON.stringify(body)});
-    })
-    .then(r=>{
-      if(r.ok||r.status===201){
-        alert("✓ TOKEN SAVED!\n\nReady to use!");
-        loadData();
-      }else{
-        alert("❌ Error saving token");
-      }
+      alert("✓ Token verified and saved locally!");
+      updateTokenStatus();
+      loadData();
     })
     .catch(e=>{
       alert("❌ Error: "+e.message);
@@ -630,7 +621,6 @@ function generateSummary(){
   const t=OWNERS[currentOwner];
   const type=t.type;
   const salesFee=masterTotals.pmc*(t.salesFeePercent/100);
-  const pmcComm=masterTotals.pmc*(t.percent*100);
   
   let html="<div class='action-buttons'><button class='back-btn' onclick='displayStatement()'>← BACK</button><button class='print-btn' onclick='window.print()'>🖨️ PRINT</button></div>";
   
