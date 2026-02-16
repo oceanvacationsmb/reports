@@ -38,11 +38,6 @@
   },
   "vendors": [
     {
-      "id": 1771224380686,
-      "name": "ECIA",
-      "phone": ""
-    },
-    {
       "id": 1771283323735,
       "name": "TEST",
       "phone": ""
@@ -99,13 +94,13 @@
   },
   "expenses": [
     {
-      "id": 1771282290676,
+      "id": 1771283801546,
       "owner": "ERAN MARON",
-      "type": "SERVICE",
-      "property": "MB - Tuscan A",
-      "vendor": "ECIA",
-      "amount": 32000,
-      "notes": ""
+      "type": "ADJUSTMENT",
+      "property": "GCSSB - 113B-12S",
+      "vendor": "TEST",
+      "amount": -2000,
+      "notes": "credit broken item"
     }
   ]
 }
