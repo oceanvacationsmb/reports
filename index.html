@@ -10,7 +10,7 @@
 </head>
 <body>
 <div class="sidebar"><h3>🎯 OCEAN VACATIONS</h3>
-<div id="tokenStatus" class="token-status token-inactive">🔴 NO TOKEN</div>
+<div id="tokenStatus" class="token-status token-inactive">🔴 LOADING...</div>
 <div class="section"><label class="label">SELECT OWNER</label><select id="ownerSelect" onchange="onOwnerChange()"><option value="">-- SELECT --</option></select></div>
 <div class="section"><label class="label">MONTH</label><select id="monthSelect"></select></div>
 <div class="section"><label class="label">YEAR</label><select id="yearSelect"></select></div>
@@ -62,7 +62,7 @@
 <div class="modal-actions"><button class="btn-add" onclick="submitExpense()">✓ ADD EXPENSE</button><button class="btn-cancel" onclick="closeAll()">✗ CANCEL</button></div>
 </div></div>
 
-<div class="main"><div id="content" class="page"><div class="invoice-header"><div class="company-info"><div class="company-name">OCEAN VACATIONS</div><div>www.oceanvacationsmb.com</div><div>oceanvacationsmb@gmail.com</div><div>843-222-6516</div></div><div class="right-header"><div class="statement-date" id="statementDate"></div><div class="period-date" id="periodDate"></div></div></div><div class="report-title" id="reportTitle">RESERVATION REPORT</div><div class="owner-name" id="ownerTitle"></div><div id="mainContent"><div style="text-align:center;padding:40px;color:#666">Ready to use! Select an owner and upload CSV to begin.</div></div></div></div>
+<div class="main"><div id="content" class="page"><div class="invoice-header"><div class="company-info"><div class="company-name">OCEAN VACATIONS</div><div>www.oceanvacationsmb.com</div><div>oceanvacationsmb@gmail.com</div><div>843-222-6516</div></div><div class="right-header"><div class="statement-date" id="statementDate"></div><div class="period-date" id="periodDate"></div></div></div><div class="report-title" id="reportTitle">RESERVATION REPORT</div><div class="owner-name" id="ownerTitle"></div><div id="mainContent"><div style="text-align:center;padding:40px;color:#666">Loading data from GitHub...</div></div></div></div>
 
 <script>
 const GITHUB_URL="https://raw.githubusercontent.com/oceanvacationsmb/reports/main/data.json";
@@ -75,7 +75,7 @@ function money(v){return"$"+(Number(v)||0).toFixed(2);}
 function updateTokenStatus(){
   const status=document.getElementById("tokenStatus");
   if(githubToken){
-    status.textContent="🟢 TOKEN ACTIVE";
+    status.textContent="🟢 TOKEN ACTIVE (reports)";
     status.className="token-status token-active";
   }else{
     status.textContent="🔴 NO TOKEN";
@@ -93,11 +93,17 @@ function loadData(){
       expenses=data.expenses||[];
       propertySettings=data.properties||{};
       githubToken=data.github_token||"";
+      console.log("✓ Data loaded from GitHub");
+      console.log("Token found:",githubToken?"YES":"NO");
       if(githubToken)localStorage.setItem("github_token",githubToken);
       init();
       updateTokenStatus();
     })
-    .catch(e=>{console.error(e);init();});
+    .catch(e=>{
+      console.error("Error loading data:",e);
+      init();
+      updateTokenStatus();
+    });
 }
 
 function init(){
@@ -193,14 +199,14 @@ function saveOwnerData(){
   fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{headers:{"Authorization":"token "+githubToken}})
     .then(r=>r.json())
     .then(file=>{
-      if(file.message)return alert("Token invalid: "+file.message);
+      if(file.message)return alert("❌ Token error: "+file.message);
       fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{
         method:"PUT",
         headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},
         body:JSON.stringify({message:"Update owner settings "+new Date().toLocaleString(),content:content,sha:file.sha})
       }).then(r=>{
-        if(r.ok){alert("✓ OWNER SETTINGS SAVED!");gitHubData={owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken};}
-        else alert("Save failed - check token permissions");
+        if(r.ok){alert("✓ OWNER SETTINGS SAVED!");}
+        else alert("Save failed");
       });
     })
     .catch(e=>alert("Error: "+e.message));
@@ -233,14 +239,14 @@ function saveTaxData(){
   fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{headers:{"Authorization":"token "+githubToken}})
     .then(r=>r.json())
     .then(file=>{
-      if(file.message)return alert("Token invalid: "+file.message);
+      if(file.message)return alert("❌ Token error: "+file.message);
       fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{
         method:"PUT",
         headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},
         body:JSON.stringify({message:"Update tax settings "+new Date().toLocaleString(),content:content,sha:file.sha})
       }).then(r=>{
-        if(r.ok){alert("✓ TAX SETTINGS SAVED!");gitHubData={owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken};}
-        else alert("Save failed - check token permissions");
+        if(r.ok){alert("✓ TAX SETTINGS SAVED!");}
+        else alert("Save failed");
       });
     })
     .catch(e=>alert("Error: "+e.message));
@@ -286,14 +292,14 @@ function saveVendorData(){
   fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{headers:{"Authorization":"token "+githubToken}})
     .then(r=>r.json())
     .then(file=>{
-      if(file.message)return alert("Token invalid: "+file.message);
+      if(file.message)return alert("❌ Token error: "+file.message);
       fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{
         method:"PUT",
         headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},
         body:JSON.stringify({message:"Update vendors "+new Date().toLocaleString(),content:content,sha:file.sha})
       }).then(r=>{
-        if(r.ok){alert("✓ VENDORS SAVED!");gitHubData={owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken};}
-        else alert("Save failed - check token permissions");
+        if(r.ok){alert("✓ VENDORS SAVED!");}
+        else alert("Save failed");
       });
     })
     .catch(e=>alert("Error: "+e.message));
@@ -347,7 +353,7 @@ function saveExpenseData(){
 }
 
 function setupToken(){
-  const token=prompt("ENTER YOUR GITHUB TOKEN:\n\n1. Go to: https://github.com/settings/tokens\n2. Click 'Generate new token'\n3. Select: repo (full control)\n4. Copy the token and paste it below\n\nTOKEN:");
+  const token=prompt("PASTE YOUR GITHUB TOKEN:\n\n(Your token name is 'reports')\n\nIf you lost it, create a new one at:\nhttps://github.com/settings/tokens");
   if(token&&token.trim()){
     githubToken=token.trim();
     localStorage.setItem("github_token",githubToken);
@@ -356,17 +362,20 @@ function setupToken(){
     fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{headers:{"Authorization":"token "+githubToken}})
       .then(r=>r.json())
       .then(file=>{
-        if(file.message){alert("❌ Token invalid or expired!\n\nMake sure:\n- Token is NOT expired\n- Repo access is enabled\n- Use 'repo' scope");return;}
+        if(file.message){alert("❌ Token invalid!\n\nMake sure the token is not expired and has 'repo' permissions.");return;}
         fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{
           method:"PUT",
           headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},
           body:JSON.stringify({message:"Save GitHub token "+new Date().toLocaleString(),content:content,sha:file.sha})
         }).then(r=>{
-          if(r.ok){alert("✓ GitHub token SAVED!\n\nToken is now active and will work from any computer.");loadData();updateTokenStatus();}
-          else alert("❌ Failed to save token.\n\nCheck your internet connection and try again.");
+          if(r.ok){
+            alert("✓ TOKEN SAVED!\n\nYou can now use any computer!");
+            loadData();
+            updateTokenStatus();
+          }else alert("❌ Failed to save token");
         });
       })
-      .catch(e=>alert("❌ Error: "+e.message+"\n\nMake sure the token is valid and has 'repo' permissions."));
+      .catch(e=>alert("❌ Error: "+e.message));
   }
 }
 
