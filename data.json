@@ -86,6 +86,15 @@
       "vendor": "ECIA",
       "amount": 100,
       "notes": ""
+    },
+    {
+      "id": 1771229360425,
+      "owner": "GHO",
+      "type": "MAINTENANCE",
+      "property": "MB - 7500",
+      "vendor": "ECIA",
+      "amount": 200,
+      "notes": ""
     }
   ]
 }
