@@ -302,25 +302,58 @@ function saveToGitHub(type){
   const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken},null,2);
   const content=btoa(unescape(encodeURIComponent(data)));
   
-  fetch(GITHUB_API,{headers:{"Authorization":"token "+githubToken}})
-    .then(r=>r.json())
-    .then(fileData=>{
-      return fetch(GITHUB_API,{
-        method:"PUT",
-        headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},
-        body:JSON.stringify({message:"Update "+type,content:content,sha:fileData.sha})
+  function attemptSave(retryCount=0){
+    console.log("Attempt "+(retryCount+1)+" - Getting SHA from GitHub...");
+    fetch(GITHUB_API,{headers:{"Authorization":"token "+githubToken}})
+      .then(r=>{
+        if(!r.ok)throw new Error("GET failed: "+r.status);
+        return r.json();
+      })
+      .then(fileData=>{
+        const sha=fileData.sha;
+        console.log("Got SHA: "+sha.substring(0,8));
+        console.log("Attempting PUT with current SHA...");
+        
+        return fetch(GITHUB_API,{
+          method:"PUT",
+          headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},
+          body:JSON.stringify({message:"Update "+type,content:content,sha:sha})
+        }).then(r=>({response:r,sha:sha}));
+      })
+      .then(({response,sha})=>{
+        console.log("PUT response status: "+response.status);
+        
+        if(response.status===409){
+          console.log("409 Conflict - SHA mismatch, retrying...");
+          if(retryCount<3){
+            setTimeout(()=>attemptSave(retryCount+1), 2000);
+          }else{
+            alert("❌ Could not save after 4 attempts (409 Conflict)");
+          }
+          return;
+        }
+        
+        if(response.ok||response.status===200){
+          console.log("✓ Save successful!");
+          alert("✓ "+type.toUpperCase()+" SAVED TO GITHUB!");
+          setTimeout(()=>loadData(), 1000);
+          return;
+        }
+        
+        throw new Error("PUT failed: "+response.status);
+      })
+      .catch(e=>{
+        console.error("Error:",e.message);
+        if(retryCount<3){
+          console.log("Retrying in 2 seconds...");
+          setTimeout(()=>attemptSave(retryCount+1), 2000);
+        }else{
+          alert("❌ Could not save after 4 attempts");
+        }
       });
-    })
-    .then(r=>r.json())
-    .then(result=>{
-      console.log("Save completed!");
-      alert("✓ "+type.toUpperCase()+" SAVED!");
-      setTimeout(()=>loadData(),1000);
-    })
-    .catch(e=>{
-      console.log("Save error (retrying in 2 seconds):",e.message);
-      setTimeout(()=>saveToGitHub(type),2000);
-    });
+  }
+  
+  attemptSave();
 }
 
 function updateVendorDropdown(){
