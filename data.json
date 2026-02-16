@@ -21,56 +21,41 @@
     }
   ],
   "properties": {
-    "MB - 4765": {},
+    "MB - 4765": {
+      "SC": true,
+      "MB": true,
+      "HC": true
+    },
     "MB - 7500": {
       "SC": true,
       "MB": true,
       "HC": true
     },
-    "GCSSB - 204-2D": {},
-    "MB - 209/5113": {},
-    "MB - 2000": {},
-    "MB - 209/5112": {},
+    "GCSSB - 204-2D": {
+      "SC": true,
+      "MB": false,
+      "HC": true
+    },
+    "MB - 209/5113": {
+      "SC": true,
+      "MB": true,
+      "HC": true
+    },
+    "MB - 2000": {
+      "SC": true,
+      "MB": true,
+      "HC": true
+    },
+    "MB - 209/5112": {
+      "SC": true,
+      "MB": true,
+      "HC": true
+    },
     "GCSSB - 113B-12S": {},
     "MB - Tuscan A": {},
-    "NMB - 204-28N": {}
-  },
-  "expenses": [
-    {
-      "id": 1771226834081,
-      "owner": "ERAN MARON",
-      "type": "REPAIR",
-      "property": "GCSSB - 113B-12S",
-      "vendor": "ECIA",
-      "amount": 100,
-      "notes": ""
-    },
-    {
-      "id": 1771226853404,
-      "owner": "ERAN MARON",
-      "type": "REPAIR",
-      "property": "MB - Tuscan A",
-      "vendor": "ECIA",
-      "amount": 100,
-      "notes": ""
-    },
-    {
-      "id": 1771226866850,
-      "owner": "ERAN MARON",
-      "type": "MAINTENANCE",
-      "property": "NMB - 204-28N",
-      "vendor": "ECIA",
-      "amount": 100,
-      "notes": ""
-    },
-    {
-      "id": 1771226925874,
-      "owner": "ERAN MARON",
-      "type": "PURCHASE",
-      "property": "GCSSB - 113B-12S",
-      "vendor": "ECIA",
-      "amount": 100,
-      "notes": ""
+    "NMB - 204-28N": {
+      "SC": false
     }
-  ]
+  },
+  "expenses": []
 }
