@@ -55,6 +55,15 @@
       "vendor": "ECIA",
       "amount": 100,
       "notes": "NOTE"
+    },
+    {
+      "id": 1771224481833,
+      "owner": "GHO",
+      "type": "POOL CLEANING",
+      "property": "MB - 209/5113",
+      "vendor": "ECIA",
+      "amount": 100,
+      "notes": "NOTE"
     }
   ]
 }
