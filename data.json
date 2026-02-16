@@ -27,6 +27,13 @@
       "salesFeePercent": 5,
       "type": "payout",
       "guestyReportUrl": "https://app.guesty.com/reservations?viewId=693900585c8b6c44c508d1ee&soft-nav=true"
+    },
+    "CARL RICHARDS - 113B 13TH AVE NORTH SURFSIDE BEACH SC 29575": {
+      "email": "",
+      "percent": 0.12,
+      "salesFeePercent": 5,
+      "type": "payout",
+      "guestyReportUrl": ""
     }
   },
   "vendors": [
