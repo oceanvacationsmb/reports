@@ -4,47 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reports</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Reports</h1>
-    <!-- Existing sections -->
-
-    <button id="incomeReportsBtn">INCOME REPORTS</button>
-
-    <div id="incomeReportsModal" style="display:none;">
-        <h2>Generate Income Report</h2>
-        <label for="ownerSelection">Select Owner:</label>
-        <select id="ownerSelection">
-            <option value="ERAN">ERAN</option>
-            <option value="OTHER">Other Owners...</option>
-        </select>
-
-        <label for="datePeriod">Select Date Period:</label>
-        <input type="date" id="startDate">
-        <input type="date" id="endDate">
-
-        <label for="reportType">Select Report Type:</label>
-        <select id="reportType">
-            <option value="GRI">GRI</option>
-            <option value="FULL">FULL</option>
-        </select>
-
-        <button id="generateReport">Generate Report</button>
+    <div class="sidebar">
+        <button>SUMMARY REPORT</button>
+        <button>INCOME REPORTS</button>
+        <div class="settings">
+            <h2>SETTINGS</h2>
+            <!-- Settings content -->
+        </div>
     </div>
-
-    <script>
-        document.getElementById('incomeReportsBtn').onclick = function() {
-            var modal = document.getElementById('incomeReportsModal');
-            modal.style.display = modal.style.display === 'none' ? 'block' : 'none';
-        };
-
-        document.getElementById('generateReport').onclick = function() {
-            var owner = document.getElementById('ownerSelection').value;
-            var startDate = document.getElementById('startDate').value;
-            var endDate = document.getElementById('endDate').value;
-            var reportType = document.getElementById('reportType').value;
-            alert('Generating ' + reportType + ' report for ' + owner + ' from ' + startDate + ' to ' + endDate);
-        };
-    </script>
+    <div class="content">
+        <h1>Reports Overview</h1>
+        <!-- Main content goes here -->
+    </div>
 </body>
 </html>
