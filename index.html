@@ -5,7 +5,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial;background:#f5f5f5;color:#000;display:flex}.sidebar{width:280px;background:#333;color:#fff;padding:20px;height:100vh;overflow-y:auto;position:fixed;left:0;top:0}.sidebar h3{margin-bottom:20px;font-size:16px;border-bottom:2px solid #fff;padding-bottom:10px}.section{margin-bottom:20px}.label{font-size:11px;font-weight:bold;color:#aaa;margin-bottom:5px;display:block}select,input{width:100%;padding:8px;margin:5px 0;border:1px solid #555;background:#444;color:#fff;border-radius:3px;font-size:11px}.btn{width:100%;padding:12px;margin:8px 0;border:none;font-weight:bold;border-radius:3px;cursor:pointer;font-size:12px;color:#fff;text-transform:uppercase}.btn-primary{background:#000}.btn-success{background:#28a745}.btn-warning{background:#ff9800}.btn-info{background:#17a2b8}.btn-danger{background:#dc3545}.main{margin-left:280px;padding:20px;width:calc(100% - 280px)}.page{background:#fff;padding:40px;border-radius:5px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}.invoice-header{display:flex;justify-content:space-between;margin-bottom:40px;border-bottom:2px solid #000;padding-bottom:30px}.company-info{font-size:11px;line-height:1.8}.company-name{font-size:20px;font-weight:bold;margin-bottom:5px}.report-title{text-align:center;font-size:32px;font-weight:bold;margin:40px 0 10px 0;letter-spacing:2px}.owner-name{text-align:center;font-size:28px;margin-bottom:40px;font-weight:bold;color:#000}table{width:100%;border-collapse:collapse;margin:20px 0;font-size:11px}th,td{border:1px solid #e0e0e0;padding:12px;text-align:left}th{background:#f5f5f5;color:#000;font-weight:bold;text-transform:uppercase}tr:nth-child(even){background:#fafafa}.action-buttons{display:flex;gap:10px;margin:20px 0;justify-content:center;flex-wrap:wrap}.action-buttons button{padding:10px 20px;font-size:12px;cursor:pointer;border:none;border-radius:3px;color:#fff;font-weight:bold;text-transform:uppercase}.back-btn{background:#666}.print-btn{background:#e74c3c}.property-section{margin:40px 0;padding:20px;border:1px solid #ddd;border-radius:5px;background:#fff}.property-title{font-size:14px;font-weight:bold;margin-bottom:15px;display:flex;align-items:center;text-transform:uppercase}.property-icon{font-size:18px;margin-right:10px}.summary-title{font-size:12px;font-weight:bold;text-transform:uppercase;text-align:center;margin:20px 0}.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}.summary-card{background:#f9f9f9;border:1px solid #ddd;padding:12px;text-align:center;border-radius:5px}.summary-label{font-size:10px;color:#666;font-weight:bold;text-transform:uppercase}.summary-value{font-size:14px;font-weight:bold;color:#000;margin-top:6px}.attachment{background:#f0f0f0;padding:10px;margin:10px 0;border-radius:3px;font-size:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.attachment-left{flex:1}.attachment-actions{display:flex;gap:5px;flex-wrap:wrap}.modal{display:none;position:fixed;z-index:1001;left:50%;top:50%;transform:translate(-50%,-50%);width:90%;max-width:500px;background:#333;color:#fff;border-radius:8px;padding:30px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto}.modal.show{display:block}.modal-title{font-size:20px;font-weight:bold;margin-bottom:20px;text-transform:uppercase;text-align:center;border-bottom:2px solid #fff;padding-bottom:15px}.modal-field{margin-bottom:15px}.modal-label{font-size:11px;font-weight:bold;color:#aaa;margin-bottom:8px;display:block;text-transform:uppercase}.modal-input{width:100%;padding:10px;border:1px solid #555;background:#444;color:#fff;border-radius:3px;font-size:11px}.modal-actions{display:flex;gap:10px;margin-top:25px}.modal-actions button{flex:1;padding:12px;border:none;font-weight:bold;border-radius:3px;cursor:pointer;font-size:12px;color:#fff;text-transform:uppercase}.btn-add{background:#28a745}.btn-cancel{background:#666}.btn-save{background:#0066cc}.modal-overlay{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.7)}.modal-overlay.show{display:block}.copy-link-btn{background:#0066cc;color:#fff;padding:10px 15px;border:none;border-radius:3px;cursor:pointer;font-weight:bold;margin:10px 0;width:100%;text-transform:uppercase}.commission-box{background:#fff3cd;border:2px solid #ffc107;padding:15px;margin:15px 0;border-radius:5px}.commission-box-title{font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px;text-transform:uppercase;text-align:center}.calc-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd}.calc-row-total{display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold}.pmc-transfer-box{background:#d4edda;border:2px solid #28a745;padding:15px;margin:15px 0;border-radius:5px}.pmc-transfer-title{font-size:14px;font-weight:bold;color:#155724;margin-bottom:10px;text-transform:uppercase;text-align:center}.pmc-transfer-amount{font-size:18px;font-weight:bold;color:#155724;text-align:center}.tax-box{background:#e8f4f8;border:2px solid #17a2b8;padding:15px;margin:15px 0;border-radius:5px}.tax-box-title{font-size:14px;font-weight:bold;color:#0c5460;margin-bottom:10px;text-transform:uppercase;text-align:center}.tax-property{background:#fff;padding:12px;margin:10px 0;border-radius:3px;border-left:4px solid #17a2b8}.tax-property-name{font-weight:bold;color:#0c5460;font-size:12px}.tax-property-amount{font-size:14px;font-weight:bold;color:#0c5460;margin:5px 0}.tax-municipalities{font-size:11px;color:#0c5460}.section-title{font-size:12px;font-weight:bold;text-transform:uppercase;margin-top:20px;margin-bottom:10px;color:#000}.btn-small{padding:5px 10px;font-size:9px;width:auto;margin:0;display:inline-block;text-transform:uppercase}.settings-header{color:#fff;margin:20px 0 10px 0;font-size:12px;font-weight:bold;text-transform:uppercase;border-top:2px solid #555;padding-top:15px}.token-status{padding:8px;margin:8px 0;border-radius:3px;text-align:center;font-size:11px;font-weight:bold}.token-active{background:#28a745;color:#fff}.token-inactive{background:#dc3545;color:#fff}@media print{.sidebar,.back-btn,.print-btn,.copy-link-btn{display:none}.main{margin-left:0;width:100%}.page{padding:20px}}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial;background:#f5f5f5;color:#000;display:flex}.sidebar{width:280px;background:#333;color:#fff;padding:20px;height:100vh;overflow-y:auto;position:fixed;left:0;top:0}.sidebar h3{margin-bottom:20px;font-size:16px;border-bottom:2px solid #fff;padding-bottom:10px}.section{margin-bottom:20px}.label{font-size:11px;font-weight:bold;color:#aaa;margin-bottom:5px;display:block}select,input{width:100%;padding:8px;margin:5px 0;border:1px solid #555;background:#444;color:#fff;border-radius:3px;font-size:11px}.btn{width:100%;padding:12px;margin:8px 0;border:none;font-weight:bold;border-radius:3px;cursor:pointer;font-size:12px;color:#fff;text-transform:uppercase}.btn-primary{background:#000}.btn-success{background:#28a745}.btn-warning{background:#ff9800}.btn-info{background:#17a2b8}.btn-danger{background:#dc3545}.main{margin-left:280px;padding:20px;width:calc(100% - 280px)}.page{background:#fff;padding:40px;border-radius:5px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}.invoice-header{display:flex;justify-content:space-between;margin-bottom:40px;border-bottom:2px solid #000;padding-bottom:30px}.company-info{font-size:11px;line-height:1.8}.company-name{font-size:20px;font-weight:bold;margin-bottom:5px}.report-title{text-align:center;font-size:32px;font-weight:bold;margin:40px 0 10px 0;letter-spacing:2px}.owner-name{text-align:center;font-size:28px;margin-bottom:40px;font-weight:bold;color:#000}table{width:100%;border-collapse:collapse;margin:20px 0;font-size:11px}th,td{border:1px solid #e0e0e0;padding:12px;text-align:left}th{background:#f5f5f5;color:#000;font-weight:bold;text-transform:uppercase}tr:nth-child(even){background:#fafafa}.action-buttons{display:flex;gap:10px;margin:20px 0;justify-content:center;flex-wrap:wrap}.action-buttons button{padding:10px 20px;font-size:12px;cursor:pointer;border:none;border-radius:3px;color:#fff;font-weight:bold;text-transform:uppercase}.back-btn{background:#666}.print-btn{background:#e74c3c}.property-section{margin:40px 0;padding:20px;border:1px solid #ddd;border-radius:5px;background:#fff}.property-title{font-size:14px;font-weight:bold;margin-bottom:15px;display:flex;align-items:center;text-transform:uppercase}.property-icon{font-size:18px;margin-right:10px}.summary-title{font-size:12px;font-weight:bold;text-transform:uppercase;text-align:center;margin:20px 0}.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}.summary-card{background:#f9f9f9;border:1px solid #ddd;padding:12px;text-align:center;border-radius:5px}.summary-label{font-size:10px;color:#666;font-weight:bold;text-transform:uppercase}.summary-value{font-size:14px;font-weight:bold;color:#000;margin-top:6px}.attachment{background:#f0f0f0;padding:10px;margin:10px 0;border-radius:3px;font-size:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.attachment-left{flex:1}.attachment-actions{display:flex;gap:5px;flex-wrap:wrap}.modal{display:none;position:fixed;z-index:1001;left:50%;top:50%;transform:translate(-50%,-50%);width:90%;max-width:500px;background:#333;color:#fff;border-radius:8px;padding:30px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto}.modal.show{display:block}.modal-title{font-size:20px;font-weight:bold;margin-bottom:20px;text-transform:uppercase;text-align:center;border-bottom:2px solid #fff;padding-bottom:15px}.modal-field{margin-bottom:15px}.modal-label{font-size:11px;font-weight:bold;color:#aaa;margin-bottom:8px;display:block;text-transform:uppercase}.modal-input{width:100%;padding:10px;border:1px solid #555;background:#444;color:#fff;border-radius:3px;font-size:11px}.modal-actions{display:flex;gap:10px;margin-top:25px}.modal-actions button{flex:1;padding:12px;border:none;font-weight:bold;border-radius:3px;cursor:pointer;font-size:12px;color:#fff;text-transform:uppercase}.btn-add{background:#28a745}.btn-cancel{background:#666}.btn-save{background:#0066cc}.modal-overlay{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.7)}.modal-overlay.show{display:block}.copy-link-btn{background:#0066cc;color:#fff;padding:10px 15px;border:none;border-radius:3px;cursor:pointer;font-weight:bold;margin:10px 0;width:100%;text-transform:uppercase}.commission-box{background:#fff3cd;border:2px solid #ffc107;padding:15px;margin:15px 0;border-radius:5px}.commission-box-title{font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px;text-transform:uppercase;text-align:center}.calc-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd}.calc-row-total{display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold}.payout-summary-box{background:#e8f5e9;border:2px solid #4caf50;padding:15px;margin:15px 0;border-radius:5px}.payout-summary-title{font-size:14px;font-weight:bold;color:#2e7d32;margin-bottom:10px;text-transform:uppercase;text-align:center}.payout-calc-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #c8e6c9}.payout-calc-total{display:flex;justify-content:space-between;padding:12px;background:#2e7d32;color:#fff;font-weight:bold}.commission-calc-box{background:#fff9c4;border:2px solid #fbc02d;padding:15px;margin:15px 0;border-radius:5px}.commission-calc-title{font-size:14px;font-weight:bold;color:#f57f17;margin-bottom:10px;text-transform:uppercase;text-align:center}.tax-box{background:#e8f4f8;border:2px solid #17a2b8;padding:15px;margin:15px 0;border-radius:5px}.tax-box-title{font-size:14px;font-weight:bold;color:#0c5460;margin-bottom:10px;text-transform:uppercase;text-align:center}.tax-property{background:#fff;padding:12px;margin:10px 0;border-radius:3px;border-left:4px solid #17a2b8}.tax-property-name{font-weight:bold;color:#0c5460;font-size:12px}.tax-property-amount{font-size:14px;font-weight:bold;color:#0c5460;margin:5px 0}.tax-municipalities{font-size:11px;color:#0c5460}.section-title{font-size:12px;font-weight:bold;text-transform:uppercase;margin-top:20px;margin-bottom:10px;color:#000}.btn-small{padding:5px 10px;font-size:9px;width:auto;margin:0;display:inline-block;text-transform:uppercase}.settings-header{color:#fff;margin:20px 0 10px 0;font-size:12px;font-weight:bold;text-transform:uppercase;border-top:2px solid #555;padding-top:15px}.token-status{padding:8px;margin:8px 0;border-radius:3px;text-align:center;font-size:11px;font-weight:bold}.token-active{background:#28a745;color:#fff}.token-inactive{background:#dc3545;color:#fff}@media print{.sidebar,.back-btn,.print-btn,.copy-link-btn{display:none}.main{margin-left:0;width:100%}.page{padding:20px}}
 </style>
 </head>
 <body>
@@ -116,6 +116,7 @@ function loadData(){
     propertySettings=data.properties||{};
     console.log("✓ Owners:",Object.keys(OWNERS).length);
     console.log("✓ Vendors:",vendors.length);
+    console.log("✓ Expenses:",expenses.length);
     init();
     updateTokenStatus();
   })
@@ -306,34 +307,39 @@ function saveToGitHub(type){
     console.log("Attempt "+(retryCount+1)+" - Getting SHA from GitHub...");
     fetch(GITHUB_API,{headers:{"Authorization":"token "+githubToken}})
       .then(r=>{
+        if(r.status===404){
+          console.log("File not found - creating new file");
+          return {sha:null, create:true};
+        }
         if(!r.ok)throw new Error("GET failed: "+r.status);
-        return r.json();
+        return r.json().then(data=>({sha:data.sha, create:false}));
       })
-      .then(fileData=>{
-        const sha=fileData.sha;
-        console.log("Got SHA: "+sha.substring(0,8));
-        console.log("Attempting PUT with current SHA...");
+      .then(({sha,create})=>{
+        console.log(create?"Creating new file":"Updating file with SHA: "+(sha?sha.substring(0,8):""));
+        
+        const body={message:"Update "+type,content:content};
+        if(sha) body.sha=sha;
         
         return fetch(GITHUB_API,{
           method:"PUT",
           headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},
-          body:JSON.stringify({message:"Update "+type,content:content,sha:sha})
+          body:JSON.stringify(body)
         }).then(r=>({response:r,sha:sha}));
       })
       .then(({response,sha})=>{
         console.log("PUT response status: "+response.status);
         
         if(response.status===409){
-          console.log("409 Conflict - SHA mismatch, retrying...");
+          console.log("409 Conflict - retrying...");
           if(retryCount<3){
             setTimeout(()=>attemptSave(retryCount+1), 2000);
           }else{
-            alert("❌ Could not save after 4 attempts (409 Conflict)");
+            alert("❌ Could not save after 4 attempts");
           }
           return;
         }
         
-        if(response.ok||response.status===200){
+        if(response.ok||response.status===200||response.status===201){
           console.log("✓ Save successful!");
           alert("✓ "+type.toUpperCase()+" SAVED TO GITHUB!");
           setTimeout(()=>loadData(), 1000);
@@ -366,6 +372,7 @@ function updateVendorDropdown(){
 
 function openAddExpense(){
   if(!currentOwner)return alert("Select owner first");
+  if(Object.keys(propertyTotals).length===0)return alert("Generate statement first");
   const prop=document.getElementById("expenseProperty");
   prop.innerHTML="<option>-- SELECT --</option>";
   Object.keys(propertyTotals).forEach(p=>{
@@ -381,10 +388,12 @@ function submitExpense(){
   const amount=parseFloat(document.getElementById("expenseAmount").value);
   if(!currentOwner||!prop||!vendor||!amount)return alert("Fill all fields");
   expenses.push({id:Date.now(),owner:currentOwner,type:type,property:prop,vendor:vendor,amount:amount,notes:document.getElementById("expenseNotes").value});
+  document.getElementById("expenseAmount").value="";
+  document.getElementById("expenseNotes").value="";
   closeAll();
+  saveToGitHub("expenses");
   processData();
   displayStatement();
-  saveToGitHub("expenses");
 }
 
 function setupToken(){
@@ -407,17 +416,15 @@ function setupToken(){
       const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken},null,2);
       const content=btoa(unescape(encodeURIComponent(data)));
       
-      return fetch(GITHUB_API,{headers:{"Authorization":"token "+githubToken}})
-        .then(r=>r.json())
-        .then(file=>{
-          if(!file.sha)throw new Error("Cannot read file");
-          return fetch(GITHUB_API,{method:"PUT",headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},body:JSON.stringify({message:"Setup token",content:content,sha:file.sha})});
-        });
+      const body={message:"Setup token",content:content};
+      return fetch(GITHUB_API,{method:"PUT",headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},body:JSON.stringify(body)});
     })
     .then(r=>{
-      if(r.ok){
+      if(r.ok||r.status===201){
         alert("✓ TOKEN SAVED!\n\nReady to use!");
         loadData();
+      }else{
+        alert("❌ Error saving token");
       }
     })
     .catch(e=>{
@@ -461,7 +468,7 @@ function processData(){
   const year=parseInt(document.getElementById("yearSelect").value);
   const t=OWNERS[currentOwner];
   propertyTotals={};
-  masterTotals={gross:0,acc:0,clean:0,pmc:0,expenses:0,draft:0,owner:0,websiteFee:0};
+  masterTotals={gross:0,acc:0,clean:0,pmc:0,expenses:0,draft:0,owner:0,websiteFee:0,totalTaxCollected:0};
   taxByProperty={};
   let byProp={};
   
@@ -478,7 +485,7 @@ function processData(){
   });
   
   Object.keys(byProp).forEach(prop=>{
-    let gross=0,acc=0,clean=0,pmc=0,websiteFee=0;
+    let gross=0,acc=0,clean=0,pmc=0,websiteFee=0,totalTax=0;
     byProp[prop].forEach(row=>{
       const g=num(row["TOTAL PAYOUT"]);
       const a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
@@ -502,15 +509,17 @@ function processData(){
         const stateTax=num(row["STATE TAX"])||0;
         const countyTax=num(row["COUNTY TAX"])||0;
         const occupancyTax=num(row["OCCUPANCY TAX"])||0;
-        if(cityTax>0||stateTax>0||countyTax>0||occupancyTax>0){
-          if(!taxByProperty[prop])taxByProperty[prop]=g;
+        const tax=cityTax+stateTax+countyTax+occupancyTax;
+        totalTax+=tax;
+        if(tax>0){
+          if(!taxByProperty[prop])taxByProperty[prop]={gross:g,tax:tax,collected:false};
         }
       }
     });
     const exp=expenses.filter(e=>e.property===prop&&e.owner===currentOwner).reduce((sum,e)=>sum+e.amount,0);
     const draft=pmc+clean+websiteFee+exp;
     const owner=acc-pmc-exp;
-    propertyTotals[prop]={gross:gross,acc:acc,clean:clean,pmc:pmc,websiteFee:websiteFee,expenses:exp,draft:draft,owner:owner,reservations:byProp[prop]};
+    propertyTotals[prop]={gross:gross,acc:acc,clean:clean,pmc:pmc,websiteFee:websiteFee,expenses:exp,draft:draft,owner:owner,tax:totalTax,reservations:byProp[prop]};
     masterTotals.gross+=gross;
     masterTotals.acc+=acc;
     masterTotals.clean+=clean;
@@ -519,6 +528,7 @@ function processData(){
     masterTotals.expenses+=exp;
     masterTotals.draft+=draft;
     masterTotals.owner+=owner;
+    masterTotals.totalTaxCollected+=totalTax;
   });
 }
 
@@ -620,14 +630,18 @@ function generateSummary(){
   const t=OWNERS[currentOwner];
   const type=t.type;
   const salesFee=masterTotals.pmc*(t.salesFeePercent/100);
+  const pmcComm=masterTotals.pmc*(t.percent*100);
+  
   let html="<div class='action-buttons'><button class='back-btn' onclick='displayStatement()'>← BACK</button><button class='print-btn' onclick='window.print()'>🖨️ PRINT</button></div>";
-  html+="<div style='background:#fff3cd;border:2px solid #ffc107;padding:15px;margin:15px 0;border-radius:5px'>";
-  html+="<div style='font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px;text-transform:uppercase;text-align:center'>SALES COMMISSION DUE</div>";
-  html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>TOTAL PMC</span><span>"+money(masterTotals.pmc)+"</span></div>";
-  html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>SALES FEE %</span><span>"+t.salesFeePercent+"%</span></div>";
-  html+="<div style='display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold'><span>COMMISSION AMOUNT</span><span>"+money(salesFee)+"</span></div>";
-  html+="</div>";
+  
   if(type==="draft"){
+    html+="<div class='commission-box'>";
+    html+="<div class='commission-box-title'>SALES COMMISSION DUE</div>";
+    html+="<div class='calc-row'><span>TOTAL PMC</span><span>"+money(masterTotals.pmc)+"</span></div>";
+    html+="<div class='calc-row'><span>SALES FEE %</span><span>"+t.salesFeePercent+"%</span></div>";
+    html+="<div class='calc-row-total'><span>COMMISSION AMOUNT</span><span>"+money(salesFee)+"</span></div>";
+    html+="</div>";
+    
     html+="<div style='background:#fff3cd;border:2px solid #ffc107;padding:15px;margin:15px 0;border-radius:5px'>";
     html+="<div style='font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px;text-transform:uppercase;text-align:center'>DRAFT BREAKDOWN</div>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>CLEANING</span><span>"+money(masterTotals.clean)+"</span></div>";
@@ -636,36 +650,48 @@ function generateSummary(){
     html+="<div style='display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold'><span>TOTAL DUE</span><span>"+money(masterTotals.draft)+"</span></div>";
     html+="</div>";
   }else{
-    html+="<div style='background:#fff3cd;border:2px solid #ffc107;padding:15px;margin:15px 0;border-radius:5px'>";
-    html+="<div style='font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px;text-transform:uppercase;text-align:center'>PAYOUT BREAKDOWN</div>";
-    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
-    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>PMC (DEDUCT)</span><span>-"+money(masterTotals.pmc)+"</span></div>";
-    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>EXPENSES</span><span>-"+money(masterTotals.expenses)+"</span></div>";
-    html+="<div style='display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold'><span>OWNER PAYOUT</span><span>"+money(masterTotals.owner)+"</span></div>";
+    html+="<div class='payout-summary-box'>";
+    html+="<div class='payout-summary-title'>PAYOUT SUMMARY</div>";
+    html+="<div class='payout-calc-row'><span>TOTAL ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+    html+="<div class='payout-calc-row'><span>COMMISSION %</span><span>"+(t.percent*100).toFixed(2)+"%</span></div>";
+    html+="<div class='payout-calc-row'><span>PMC (Commission Amount)</span><span>"+money(masterTotals.pmc)+"</span></div>";
+    html+="<div class='payout-calc-row'><span>MINUS Expenses</span><span>-"+money(masterTotals.expenses)+"</span></div>";
+    html+="<div class='payout-calc-total'><span>OWNER PAYOUT</span><span>"+money(masterTotals.owner)+"</span></div>";
     html+="</div>";
+    
+    html+="<div class='commission-calc-box'>";
+    html+="<div class='commission-calc-title'>SALES COMMISSION</div>";
+    html+="<div class='calc-row'><span>PMC AMOUNT</span><span>"+money(masterTotals.pmc)+"</span></div>";
+    html+="<div class='calc-row'><span>SALES FEE %</span><span>"+t.salesFeePercent+"%</span></div>";
+    html+="<div class='calc-row-total'><span>COMMISSION DUE</span><span>"+money(salesFee)+"</span></div>";
+    html+="</div>";
+    
     let hasTaxes=false;
-    Object.keys(propertyTotals).forEach(prop=>{if(taxByProperty[prop])hasTaxes=true;});
+    Object.keys(taxByProperty).forEach(prop=>{if(taxByProperty[prop])hasTaxes=true;});
     if(hasTaxes){
-      html+="<div style='background:#e8f4f8;border:2px solid #17a2b8;padding:15px;margin:15px 0;border-radius:5px'>";
-      html+="<div style='font-size:14px;font-weight:bold;color:#0c5460;margin-bottom:10px;text-transform:uppercase;text-align:center'>⚠️ TAX REPORTING</div>";
-      Object.keys(propertyTotals).forEach(prop=>{
-        if(taxByProperty[prop]){
-          const s=propertySettings[prop];
-          const muns=s?Object.keys(s).filter(m=>s[m]).join(", "):"None";
-          html+="<div style='background:#fff;padding:12px;margin:10px 0;border-radius:3px;border-left:4px solid #17a2b8'>";
-          html+="<div style='font-weight:bold;color:#0c5460;font-size:12px'>"+prop.toUpperCase()+"</div>";
-          html+="<div style='font-size:14px;font-weight:bold;color:#0c5460;margin:5px 0'>Payout: "+money(taxByProperty[prop])+"</div>";
-          html+="<div style='font-size:11px;color:#0c5460'>Report To: "+muns+"</div>";
-          html+="</div>";
-        }
+      html+="<div class='tax-box'>";
+      html+="<div class='tax-box-title'>⚠️ TAX REPORTING (Minus Collected Taxes)</div>";
+      html+="<div style='margin-bottom:15px'><strong>Total Collected Taxes: "+money(masterTotals.totalTaxCollected)+"</strong></div>";
+      html+="<div style='margin-bottom:15px'><strong>Net Payout (After Taxes): "+money(masterTotals.owner-masterTotals.totalTaxCollected)+"</strong></div>";
+      Object.keys(taxByProperty).forEach(prop=>{
+        const tax=taxByProperty[prop];
+        const s=propertySettings[prop];
+        const muns=s?Object.keys(s).filter(m=>s[m]).join(", "):"None";
+        html+="<div class='tax-property'>";
+        html+="<div class='tax-property-name'>"+prop.toUpperCase()+"</div>";
+        html+="<div class='tax-property-amount'>Gross: "+money(tax.gross)+" | Tax: "+money(tax.tax)+"</div>";
+        html+="<div class='tax-municipalities'>Report To: "+muns+"</div>";
+        html+="</div>";
       });
       html+="</div>";
     }
   }
+  
   html+="<div style='background:#d4edda;border:2px solid #28a745;padding:15px;margin:15px 0;border-radius:5px;text-align:center'>";
   html+="<div style='font-size:14px;font-weight:bold;color:#155724;text-transform:uppercase;margin-bottom:10px'>💳 PMC BANK TRANSFER</div>";
   html+="<div style='font-size:18px;font-weight:bold;color:#155724'>"+money(masterTotals.pmc)+"</div>";
   html+="</div>";
+  
   document.getElementById("mainContent").innerHTML=html;
 }
 
