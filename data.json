@@ -46,6 +46,15 @@
       "vendor": "ECIA",
       "amount": 100,
       "notes": ""
+    },
+    {
+      "id": 1771224466413,
+      "owner": "GHO",
+      "type": "SERVICE",
+      "property": "GCSSB - 204-2D",
+      "vendor": "ECIA",
+      "amount": 100,
+      "notes": "NOTE"
     }
   ]
 }
