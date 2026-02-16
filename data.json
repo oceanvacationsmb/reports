@@ -37,37 +37,28 @@
   },
   "expenses": [
     {
-      "id": 1771224451237,
-      "owner": "GHO",
+      "id": 1771226834081,
+      "owner": "ERAN MARON",
       "type": "REPAIR",
-      "property": "MB - 7500",
+      "property": "GCSSB - 113B-12S",
       "vendor": "ECIA",
       "amount": 100,
       "notes": ""
     },
     {
-      "id": 1771224466413,
-      "owner": "GHO",
-      "type": "SERVICE",
-      "property": "GCSSB - 204-2D",
+      "id": 1771226853404,
+      "owner": "ERAN MARON",
+      "type": "REPAIR",
+      "property": "MB - Tuscan A",
       "vendor": "ECIA",
       "amount": 100,
-      "notes": "NOTE"
+      "notes": ""
     },
     {
-      "id": 1771224481833,
-      "owner": "GHO",
-      "type": "POOL CLEANING",
-      "property": "MB - 209/5113",
-      "vendor": "ECIA",
-      "amount": 100,
-      "notes": "NOTE"
-    },
-    {
-      "id": 1771224510392,
-      "owner": "GHO",
-      "type": "PEST CONTROL",
-      "property": "MB - 209/5112",
+      "id": 1771226866850,
+      "owner": "ERAN MARON",
+      "type": "MAINTENANCE",
+      "property": "NMB - 204-28N",
       "vendor": "ECIA",
       "amount": 100,
       "notes": ""
