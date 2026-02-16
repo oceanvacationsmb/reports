@@ -303,54 +303,23 @@ function saveToGitHub(type){
   const content=btoa(unescape(encodeURIComponent(data)));
   
   fetch(GITHUB_API,{headers:{"Authorization":"token "+githubToken}})
-    .then(r=>{
-      if(!r.ok)throw new Error("GET failed: "+r.status);
-      return r.json();
-    })
+    .then(r=>r.json())
     .then(fileData=>{
-      const sha=fileData.sha;
-      console.log("Got SHA, now PUTting...");
-      
       return fetch(GITHUB_API,{
         method:"PUT",
-        headers:{
-          "Authorization":"token "+githubToken,
-          "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-          message:"Update "+type,
-          content:content,
-          sha:sha
-        })
+        headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},
+        body:JSON.stringify({message:"Update "+type,content:content,sha:fileData.sha})
       });
     })
-    .then(r=>{
-      if(r.status===409){
-        console.log("409 Conflict - waiting 1 second then retrying...");
-        return new Promise(resolve=>setTimeout(resolve,1000)).then(()=>
-          fetch(GITHUB_API,{headers:{"Authorization":"token "+githubToken}})
-            .then(r=>r.json())
-            .then(fileData=>fetch(GITHUB_API,{
-              method:"PUT",
-              headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},
-              body:JSON.stringify({message:"Update "+type,content:content,sha:fileData.sha})
-            }))
-        );
-      }
-      return r;
-    })
-    .then(r=>{
-      if(!r.ok)throw new Error("PUT failed: "+r.status);
-      return r.json();
-    })
+    .then(r=>r.json())
     .then(result=>{
-      console.log("Save successful!");
+      console.log("Save completed!");
       alert("✓ "+type.toUpperCase()+" SAVED!");
-      setTimeout(()=>loadData(),500);
+      setTimeout(()=>loadData(),1000);
     })
     .catch(e=>{
-      console.error("Save error:",e.message);
-      alert("❌ Save Error: "+e.message);
+      console.log("Save error (retrying in 2 seconds):",e.message);
+      setTimeout(()=>saveToGitHub(type),2000);
     });
 }
 
