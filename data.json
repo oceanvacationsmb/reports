@@ -37,6 +37,15 @@
       "vendor": "ECIA",
       "amount": 100,
       "notes": ""
+    },
+    {
+      "id": 1771224451237,
+      "owner": "GHO",
+      "type": "REPAIR",
+      "property": "MB - 7500",
+      "vendor": "ECIA",
+      "amount": 100,
+      "notes": ""
     }
   ]
 }
