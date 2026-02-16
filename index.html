@@ -599,17 +599,44 @@ function setupDropbox(){
 }
 
 function generateStatement(){
-  const file=document.getElementById("csvFile").files[0];
-  if(!file||!currentOwner)return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    csvData=Papa.parse(e.target.result,{header:true,skipEmptyLines:true}).data;
-    updateHeaderDates();
-    processData();
-    displayStatement();
-  };
-  reader.readAsText(file);
+
+  if(!currentOwner){
+    alert("Select owner first");
+    return;
+  }
+
+  const month = document.getElementById("monthSelect").value;
+  const year = document.getElementById("yearSelect").value;
+
+  document.getElementById("mainContent").innerHTML =
+    "<div style='text-align:center;padding:40px;color:#666'>Loading data from Guesty...</div>";
+
+  fetch(`https://guesty-backend-11qf.onrender.com/api/guesty-report?month=${month}&year=${year}`)
+    .then(res => {
+        if(!res.ok) throw new Error("Guesty backend error");
+        return res.json();
+    })
+    .then(data => {
+
+        if(!data || data.length === 0){
+            document.getElementById("mainContent").innerHTML =
+              "<div style='text-align:center;padding:40px;color:#c00'>No reservations found for this period.</div>";
+            return;
+        }
+
+        csvData = data;
+        updateHeaderDates();
+        processData();
+        displayStatement();
+
+    })
+    .catch(err => {
+        console.error(err);
+        document.getElementById("mainContent").innerHTML =
+          "<div style='text-align:center;padding:40px;color:#c00'>Failed to load Guesty data.</div>";
+    });
 }
+
 
 function updateHeaderDates(){
   const month=parseInt(document.getElementById("monthSelect").value);
