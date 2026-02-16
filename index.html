@@ -344,6 +344,11 @@ function setupToken(){
   localStorage.setItem("github_token",githubToken);
   alert("✓ Saving token to GitHub...");
   saveToGitHub("GitHub token");
+  
+  setTimeout(()=>{
+    console.log("Reloading data...");
+    loadData();
+  },2000);
 }
 
 function setupDropbox(){
