@@ -65,6 +65,7 @@
 <div class="main"><div id="content" class="page"><div class="invoice-header"><div class="company-info"><div class="company-name">OCEAN VACATIONS</div><div>www.oceanvacationsmb.com</div><div>oceanvacationsmb@gmail.com</div><div>843-222-6516</div></div><div class="right-header"><div class="statement-date" id="statementDate"></div><div class="period-date" id="periodDate"></div></div></div><div class="report-title" id="reportTitle">RESERVATION REPORT</div><div class="owner-name" id="ownerTitle"></div><div id="mainContent"><div style="text-align:center;padding:40px;color:#666">Loading data from GitHub...</div></div></div></div>
 
 <script>
+const GITHUB_URL="https://raw.githubusercontent.com/oceanvacationsmb/reports/main/data.json";
 const GITHUB_API="https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json";
 let gitHubData={},OWNERS={},vendors=[],expenses=[],csvData=[],propertySettings={},currentOwner="",masterTotals={},propertyTotals={},taxByProperty={},githubToken="";
 const municipalities=["SC","MB","NMB","SSB","HC"];
@@ -85,41 +86,27 @@ function updateTokenStatus(){
 
 function loadData(){
   githubToken=localStorage.getItem("github_token")||"";
-  console.log("Loaded token from localStorage:",githubToken?"YES":"NO");
+  console.log("Token from localStorage:",githubToken?"YES":"NO");
   
-  if(!githubToken){
-    console.log("No token, skipping GitHub load");
-    init();
-    updateTokenStatus();
-    return;
-  }
-  
-  console.log("Fetching from GitHub API...");
-  fetch(GITHUB_API,{
-    headers:{"Authorization":"token "+githubToken,"Accept":"application/vnd.github.v3.raw"}
-  })
-  .then(r=>{
-    if(!r.ok)throw new Error(r.status);
-    return r.text();
-  })
-  .then(text=>{
-    const data=JSON.parse(text);
-    gitHubData=data;
-    OWNERS=data.owners||{};
-    vendors=data.vendors||[];
-    expenses=data.expenses||[];
-    propertySettings=data.properties||{};
-    console.log("✓ Data loaded fresh from GitHub API");
-    console.log("Vendors:",vendors.length);
-    console.log("Properties:",Object.keys(propertySettings).length);
-    init();
-    updateTokenStatus();
-  })
-  .catch(e=>{
-    console.error("Error loading from GitHub:",e);
-    init();
-    updateTokenStatus();
-  });
+  fetch(GITHUB_URL+"?t="+Date.now())
+    .then(r=>r.json())
+    .then(data=>{
+      console.log("Data from raw GitHub:",data);
+      gitHubData=data;
+      OWNERS=data.owners||{};
+      vendors=data.vendors||[];
+      expenses=data.expenses||[];
+      propertySettings=data.properties||{};
+      console.log("✓ Owners:",Object.keys(OWNERS).length);
+      console.log("✓ Vendors:",vendors.length);
+      init();
+      updateTokenStatus();
+    })
+    .catch(e=>{
+      console.error("Error:",e);
+      init();
+      updateTokenStatus();
+    });
 }
 
 function init(){
@@ -295,9 +282,6 @@ function saveToGitHub(type){
   
   const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken},null,2);
   const content=btoa(unescape(encodeURIComponent(data)));
-  
-  console.log("Saving "+type+"...");
-  console.log("Vendors to save:",vendors.length);
   
   fetch(GITHUB_API,{headers:{"Authorization":"token "+githubToken}})
     .then(r=>r.json())
