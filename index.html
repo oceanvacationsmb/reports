@@ -5,7 +5,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial;background:#f5f5f5;color:#000;display:flex}.sidebar{width:280px;background:#333;color:#fff;padding:20px;height:100vh;overflow-y:auto;position:fixed;left:0;top:0}.sidebar h3{margin-bottom:20px;font-size:16px;border-bottom:2px solid #fff;padding-bottom:10px}.section{margin-bottom:20px}.label{font-size:11px;font-weight:bold;color:#aaa;margin-bottom:5px;display:block}select,input{width:100%;padding:8px;margin:5px 0;border:1px solid #555;background:#444;color:#fff;border-radius:3px;font-size:11px}.btn{width:100%;padding:12px;margin:8px 0;border:none;font-weight:bold;border-radius:3px;cursor:pointer;font-size:12px;color:#fff;text-transform:uppercase}.btn-primary{background:#000}.btn-success{background:#28a745}.btn-warning{background:#ff9800}.btn-info{background:#17a2b8}.btn-danger{background:#dc3545}.main{margin-left:280px;padding:20px;width:calc(100% - 280px)}.page{background:#fff;padding:40px;border-radius:5px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}.invoice-header{display:flex;justify-content:space-between;margin-bottom:40px;border-bottom:2px solid #000;padding-bottom:30px}.company-info{font-size:11px;line-height:1.8}.company-name{font-size:20px;font-weight:bold;margin-bottom:5px}.report-title{text-align:center;font-size:32px;font-weight:bold;margin:40px 0 10px 0;letter-spacing:2px}.owner-name{text-align:center;font-size:28px;margin-bottom:10px;font-weight:bold;color:#000}.owner-details{text-align:center;font-size:13px;color:#666;margin-bottom:40px}.owner-detail-item{display:inline-block;margin:0 15px}table{width:100%;border-collapse:collapse;margin:20px 0;font-size:11px}th,td{border:1px solid #e0e0e0;padding:12px;text-align:left}th{background:#f5f5f5;color:#000;font-weight:bold;text-transform:uppercase}tr:nth-child(even){background:#fafafa}.action-buttons{display:flex;gap:10px;margin:20px 0;justify-content:center;flex-wrap:wrap}.action-buttons button{padding:10px 20px;font-size:12px;cursor:pointer;border:none;border-radius:3px;color:#fff;font-weight:bold;text-transform:uppercase}.back-btn{background:#666}.print-btn{background:#e74c3c}.property-section{margin:40px 0;padding:20px;border:1px solid #ddd;border-radius:5px;background:#fff}.property-title{font-size:14px;font-weight:bold;margin-bottom:15px;display:flex;align-items:center;text-transform:uppercase}.property-icon{font-size:18px;margin-right:10px}.summary-title{font-size:12px;font-weight:bold;text-transform:uppercase;text-align:center;margin:20px 0}.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}.summary-card{background:#f9f9f9;border:1px solid #ddd;padding:12px;text-align:center;border-radius:5px}.summary-label{font-size:10px;color:#666;font-weight:bold;text-transform:uppercase}.summary-value{font-size:14px;font-weight:bold;color:#000;margin-top:6px}.amount-due-container{text-align:center;margin:30px 0}.amount-due-box{background:#000;color:#fff;border:none;border-radius:5px;padding:20px;display:inline-block;min-width:300px}.amount-due-label{font-size:12px;font-weight:bold;text-transform:uppercase;margin-bottom:10px}.amount-due-value{font-size:32px;font-weight:bold}.modal{display:none;position:fixed;z-index:1001;left:50%;top:50%;transform:translate(-50%,-50%);width:90%;max-width:500px;background:#333;color:#fff;border-radius:8px;padding:30px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto}.modal.show{display:block}.modal-title{font-size:20px;font-weight:bold;margin-bottom:20px;text-transform:uppercase;text-align:center;border-bottom:2px solid #fff;padding-bottom:15px}.modal-field{margin-bottom:15px}.modal-label{font-size:11px;font-weight:bold;color:#aaa;margin-bottom:8px;display:block;text-transform:uppercase}.modal-input{width:100%;padding:10px;border:1px solid #555;background:#444;color:#fff;border-radius:3px;font-size:11px}.modal-actions{display:flex;gap:10px;margin-top:25px}.modal-actions button{flex:1;padding:12px;border:none;font-weight:bold;border-radius:3px;cursor:pointer;font-size:12px;color:#fff;text-transform:uppercase}.btn-add{background:#28a745}.btn-cancel{background:#666}.btn-save{background:#0066cc}.modal-overlay{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.7)}.modal-overlay.show{display:block}.copy-link-btn{background:#0066cc;color:#fff;padding:10px 15px;border:none;border-radius:3px;cursor:pointer;font-weight:bold;margin:10px 0;width:100%;text-transform:uppercase}.commission-box{background:#fff3cd;border:2px solid #ffc107;padding:15px;margin:15px 0;border-radius:5px}.commission-box-title{font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px;text-transform:uppercase;text-align:center}.calc-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd}.calc-row-total{display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold}.payout-summary-box{background:#e8f5e9;border:2px solid #4caf50;padding:15px;margin:15px 0;border-radius:5px}.payout-summary-title{font-size:14px;font-weight:bold;color:#2e7d32;margin-bottom:10px;text-transform:uppercase;text-align:center}.payout-calc-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #c8e6c9}.payout-calc-total{display:flex;justify-content:space-between;padding:12px;background:#2e7d32;color:#fff;font-weight:bold}.draft-breakdown-box{background:#fff3cd;border:2px solid #ffc107;padding:15px;margin:15px 0;border-radius:5px}.draft-breakdown-title{font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px;text-transform:uppercase;text-align:center}.draft-calc-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd}.draft-calc-total{display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold}.sales-commission-box{background:#fff9c4;border:2px solid #fbc02d;padding:15px;margin:15px 0;border-radius:5px}.sales-commission-title{font-size:14px;font-weight:bold;color:#f57f17;margin-bottom:10px;text-transform:uppercase;text-align:center}.tax-box{background:#e8f4f8;border:2px solid #17a2b8;padding:15px;margin:15px 0;border-radius:5px;text-align:center}.tax-box-title{font-size:14px;font-weight:bold;color:#0c5460;text-transform:uppercase;margin-bottom:15px}.tax-content{background:#fff;padding:15px;border-radius:5px}.tax-property-name{font-weight:bold;color:#0c5460;font-size:12px;margin-bottom:10px}.tax-property-amount{font-size:14px;font-weight:bold;color:#0c5460;margin:5px 0}.tax-municipalities{font-size:11px;color:#0c5460}.section-title{font-size:12px;font-weight:bold;text-transform:uppercase;margin-top:20px;margin-bottom:10px;color:#000}.btn-small{padding:5px 10px;font-size:9px;width:auto;margin:0;display:inline-block;text-transform:uppercase}.settings-header{color:#fff;margin:20px 0 10px 0;font-size:12px;font-weight:bold;text-transform:uppercase;border-top:2px solid #555;padding-top:15px}.token-status{padding:8px;margin:8px 0;border-radius:3px;text-align:center;font-size:11px;font-weight:bold}.token-active{background:#28a745;color:#fff}.token-inactive{background:#dc3545;color:#fff}.success-message{background:#d4edda;border:2px solid #28a745;color:#155724;padding:12px;margin:10px 0;border-radius:5px;text-align:center;font-weight:bold;font-size:13px}.expense-list{max-height:250px;overflow-y:auto;margin:15px 0;padding:10px;background:#444;border-radius:5px}.expense-item{background:#555;padding:10px;margin:5px 0;border-radius:3px;border-left:4px solid #28a745;display:flex;justify-content:space-between;align-items:center}.expense-item-text{color:#fff;font-size:11px}.expense-item-amount{color:#28a745;font-weight:bold;font-size:12px}.expense-item-delete{background:#dc3545;color:#fff;border:none;padding:5px 10px;border-radius:3px;cursor:pointer;font-size:9px;font-weight:bold}@media print{.sidebar,.back-btn,.print-btn,.copy-link-btn{display:none}.main{margin-left:0;width:100%}.page{padding:20px}}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial;background:#f5f5f5;color:#000;display:flex}.sidebar{width:280px;background:#333;color:#fff;padding:20px;height:100vh;overflow-y:auto;position:fixed;left:0;top:0}.sidebar h3{margin-bottom:20px;font-size:16px;border-bottom:2px solid #fff;padding-bottom:10px}.section{margin-bottom:20px}.label{font-size:11px;font-weight:bold;color:#aaa;margin-bottom:5px;display:block}select,input{width:100%;padding:8px;margin:5px 0;border:1px solid #555;background:#444;color:#fff;border-radius:3px;font-size:11px}.btn{width:100%;padding:12px;margin:8px 0;border:none;font-weight:bold;border-radius:3px;cursor:pointer;font-size:12px;color:#fff;text-transform:uppercase}.btn-primary{background:#000}.btn-success{background:#28a745}.btn-warning{background:#ff9800}.btn-info{background:#17a2b8}.btn-danger{background:#dc3545}.main{margin-left:280px;padding:20px;width:calc(100% - 280px)}.page{background:#fff;padding:40px;border-radius:5px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}.invoice-header{display:flex;justify-content:space-between;margin-bottom:40px;border-bottom:2px solid #000;padding-bottom:30px}.company-info{font-size:11px;line-height:1.8}.company-name{font-size:20px;font-weight:bold;margin-bottom:5px}.report-title{text-align:center;font-size:32px;font-weight:bold;margin:40px 0 10px 0;letter-spacing:2px}.owner-name{text-align:center;font-size:28px;margin-bottom:10px;font-weight:bold;color:#000}.owner-details{text-align:center;font-size:13px;color:#666;margin-bottom:40px}.owner-detail-item{display:inline-block;margin:0 15px}table{width:100%;border-collapse:collapse;margin:20px 0;font-size:11px}th,td{border:1px solid #e0e0e0;padding:12px;text-align:left}th{background:#f5f5f5;color:#000;font-weight:bold;text-transform:uppercase}tr:nth-child(even){background:#fafafa}.action-buttons{display:flex;gap:10px;margin:20px 0;justify-content:center;flex-wrap:wrap}.action-buttons button{padding:10px 20px;font-size:12px;cursor:pointer;border:none;border-radius:3px;color:#fff;font-weight:bold;text-transform:uppercase}.back-btn{background:#666}.print-btn{background:#e74c3c}.property-section{margin:40px 0;padding:20px;border:1px solid #ddd;border-radius:5px;background:#fff}.property-title{font-size:14px;font-weight:bold;margin-bottom:15px;display:flex;align-items:center;text-transform:uppercase}.property-icon{font-size:18px;margin-right:10px}.summary-title{font-size:12px;font-weight:bold;text-transform:uppercase;text-align:center;margin:20px 0}.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}.summary-card{background:#f9f9f9;border:1px solid #ddd;padding:12px;text-align:center;border-radius:5px}.summary-label{font-size:10px;color:#666;font-weight:bold;text-transform:uppercase}.summary-value{font-size:14px;font-weight:bold;color:#000;margin-top:6px}.amount-due-container{text-align:center;margin:30px 0}.amount-due-box{background:#000;color:#fff;border:none;border-radius:5px;padding:20px;display:inline-block;min-width:300px}.amount-due-label{font-size:12px;font-weight:bold;text-transform:uppercase;margin-bottom:10px}.amount-due-value{font-size:32px;font-weight:bold}.modal{display:none;position:fixed;z-index:1001;left:50%;top:50%;transform:translate(-50%,-50%);width:90%;max-width:500px;background:#333;color:#fff;border-radius:8px;padding:30px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto}.modal.show{display:block}.modal-title{font-size:20px;font-weight:bold;margin-bottom:20px;text-transform:uppercase;text-align:center;border-bottom:2px solid #fff;padding-bottom:15px}.modal-field{margin-bottom:15px}.modal-label{font-size:11px;font-weight:bold;color:#aaa;margin-bottom:8px;display:block;text-transform:uppercase}.modal-input{width:100%;padding:10px;border:1px solid #555;background:#444;color:#fff;border-radius:3px;font-size:11px}.modal-actions{display:flex;gap:10px;margin-top:25px}.modal-actions button{flex:1;padding:12px;border:none;font-weight:bold;border-radius:3px;cursor:pointer;font-size:12px;color:#fff;text-transform:uppercase}.btn-add{background:#28a745}.btn-cancel{background:#666}.btn-save{background:#0066cc}.modal-overlay{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.7)}.modal-overlay.show{display:block}.copy-link-btn{background:#0066cc;color:#fff;padding:10px 15px;border:none;border-radius:3px;cursor:pointer;font-weight:bold;margin:10px 0;width:100%;text-transform:uppercase}.commission-box{background:#fff3cd;border:2px solid #ffc107;padding:15px;margin:15px 0;border-radius:5px}.commission-box-title{font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px;text-transform:uppercase;text-align:center}.calc-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd}.calc-row-total{display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold}.payout-summary-box{background:#e8f5e9;border:2px solid #4caf50;padding:15px;margin:15px 0;border-radius:5px}.payout-summary-title{font-size:14px;font-weight:bold;color:#2e7d32;margin-bottom:10px;text-transform:uppercase;text-align:center}.payout-calc-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #c8e6c9}.payout-calc-total{display:flex;justify-content:space-between;padding:12px;background:#2e7d32;color:#fff;font-weight:bold}.draft-breakdown-box{background:#fff3cd;border:2px solid #ffc107;padding:15px;margin:15px 0;border-radius:5px}.draft-breakdown-title{font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px;text-transform:uppercase;text-align:center}.draft-calc-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd}.draft-calc-total{display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold}.sales-commission-box{background:#fff9c4;border:2px solid #fbc02d;padding:15px;margin:15px 0;border-radius:5px}.sales-commission-title{font-size:14px;font-weight:bold;color:#f57f17;margin-bottom:10px;text-transform:uppercase;text-align:center}.tax-box{background:#e8f4f8;border:2px solid #17a2b8;padding:15px;margin:15px 0;border-radius:5px;text-align:center}.tax-box-title{font-size:14px;font-weight:bold;color:#0c5460;text-transform:uppercase;margin-bottom:15px}.tax-content{background:#fff;padding:15px;border-radius:5px}.tax-property-name{font-weight:bold;color:#0c5460;font-size:12px;margin-bottom:10px}.tax-property-amount{font-size:14px;font-weight:bold;color:#0c5460;margin:5px 0}.tax-municipalities{font-size:11px;color:#0c5460}.section-title{font-size:12px;font-weight:bold;text-transform:uppercase;margin-top:20px;margin-bottom:10px;color:#000}.btn-small{padding:5px 10px;font-size:9px;width:auto;margin:0;display:inline-block;text-transform:uppercase}.settings-header{color:#fff;margin:20px 0 10px 0;font-size:12px;font-weight:bold;text-transform:uppercase;border-top:2px solid #555;padding-top:15px}.token-status{padding:8px;margin:8px 0;border-radius:3px;text-align:center;font-size:11px;font-weight:bold}.token-active{background:#28a745;color:#fff}.token-inactive{background:#dc3545;color:#fff}.success-message{background:#d4edda;border:2px solid #28a745;color:#155724;padding:12px;margin:10px 0;border-radius:5px;text-align:center;font-weight:bold;font-size:13px}.expense-list{max-height:250px;overflow-y:auto;margin:15px 0;padding:10px;background:#444;border-radius:5px}.expense-item{background:#555;padding:10px;margin:5px 0;border-radius:3px;border-left:4px solid #28a745;display:flex;justify-content:space-between;align-items:center}.expense-item-text{color:#fff;font-size:11px}.expense-item-amount{color:#28a745;font-weight:bold;font-size:12px}.expense-item-delete{background:#dc3545;color:#fff;border:none;padding:5px 10px;border-radius:3px;cursor:pointer;font-size:9px;font-weight:bold}.success-checkmark{font-size:48px;text-align:center;color:#28a745;margin:20px 0}@media print{.sidebar,.back-btn,.print-btn,.copy-link-btn{display:none}.main{margin-left:0;width:100%}.page{padding:20px}}
 </style>
 </head>
 <body>
@@ -54,7 +54,8 @@
 </div></div>
 
 <div id="expenseModal" class="modal"><div><div class="modal-title">💰 ADD EXPENSE</div>
-<div id="expenseSuccess" class="success-message" style="display:none">✓ Expense Added Successfully!</div>
+<div id="expenseCheckmark" class="success-checkmark" style="display:none">✓</div>
+<div id="expenseFormContent">
 <div class="modal-field"><label class="modal-label">TYPE</label><select id="expenseType" class="modal-input"><option>MAINTENANCE</option><option>REPAIR</option><option>PURCHASE</option><option>SUPPLIES</option><option>SERVICE</option><option>POOL CLEANING</option><option>PEST CONTROL</option><option>CREDIT</option><option>ADJUSTMENT</option></select></div>
 <div class="modal-field"><label class="modal-label">PROPERTY</label><select id="expenseProperty" class="modal-input"></select></div>
 <div class="modal-field"><label class="modal-label">VENDOR</label><select id="expenseVendor" class="modal-input"></select></div>
@@ -62,6 +63,7 @@
 <div class="modal-field"><label class="modal-label">NOTES</label><input type="text" id="expenseNotes" class="modal-input" placeholder="Optional notes"></div>
 <div class="modal-actions"><button class="btn-add" onclick="submitExpense()">✓ ADD EXPENSE</button><button class="btn-cancel" onclick="doneAddingExpenses()">✓ DONE - BACK TO REPORT</button></div>
 <div id="expenseListDisplay" class="expense-list" style="display:none"></div>
+</div>
 </div></div>
 
 <div class="main"><div id="content" class="page"><div class="invoice-header"><div class="company-info"><div class="company-name">OCEAN VACATIONS</div><div>www.oceanvacationsmb.com</div><div>oceanvacationsmb@gmail.com</div><div>843-222-6516</div></div><div class="right-header"><div class="statement-date" id="statementDate"></div><div class="period-date" id="periodDate"></div></div></div><div class="report-title" id="reportTitle">RESERVATION REPORT</div><div class="owner-name" id="ownerTitle"></div><div class="owner-details" id="ownerDetails"></div><div id="mainContent"><div style="text-align:center;padding:40px;color:#666">Loading data from GitHub...</div></div></div></div>
@@ -125,8 +127,11 @@ function loadData(){
 
 function init(){
   buildOwners();
-  buildMonths();
-  buildYears();
+  const sel=document.getElementById("monthSelect");
+  if(!sel.innerHTML){
+    buildMonths();
+    buildYears();
+  }
   updateVendorDropdown();
   document.getElementById("mainContent").innerHTML="<div style='text-align:center;padding:40px;color:#666'>Ready to use! Select an owner and upload CSV to begin.</div>";
 }
@@ -145,7 +150,6 @@ function buildOwners(){
 
 function buildMonths(){
   const sel=document.getElementById("monthSelect");
-  if(sel.innerHTML)return;
   const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
   months.forEach((m,i)=>{
     sel.innerHTML+="<option value='"+(i+1)+"'>"+m+"</option>";
@@ -155,7 +159,6 @@ function buildMonths(){
 
 function buildYears(){
   const sel=document.getElementById("yearSelect");
-  if(sel.innerHTML)return;
   const y=new Date().getFullYear();
   for(let i=y-2;i<=y+2;i++){
     sel.innerHTML+="<option>"+i+"</option>";
@@ -217,7 +220,11 @@ function deleteOwner(name){
 
 function saveOwnerData(){
   if(!githubToken)return alert("GitHub token not set. Click GitHub Setup first.");
-  saveToGitHub("owner settings");
+  const savedOwner=currentOwner;
+  saveToGitHub("owner settings",()=>{
+    currentOwner=savedOwner;
+    document.getElementById("ownerSelect").value=savedOwner;
+  });
 }
 
 function openTax(){
@@ -248,7 +255,15 @@ function openTax(){
 
 function saveTaxData(){
   if(!githubToken)return alert("GitHub token not set. Click GitHub Setup first.");
-  saveToGitHub("tax settings");
+  const savedOwner=currentOwner;
+  const savedMonth=document.getElementById("monthSelect").value;
+  const savedYear=document.getElementById("yearSelect").value;
+  saveToGitHub("tax settings",()=>{
+    currentOwner=savedOwner;
+    document.getElementById("ownerSelect").value=savedOwner;
+    document.getElementById("monthSelect").value=savedMonth;
+    document.getElementById("yearSelect").value=savedYear;
+  });
 }
 
 function openVendorSettings(){
@@ -291,10 +306,18 @@ function deleteVendor(id){
 
 function saveVendorData(){
   if(!githubToken)return alert("GitHub token not set. Click GitHub Setup first.");
-  saveToGitHub("vendors");
+  const savedOwner=currentOwner;
+  const savedMonth=document.getElementById("monthSelect").value;
+  const savedYear=document.getElementById("yearSelect").value;
+  saveToGitHub("vendors",()=>{
+    currentOwner=savedOwner;
+    document.getElementById("ownerSelect").value=savedOwner;
+    document.getElementById("monthSelect").value=savedMonth;
+    document.getElementById("yearSelect").value=savedYear;
+  });
 }
 
-function saveToGitHub(type){
+function saveToGitHub(type,callback){
   if(!githubToken){
     alert("❌ No token");
     return;
@@ -333,8 +356,7 @@ function saveToGitHub(type){
         }
         
         if(response.ok||response.status===200||response.status===201){
-          alert("✓ "+type.toUpperCase()+" SAVED TO GITHUB!");
-          setTimeout(()=>loadData(), 500);
+          if(callback)callback();
           return;
         }
         
@@ -343,8 +365,6 @@ function saveToGitHub(type){
       .catch(e=>{
         if(retryCount<3){
           setTimeout(()=>attemptSave(retryCount+1), 2000);
-        }else{
-          alert("❌ Could not save after 4 attempts");
         }
       });
   }
@@ -364,7 +384,8 @@ function openAddExpense(){
   if(!currentOwner)return alert("Select owner first");
   if(Object.keys(propertyTotals).length===0)return alert("Generate statement first");
   sessionExpenses=[];
-  document.getElementById("expenseSuccess").style.display="none";
+  document.getElementById("expenseCheckmark").style.display="none";
+  document.getElementById("expenseFormContent").style.display="block";
   document.getElementById("expenseListDisplay").style.display="none";
   const prop=document.getElementById("expenseProperty");
   prop.innerHTML="<option>-- SELECT --</option>";
@@ -396,11 +417,6 @@ function submitExpense(){
   document.getElementById("expenseAmount").value="";
   document.getElementById("expenseNotes").value="";
   
-  document.getElementById("expenseSuccess").style.display="block";
-  setTimeout(()=>{
-    document.getElementById("expenseSuccess").style.display="none";
-  }, 2000);
-  
   displaySessionExpenses();
 }
 
@@ -429,9 +445,22 @@ function displaySessionExpenses(){
 }
 
 function doneAddingExpenses(){
-  saveToGitHub("expenses");
-  processData();
-  displayStatement();
+  document.getElementById("expenseFormContent").style.display="none";
+  document.getElementById("expenseCheckmark").style.display="block";
+  const savedOwner=currentOwner;
+  const savedMonth=document.getElementById("monthSelect").value;
+  const savedYear=document.getElementById("yearSelect").value;
+  saveToGitHub("expenses",()=>{
+    currentOwner=savedOwner;
+    document.getElementById("ownerSelect").value=savedOwner;
+    document.getElementById("monthSelect").value=savedMonth;
+    document.getElementById("yearSelect").value=savedYear;
+    setTimeout(()=>{
+      closeAll();
+      processData();
+      displayStatement();
+    }, 1000);
+  });
 }
 
 function setupToken(){
@@ -581,6 +610,7 @@ function displayStatement(){
     html+="<div class='summary-card'><div class='summary-label'>WEBSITE (1%)</div><div class='summary-value'>"+money(masterTotals.websiteFee)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>PMC ("+(t.percent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
+    html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>AMOUNT DUE</div><div class='summary-value' style='color:#fff'>"+money(masterTotals.draft)+"</div></div>";
   }else{
     html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
@@ -602,7 +632,7 @@ function displayStatement(){
       html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
       html+="<div class='summary-card'><div class='summary-label'>PMC ("+(t.percent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
       html+="</div>";
-      html+="<div class='amount-due-container'><div class='amount-due-box'><div class='amount-due-label'>TOTAL DUE</div><div class='amount-due-value'>"+money(r)+"</div></div></div>";
+      html+="<div class='amount-due-container'><div class='amount-due-box'><div class='amount-due-label'>AMOUNT DUE</div><div class='amount-due-value'>"+money(r)+"</div></div></div>";
     }else{
       html+="<div class='summary-grid'>";
       html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
@@ -688,19 +718,19 @@ function generateSummary(){
   if(type==="draft"){
     html+="<div class='draft-breakdown-box'>";
     html+="<div class='draft-breakdown-title'>💰 DRAFT BREAKDOWN</div>";
-    html+="<div class='draft-calc-row'><span>TOTAL ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
-    html+="<div class='draft-calc-row'><span>COMMISSION ("+(t.percent*100).toFixed(2)+"%)</span><span>"+money(masterTotals.pmc)+"</span></div>";
-    html+="<div class='draft-calc-row'><span>PMC</span><span>"+money(masterTotals.pmc)+"</span></div>";
-    html+="<div class='draft-calc-row'><span>WEBSITE FEE</span><span>"+money(masterTotals.websiteFee)+"</span></div>";
+    html+="<div class='draft-calc-row'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+    html+="<div class='draft-calc-row'><span>CLEANING FEE</span><span>"+money(masterTotals.clean)+"</span></div>";
+    html+="<div class='draft-calc-row'><span>WEBSITE (1%)</span><span>"+money(masterTotals.websiteFee)+"</span></div>";
     html+="<div class='draft-calc-row'><span>EXPENSES</span><span>"+money(masterTotals.expenses)+"</span></div>";
-    html+="<div class='draft-calc-total'><span>BALANCE DUE</span><span>"+money(masterTotals.draft)+"</span></div>";
+    html+="<div class='draft-calc-row'><span>PMC ("+(t.percent*100).toFixed(2)+"%)</span><span>"+money(masterTotals.pmc)+"</span></div>";
+    html+="<div class='draft-calc-total'><span>AMOUNT DUE</span><span>"+money(masterTotals.draft)+"</span></div>";
     html+="</div>";
     
     html+="<div class='sales-commission-box'>";
     html+="<div class='sales-commission-title'>💳 SALES COMMISSION DUE</div>";
-    html+="<div class='calc-row'><span>TOTAL ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+    html+="<div class='calc-row'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
     html+="<div class='calc-row'><span>PMC COLLECTED</span><span>"+money(masterTotals.pmc)+"</span></div>";
-    html+="<div class='calc-row'><span>COMMISSION FEE ("+ t.salesFeePercent+"%)</span><span>"+money(salesFee)+"</span></div>";
+    html+="<div class='calc-row'><span>COMMISSION FEE ("+t.salesFeePercent+"%)</span><span>"+money(salesFee)+"</span></div>";
     html+="<div class='calc-row-total'><span>COMMISSION DUE</span><span>"+money(salesFee)+"</span></div>";
     html+="</div>";
   }else{
@@ -715,7 +745,7 @@ function generateSummary(){
     
     html+="<div class='sales-commission-box'>";
     html+="<div class='sales-commission-title'>💳 SALES COMMISSION</div>";
-    html+="<div class='calc-row'><span>TOTAL ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+    html+="<div class='calc-row'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
     html+="<div class='calc-row'><span>PMC COLLECTED</span><span>"+money(masterTotals.pmc)+"</span></div>";
     html+="<div class='calc-row'><span>COMMISSION FEE ("+t.salesFeePercent+"%)</span><span>"+money(salesFee)+"</span></div>";
     html+="<div class='calc-row-total'><span>COMMISSION DUE</span><span>"+money(salesFee)+"</span></div>";
