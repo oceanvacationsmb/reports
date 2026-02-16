@@ -326,14 +326,16 @@ function saveToGitHub(type){
     })
     .then(r=>{
       if(r.status===409){
-        console.log("409 Conflict - retrying once...");
-        return fetch(GITHUB_API,{headers:{"Authorization":"token "+githubToken}})
-          .then(r=>r.json())
-          .then(fileData=>fetch(GITHUB_API,{
-            method:"PUT",
-            headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},
-            body:JSON.stringify({message:"Update "+type,content:content,sha:fileData.sha})
-          }));
+        console.log("409 Conflict - waiting 1 second then retrying...");
+        return new Promise(resolve=>setTimeout(resolve,1000)).then(()=>
+          fetch(GITHUB_API,{headers:{"Authorization":"token "+githubToken}})
+            .then(r=>r.json())
+            .then(fileData=>fetch(GITHUB_API,{
+              method:"PUT",
+              headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},
+              body:JSON.stringify({message:"Update "+type,content:content,sha:fileData.sha})
+            }))
+        );
       }
       return r;
     })
@@ -378,9 +380,9 @@ function submitExpense(){
   if(!currentOwner||!prop||!vendor||!amount)return alert("Fill all fields");
   expenses.push({id:Date.now(),owner:currentOwner,type:type,property:prop,vendor:vendor,amount:amount,notes:document.getElementById("expenseNotes").value});
   closeAll();
+  processData();
+  displayStatement();
   saveToGitHub("expenses");
-  if(csvData.length){processData();displayStatement();}
-  alert("✓ Expense added!");
 }
 
 function setupToken(){
@@ -585,11 +587,12 @@ function displayStatement(){
     }
     html+="</table></div>";
     if(exp.length>0){
-      html+="<div style='margin-top:15px'><div class='section-title'>EXPENSES</div>";
+      html+="<div style='margin-top:15px'><div class='section-title'>EXPENSES</div><table style='margin-top:10px'>";
+      html+="<tr><th>TYPE</th><th>VENDOR</th><th>AMOUNT</th><th>ACTION</th></tr>";
       exp.forEach(e=>{
-        html+="<div class='attachment'><div class='attachment-left'><strong>"+e.type+"</strong> - "+e.vendor+": "+money(e.amount)+"</div><div class='attachment-actions'><button class='btn btn-danger btn-small' onclick='deleteExpense("+e.id+")'>DELETE</button></div></div>";
+        html+="<tr><td>"+e.type+"</td><td>"+e.vendor+"</td><td>"+money(e.amount)+"</td><td><button class='btn btn-danger btn-small' onclick='deleteExpense("+e.id+")'>DELETE</button></td></tr>";
       });
-      html+="</div>";
+      html+="</table></div>";
     }
     html+="</div>";
   });
@@ -600,7 +603,8 @@ function deleteExpense(id){
   if(!confirm("Delete?"))return;
   expenses=expenses.filter(e=>e.id!==id);
   saveToGitHub("expenses");
-  if(csvData.length){processData();displayStatement();}
+  processData();
+  displayStatement();
 }
 
 function generateLink(){
@@ -613,12 +617,13 @@ function generateSummary(){
   document.getElementById("reportTitle").textContent="SUMMARY REPORT";
   const t=OWNERS[currentOwner];
   const type=t.type;
+  const salesFee=masterTotals.pmc*(t.salesFeePercent/100);
   let html="<div class='action-buttons'><button class='back-btn' onclick='displayStatement()'>← BACK</button><button class='print-btn' onclick='window.print()'>🖨️ PRINT</button></div>";
   html+="<div style='background:#fff3cd;border:2px solid #ffc107;padding:15px;margin:15px 0;border-radius:5px'>";
   html+="<div style='font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px;text-transform:uppercase;text-align:center'>SALES COMMISSION DUE</div>";
-  html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
-  html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>PMC RATE</span><span>"+(t.percent*100).toFixed(2)+"%</span></div>";
-  html+="<div style='display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold'><span>TOTAL PMC</span><span>"+money(masterTotals.pmc)+"</span></div>";
+  html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>TOTAL PMC</span><span>"+money(masterTotals.pmc)+"</span></div>";
+  html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>SALES FEE %</span><span>"+t.salesFeePercent+"%</span></div>";
+  html+="<div style='display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold'><span>COMMISSION AMOUNT</span><span>"+money(salesFee)+"</span></div>";
   html+="</div>";
   if(type==="draft"){
     html+="<div style='background:#fff3cd;border:2px solid #ffc107;padding:15px;margin:15px 0;border-radius:5px'>";
