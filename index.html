@@ -297,22 +297,47 @@ function saveToGitHub(type){
     return;
   }
   
+  console.log("Starting save for: "+type);
+  
   const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken},null,2);
   const content=btoa(unescape(encodeURIComponent(data)));
   
   fetch(GITHUB_API,{headers:{"Authorization":"token "+githubToken}})
-    .then(r=>r.json())
-    .then(file=>{
-      if(!file.sha)throw new Error("Cannot read file");
-      return fetch(GITHUB_API,{method:"PUT",headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},body:JSON.stringify({message:"Update "+type,content:content,sha:file.sha})});
+    .then(r=>{
+      console.log("GET response status:",r.status);
+      if(!r.ok)throw new Error("GET failed: "+r.status);
+      return r.json();
     })
-    .then(r=>r.json())
+    .then(fileData=>{
+      console.log("Got SHA:",fileData.sha);
+      const sha=fileData.sha;
+      
+      return fetch(GITHUB_API,{
+        method:"PUT",
+        headers:{
+          "Authorization":"token "+githubToken,
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          message:"Update "+type,
+          content:content,
+          sha:sha
+        })
+      });
+    })
+    .then(r=>{
+      console.log("PUT response status:",r.status);
+      if(!r.ok)throw new Error("PUT failed: "+r.status);
+      return r.json();
+    })
     .then(result=>{
+      console.log("Save successful!");
       alert("✓ "+type.toUpperCase()+" SAVED!");
       setTimeout(()=>loadData(),500);
     })
     .catch(e=>{
-      alert("❌ Error: "+e.message);
+      console.error("Save error:",e.message);
+      alert("❌ Save Error: "+e.message);
     });
 }
 
