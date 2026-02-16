@@ -86,6 +86,7 @@ tr:nth-child(even){background:#fafafa}
 <button class="btn btn-primary" onclick="generateStatement()">▶ STATEMENT</button>
 <button class="btn btn-success" onclick="openAddExpense()" style="font-size:13px;font-weight:bold">💰 ADD EXPENSE</button>
 <button class="btn btn-success" onclick="generateSummary()">📊 SUMMARY REPORT</button>
+<button class="btn btn-success" onclick="generateIncomeReport()" style="font-size:13px;font-weight:bold">📈 INCOME REPORTS</button>
 <div class="settings-header">⚙️ SETTINGS</div>
 <button class="btn btn-info" onclick="openOwners()" style="font-size:11px">⚙️ OWNER SETTINGS</button>
 <button class="btn btn-info" onclick="openTax()" style="font-size:11px">⚙️ TAX SETTINGS</button>
@@ -276,7 +277,9 @@ function openOwners(){
   Object.keys(OWNERS).sort().forEach(name=>{
     const o=OWNERS[name];
     html+="<div style='background:#555;padding:15px;margin:10px 0;border-radius:3px'>";
-    html+="<div style='font-weight:bold;color:#fff;margin-bottom:10px'>"+name+"</div>";
+    html+="<div style='font-weight:bold;color:#fff;margin-bottom:10px'>";
+    html+="<input type='text' value='"+name+"' onchange=\"updateOwnerName('"+name+"',this.value)\" class='modal-input' style='margin:0;padding:5px;font-weight:bold'>";
+    html+="</div>";
     html+="<label class='modal-label'>EMAIL</label>";
     html+="<input type='email' value='"+(o.email||"")+"' onchange=\"OWNERS['"+name+"'].email=this.value\" class='modal-input'>";
     html+="<label class='modal-label'>COMMISSION %</label>";
@@ -295,6 +298,17 @@ function openOwners(){
   });
   list.innerHTML=html;
   openModal("ownerModal");
+}
+
+function updateOwnerName(oldName,newName){
+  if(!newName.trim())return alert("Owner name cannot be empty");
+  if(oldName===newName)return;
+  if(OWNERS[newName])return alert("Owner name already exists");
+  OWNERS[newName]=OWNERS[oldName];
+  delete OWNERS[oldName];
+  if(currentOwner===oldName)currentOwner=newName;
+  buildOwners();
+  openOwners();
 }
 
 function addOwner(){
@@ -801,6 +815,14 @@ function generateLink(){
   alert("✓ Dropbox feature coming soon!");
 }
 
+function generateIncomeReport(){
+  if(!csvData||csvData.length===0)return alert("Generate statement first");
+  document.getElementById("reportTitle").textContent="INCOME REPORT";
+  let html="<div class='action-buttons'><button class='back-btn' onclick='generateStatement()'>← BACK</button><button class='print-btn' onclick='window.print()'>🖨️ PRINT</button></div>";
+  html+="<div style='text-align:center;padding:40px;color:#666'><h2>Income Report Coming Soon</h2><p>This section will display detailed income analysis and reporting.</p></div>";
+  document.getElementById("mainContent").innerHTML=html;
+}
+
 function generateSummary(){
   if(!csvData||csvData.length===0)return alert("Generate statement first");
   const month=parseInt(document.getElementById("monthSelect").value);
@@ -843,25 +865,4 @@ function generateSummary(){
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>PMC COLLECTED</span><span>"+money(masterTotals.pmc)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>COMMISSION FEE ("+t.salesFeePercent+"%)</span><span>"+money(salesFee)+"</span></div>";
-    html+="<div style='display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold'><span>COMMISSION DUE</span><span>"+money(salesFee)+"</span></div></div></div>";
-  }
-  
-  html+="<div style='background:#d4edda;border:2px solid #28a745;padding:15px;margin:15px 0;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#155724;text-transform:uppercase;margin-bottom:10px'>🏦 PMC BANK TRANSFER</div><div style='font-size:18px;font-weight:bold;color:#155724'>"+money(masterTotals.pmc)+"</div></div>";
-  
-  document.getElementById("mainContent").innerHTML=html;
-}
-
-function openModal(id){
-  document.getElementById("modalOverlay").classList.add("show");
-  document.getElementById(id).classList.add("show");
-}
-
-function closeAll(){
-  document.getElementById("modalOverlay").classList.remove("show");
-  document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));
-}
-
-loadData();
-</script>
-</body>
-</html>
+    html+="<div style='display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold'><span>COMMISSION DUE</span><span>"+
