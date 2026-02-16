@@ -39,7 +39,8 @@
     "MB - 209/5113": {
       "SC": true,
       "MB": true,
-      "HC": true
+      "HC": true,
+      "NMB": false
     },
     "MB - 2000": {
       "SC": true,
@@ -55,7 +56,17 @@
     "MB - Tuscan A": {},
     "NMB - 204-28N": {
       "SC": false
-    }
+    },
+    "GC - 1211A": {},
+    "GC - 601B": {},
+    "GC - 827B": {},
+    "GCSSB - 113A-12S": {},
+    "MB - Tuscan C": {},
+    "NMB - 1004": {},
+    "NMB - 204-27N": {},
+    "NMB - 304B": {},
+    "NMB - 703-2": {},
+    "NMB - 709-2": {}
   },
   "expenses": []
 }
