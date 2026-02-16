@@ -95,7 +95,6 @@ function loadData(){
       propertySettings=data.properties||{};
       githubToken=data.github_token||"";
       console.log("✓ Data loaded from GitHub");
-      console.log("Token found:",githubToken?"YES":"NO");
       init();
       updateTokenStatus();
     })
@@ -264,58 +263,59 @@ function saveToGitHub(type){
   const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken},null,2);
   const content=btoa(unescape(encodeURIComponent(data)));
   
-  function attemptSave(retries=0){
-    fetch(GITHUB_API,{
+  function getLatestSha(){
+    return fetch(GITHUB_API,{
       headers:{
         "Authorization":"token "+githubToken,
         "Accept":"application/vnd.github.v3+json"
       }
-    })
-    .then(r=>r.json())
-    .then(file=>{
-      if(file.message){
-        alert("❌ Error: "+file.message);
-        return;
-      }
-      
-      return fetch(GITHUB_API,{
-        method:"PUT",
-        headers:{
-          "Authorization":"token "+githubToken,
-          "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-          message:"Update "+type,
-          content:content,
-          sha:file.sha
-        })
+    }).then(r=>r.json());
+  }
+  
+  function attemptSave(retries=0){
+    getLatestSha()
+      .then(file=>{
+        if(file.message){
+          alert("❌ Error: "+file.message);
+          return Promise.reject(new Error(file.message));
+        }
+        
+        return fetch(GITHUB_API,{
+          method:"PUT",
+          headers:{
+            "Authorization":"token "+githubToken,
+            "Content-Type":"application/json"
+          },
+          body:JSON.stringify({
+            message:"Update "+type+" "+Date.now(),
+            content:content,
+            sha:file.sha
+          })
+        });
       })
       .then(r=>{
-        if(r.status===409&&retries<2){
-          console.log("Conflict detected (409), retrying... attempt "+(retries+1));
-          setTimeout(()=>attemptSave(retries+1),1000);
+        if(r.status===409){
+          console.log("409 conflict - retrying with fresh SHA");
+          if(retries<3){
+            setTimeout(()=>attemptSave(retries+1),1500);
+          }else{
+            alert("❌ Failed after 3 retries - please try again");
+          }
         }else if(!r.ok){
           throw new Error(r.status+" "+r.statusText);
         }else{
-          return r.json();
+          return r.json().then(()=>{
+            alert("✓ "+type.toUpperCase()+" SAVED!");
+            setTimeout(()=>loadData(),500);
+          });
         }
       })
-      .then(result=>{
-        if(result){
-          alert("✓ "+type.toUpperCase()+" SAVED!");
-          setTimeout(()=>loadData(),500);
+      .catch(e=>{
+        console.error("Error:",e);
+        if(retries<3){
+          setTimeout(()=>attemptSave(retries+1),1500);
         }
       });
-    })
-    .catch(e=>{
-      console.error("Error:",e);
-      if(retries<2){
-        console.log("Retrying... attempt "+(retries+1));
-        setTimeout(()=>attemptSave(retries+1),1000);
-      }else{
-        alert("❌ Failed to save: "+e.message);
-      }
-    });
   }
   
   attemptSave();
