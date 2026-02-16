@@ -66,6 +66,7 @@
 
 <script>
 const GITHUB_URL="https://raw.githubusercontent.com/oceanvacationsmb/reports/main/data.json";
+const GITHUB_API="https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json";
 let gitHubData={},OWNERS={},vendors=[],expenses=[],csvData=[],propertySettings={},currentOwner="",masterTotals={},propertyTotals={},taxByProperty={},githubToken="";
 const municipalities=["SC","MB","NMB","SSB","HC"];
 
@@ -194,22 +195,7 @@ function deleteOwner(name){
 
 function saveOwnerData(){
   if(!githubToken)return alert("GitHub token not set. Click GitHub Setup first.");
-  const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken},null,2);
-  const content=btoa(unescape(encodeURIComponent(data)));
-  fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{headers:{"Authorization":"token "+githubToken}})
-    .then(r=>r.json())
-    .then(file=>{
-      if(file.message)return alert("❌ Token error: "+file.message);
-      fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{
-        method:"PUT",
-        headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},
-        body:JSON.stringify({message:"Update owner settings "+new Date().toLocaleString(),content:content,sha:file.sha})
-      }).then(r=>{
-        if(r.ok){alert("✓ OWNER SETTINGS SAVED!");}
-        else alert("Save failed");
-      });
-    })
-    .catch(e=>alert("Error: "+e.message));
+  saveToGitHub("owner settings");
 }
 
 function openTax(){
@@ -234,22 +220,7 @@ function openTax(){
 
 function saveTaxData(){
   if(!githubToken)return alert("GitHub token not set. Click GitHub Setup first.");
-  const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken},null,2);
-  const content=btoa(unescape(encodeURIComponent(data)));
-  fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{headers:{"Authorization":"token "+githubToken}})
-    .then(r=>r.json())
-    .then(file=>{
-      if(file.message)return alert("❌ Token error: "+file.message);
-      fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{
-        method:"PUT",
-        headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},
-        body:JSON.stringify({message:"Update tax settings "+new Date().toLocaleString(),content:content,sha:file.sha})
-      }).then(r=>{
-        if(r.ok){alert("✓ TAX SETTINGS SAVED!");}
-        else alert("Save failed");
-      });
-    })
-    .catch(e=>alert("Error: "+e.message));
+  saveToGitHub("tax settings");
 }
 
 function openVendorSettings(){
@@ -287,22 +258,38 @@ function deleteVendor(id){
 
 function saveVendorData(){
   if(!githubToken)return alert("GitHub token not set. Click GitHub Setup first.");
+  saveToGitHub("vendors");
+}
+
+function saveToGitHub(type){
   const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken},null,2);
   const content=btoa(unescape(encodeURIComponent(data)));
-  fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{headers:{"Authorization":"token "+githubToken}})
-    .then(r=>r.json())
+  
+  fetch(GITHUB_API,{headers:{"Authorization":"token "+githubToken,"Accept":"application/vnd.github.v3+json"}})
+    .then(r=>{
+      if(!r.ok)throw new Error(r.status+" "+r.statusText);
+      return r.json();
+    })
     .then(file=>{
-      if(file.message)return alert("❌ Token error: "+file.message);
-      fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{
+      if(file.message)throw new Error(file.message);
+      return fetch(GITHUB_API,{
         method:"PUT",
-        headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},
-        body:JSON.stringify({message:"Update vendors "+new Date().toLocaleString(),content:content,sha:file.sha})
-      }).then(r=>{
-        if(r.ok){alert("✓ VENDORS SAVED!");}
-        else alert("Save failed");
+        headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json","Accept":"application/vnd.github.v3+json"},
+        body:JSON.stringify({message:"Update "+type,content:content,sha:file.sha})
       });
     })
-    .catch(e=>alert("Error: "+e.message));
+    .then(r=>{
+      if(!r.ok)throw new Error(r.status+" "+r.statusText);
+      return r.json();
+    })
+    .then(data=>{
+      alert("✓ "+type.toUpperCase()+" SAVED!");
+      loadData();
+    })
+    .catch(e=>{
+      console.error("Error:",e);
+      alert("❌ Failed to save: "+e.message);
+    });
 }
 
 function updateVendorDropdown(){
@@ -338,44 +325,17 @@ function submitExpense(){
 
 function saveExpenseData(){
   if(!githubToken)return;
-  const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken},null,2);
-  const content=btoa(unescape(encodeURIComponent(data)));
-  fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{headers:{"Authorization":"token "+githubToken}})
-    .then(r=>r.json())
-    .then(file=>{
-      if(file.message)return;
-      fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{
-        method:"PUT",
-        headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},
-        body:JSON.stringify({message:"Update expenses "+new Date().toLocaleString(),content:content,sha:file.sha})
-      });
-    });
+  saveToGitHub("expenses");
 }
 
 function setupToken(){
-  const token=prompt("PASTE YOUR GITHUB TOKEN:\n\n(Token name: 'ocean vacations')\n\nIf you lost it, create new at:\nhttps://github.com/settings/tokens");
+  const token=prompt("PASTE YOUR GITHUB TOKEN:\n\n(Token name: 'ocean vacations')\n\nMake sure token has 'repo' scope.");
   if(token&&token.trim()){
     githubToken=token.trim();
     localStorage.setItem("github_token",githubToken);
-    const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses,github_token:githubToken},null,2);
-    const content=btoa(unescape(encodeURIComponent(data)));
-    fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{headers:{"Authorization":"token "+githubToken}})
-      .then(r=>r.json())
-      .then(file=>{
-        if(file.message){alert("❌ Token invalid!\n\nMake sure the token is not expired and has 'repo' permissions.");return;}
-        fetch("https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json",{
-          method:"PUT",
-          headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},
-          body:JSON.stringify({message:"Save GitHub token "+new Date().toLocaleString(),content:content,sha:file.sha})
-        }).then(r=>{
-          if(r.ok){
-            alert("✓ TOKEN SAVED!\n\nYou can now use any computer!");
-            loadData();
-            updateTokenStatus();
-          }else alert("❌ Failed to save token");
-        });
-      })
-      .catch(e=>alert("❌ Error: "+e.message));
+    alert("✓ TOKEN SAVED!\n\nYou can now use any computer!");
+    saveToGitHub("GitHub token setup");
+    updateTokenStatus();
   }
 }
 
