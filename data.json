@@ -8,11 +8,11 @@
       "guestyReportUrl": "https://app.guesty.com/reservations?viewId=69390343d28c76ee8b49fd18"
     },
     "GHO": {
-      "email": "",
-      "percent": 0.1,
-      "salesFeePercent": 5,
-      "type": "payout",
-      "guestyReportUrl": "statementUrl": "https://guesty-pmc-api.onrender.com/reservations"
+  "email": "",
+  "percent": 0.1,
+  "salesFeePercent": 5,
+  "type": "payout",
+  "statementUrl": "https://guesty-pmc-api.onrender.com/reservations"
     },
     "1463 BSN": {
       "email": "",
