@@ -195,23 +195,10 @@ function updateTokenStatus(){
   }
 }
 
-function showHistory(){
+function show1099(){
   if(!currentOwner) return alert("Select owner first");
 
-  document.getElementById("reportTitle").textContent="HISTORY";
-
-  let html="<div class='summary-title'>STATEMENT HISTORY</div>";
-  html+="<div style='text-align:center;padding:40px;color:#666'>";
-  html+="History section ready. You can later load saved monthly reports here.";
-  html+="</div>";
-
-  document.getElementById("mainContent").innerHTML=html;
-}
-
-function showIncomeReport(){
-  if(!currentOwner) return alert("Select owner first");
-
-  document.getElementById("reportTitle").textContent="INCOME REPORT";
+  document.getElementById("reportTitle").textContent="1099 REPORT";
 
   if(!csvData || csvData.length===0){
     document.getElementById("mainContent").innerHTML=
@@ -219,16 +206,33 @@ function showIncomeReport(){
     return;
   }
 
-  let html="<div class='summary-title'>INCOME REPORT</div>";
+  const t = OWNERS[currentOwner];
+
+  let totalAccommodation = masterTotals.acc;
+  let totalPMC = masterTotals.pmc;
+  let totalExpenses = masterTotals.expenses;
+  let netPaidToOwner = masterTotals.owner;
+
+  let html="<div class='summary-title'>1099 SUMMARY</div>";
+
   html+="<div class='summary-grid'>";
-  html+="<div class='summary-card'><div class='summary-label'>TOTAL GROSS</div><div class='summary-value'>"+money(masterTotals.gross)+"</div></div>";
-  html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
-  html+="<div class='summary-card'><div class='summary-label'>PMC COLLECTED</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
-  html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>TOTAL ACCOMMODATION</div><div class='summary-value'>"+money(totalAccommodation)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>PMC COLLECTED</div><div class='summary-value'>"+money(totalPMC)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(totalExpenses)+"</div></div>";
+  html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>NET TO OWNER</div><div class='summary-value' style='color:#fff'>"+money(netPaidToOwner)+"</div></div>";
+  html+="</div>";
+
+  html+="<div style='margin-top:30px;padding:20px;border:1px solid #ddd;border-radius:5px;background:#f9f9f9'>";
+  html+="<div style='font-weight:bold;margin-bottom:10px'>IRS 1099 Information</div>";
+  html+="<div>Total Gross Rents (Reportable): "+money(totalAccommodation)+"</div>";
+  html+="<div>Management Fees Deducted: "+money(totalPMC)+"</div>";
+  html+="<div>Expenses Deducted: "+money(totalExpenses)+"</div>";
+  html+="<div style='margin-top:10px;font-weight:bold'>Net Paid to Owner: "+money(netPaidToOwner)+"</div>";
   html+="</div>";
 
   document.getElementById("mainContent").innerHTML=html;
 }
+
 
   
 function loadData(){
