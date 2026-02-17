@@ -1023,7 +1023,7 @@ async function generateStatement(){
     if(!currentOwner) return;
 
     const ownerSettings = OWNERS[currentOwner];
-    if(!ownerSettings || !ownerSettings.statementUrl) {
+    if(!ownerSettings || !ownerSettings.guestyReportUrl) {
         alert("Owner missing statement URL");
         return;
     }
@@ -1043,14 +1043,16 @@ async function generateStatement(){
     try {
 
         const response = await fetch(
-            `https://guesty-pmc-api.onrender.com/reservations?from=${from}&to=${to}&statementUrl=${ownerSettings.statementUrl}`
+            `${ownerSettings.guestyReportUrl}?from=${from}&to=${to}`
         );
 
-        if(!response.ok){
-            throw new Error("Failed to fetch reservations");
-        }
+        if (!response.ok) {
+    throw new Error("Failed to fetch reservations");
+}
 
-        const apiData = await response.json();
+const data = await response.json();
+csvData = data.results || data;
+
 
         // 🔹 THIS replaces csvData
         csvData = (apiData.results || []).map(r => ({
