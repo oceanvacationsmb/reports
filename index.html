@@ -196,41 +196,190 @@ function updateTokenStatus(){
 }
 function showIncomeReport(){
 
-  if(!csvData || csvData.length===0){
-    alert("Generate statement first");
-    return;
-  }
-
   document.getElementById("reportTitle").textContent = "INCOME REPORT";
 
   let html = "";
 
   html += "<div class='property-section'>";
 
-  html += "<div style='font-size:12px;color:#666;margin-bottom:20px'>";
-  html += "On this page you can run report for single, multiple or all properties.";
-  html += "</div>";
+  html += "<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px'>";
 
-  html += "<div class='summary-card' style='margin-bottom:20px'>";
-  html += "<div class='summary-label'>GROSS INCOME REVENUE</div>";
-  html += "<div class='summary-value'>"+money(masterTotals.acc)+"</div>";
-  html += "</div>";
+  html += "<div><label>FILTER TYPE</label>";
+  html += "<select id='filterType'>";
+  html += "<option value='month'>MONTH & YEAR</option>";
+  html += "<option value='range'>BETWEEN DATES</option>";
+  html += "<option value='ytd'>YEAR TO DATE</option>";
+  html += "<option value='year'>FULL YEAR</option>";
+  html += "</select></div>";
 
-  html += "<div style='margin-bottom:20px'>";
-  html += "<label style='font-weight:bold'>REPORT TYPE</label>";
-  html += "<select id='incomeType' style='width:200px;margin-left:10px'>";
+  html += "<div><label>MONTH</label><select id='incomeMonth'></select></div>";
+  html += "<div><label>YEAR</label><select id='incomeYear'></select></div>";
+
+  html += "<div><label>FROM</label><input type='date' id='dateFrom'></div>";
+  html += "<div><label>TO</label><input type='date' id='dateTo'></div>";
+
+  html += "<div><label>PROPERTY</label>";
+  html += "<select id='incomeProperty' multiple size='4'></select></div>";
+
+  html += "<div><label>REPORT TYPE</label>";
+  html += "<select id='incomeType'>";
   html += "<option value='full'>FULL REPORT</option>";
   html += "<option value='gri'>GRI REPORT</option>";
-  html += "</select>";
-  html += "<button style='margin-left:15px;padding:6px 12px;background:#000;color:#fff;border:none;border-radius:4px' onclick='runIncomeReport()'>RUN</button>";
+  html += "</select></div>";
+
+  html += "</div>";
+
+  html += "<button style='margin-top:20px;padding:10px 20px;background:#000;color:#fff;border:none;border-radius:4px' onclick='runIncomeReport()'>RUN REPORT</button>";
+
   html += "</div>";
 
   html += "<div id='incomeReportResult'></div>";
 
+  document.getElementById("mainContent").innerHTML = html;
+
+  buildIncomeFilters();
+}
+function buildIncomeFilters(){
+
+  const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+
+  const monthSel = document.getElementById("incomeMonth");
+  monthSel.innerHTML="";
+  months.forEach((m,i)=>{
+    monthSel.innerHTML+="<option value='"+(i+1)+"'>"+m+"</option>";
+  });
+  monthSel.value=new Date().getMonth()+1;
+
+  const yearSel = document.getElementById("incomeYear");
+  yearSel.innerHTML="";
+  const y=new Date().getFullYear();
+  for(let i=y-3;i<=y+1;i++){
+    yearSel.innerHTML+="<option>"+i+"</option>";
+  }
+  yearSel.value=y;
+
+  const propSel = document.getElementById("incomeProperty");
+  propSel.innerHTML="";
+
+  const uniqueProps = [...new Set(csvData.map(r=>r["LISTING'S NICKNAME"]))];
+
+  uniqueProps.forEach(p=>{
+    propSel.innerHTML+="<option value='"+p+"'>"+p+"</option>";
+  });
+}
+function runIncomeReport(){
+
+  if(!csvData || csvData.length===0){
+    alert("Generate statement first");
+    return;
+  }
+
+  const filterType = document.getElementById("filterType").value;
+  const month = parseInt(document.getElementById("incomeMonth").value);
+  const year = parseInt(document.getElementById("incomeYear").value);
+  const dateFrom = document.getElementById("dateFrom").value;
+  const dateTo = document.getElementById("dateTo").value;
+  const reportType = document.getElementById("incomeType").value;
+
+  const selectedProps = Array.from(document.getElementById("incomeProperty").selectedOptions).map(o=>o.value);
+
+  let filteredRows = [];
+
+  csvData.forEach(row=>{
+
+    if(!row["CHECK-IN DATE"]) return;
+
+    const checkIn = new Date(row["CHECK-IN DATE"]);
+    const m = checkIn.getMonth()+1;
+    const y = checkIn.getFullYear();
+
+    let include = false;
+
+    if(filterType==="month"){
+      include = (m===month && y===year);
+    }
+
+    if(filterType==="range" && dateFrom && dateTo){
+      include = (checkIn >= new Date(dateFrom) && checkIn <= new Date(dateTo));
+    }
+
+    if(filterType==="ytd"){
+      include = (y===year && checkIn <= new Date());
+    }
+
+    if(filterType==="year"){
+      include = (y===year);
+    }
+
+    if(selectedProps.length>0){
+      include = include && selectedProps.includes(row["LISTING'S NICKNAME"]);
+    }
+
+    if(include) filteredRows.push(row);
+  });
+
+  let totalAccommodation = 0;
+  let addresses = [];
+
+  filteredRows.forEach(r=>{
+    let a = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
+    const commFee = num(r["COMMUNITY FEE"])||0;
+    a = a - commFee;
+    totalAccommodation += a;
+
+    if(r["ADDRESS"]) addresses.push(r["ADDRESS"]);
+  });
+
+  addresses = [...new Set(addresses)];
+
+  let html = "<div class='property-section'>";
+
+  html += "<div style='font-weight:bold;font-size:18px;margin-bottom:10px'>OCEAN VACATIONS</div>";
+
+  if(addresses.length>0){
+    html += "<div style='margin-bottom:10px;font-weight:bold'>";
+    html += addresses.join(" | ");
+    html += "</div>";
+  }
+
+  html += "<div style='margin-bottom:20px'>Statement Date: "+new Date().toLocaleDateString()+"</div>";
+
+  html += "<div class='summary-card' style='margin-bottom:20px'>";
+  html += "<div class='summary-label'>GROSS INCOME REVENUE</div>";
+  html += "<div class='summary-value'>"+money(totalAccommodation)+"</div>";
   html += "</div>";
 
-  document.getElementById("mainContent").innerHTML = html;
+  if(reportType==="gri"){
+
+    html += "<table>";
+    html += "<tr><th>PROPERTY</th><th>CHECK-IN / CHECK-OUT</th><th>ACCOMMODATION</th></tr>";
+
+    filteredRows.forEach(r=>{
+      let a = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
+      const commFee = num(r["COMMUNITY FEE"])||0;
+      a = a - commFee;
+
+      html += "<tr>";
+      html += "<td>"+r["LISTING'S NICKNAME"]+"</td>";
+      html += "<td>"+r["CHECK-IN DATE"]+" - "+r["CHECK-OUT DATE"]+"</td>";
+      html += "<td>"+money(a)+"</td>";
+      html += "</tr>";
+    });
+
+    html += "</table>";
+
+  } else {
+
+    html += "<div style='margin-top:10px'>";
+    html += "<div>Total Reservations: "+filteredRows.length+"</div>";
+    html += "</div>";
+  }
+
+  html += "</div>";
+
+  document.getElementById("incomeReportResult").innerHTML = html;
 }
+
 function runIncomeReport(){
 
   const type = document.getElementById("incomeType").value;
