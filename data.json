@@ -5,42 +5,42 @@
       "percent": 0.12,
       "salesFeePercent": 5,
       "type": "draft",
-      "guestyReportUrl": "https://app.guesty.com/reservations?viewId=69390343d28c76ee8b49fd18"
+      "guestyReportUrl": "https://guesty-pmc-api.onrender.com/reservations"
     },
-    "GHO": {
+    "GHO REVOCABLE TRUST": {
   "email": "",
   "percent": 0.1,
   "salesFeePercent": 5,
   "type": "payout",
   "statementUrl": "https://guesty-pmc-api.onrender.com/reservations"
     },
-    "1463 BSN": {
+    "1463 - NICOLE": {
       "email": "",
       "percent": 0.12,
       "salesFeePercent": 5,
       "type": "payout",
-      "guestyReportUrl": "https://app.guesty.com/reservations?viewId=693900705c8b6c44c508d239&soft-nav=true"
+      "guestyReportUrl": "https://guesty-pmc-api.onrender.com/reservations"
     },
-    "MAT 11315": {
+    "113-15 - MAT": {
       "email": "",
       "percent": 0.12,
       "salesFeePercent": 5,
       "type": "payout",
-      "guestyReportUrl": "https://app.guesty.com/reservations?viewId=693900585c8b6c44c508d1ee&soft-nav=true"
+      "guestyReportUrl": "https://guesty-pmc-api.onrender.com/reservations"
     },
-    "113B13 - CARL RICHARDS": {
+    "113-13 - CARL": {
       "email": "",
       "percent": 0.12,
       "salesFeePercent": 5,
       "type": "payout",
-      "guestyReportUrl": ""
+      "guestyReportUrl": "https://guesty-pmc-api.onrender.com/reservations"
     },
-    "115C 15 - CHRIS": {
+    "115C-15 - CHRIS": {
       "email": "",
       "percent": 0.12,
       "salesFeePercent": 10,
       "type": "payout",
-      "guestyReportUrl": ""
+      "guestyReportUrl": "https://guesty-pmc-api.onrender.com/reservations"
     }
   },
   "vendors": [
