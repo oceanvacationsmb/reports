@@ -612,38 +612,48 @@ function show1099(){
 }
   
 function loadData(){
-  githubToken=localStorage.getItem("github_token")||"";
+  githubToken = localStorage.getItem("github_token") || "";
+
   if(!githubToken){
     init();
     updateTokenStatus();
     return;
   }
-  
+
   fetch(getGitHubAPI(),{
-    headers:{"Authorization":"token "+githubToken}
+    headers: { "Authorization": "token " + githubToken }
   })
   .then(r=>{
-    if(!r.ok)throw new Error(r.status);
+    if(!r.ok) throw new Error(r.status);
     return r.json();
   })
   .then(fileData=>{
-    const contentB64=fileData.content;
-    const contentDecoded=atob(contentB64);
-    const data=JSON.parse(contentDecoded);
-    
-    gitHubData=data;
-    OWNERS=data.owners||{};
-    vendors=data.vendors||[];
-    expenses=data.expenses||[];
-    propertySettings=data.properties||{};
+    const contentDecoded = atob(fileData.content);
+    const data = JSON.parse(contentDecoded);
+
+    gitHubData = data;
+
+    // ✅ Flexible owner loading
+    if(data.owners){
+      OWNERS = data.owners;
+    } else {
+      OWNERS = data;   // if file itself is owners object
+    }
+
+    vendors = data.vendors || [];
+    expenses = data.expenses || [];
+    propertySettings = data.properties || {};
+
     init();
     updateTokenStatus();
   })
   .catch(e=>{
+    console.error("Load error:", e);
     init();
     updateTokenStatus();
   });
 }
+
 
 function init(){
   buildOwners();
