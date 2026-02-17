@@ -84,10 +84,11 @@ tr:nth-child(even){background:#fafafa}
 <div class="section"><label class="label">YEAR</label><select id="yearSelect"></select></div>
 <div class="section"><label class="label">UPLOAD CSV</label><input type="file" id="csvFile" accept=".csv"></div>
 <button class="btn btn-primary" onclick="showStatement()">▶ STATEMENT</button>
-<button class="btn btn-info" onclick="showHistory()">🕒 HISTORY</button>
-<button class="btn btn-info" onclick="showIncomeReport()">💰 INCOME REPORT</button>
 <button class="btn btn-success" onclick="openAddExpense()" style="font-size:13px;font-weight:bold">💰 ADD EXPENSE</button>
 <button class="btn btn-success" onclick="generateSummary()">📊 SUMMARY REPORT</button>
+<div class="settings-header">📊 REPORTS</div>
+<button class="btn btn-info" onclick="showIncomeReport()">💰 INCOME REPORT</button>
+<button class="btn btn-info" onclick="showHistory()">🕒 HISTORY</button>
 <div class="settings-header">⚙️ SETTINGS</div>
 <button class="btn btn-info" onclick="openOwners()" style="font-size:11px">⚙️ OWNER SETTINGS</button>
 <button class="btn btn-info" onclick="openTax()" style="font-size:11px">⚙️ TAX SETTINGS</button>
