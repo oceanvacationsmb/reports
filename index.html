@@ -196,44 +196,30 @@ function updateTokenStatus(){
 }
 
 function show1099(){
-  if(!currentOwner) return alert("Select owner first");
-
-  document.getElementById("reportTitle").textContent="1099 REPORT";
-
-  if(!csvData || csvData.length===0){
-    document.getElementById("mainContent").innerHTML=
-      "<div style='text-align:center;padding:40px;color:#666'>Generate statement first.</div>";
+  if(!currentOwner){
+    alert("Select owner first");
     return;
   }
 
-  const t = OWNERS[currentOwner];
+  if(!masterTotals || !masterTotals.acc){
+    alert("Generate statement first");
+    return;
+  }
 
-  let totalAccommodation = masterTotals.acc;
-  let totalPMC = masterTotals.pmc;
-  let totalExpenses = masterTotals.expenses;
-  let netPaidToOwner = masterTotals.owner;
+  document.getElementById("reportTitle").textContent = "1099 REPORT";
 
-  let html="<div class='summary-title'>1099 SUMMARY</div>";
+  let html = "<div class='summary-title'>1099 SUMMARY</div>";
+  html += "<div class='summary-grid'>";
 
-  html+="<div class='summary-grid'>";
-  html+="<div class='summary-card'><div class='summary-label'>TOTAL ACCOMMODATION</div><div class='summary-value'>"+money(totalAccommodation)+"</div></div>";
-  html+="<div class='summary-card'><div class='summary-label'>PMC COLLECTED</div><div class='summary-value'>"+money(totalPMC)+"</div></div>";
-  html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(totalExpenses)+"</div></div>";
-  html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>NET TO OWNER</div><div class='summary-value' style='color:#fff'>"+money(netPaidToOwner)+"</div></div>";
-  html+="</div>";
+  html += "<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>" + money(masterTotals.acc) + "</div></div>";
+  html += "<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>" + money(masterTotals.pmc) + "</div></div>";
+  html += "<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>" + money(masterTotals.expenses) + "</div></div>";
+  html += "<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>NET TO OWNER</div><div class='summary-value' style='color:#fff'>" + money(masterTotals.owner) + "</div></div>";
 
-  html+="<div style='margin-top:30px;padding:20px;border:1px solid #ddd;border-radius:5px;background:#f9f9f9'>";
-  html+="<div style='font-weight:bold;margin-bottom:10px'>IRS 1099 Information</div>";
-  html+="<div>Total Gross Rents (Reportable): "+money(totalAccommodation)+"</div>";
-  html+="<div>Management Fees Deducted: "+money(totalPMC)+"</div>";
-  html+="<div>Expenses Deducted: "+money(totalExpenses)+"</div>";
-  html+="<div style='margin-top:10px;font-weight:bold'>Net Paid to Owner: "+money(netPaidToOwner)+"</div>";
-  html+="</div>";
+  html += "</div>";
 
-  document.getElementById("mainContent").innerHTML=html;
+  document.getElementById("mainContent").innerHTML = html;
 }
-
-
   
 function loadData(){
   githubToken=localStorage.getItem("github_token")||"";
