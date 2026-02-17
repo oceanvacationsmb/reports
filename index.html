@@ -1078,19 +1078,45 @@ async function generateStatement(){
     alert("Error loading Guesty data");
 }
 
-
-
 function updateHeaderDates(){
-  const month=parseInt(document.getElementById("monthSelect").value);
-  const year=parseInt(document.getElementById("yearSelect").value);
-  const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
-  const last=new Date(year,month,0).getDate();
-  let nextMonth=month+1,nextYear=year;
-  if(nextMonth>12){nextMonth=1;nextYear++;}
-  document.getElementById("reportTitle").textContent="RESERVATION REPORT";
-  document.getElementById("statementDate").innerHTML="STATEMENT DATE:<br><strong>"+months[nextMonth-1]+" 1ST "+nextYear+"</strong>";
-  document.getElementById("periodDate").innerHTML="PERIOD: "+months[month-1]+" 1ST - "+last+"TH "+year;
-  document.getElementById("ownerTitle").textContent=currentOwner.toUpperCase();
+  const month = parseInt(document.getElementById("monthSelect").value);
+  const year = parseInt(document.getElementById("yearSelect").value);
+
+  const months = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+
+  const last = new Date(year, month, 0).getDate();
+
+  let nextMonth = month + 1;
+  let nextYear = year;
+  if(nextMonth > 12){
+    nextMonth = 1;
+    nextYear++;
+  }
+
+  document.getElementById("reportTitle").textContent = "RESERVATION REPORT";
+
+  document.getElementById("statementDate").innerHTML =
+    "STATEMENT DATE:<br><strong>" + months[nextMonth-1] + " 1ST " + nextYear + "</strong>";
+
+  document.getElementById("periodDate").innerHTML =
+    "PERIOD: " + months[month-1] + " 1ST - " + last + "TH " + year;
+
+  document.getElementById("ownerTitle").textContent =
+    currentOwner ? currentOwner.toUpperCase() : "";
+
+  const t = OWNERS[currentOwner];
+  if(t){
+    document.getElementById("ownerDetails").innerHTML =
+      "<div class='owner-detail-item'>TYPE: " + t.type.toUpperCase() + "</div>" +
+      "<div class='owner-detail-item'>COMMISSION: " + (t.percent * 100).toFixed(2) + "%</div>";
+  }
+}
+
+  
+loadData();
+</script>
+</body>
+</html>
   
   const t=OWNERS[currentOwner];
   document.getElementById("ownerDetails").innerHTML="<div class='owner-detail-item'>TYPE: "+t.type.toUpperCase()+"</div><div class='owner-detail-item'>COMMISSION: "+(t.percent*100).toFixed(2)+"%</div>";
