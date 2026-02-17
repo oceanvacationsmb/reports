@@ -12,7 +12,7 @@
       "percent": 0.1,
       "salesFeePercent": 5,
       "type": "payout",
-      "guestyReportUrl": "statementUrl": "https://guesty-pmc-api.onrender.com/reservations""
+      "guestyReportUrl": "statementUrl": "https://guesty-pmc-api.onrender.com/reservations"
     },
     "1463 BSN": {
       "email": "",
