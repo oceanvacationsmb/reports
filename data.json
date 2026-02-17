@@ -113,6 +113,15 @@
       "vendor": "TEST",
       "amount": -2000,
       "notes": "credit broken item"
+    },
+    {
+      "id": 1771294510143,
+      "owner": "GHO",
+      "type": "REPAIR",
+      "property": "MB - 4765",
+      "vendor": "ECIA",
+      "amount": 1000,
+      "notes": ""
     }
   ]
 }
