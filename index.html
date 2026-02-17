@@ -1023,25 +1023,24 @@ async function generateStatement(){
     if(!currentOwner) return;
 
     const ownerSettings = OWNERS[currentOwner];
-    if(!ownerSettings || !ownerSettings.guestyReportUrl) {
-        alert("Owner missing statement URL");
+    if(!ownerSettings) {
+        alert("Owner not found");
         return;
     }
 
-    // GET DATE RANGE (use your existing date logic here if different)
     const month = document.getElementById("monthSelect").value;
-const year  = document.getElementById("yearSelect").value;
+    const year  = document.getElementById("yearSelect").value;
 
-if(!month || !year){
-    alert("Select month and year");
-    return;
-}
+    if(!month || !year){
+        alert("Select month and year");
+        return;
+    }
 
-const firstDay = new Date(year, month - 1, 1);
-const lastDay  = new Date(year, month, 0);
+    const firstDay = new Date(year, month - 1, 1);
+    const lastDay  = new Date(year, month, 0);
 
-const from = firstDay.toISOString().split("T")[0];
-const to   = lastDay.toISOString().split("T")[0];
+    const from = firstDay.toISOString().split("T")[0];
+    const to   = lastDay.toISOString().split("T")[0];
 
     try {
 
@@ -1050,22 +1049,23 @@ const to   = lastDay.toISOString().split("T")[0];
         );
 
         if (!response.ok) {
-    throw new Error("Failed to fetch reservations");
-}
+            throw new Error("Failed to fetch reservations");
+        }
 
-const data = await response.json();
-csvData = data.results || data;
+        const apiData = await response.json();
 
-
-        // 🔹 THIS replaces csvData
-        csvData = (apiData.results || []).map(r => ({
-            Property: r.listing?.title || "",
-            CheckIn: r.checkIn,
-            CheckOut: r.checkOut,
-            Guest: r.guest?.fullName || "",
-            Confirmation: r.confirmationCode || "",
-            Commission: r.accounting?.analytics?.commission || 0,
-            ReservationId: r._id
+        csvData = apiData.map(r => ({
+            "LISTING'S NICKNAME": r.listing?.title || "",
+            "CHECK-IN DATE": r.checkIn ? r.checkIn.split("T")[0] : "",
+            "CHECK-OUT DATE": r.checkOut ? r.checkOut.split("T")[0] : "",
+            "CONFIRMATION CODE": r.confirmationCode || "",
+            "PLATFORM": r.integration?.platform || "",
+            "ACCOMMODATION FARE": r.accounting?.analytics?.commission || 0,
+            "TOTAL PAYOUT": r.accounting?.analytics?.commission || 0,
+            "MARKUP": 0,
+            "COMMUNITY FEE": 0,
+            "CLEANING FARE": 0,
+            "STATUS": "confirmed"
         }));
 
         updateHeaderDates();
