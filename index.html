@@ -1046,7 +1046,7 @@ const to   = lastDay.toISOString().split("T")[0];
     try {
 
         const response = await fetch(
-            `${ownerSettings.guestyReportUrl}?from=${from}&to=${to}`
+            `https://guesty-pmc-api.onrender.com/reservations?from=${from}&to=${to}`
         );
 
         if (!response.ok) {
