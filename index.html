@@ -194,6 +194,42 @@ function updateTokenStatus(){
   }
 }
 
+function showHistory(){
+  if(!currentOwner) return alert("Select owner first");
+
+  document.getElementById("reportTitle").textContent="HISTORY";
+
+  let html="<div class='summary-title'>STATEMENT HISTORY</div>";
+  html+="<div style='text-align:center;padding:40px;color:#666'>";
+  html+="History section ready. You can later load saved monthly reports here.";
+  html+="</div>";
+
+  document.getElementById("mainContent").innerHTML=html;
+}
+
+function showIncomeReport(){
+  if(!currentOwner) return alert("Select owner first");
+
+  document.getElementById("reportTitle").textContent="INCOME REPORT";
+
+  if(!csvData || csvData.length===0){
+    document.getElementById("mainContent").innerHTML=
+      "<div style='text-align:center;padding:40px;color:#666'>Generate statement first.</div>";
+    return;
+  }
+
+  let html="<div class='summary-title'>INCOME REPORT</div>";
+  html+="<div class='summary-grid'>";
+  html+="<div class='summary-card'><div class='summary-label'>TOTAL GROSS</div><div class='summary-value'>"+money(masterTotals.gross)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>PMC COLLECTED</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
+  html+="</div>";
+
+  document.getElementById("mainContent").innerHTML=html;
+}
+
+  
 function loadData(){
   githubToken=localStorage.getItem("github_token")||"";
   if(!githubToken){
