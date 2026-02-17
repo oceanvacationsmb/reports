@@ -1,30 +1,867 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Ocean Vacations</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
+<title>Ocean Vacations - Reservation Report</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial;background:#f5f5f5;color:#000;display:flex}
+.sidebar{width:280px;background:#333;color:#fff;padding:20px;height:100vh;overflow-y:auto;position:fixed;left:0;top:0}
+.sidebar h3{margin-bottom:20px;font-size:16px;border-bottom:2px solid #fff;padding-bottom:10px}
+.section{margin-bottom:20px}
+.label{font-size:11px;font-weight:bold;color:#aaa;margin-bottom:5px;display:block}
+select,input{width:100%;padding:8px;margin:5px 0;border:1px solid #555;background:#444;color:#fff;border-radius:3px;font-size:11px}
+.btn{width:100%;padding:12px;margin:8px 0;border:none;font-weight:bold;border-radius:3px;cursor:pointer;font-size:12px;color:#fff;text-transform:uppercase}
+.btn-primary{background:#000}
+.btn-success{background:#28a745}
+.btn-warning{background:#ff9800}
+.btn-info{background:#17a2b8}
+.btn-danger{background:#dc3545}
+.main{margin-left:280px;padding:20px;width:calc(100% - 280px)}
+.page{background:#fff;padding:40px;border-radius:5px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
+.invoice-header{display:flex;justify-content:space-between;margin-bottom:40px;border-bottom:2px solid #000;padding-bottom:30px}
+.company-info{font-size:11px;line-height:1.8}
+.company-name{font-size:20px;font-weight:bold;margin-bottom:5px}
+.report-title{text-align:center;font-size:32px;font-weight:bold;margin:40px 0 10px 0;letter-spacing:2px}
+.owner-name{text-align:center;font-size:28px;margin-bottom:10px;font-weight:bold;color:#000}
+.owner-details{text-align:center;font-size:13px;color:#666;margin-bottom:40px}
+.owner-detail-item{display:inline-block;margin:0 15px}
+table{width:100%;border-collapse:collapse;margin:20px 0;font-size:11px}
+th,td{border:1px solid #e0e0e0;padding:12px;text-align:left}
+th{background:#f5f5f5;color:#000;font-weight:bold;text-transform:uppercase}
+tr:nth-child(even){background:#fafafa}
+.action-buttons{display:flex;gap:10px;margin:20px 0;justify-content:center;flex-wrap:wrap}
+.action-buttons button{padding:10px 20px;font-size:12px;cursor:pointer;border:none;border-radius:3px;color:#fff;font-weight:bold;text-transform:uppercase}
+.back-btn{background:#666}
+.print-btn{background:#e74c3c}
+.property-section{margin:40px 0;padding:20px;border:1px solid #ddd;border-radius:5px;background:#fff}
+.property-title{font-size:14px;font-weight:bold;margin-bottom:15px;display:flex;align-items:center;text-transform:uppercase}
+.property-icon{font-size:18px;margin-right:10px}
+.summary-title{font-size:12px;font-weight:bold;text-transform:uppercase;text-align:center;margin:20px 0}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}
+.summary-card{background:#f9f9f9;border:1px solid #ddd;padding:12px;text-align:center;border-radius:5px}
+.summary-label{font-size:10px;color:#666;font-weight:bold;text-transform:uppercase}
+.summary-value{font-size:14px;font-weight:bold;color:#000;margin-top:6px}
+.amount-due-container{text-align:center;margin:30px 0}
+.amount-due-box{background:#000;color:#fff;border:none;border-radius:5px;padding:20px;display:inline-block;min-width:300px}
+.amount-due-label{font-size:12px;font-weight:bold;text-transform:uppercase;margin-bottom:10px}
+.amount-due-value{font-size:32px;font-weight:bold}
+.modal{display:none;position:fixed;z-index:1001;left:50%;top:50%;transform:translate(-50%,-50%);width:90%;max-width:500px;background:#333;color:#fff;border-radius:8px;padding:30px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto}
+.modal.show{display:block}
+.modal-title{font-size:20px;font-weight:bold;margin-bottom:20px;text-transform:uppercase;text-align:center;border-bottom:2px solid #fff;padding-bottom:15px}
+.modal-field{margin-bottom:15px}
+.modal-label{font-size:11px;font-weight:bold;color:#aaa;margin-bottom:8px;display:block;text-transform:uppercase}
+.modal-input{width:100%;padding:10px;border:1px solid #555;background:#444;color:#fff;border-radius:3px;font-size:11px}
+.modal-actions{display:flex;gap:10px;margin-top:25px}
+.modal-actions button{flex:1;padding:12px;border:none;font-weight:bold;border-radius:3px;cursor:pointer;font-size:12px;color:#fff;text-transform:uppercase}
+.btn-add{background:#28a745}
+.btn-cancel{background:#666}
+.btn-save{background:#0066cc}
+.modal-overlay{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.7)}
+.modal-overlay.show{display:block}
+.copy-link-btn{background:#0066cc;color:#fff;padding:10px 15px;border:none;border-radius:3px;cursor:pointer;font-weight:bold;margin:10px 0;width:100%;text-transform:uppercase}
+.section-title{font-size:12px;font-weight:bold;text-transform:uppercase;margin-top:20px;margin-bottom:10px;color:#000}
+.btn-small{padding:5px 10px;font-size:9px;width:auto;margin:0;display:inline-block;text-transform:uppercase}
+.settings-header{color:#fff;margin:20px 0 10px 0;font-size:12px;font-weight:bold;text-transform:uppercase;border-top:2px solid #555;padding-top:15px}
+.token-status{padding:8px;margin:8px 0;border-radius:3px;text-align:center;font-size:11px;font-weight:bold}
+.token-active{background:#28a745;color:#fff}
+.token-inactive{background:#dc3545;color:#fff}
+.success-checkmark{font-size:48px;text-align:center;color:#28a745;margin:20px 0}
+.expense-list{max-height:250px;overflow-y:auto;margin:15px 0;padding:10px;background:#444;border-radius:5px}
+.expense-item{background:#555;padding:10px;margin:5px 0;border-radius:3px;border-left:4px solid #28a745;display:flex;justify-content:space-between;align-items:center}
+.expense-item-text{color:#fff;font-size:11px}
+.expense-item-delete{background:#dc3545;color:#fff;border:none;padding:5px 10px;border-radius:3px;cursor:pointer;font-size:9px;font-weight:bold}
+@media print{.sidebar,.back-btn,.print-btn,.copy-link-btn{display:none}.main{margin-left:0;width:100%}.page{padding:20px}}
+</style>
 </head>
 <body>
-    <header>
-        <h1>Welcome to Ocean Vacations</h1>
-    </header>
-    <nav>
-        <ul>
-            <li><a href="#">Home</a></li>
-            <li><a href="#">Destinations</a></li>
-            <li><a href="#">Contact Us</a></li>
-        </ul>
-    </nav>
-    <main>
-        <section>
-            <h2>Featured Destinations</h2>
-            <p>Explore the beauty of the ocean like never before.</p>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2026 Ocean Vacations. All rights reserved.</p>
-    </footer>
+<div class="sidebar">
+<h3>🎯 OCEAN VACATIONS</h3>
+<div id="tokenStatus" class="token-status token-inactive">🔴 LOADING...</div>
+<div class="section"><label class="label">SELECT OWNER</label><select id="ownerSelect" onchange="onOwnerChange()"><option value="">-- SELECT --</option></select></div>
+<div class="section"><label class="label">MONTH</label><select id="monthSelect"></select></div>
+<div class="section"><label class="label">YEAR</label><select id="yearSelect"></select></div>
+<div class="section"><label class="label">UPLOAD CSV</label><input type="file" id="csvFile" accept=".csv"></div>
+<button class="btn btn-primary" onclick="generateStatement()">▶ STATEMENT</button>
+<button class="btn btn-success" onclick="openAddExpense()" style="font-size:13px;font-weight:bold">💰 ADD EXPENSE</button>
+<button class="btn btn-success" onclick="generateSummary()">📊 SUMMARY REPORT</button>
+<div class="settings-header">⚙️ SETTINGS</div>
+<button class="btn btn-info" onclick="openOwners()" style="font-size:11px">⚙️ OWNER SETTINGS</button>
+<button class="btn btn-info" onclick="openTax()" style="font-size:11px">⚙️ TAX SETTINGS</button>
+<button class="btn btn-info" onclick="openVendorSettings()" style="font-size:11px">🏢 VENDORS</button>
+<hr style="border:1px solid #555;margin:20px 0">
+<button class="btn btn-warning" onclick="setupToken()" style="font-size:11px">🔑 GITHUB SETUP</button>
+<button class="btn btn-warning" onclick="setupDropbox()" style="font-size:11px">📁 DROPBOX SETUP</button>
+</div>
+
+<div id="modalOverlay" class="modal-overlay" onclick="closeAll()"></div>
+
+<div id="ownerModal" class="modal">
+<div>
+<div class="modal-title">⚙️ OWNER MANAGEMENT</div>
+<div class="modal-field"><label class="modal-label">OWNER NAME</label><input type="text" id="ownerName" class="modal-input" placeholder="Owner Name"></div>
+<div class="modal-field"><label class="modal-label">EMAIL</label><input type="email" id="ownerEmail" class="modal-input" placeholder="Email"></div>
+<div class="modal-field"><label class="modal-label">COMMISSION %</label><input type="number" id="ownerComm" class="modal-input" placeholder="Commission %" step="0.01"></div>
+<div class="modal-field"><label class="modal-label">SALES FEE %</label><input type="number" id="ownerSales" class="modal-input" placeholder="Sales Fee %" step="0.01"></div>
+<div class="modal-field"><label class="modal-label">TYPE</label><select id="ownerType" class="modal-input"><option value="draft">DRAFT</option><option value="payout">PAYOUT</option></select></div>
+<div class="modal-field"><label class="modal-label">🔗 GUESTY REPORT URL</label><input type="text" id="ownerGuestyUrl" class="modal-input" placeholder="https://guesty.com/..."></div>
+<button class="btn btn-success" onclick="addOwner()" style="width:100%;margin-bottom:20px">➕ ADD OWNER</button>
+<div id="ownersList" style="max-height:350px;overflow-y:auto;margin-bottom:20px"></div>
+<div class="modal-actions"><button class="btn-save" onclick="saveOwnerData()">💾 SAVE ALL</button><button class="btn-cancel" onclick="closeAll()">✗ CLOSE</button></div>
+</div>
+</div>
+
+<div id="taxModal" class="modal">
+<div>
+<div class="modal-title">⚙️ TAX SETTINGS</div>
+<div id="taxContent" style="max-height:400px;overflow-y:auto;margin-bottom:20px"></div>
+<div class="modal-actions"><button class="btn-save" onclick="saveTaxData()">💾 SAVE ALL</button><button class="btn-cancel" onclick="closeAll()">✗ CLOSE</button></div>
+</div>
+</div>
+
+<div id="vendorSettingsModal" class="modal">
+<div>
+<div class="modal-title">🏢 VENDOR MANAGEMENT</div>
+<div class="modal-field"><label class="modal-label">VENDOR NAME</label><input type="text" id="vendorNameInput" class="modal-input" placeholder="Vendor Name"></div>
+<div class="modal-field"><label class="modal-label">PHONE/EMAIL</label><input type="text" id="vendorPhoneInput" class="modal-input" placeholder="Phone/Email"></div>
+<button class="btn btn-success" onclick="addNewVendor()" style="width:100%;margin-bottom:20px">➕ ADD VENDOR</button>
+<div id="vendorSettingsList" style="max-height:350px;overflow-y:auto;margin-bottom:20px"></div>
+<div class="modal-actions"><button class="btn-save" onclick="saveVendorData()">💾 SAVE ALL</button><button class="btn-cancel" onclick="closeAll()">✗ CLOSE</button></div>
+</div>
+</div>
+
+<div id="expenseModal" class="modal">
+<div>
+<div class="modal-title">💰 ADD EXPENSE</div>
+<div id="expenseCheckmark" class="success-checkmark" style="display:none">✓</div>
+<div id="expenseFormContent">
+<div class="modal-field"><label class="modal-label">TYPE</label><select id="expenseType" class="modal-input"><option>MAINTENANCE</option><option>REPAIR</option><option>PURCHASE</option><option>SUPPLIES</option><option>SERVICE</option><option>POOL CLEANING</option><option>PEST CONTROL</option><option>CREDIT</option><option>ADJUSTMENT</option></select></div>
+<div class="modal-field"><label class="modal-label">PROPERTY</label><select id="expenseProperty" class="modal-input"></select></div>
+<div class="modal-field"><label class="modal-label">VENDOR</label><select id="expenseVendor" class="modal-input"></select></div>
+<div class="modal-field"><label class="modal-label">AMOUNT</label><input type="number" id="expenseAmount" class="modal-input" placeholder="0.00" step="0.01"></div>
+<div class="modal-field"><label class="modal-label">NOTES</label><input type="text" id="expenseNotes" class="modal-input" placeholder="Optional notes"></div>
+<div class="modal-actions"><button class="btn-add" onclick="submitExpense()">✓ ADD EXPENSE</button><button class="btn-cancel" onclick="doneAddingExpenses()">✓ DONE</button></div>
+<div id="expenseListDisplay" class="expense-list" style="display:none"></div>
+</div>
+</div>
+</div>
+
+<div class="main">
+<div id="content" class="page">
+<div class="invoice-header">
+<div class="company-info">
+<div class="company-name">OCEAN VACATIONS</div>
+<div>www.oceanvacationsmb.com</div>
+<div>oceanvacationsmb@gmail.com</div>
+<div>843-222-6516</div>
+</div>
+<div class="right-header">
+<div class="statement-date" id="statementDate"></div>
+<div class="period-date" id="periodDate"></div>
+</div>
+</div>
+<div class="report-title" id="reportTitle">RESERVATION REPORT</div>
+<div class="owner-name" id="ownerTitle"></div>
+<div class="owner-details" id="ownerDetails"></div>
+<div id="mainContent"><div style="text-align:center;padding:40px;color:#666">Loading data from GitHub...</div></div>
+</div>
+</div>
+
+<script>
+function getGitHubAPI(){
+  return "https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json";
+}
+
+let gitHubData={},OWNERS={},vendors=[],expenses=[],csvData=[],propertySettings={},currentOwner="",masterTotals={},propertyTotals={},taxByProperty={},githubToken="";
+let sessionExpenses=[];
+const municipalities=["SC","MB","NMB","SSB","HC"];
+
+function num(v){return parseFloat((v||"0").toString().replace(/[$,]/g,""))||0;}
+function money(v){return"$"+(Number(v)||0).toFixed(2);}
+
+function updateTokenStatus(){
+  const status=document.getElementById("tokenStatus");
+  if(githubToken){
+    status.textContent="🟢 TOKEN ACTIVE";
+    status.className="token-status token-active";
+  }else{
+    status.textContent="🔴 NO TOKEN";
+    status.className="token-status token-inactive";
+  }
+}
+
+function loadData(){
+  githubToken=localStorage.getItem("github_token")||"";
+  if(!githubToken){
+    init();
+    updateTokenStatus();
+    return;
+  }
+  
+  fetch(getGitHubAPI(),{
+    headers:{"Authorization":"token "+githubToken}
+  })
+  .then(r=>{
+    if(!r.ok)throw new Error(r.status);
+    return r.json();
+  })
+  .then(fileData=>{
+    const contentB64=fileData.content;
+    const contentDecoded=atob(contentB64);
+    const data=JSON.parse(contentDecoded);
+    
+    gitHubData=data;
+    OWNERS=data.owners||{};
+    vendors=data.vendors||[];
+    expenses=data.expenses||[];
+    propertySettings=data.properties||{};
+    init();
+    updateTokenStatus();
+  })
+  .catch(e=>{
+    init();
+    updateTokenStatus();
+  });
+}
+
+function init(){
+  buildOwners();
+  const sel=document.getElementById("monthSelect");
+  if(!sel.innerHTML){
+    buildMonths();
+    buildYears();
+  }
+  updateVendorDropdown();
+  document.getElementById("mainContent").innerHTML="<div style='text-align:center;padding:40px;color:#666'>Ready to use! Select an owner and upload CSV to begin.</div>";
+}
+
+function buildOwners(){
+  const sel=document.getElementById("ownerSelect");
+  const current=sel.value;
+  sel.innerHTML='<option value="">-- SELECT --</option>';
+  Object.keys(OWNERS).sort().forEach(name=>{
+    sel.innerHTML+="<option>"+name+"</option>";
+  });
+  if(current && OWNERS[current]){
+    sel.value=current;
+  }
+}
+
+function buildMonths(){
+  const sel=document.getElementById("monthSelect");
+  const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+  months.forEach((m,i)=>{
+    sel.innerHTML+="<option value='"+(i+1)+"'>"+m+"</option>";
+  });
+  sel.value=new Date().getMonth()+1;
+}
+
+function buildYears(){
+  const sel=document.getElementById("yearSelect");
+  const y=new Date().getFullYear();
+  for(let i=y-2;i<=y+2;i++){
+    sel.innerHTML+="<option>"+i+"</option>";
+  }
+  sel.value=y;
+}
+
+function onOwnerChange(){
+  currentOwner=document.getElementById("ownerSelect").value;
+}
+
+function openOwners(){
+  const list=document.getElementById("ownersList");
+  let html="";
+  Object.keys(OWNERS).sort().forEach(name=>{
+    const o=OWNERS[name];
+    html+="<div style='background:#555;padding:15px;margin:10px 0;border-radius:3px'>";
+    html+="<div style='font-weight:bold;color:#fff;margin-bottom:10px'>"+name+"</div>";
+    html+="<label class='modal-label'>EMAIL</label>";
+    html+="<input type='email' value='"+(o.email||"")+"' onchange=\"OWNERS['"+name+"'].email=this.value\" class='modal-input'>";
+    html+="<label class='modal-label'>COMMISSION %</label>";
+    html+="<input type='number' step='0.01' value='"+(o.percent*100)+"' onchange=\"OWNERS['"+name+"'].percent=this.value/100\" class='modal-input'>";
+    html+="<label class='modal-label'>SALES FEE %</label>";
+    html+="<input type='number' step='0.01' value='"+o.salesFeePercent+"' onchange=\"OWNERS['"+name+"'].salesFeePercent=this.value\" class='modal-input'>";
+    html+="<label class='modal-label'>TYPE</label>";
+    html+="<select onchange=\"OWNERS['"+name+"'].type=this.value\" class='modal-input'>";
+    html+="<option value='draft' "+(o.type==='draft'?'selected':'')+">DRAFT</option>";
+    html+="<option value='payout' "+(o.type==='payout'?'selected':'')+">PAYOUT</option>";
+    html+="</select>";
+    html+="<label class='modal-label'>🔗 GUESTY REPORT URL</label>";
+    html+="<input type='text' value='"+(o.guestyReportUrl||"")+"' onchange=\"OWNERS['"+name+"'].guestyReportUrl=this.value\" class='modal-input' placeholder='https://guesty.com/...'>";
+    html+="<button class='btn btn-danger' onclick=\"deleteOwner('"+name+"')\" style='width:100%;margin-top:10px;padding:8px'>🗑️ DELETE OWNER</button>";
+    html+="</div>";
+  });
+  list.innerHTML=html;
+  openModal("ownerModal");
+}
+
+function addOwner(){
+  const name=document.getElementById("ownerName").value.trim();
+  const email=document.getElementById("ownerEmail").value.trim();
+  const comm=parseFloat(document.getElementById("ownerComm").value)||0.12;
+  const sales=parseFloat(document.getElementById("ownerSales").value)||5;
+  const type=document.getElementById("ownerType").value;
+  const guestyUrl=document.getElementById("ownerGuestyUrl").value.trim();
+  if(!name)return alert("Enter owner name");
+  OWNERS[name]={email:email,percent:comm/100,salesFeePercent:sales,type:type,guestyReportUrl:guestyUrl};
+  document.getElementById("ownerName").value="";
+  document.getElementById("ownerEmail").value="";
+  document.getElementById("ownerComm").value="";
+  document.getElementById("ownerSales").value="";
+  document.getElementById("ownerGuestyUrl").value="";
+  buildOwners();
+  openOwners();
+}
+
+function deleteOwner(name){
+  if(!confirm("Delete owner "+name+"?"))return;
+  delete OWNERS[name];
+  buildOwners();
+  openOwners();
+}
+
+function saveOwnerData(){
+  if(!githubToken)return alert("GitHub token not set. Click GitHub Setup first.");
+  const savedOwner=currentOwner;
+  saveToGitHub("owner settings",()=>{
+    currentOwner=savedOwner;
+    document.getElementById("ownerSelect").value=savedOwner;
+  });
+}
+
+function openTax(){
+  const content=document.getElementById("taxContent");
+  let html="";
+  const allProps=Object.keys(propertySettings);
+  
+  if(allProps.length===0){
+    html="<p style='color:#aaa;text-align:center;padding:20px'>Upload a CSV first to create properties, then configure tax settings.</p>";
+  }else{
+    allProps.sort().forEach(prop=>{
+      const o=propertySettings[prop]||{};
+      html+="<div style='background:#555;padding:15px;margin:10px 0;border-radius:3px'>";
+      html+="<div style='font-weight:bold;color:#fff;margin-bottom:10px'>"+prop.toUpperCase()+"</div>";
+      municipalities.forEach(m=>{
+        const checked=o[m]?"checked":"";
+        html+="<label style='color:#fff;display:flex;align-items:center;margin:8px 0;cursor:pointer'>";
+        html+="<input type='checkbox' "+checked+" onchange=\"if(!propertySettings['"+prop+"'])propertySettings['"+prop+"']={};propertySettings['"+prop+"']['"+m+"']=this.checked\">";
+        html+="<span style='margin-left:8px'>"+m+"</span>";
+        html+="</label>";
+      });
+      html+="</div>";
+    });
+  }
+  content.innerHTML=html;
+  openModal("taxModal");
+}
+
+function saveTaxData(){
+  if(!githubToken)return alert("GitHub token not set. Click GitHub Setup first.");
+  const savedOwner=currentOwner;
+  const savedMonth=document.getElementById("monthSelect").value;
+  const savedYear=document.getElementById("yearSelect").value;
+  saveToGitHub("tax settings",()=>{
+    currentOwner=savedOwner;
+    document.getElementById("ownerSelect").value=savedOwner;
+    document.getElementById("monthSelect").value=savedMonth;
+    document.getElementById("yearSelect").value=savedYear;
+  });
+}
+
+function openVendorSettings(){
+  const list=document.getElementById("vendorSettingsList");
+  let html="";
+  
+  if(vendors.length===0){
+    html="<p style='color:#aaa;text-align:center;padding:20px'>No vendors yet. Add one above!</p>";
+  }else{
+    vendors.forEach(v=>{
+      html+="<div style='background:#555;padding:12px;margin:8px 0;border-radius:3px;display:flex;justify-content:space-between;align-items:center'>";
+      html+="<div>";
+      html+="<div style='color:#fff;font-weight:bold'>"+v.name+"</div>";
+      html+="<div style='color:#aaa;font-size:10px'>"+v.phone+"</div>";
+      html+="</div>";
+      html+="<button class='btn btn-danger' onclick='deleteVendor("+v.id+")' style='padding:5px 10px;font-size:9px'>DELETE</button>";
+      html+="</div>";
+    });
+  }
+  list.innerHTML=html;
+  openModal("vendorSettingsModal");
+}
+
+function addNewVendor(){
+  const name=document.getElementById("vendorNameInput").value.trim();
+  const phone=document.getElementById("vendorPhoneInput").value.trim();
+  if(!name)return alert("Enter vendor name");
+  vendors.push({id:Date.now(),name:name,phone:phone});
+  document.getElementById("vendorNameInput").value="";
+  document.getElementById("vendorPhoneInput").value="";
+  updateVendorDropdown();
+  openVendorSettings();
+}
+
+function deleteVendor(id){
+  vendors=vendors.filter(v=>v.id!==id);
+  updateVendorDropdown();
+  openVendorSettings();
+}
+
+function saveVendorData(){
+  if(!githubToken)return alert("GitHub token not set. Click GitHub Setup first.");
+  const savedOwner=currentOwner;
+  const savedMonth=document.getElementById("monthSelect").value;
+  const savedYear=document.getElementById("yearSelect").value;
+  saveToGitHub("vendors",()=>{
+    currentOwner=savedOwner;
+    document.getElementById("ownerSelect").value=savedOwner;
+    document.getElementById("monthSelect").value=savedMonth;
+    document.getElementById("yearSelect").value=savedYear;
+  });
+}
+
+function saveToGitHub(type,callback){
+  if(!githubToken){
+    alert("❌ No token");
+    return;
+  }
+  
+  const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses},null,2);
+  const content=btoa(unescape(encodeURIComponent(data)));
+  
+  function attemptSave(retryCount=0){
+    fetch(getGitHubAPI(),{headers:{"Authorization":"token "+githubToken}})
+      .then(r=>{
+        if(r.status===404){
+          return {sha:null, create:true};
+        }
+        if(!r.ok)throw new Error("GET failed: "+r.status);
+        return r.json().then(data=>({sha:data.sha, create:false}));
+      })
+      .then(({sha,create})=>{
+        const body={message:"Update "+type,content:content};
+        if(sha) body.sha=sha;
+        
+        return fetch(getGitHubAPI(),{
+          method:"PUT",
+          headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},
+          body:JSON.stringify(body)
+        }).then(r=>({response:r,sha:sha}));
+      })
+      .then(({response,sha})=>{
+        if(response.status===409){
+          if(retryCount<3){
+            setTimeout(()=>attemptSave(retryCount+1), 2000);
+          }else{
+            alert("❌ Could not save after 4 attempts");
+          }
+          return;
+        }
+        
+        if(response.ok||response.status===200||response.status===201){
+          if(callback)callback();
+          return;
+        }
+        
+        throw new Error("PUT failed: "+response.status);
+      })
+      .catch(e=>{
+        if(retryCount<3){
+          setTimeout(()=>attemptSave(retryCount+1), 2000);
+        }
+      });
+  }
+  
+  attemptSave();
+}
+
+function updateVendorDropdown(){
+  const sel=document.getElementById("expenseVendor");
+  sel.innerHTML="<option>-- SELECT --</option>";
+  vendors.forEach(v=>{
+    sel.innerHTML+="<option>"+v.name+"</option>";
+  });
+}
+
+function openAddExpense(){
+  if(!currentOwner)return alert("Select owner first");
+  if(Object.keys(propertyTotals).length===0)return alert("Generate statement first");
+  sessionExpenses=[];
+  document.getElementById("expenseCheckmark").style.display="none";
+  document.getElementById("expenseFormContent").style.display="block";
+  document.getElementById("expenseListDisplay").style.display="none";
+  const prop=document.getElementById("expenseProperty");
+  prop.innerHTML="<option>-- SELECT --</option>";
+  Object.keys(propertyTotals).forEach(p=>{
+    prop.innerHTML+="<option>"+p+"</option>";
+  });
+  document.getElementById("expenseType").value="MAINTENANCE";
+  document.getElementById("expenseProperty").value="";
+  document.getElementById("expenseVendor").value="";
+  document.getElementById("expenseAmount").value="";
+  document.getElementById("expenseNotes").value="";
+  openModal("expenseModal");
+}
+
+function submitExpense(){
+  const type=document.getElementById("expenseType").value;
+  const prop=document.getElementById("expenseProperty").value;
+  const vendor=document.getElementById("expenseVendor").value;
+  const amount=parseFloat(document.getElementById("expenseAmount").value);
+  if(!currentOwner||!prop||!vendor||!amount)return alert("Fill all fields");
+  
+  const expenseId=Date.now();
+  expenses.push({id:expenseId,owner:currentOwner,type:type,property:prop,vendor:vendor,amount:amount,notes:document.getElementById("expenseNotes").value});
+  sessionExpenses.push({id:expenseId,type:type,property:prop,vendor:vendor,amount:amount});
+  
+  document.getElementById("expenseType").value="MAINTENANCE";
+  document.getElementById("expenseProperty").value="";
+  document.getElementById("expenseVendor").value="";
+  document.getElementById("expenseAmount").value="";
+  document.getElementById("expenseNotes").value="";
+  
+  displaySessionExpenses();
+}
+
+function deleteSessionExpense(id){
+  sessionExpenses=sessionExpenses.filter(e=>e.id!==id);
+  expenses=expenses.filter(e=>e.id!==id);
+  displaySessionExpenses();
+}
+
+function displaySessionExpenses(){
+  const listDiv=document.getElementById("expenseListDisplay");
+  if(sessionExpenses.length===0){
+    listDiv.style.display="none";
+    return;
+  }
+  
+  let html="<div style='color:#fff;font-weight:bold;margin-bottom:10px'>ADDED EXPENSES (" + sessionExpenses.length + "):</div>";
+  sessionExpenses.forEach(e=>{
+    html+="<div class='expense-item'>";
+    html+="<div class='expense-item-text'>"+e.type+" - "+e.vendor+" ("+e.property+")<br>"+money(e.amount)+"</div>";
+    html+="<button class='expense-item-delete' onclick='deleteSessionExpense("+e.id+")'>DELETE</button>";
+    html+="</div>";
+  });
+  listDiv.innerHTML=html;
+  listDiv.style.display="block";
+}
+
+function doneAddingExpenses(){
+  document.getElementById("expenseFormContent").style.display="none";
+  document.getElementById("expenseCheckmark").style.display="block";
+  const savedOwner=currentOwner;
+  const savedMonth=document.getElementById("monthSelect").value;
+  const savedYear=document.getElementById("yearSelect").value;
+  saveToGitHub("expenses",()=>{
+    currentOwner=savedOwner;
+    document.getElementById("ownerSelect").value=savedOwner;
+    document.getElementById("monthSelect").value=savedMonth;
+    document.getElementById("yearSelect").value=savedYear;
+    setTimeout(()=>{
+      closeAll();
+      processData();
+      displayStatement();
+    }, 1000);
+  });
+}
+
+function setupToken(){
+  const token=prompt("PASTE YOUR GITHUB TOKEN");
+  if(!token)return;
+  
+  githubToken=token.trim();
+  localStorage.setItem("github_token",githubToken);
+  
+  fetch("https://api.github.com/user",{headers:{"Authorization":"token "+githubToken}})
+    .then(r=>r.json())
+    .then(u=>{
+      if(u.message){
+        alert("❌ Invalid token");
+        localStorage.removeItem("github_token");
+        githubToken="";
+        updateTokenStatus();
+        return;
+      }
+      alert("✓ Token verified and saved locally!");
+      updateTokenStatus();
+      loadData();
+    })
+    .catch(e=>{
+      alert("❌ Error: "+e.message);
+    });
+}
+
+function setupDropbox(){
+  const token=prompt("DROPBOX TOKEN:");
+  if(token)localStorage.setItem("dropbox_token",token.trim());
+}
+
+function generateStatement(){
+  const file=document.getElementById("csvFile").files[0];
+  if(!file||!currentOwner)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    csvData=Papa.parse(e.target.result,{header:true,skipEmptyLines:true}).data;
+    updateHeaderDates();
+    processData();
+    displayStatement();
+  };
+  reader.readAsText(file);
+}
+
+function updateHeaderDates(){
+  const month=parseInt(document.getElementById("monthSelect").value);
+  const year=parseInt(document.getElementById("yearSelect").value);
+  const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+  const last=new Date(year,month,0).getDate();
+  let nextMonth=month+1,nextYear=year;
+  if(nextMonth>12){nextMonth=1;nextYear++;}
+  document.getElementById("reportTitle").textContent="RESERVATION REPORT";
+  document.getElementById("statementDate").innerHTML="STATEMENT DATE:<br><strong>"+months[nextMonth-1]+" 1ST "+nextYear+"</strong>";
+  document.getElementById("periodDate").innerHTML="PERIOD: "+months[month-1]+" 1ST - "+last+"TH "+year;
+  document.getElementById("ownerTitle").textContent=currentOwner.toUpperCase();
+  
+  const t=OWNERS[currentOwner];
+  document.getElementById("ownerDetails").innerHTML="<div class='owner-detail-item'>TYPE: "+t.type.toUpperCase()+"</div><div class='owner-detail-item'>COMMISSION: "+(t.percent*100).toFixed(2)+"%</div>";
+}
+
+function processData(){
+  const month=parseInt(document.getElementById("monthSelect").value);
+  const year=parseInt(document.getElementById("yearSelect").value);
+  const t=OWNERS[currentOwner];
+  propertyTotals={};
+  masterTotals={gross:0,acc:0,clean:0,pmc:0,expenses:0,draft:0,owner:0,websiteFee:0,totalTaxCollected:0};
+  taxByProperty={};
+  let byProp={};
+  
+  csvData.forEach(row=>{
+    if(!row["CHECK-IN DATE"])return;
+    const m=parseInt(row["CHECK-IN DATE"].split("-")[1]);
+    const y=parseInt(row["CHECK-IN DATE"].split("-")[0]);
+    if(m!==month||y!==year)return;
+    const prop=row["LISTING'S NICKNAME"]||"Unknown";
+    if(!byProp[prop])byProp[prop]=[];
+    byProp[prop].push(row);
+    
+    if(!propertySettings[prop])propertySettings[prop]={};
+  });
+  
+  Object.keys(byProp).forEach(prop=>{
+    let gross=0,acc=0,clean=0,pmc=0,websiteFee=0,totalTax=0;
+    byProp[prop].forEach(row=>{
+      const g=num(row["TOTAL PAYOUT"]);
+      let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
+      const commFee=num(row["COMMUNITY FEE"])||0;
+      a=a-commFee;
+      const c=(row["STATUS"]||"").toLowerCase().includes("cancelled")?0:num(row["CLEANING FARE"]);
+      const p=a*t.percent;
+      let w=0;
+      if(t.type==="draft"&&a>0){
+        const code=row["CONFIRMATION CODE"]||"";
+        const platform=row["PLATFORM"]||"";
+        if(!code.toUpperCase().startsWith("HA")&&(platform.toLowerCase().includes("website")||platform.toLowerCase().includes("manual"))){
+          w=g*0.01;
+        }
+      }
+      gross+=g;
+      acc+=a;
+      clean+=c;
+      pmc+=p;
+      websiteFee+=w;
+      if(t.type==="payout"){
+        const cityTax=num(row["CITY TAX"])||0;
+        const stateTax=num(row["STATE TAX"])||0;
+        const countyTax=num(row["COUNTY TAX"])||0;
+        const occupancyTax=num(row["OCCUPANCY TAX"])||0;
+        const tax=cityTax+stateTax+countyTax+occupancyTax;
+        totalTax+=tax;
+        if(tax>0){
+          if(!taxByProperty[prop])taxByProperty[prop]={gross:g,tax:tax,netReportable:0};
+        }
+      }
+    });
+    const exp=expenses.filter(e=>e.property===prop&&e.owner===currentOwner).reduce((sum,e)=>sum+e.amount,0);
+    const draft=pmc+clean+websiteFee+exp;
+    const owner=acc-pmc-exp;
+    propertyTotals[prop]={gross:gross,acc:acc,clean:clean,pmc:pmc,websiteFee:websiteFee,expenses:exp,draft:draft,owner:owner,tax:totalTax,reservations:byProp[prop]};
+    masterTotals.gross+=gross;
+    masterTotals.acc+=acc;
+    masterTotals.clean+=clean;
+    masterTotals.pmc+=pmc;
+    masterTotals.websiteFee+=websiteFee;
+    masterTotals.expenses+=exp;
+    masterTotals.draft+=draft;
+    masterTotals.owner+=owner;
+    masterTotals.totalTaxCollected+=totalTax;
+    
+    if(taxByProperty[prop]){
+      taxByProperty[prop].netReportable=owner-totalTax;
+    }
+  });
+}
+
+function displayStatement(){
+  const t=OWNERS[currentOwner];
+  const type=t.type;
+  let html="<div class='action-buttons'><button class='copy-link-btn' onclick='generateLink()'>🔗 GENERATE & COPY LINK</button></div>";
+  html+="<div class='summary-title'>FINANCIAL SUMMARY</div><div class='summary-grid'>";
+  if(type==="draft"){
+    html+="<div class='summary-card'><div class='summary-label'>GROSS PAYOUT</div><div class='summary-value'>"+money(masterTotals.gross)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>CLEANING FEE</div><div class='summary-value'>"+money(masterTotals.clean)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>WEBSITE (1%)</div><div class='summary-value'>"+money(masterTotals.websiteFee)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>PMC ("+(t.percent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
+    html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>AMOUNT DUE</div><div class='summary-value' style='color:#fff'>"+money(masterTotals.draft)+"</div></div>";
+  }else{
+    html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
+    html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>OWNER PAYOUT</div><div class='summary-value' style='color:#fff'>"+money(masterTotals.owner)+"</div></div>";
+  }
+  html+="</div>";
+  Object.keys(propertyTotals).forEach(prop=>{
+    const p=propertyTotals[prop];
+    const r=type==="draft"?p.draft:p.owner;
+    const exp=expenses.filter(e=>e.property===prop&&e.owner===currentOwner);
+    html+="<div class='property-section'><div class='property-title'><span class='property-icon'>🏠</span>"+prop.toUpperCase()+"</div>";
+    
+    if(type==="draft"){
+      html+="<div class='summary-grid'>";
+      html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>CLEANING FEE</div><div class='summary-value'>"+money(p.clean)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>WEBSITE (1%)</div><div class='summary-value'>"+money(p.websiteFee)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>PMC ("+(t.percent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
+      html+="</div>";
+      html+="<div class='amount-due-container'><div class='amount-due-box'><div class='amount-due-label'>AMOUNT DUE</div><div class='amount-due-value'>"+money(r)+"</div></div></div>";
+    }else{
+      html+="<div class='summary-grid'>";
+      html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
+      html+="</div>";
+      html+="<div class='amount-due-container'><div class='amount-due-box'><div class='amount-due-label'>OWNER PAYOUT</div><div class='amount-due-value'>"+money(r)+"</div></div></div>";
+    }
+    
+    html+="<div style='margin-top:15px'><div class='section-title'>RESERVATIONS</div><table style='margin-top:10px'>";
+    if(type==="draft"){
+      html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>ACCOMMODATION</th><th>PMC</th><th>CLEANING</th><th>WEBSITE</th><th>AMOUNT DUE</th></tr>";
+      p.reservations.forEach(row=>{
+        let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
+        const commFee=num(row["COMMUNITY FEE"])||0;
+        a=a-commFee;
+        const g=num(row["TOTAL PAYOUT"]);
+        const c=(row["STATUS"]||"").toLowerCase().includes("cancelled")?0:num(row["CLEANING FARE"]);
+        const pm=a*t.percent;
+        const w=a>0&&!row["CONFIRMATION CODE"].toUpperCase().startsWith("HA")&&(row["PLATFORM"]||"").toLowerCase().includes("website")?g*0.01:0;
+        const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
+        const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
+        if(g===0)return;
+        html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8)+"</td><td>"+checkin+"-"+checkout+"</td><td>"+row["PLATFORM"]+"</td><td>"+money(a)+"</td><td>"+money(pm)+"</td><td>"+money(c)+"</td><td>"+money(w)+"</td><td>"+money(pm+c+w)+"</td></tr>";
+      });
+    }else{
+      html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>ACCOMMODATION</th><th>PMC</th><th>OWNER PAYOUT</th></tr>";
+      p.reservations.forEach(row=>{
+        let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
+        const commFee=num(row["COMMUNITY FEE"])||0;
+        a=a-commFee;
+        const g=num(row["TOTAL PAYOUT"]);
+        const pm=a*t.percent;
+        const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
+        const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
+        if(g===0)return;
+        html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8)+"</td><td>"+checkin+"-"+checkout+"</td><td>"+row["PLATFORM"]+"</td><td>"+money(a)+"</td><td>"+money(pm)+"</td><td>"+money(a-pm)+"</td></tr>";
+      });
+    }
+    html+="</table></div>";
+    if(exp.length>0){
+      html+="<div style='margin-top:15px'><div class='section-title'>EXPENSES</div><table style='margin-top:10px'>";
+      html+="<tr><th>TYPE</th><th>VENDOR</th><th>AMOUNT</th><th>ACTION</th></tr>";
+      exp.forEach(e=>{
+        html+="<tr><td>"+e.type+"</td><td>"+e.vendor+"</td><td>"+money(e.amount)+"</td><td><button class='btn btn-danger btn-small' onclick='deleteExpenseLocal("+e.id+")'>DELETE</button></td></tr>";
+      });
+      html+="</table></div>";
+    }
+    html+="</div>";
+  });
+  document.getElementById("mainContent").innerHTML=html;
+}
+
+function deleteExpenseLocal(id){
+  if(!confirm("Delete?"))return;
+  expenses=expenses.filter(e=>e.id!==id);
+  processData();
+  displayStatement();
+}
+
+function generateLink(){
+  alert("✓ Dropbox feature coming soon!");
+}
+
+function generateSummary(){
+  if(!csvData||csvData.length===0)return alert("Generate statement first");
+  const month=parseInt(document.getElementById("monthSelect").value);
+  const year=parseInt(document.getElementById("yearSelect").value);
+  const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+  const last=new Date(year,month,0).getDate();
+  let nextMonth=month+1,nextYear=year;
+  if(nextMonth>12){nextMonth=1;nextYear++;}
+  document.getElementById("reportTitle").textContent="SUMMARY REPORT";
+  document.getElementById("statementDate").innerHTML="STATEMENT DATE:<br><strong>"+months[nextMonth-1]+" 1ST "+nextYear+"</strong>";
+  document.getElementById("periodDate").innerHTML="PERIOD: "+months[month-1]+" 1ST - "+last+"TH "+year;
+  
+  const t=OWNERS[currentOwner];
+  const type=t.type;
+  const salesFee=masterTotals.pmc*(t.salesFeePercent/100);
+  
+  let html="<div class='action-buttons'><button class='back-btn' onclick='generateStatement()'>← BACK</button><button class='print-btn' onclick='window.print()'>🖨️ PRINT</button></div>";
+  
+  if(type==="draft"){
+    html+="<div style='margin:20px auto;padding:15px;border:2px solid #ffc107;background:#fff3cd;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px;text-transform:uppercase'>💰 DRAFT BREAKDOWN</div><div style='text-align:left;color:#333'>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>CLEANING FEE</span><span>"+money(masterTotals.clean)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>WEBSITE (1%)</span><span>"+money(masterTotals.websiteFee)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>EXPENSES</span><span>"+money(masterTotals.expenses)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>PMC ("+(t.percent*100).toFixed(2)+"%)</span><span>"+money(masterTotals.pmc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold'><span>AMOUNT DUE</span><span>"+money(masterTotals.draft)+"</span></div></div></div>";
+    html+="<div style='margin:20px auto;padding:15px;border:2px solid #fbc02d;background:#fff9c4;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#f57f17;margin-bottom:10px;text-transform:uppercase'>💳 SALES COMMISSION DUE</div><div style='text-align:left;color:#333'>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>PMC COLLECTED</span><span>"+money(masterTotals.pmc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>COMMISSION FEE ("+t.salesFeePercent+"%)</span><span>"+money(salesFee)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold'><span>COMMISSION DUE</span><span>"+money(salesFee)+"</span></div></div></div>";
+  }else{
+    html+="<div style='margin:20px auto;padding:15px;border:2px solid #4caf50;background:#e8f5e9;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#2e7d32;margin-bottom:10px;text-transform:uppercase'>💰 PAYOUT SUMMARY</div><div style='text-align:left;color:#333'>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #c8e6c9'><span>TOTAL ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #c8e6c9'><span>COMMISSION ("+(t.percent*100).toFixed(2)+"%)</span><span>"+money(masterTotals.pmc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #c8e6c9'><span>MINUS PMC</span><span>-"+money(masterTotals.pmc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #c8e6c9'><span>MINUS EXPENSES</span><span>-"+money(masterTotals.expenses)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:12px;background:#2e7d32;color:#fff;font-weight:bold'><span>OWNER PAYOUT</span><span>"+money(masterTotals.owner)+"</span></div></div></div>";
+    html+="<div style='margin:20px auto;padding:15px;border:2px solid #fbc02d;background:#fff9c4;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#f57f17;margin-bottom:10px;text-transform:uppercase'>💳 SALES COMMISSION</div><div style='text-align:left;color:#333'>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>PMC COLLECTED</span><span>"+money(masterTotals.pmc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>COMMISSION FEE ("+t.salesFeePercent+"%)</span><span>"+money(salesFee)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold'><span>COMMISSION DUE</span><span>"+money(salesFee)+"</span></div></div></div>";
+  }
+  
+  html+="<div style='background:#d4edda;border:2px solid #28a745;padding:15px;margin:15px 0;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#155724;text-transform:uppercase;margin-bottom:10px'>🏦 PMC BANK TRANSFER</div><div style='font-size:18px;font-weight:bold;color:#155724'>"+money(masterTotals.pmc)+"</div></div>";
+  
+  document.getElementById("mainContent").innerHTML=html;
+}
+
+function openModal(id){
+  document.getElementById("modalOverlay").classList.add("show");
+  document.getElementById(id).classList.add("show");
+}
+
+function closeAll(){
+  document.getElementById("modalOverlay").classList.remove("show");
+  document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));
+}
+
+loadData();
+</script>
 </body>
 </html>
