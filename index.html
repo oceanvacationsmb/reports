@@ -255,18 +255,27 @@ function toggleFilters(){
 function buildIncomeFilters(){
 
   const ownerSel = document.getElementById("incomeOwner");
-  ownerSel.innerHTML="<option value=''>-- SELECT --</option>";
-  Object.keys(OWNERS).forEach(o=>{
-    ownerSel.innerHTML+="<option>"+o+"</option>";
-  });
 
+  ownerSel.innerHTML = "<option value=''>-- SELECT OWNER --</option>";
+
+  if(!OWNERS || Object.keys(OWNERS).length === 0){
+    ownerSel.innerHTML += "<option disabled>No owners found</option>";
+  } else {
+    Object.keys(OWNERS).sort().forEach(o=>{
+      ownerSel.innerHTML += "<option value='"+o+"'>"+o+"</option>";
+    });
+  }
+
+  // Build months
   const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
   const monthSel=document.getElementById("incomeMonth");
   monthSel.innerHTML="";
   months.forEach((m,i)=>{
     monthSel.innerHTML+="<option value='"+(i+1)+"'>"+m+"</option>";
   });
+  monthSel.value=new Date().getMonth()+1;
 
+  // Build years
   const yearSel=document.getElementById("incomeYear");
   yearSel.innerHTML="";
   const y=new Date().getFullYear();
@@ -275,30 +284,19 @@ function buildIncomeFilters(){
   }
   yearSel.value=y;
 
+  // Build properties only if csv loaded
   const propSel=document.getElementById("incomeProperty");
   propSel.innerHTML="";
 
-  const uniqueProps=[...new Set(csvData.map(r=>r["LISTING'S NICKNAME"]))];
+  if(csvData && csvData.length>0){
+    const uniqueProps=[...new Set(csvData.map(r=>r["LISTING'S NICKNAME"]).filter(Boolean))];
 
-  uniqueProps.forEach(p=>{
-    propSel.innerHTML+="<option value='"+p+"' selected>"+p+"</option>";
-  });
-}
-function runIncomeReport(){
-
-  const file = document.getElementById("incomeCsv").files[0];
-
-  if(file){
-    const reader = new FileReader();
-    reader.onload = e=>{
-      csvData = Papa.parse(e.target.result,{header:true,skipEmptyLines:true}).data;
-      executeIncomeReport();
-    };
-    reader.readAsText(file);
-  } else {
-    executeIncomeReport();
+    uniqueProps.forEach(p=>{
+      propSel.innerHTML+="<option value='"+p+"' selected>"+p+"</option>";
+    });
   }
 }
+
 function executeIncomeReport(){
 
   const filterType=document.getElementById("filterType").value;
