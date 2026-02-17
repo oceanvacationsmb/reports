@@ -34,6 +34,13 @@
       "salesFeePercent": 5,
       "type": "payout",
       "guestyReportUrl": ""
+    },
+    "115C 15 - CHRIS": {
+      "email": "",
+      "percent": 0.12,
+      "salesFeePercent": 10,
+      "type": "payout",
+      "guestyReportUrl": ""
     }
   },
   "vendors": [
