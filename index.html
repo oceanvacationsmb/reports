@@ -1029,16 +1029,19 @@ async function generateStatement(){
     }
 
     // GET DATE RANGE (use your existing date logic here if different)
-    const fromDate = document.getElementById("startDate").value;
-    const toDate   = document.getElementById("endDate").value;
+    const month = document.getElementById("monthSelect").value;
+const year  = document.getElementById("yearSelect").value;
 
-    if(!fromDate || !toDate){
-        alert("Select date range");
-        return;
-    }
+if(!month || !year){
+    alert("Select month and year");
+    return;
+}
 
-    const from = new Date(fromDate).toISOString().split("T")[0];
-    const to   = new Date(toDate).toISOString().split("T")[0];
+const firstDay = new Date(year, month - 1, 1);
+const lastDay  = new Date(year, month, 0);
+
+const from = firstDay.toISOString().split("T")[0];
+const to   = lastDay.toISOString().split("T")[0];
 
     try {
 
