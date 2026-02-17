@@ -243,6 +243,15 @@ function showIncomeReport(){
 
   buildIncomeFilters();
 }
+function toggleFilters(){
+
+  const type = document.getElementById("filterType").value;
+
+  document.getElementById("monthBox").style.display = (type==="month") ? "block" : "none";
+  document.getElementById("yearBox").style.display = (type==="month" || type==="year") ? "block" : "none";
+  document.getElementById("dateFromBox").style.display = (type==="range") ? "block" : "none";
+  document.getElementById("dateToBox").style.display = (type==="range") ? "block" : "none";
+}
 
 function buildIncomeFilters(){
 
