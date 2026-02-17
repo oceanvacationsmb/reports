@@ -87,9 +87,9 @@ tr:nth-child(even){background:#fafafa}
 <button class="btn btn-success" onclick="openAddExpense()" style="font-size:13px;font-weight:bold">💰 ADD EXPENSE</button>
 <button class="btn btn-success" onclick="generateSummary()">📊 SUMMARY REPORT</button>
 <div class="settings-header">📊 REPORTS</div>
-<button class="btn btn-info" onclick="generateSummary()">💰 INCOME REPORT</button>
-<button class="btn btn-info" onclick="generateStatement()">🕒 HISTORY</button>
-<button class="btn btn-info" onclick="generateStatement()">🕒 1099</button>
+<button class="btn btn-info" onclick="showIncomeReport()">💰 INCOME REPORT</button>
+<button class="btn btn-info" onclick="showHistory()">🕒 HISTORY</button>
+<button class="btn btn-info" onclick="show1099()">🕒 1099</button>
 <div class="settings-header">⚙️ SETTINGS</div>
 <button class="btn btn-info" onclick="openOwners()" style="font-size:11px">⚙️ OWNER SETTINGS</button>
 <button class="btn btn-info" onclick="openTax()" style="font-size:11px">⚙️ TAX SETTINGS</button>
@@ -193,6 +193,102 @@ function updateTokenStatus(){
     status.textContent="🔴 NO TOKEN";
     status.className="token-status token-inactive";
   }
+}
+function showIncomeReport(){
+
+  if(!csvData || csvData.length===0){
+    alert("Generate statement first");
+    return;
+  }
+
+  document.getElementById("reportTitle").textContent = "INCOME REPORT";
+
+  let html = "";
+
+  html += "<div class='property-section'>";
+
+  html += "<div style='font-size:12px;color:#666;margin-bottom:20px'>";
+  html += "On this page you can run report for single, multiple or all properties.";
+  html += "</div>";
+
+  html += "<div class='summary-card' style='margin-bottom:20px'>";
+  html += "<div class='summary-label'>GROSS INCOME REVENUE</div>";
+  html += "<div class='summary-value'>"+money(masterTotals.acc)+"</div>";
+  html += "</div>";
+
+  html += "<div style='margin-bottom:20px'>";
+  html += "<label style='font-weight:bold'>REPORT TYPE</label>";
+  html += "<select id='incomeType' style='width:200px;margin-left:10px'>";
+  html += "<option value='full'>FULL REPORT</option>";
+  html += "<option value='gri'>GRI REPORT</option>";
+  html += "</select>";
+  html += "<button style='margin-left:15px;padding:6px 12px;background:#000;color:#fff;border:none;border-radius:4px' onclick='runIncomeReport()'>RUN</button>";
+  html += "</div>";
+
+  html += "<div id='incomeReportResult'></div>";
+
+  html += "</div>";
+
+  document.getElementById("mainContent").innerHTML = html;
+}
+function runIncomeReport(){
+
+  const type = document.getElementById("incomeType").value;
+
+  let html = "";
+
+  if(type === "gri"){
+
+    html += "<table>";
+    html += "<tr><th>PROPERTY</th><th>CHECK-IN / CHECK-OUT</th><th>ACCOMMODATION</th></tr>";
+
+    Object.keys(propertyTotals).forEach(prop=>{
+      const p = propertyTotals[prop];
+
+      p.reservations.forEach(r=>{
+
+        let a = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
+        const commFee = num(r["COMMUNITY FEE"])||0;
+        a = a - commFee;
+
+        html += "<tr>";
+        html += "<td>"+prop+"</td>";
+        html += "<td>"+r["CHECK-IN DATE"]+" - "+r["CHECK-OUT DATE"]+"</td>";
+        html += "<td>"+money(a)+"</td>";
+        html += "</tr>";
+      });
+    });
+
+    html += "</table>";
+
+  } else {
+
+    Object.keys(propertyTotals).forEach(prop=>{
+      const p = propertyTotals[prop];
+
+      html += "<div class='property-section'>";
+      html += "<div class='property-title'>"+prop+"</div>";
+      html += "<div>Accommodation: "+money(p.acc)+"</div>";
+      html += "<div>PMC: "+money(p.pmc)+"</div>";
+      html += "<div>Expenses: "+money(p.expenses)+"</div>";
+      html += "</div>";
+    });
+  }
+
+  document.getElementById("incomeReportResult").innerHTML = html;
+}
+function showHistory(){
+
+  document.getElementById("reportTitle").textContent = "HISTORY";
+
+  let html = "<div class='property-section'>";
+  html += "<div style='font-weight:bold;margin-bottom:10px'>History</div>";
+  html += "<div style='color:#666;font-size:12px'>";
+  html += "History will display saved monthly reports in future.";
+  html += "</div>";
+  html += "</div>";
+
+  document.getElementById("mainContent").innerHTML = html;
 }
 
 function show1099(){
