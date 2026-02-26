@@ -8,11 +8,11 @@
       "guestyReportUrl": "https://guesty-pmc-api.onrender.com/reservations"
     },
     "GHO REVOCABLE TRUST": {
-  "email": "",
-  "percent": 0.1,
-  "salesFeePercent": 5,
-  "type": "payout",
-  "guestyReportUrl": "https://guesty-pmc-api.onrender.com/reservations"
+      "email": "",
+      "percent": 0.1,
+      "salesFeePercent": 5,
+      "type": "payout",
+      "guestyReportUrl": "https://guesty-pmc-api.onrender.com/reservations"
     },
     "1463 - NICOLE": {
       "email": "",
@@ -104,15 +104,5 @@
     "NMB - 709-2": {},
     "GC - 601A": {}
   },
-  "expenses": [
-    {
-      "id": 1771283801546,
-      "owner": "ERAN MARON",
-      "type": "ADJUSTMENT",
-      "property": "GCSSB - 113B-12S",
-      "vendor": "TEST",
-      "amount": -2000,
-      "notes": "credit broken item"
-    }
-  ]
+  "expenses": []
 }
