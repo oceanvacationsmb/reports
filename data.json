@@ -97,6 +97,11 @@
       "id": 1771293036520,
       "name": "ECIA",
       "phone": ""
+    },
+    {
+      "id": 1772548956644,
+      "name": "MANUAL ADJUSTMENT",
+      "phone": ""
     }
   ],
   "properties": {
@@ -150,5 +155,15 @@
     "MB - 469C": {},
     "MB - 4631/301": {}
   },
-  "expenses": []
+  "expenses": [
+    {
+      "id": 1772548996240,
+      "owner": "GHO REVOCABLE TRUST",
+      "type": "ADJUSTMENT",
+      "property": "MB - 209/5112",
+      "vendor": "MANUAL ADJUSTMENT",
+      "amount": 1712,
+      "notes": "MONTHLY RENTAL - PAID 1 MONTH - 2ND MONTH WILL PAY ON APRIL "
+    }
+  ]
 }
