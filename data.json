@@ -164,6 +164,15 @@
       "vendor": "MANUAL ADJUSTMENT",
       "amount": 1712,
       "notes": "MONTHLY RENTAL - PAID 1 MONTH - 2ND MONTH WILL PAY ON APRIL "
+    },
+    {
+      "id": 1772549121719,
+      "owner": "GHO REVOCABLE TRUST",
+      "type": "ADJUSTMENT",
+      "property": "MB - 4765",
+      "vendor": "MANUAL ADJUSTMENT",
+      "amount": 56.88,
+      "notes": "HMQBETKN\t02/26-03/02\tAirbnb\t$376.00 - ACTUAL ACCOMMO - "
     }
   ]
 }
