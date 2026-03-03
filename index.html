@@ -247,7 +247,7 @@ function runIncomeReport(){
 
       p.reservations.forEach(r=>{
 
-        let a = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"])+ num(row["LENGTH OF STAY DISCOUNT"]);
+        let a = num(r["ACCOMMODATION FARE"]) + num(row["LENGTH OF STAY DISCOUNT"]);
         const commFee = num(r["COMMUNITY FEE"])||0;
         a = a - commFee;
 
