@@ -179,7 +179,7 @@ function getGitHubAPI(){
 
 let gitHubData={},OWNERS={},vendors=[],expenses=[],csvData=[],propertySettings={},currentOwner="",masterTotals={},propertyTotals={},taxByProperty={},githubToken="";
 let sessionExpenses=[];
-const municipalities=["SC","MB","NMB","SSB","HC","MI",];
+const municipalities=["SC","MB","NMB","SSB","HC"];
 
 function num(v){return parseFloat((v||"0").toString().replace(/[$,]/g,""))||0;}
 function money(v){return"$"+(Number(v)||0).toFixed(2);}
@@ -778,9 +778,7 @@ function processData(){
     let gross=0,acc=0,clean=0,pmc=0,websiteFee=0,totalTax=0;
     byProp[prop].forEach(row=>{
       const g=num(row["TOTAL PAYOUT"]);
-      let a = num(row["ACCOMMODATION FARE"]) 
-        - num(row["MARKUP"]) 
-        - num(row["LENGTH OF STAY DISCOUNT"]);
+      let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
       const commFee=num(row["COMMUNITY FEE"])||0;
       a=a-commFee;
       const c=(row["STATUS"]||"").toLowerCase().includes("cancelled")?0:num(row["CLEANING FARE"]);
@@ -878,9 +876,7 @@ function displayStatement(){
     if(type==="draft"){
       html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>ACCOMMODATION</th><th>PMC</th><th>CLEANING</th><th>WEBSITE</th><th>AMOUNT DUE</th></tr>";
       p.reservations.forEach(row=>{
-        let a = num(row["ACCOMMODATION FARE"]) 
-        - num(row["MARKUP"]) 
-        - num(row["LENGTH OF STAY DISCOUNT"]);
+        let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
         const commFee=num(row["COMMUNITY FEE"])||0;
         a=a-commFee;
         const g=num(row["TOTAL PAYOUT"]);
@@ -895,9 +891,7 @@ function displayStatement(){
     }else{
       html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>ACCOMMODATION</th><th>PMC</th><th>OWNER PAYOUT</th></tr>";
       p.reservations.forEach(row=>{
-        let a = num(row["ACCOMMODATION FARE"]) 
-        - num(row["MARKUP"]) 
-        - num(row["LENGTH OF STAY DISCOUNT"]);
+        let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
         const commFee=num(row["COMMUNITY FEE"])||0;
         a=a-commFee;
         const g=num(row["TOTAL PAYOUT"]);
