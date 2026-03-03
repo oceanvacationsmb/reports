@@ -69,6 +69,13 @@
       "salesFeePercent": 10,
       "type": "payout",
       "guestyReportUrl": ""
+    },
+    "2131 - GSD INVESTMENTS": {
+      "email": "office@rodriguezlc.com",
+      "percent": 0.15,
+      "salesFeePercent": 5,
+      "type": "payout",
+      "guestyReportUrl": ""
     }
   },
   "vendors": [
