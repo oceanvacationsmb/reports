@@ -41,6 +41,13 @@
       "salesFeePercent": 10,
       "type": "payout",
       "guestyReportUrl": "https://guesty-pmc-api.onrender.com/reservations"
+    },
+    "469C - ASSAF": {
+      "email": "adahabani@gmail.com",
+      "percent": 0.12,
+      "salesFeePercent": 5,
+      "type": "payout",
+      "guestyReportUrl": ""
     }
   },
   "vendors": [
