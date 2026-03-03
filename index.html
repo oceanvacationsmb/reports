@@ -179,7 +179,7 @@ function getGitHubAPI(){
 
 let gitHubData={},OWNERS={},vendors=[],expenses=[],csvData=[],propertySettings={},currentOwner="",masterTotals={},propertyTotals={},taxByProperty={},githubToken="";
 let sessionExpenses=[];
-const municipalities=["SC","MB","NMB","SSB","HC"];
+const municipalities=["SC","MB","NMB","SSB","HC","MI",];
 
 function num(v){return parseFloat((v||"0").toString().replace(/[$,]/g,""))||0;}
 function money(v){return"$"+(Number(v)||0).toFixed(2);}
