@@ -891,7 +891,7 @@ function displayStatement(){
     }else{
       html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>ACCOMMODATION</th><th>PMC</th><th>OWNER PAYOUT</th></tr>";
       p.reservations.forEach(row=>{
-        let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
+        let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"])+ num(row["LENGTH OF STAY DISCOUNT"]);
         const commFee=num(row["COMMUNITY FEE"])||0;
         a=a-commFee;
         const g=num(row["TOTAL PAYOUT"]);
