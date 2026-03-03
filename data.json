@@ -48,6 +48,27 @@
       "salesFeePercent": 5,
       "type": "payout",
       "guestyReportUrl": ""
+    },
+    "1552 - YEN": {
+      "email": "tristate1391@gmail.com",
+      "percent": 0.15,
+      "salesFeePercent": 5,
+      "type": "payout",
+      "guestyReportUrl": ""
+    },
+    "508/1-2  - Kobi": {
+      "email": "kobiswisa26@gmail.com",
+      "percent": 0.15,
+      "salesFeePercent": 10,
+      "type": "payout",
+      "guestyReportUrl": ""
+    },
+    "214 - GTI GROUP TAL": {
+      "email": "zilkerinvestments@gmail.com",
+      "percent": 0.12,
+      "salesFeePercent": 10,
+      "type": "payout",
+      "guestyReportUrl": ""
     }
   },
   "vendors": [
