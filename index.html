@@ -903,6 +903,7 @@ if(platform.includes("homeaway")){
   w = num(row["CHANNEL COMMISSION"]);
 }
 
+        p.reservations.forEach(row=>{
 const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
 const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
 
