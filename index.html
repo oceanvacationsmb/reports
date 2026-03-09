@@ -904,6 +904,7 @@ html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8)+"</td><td>"+checkin+"-"
 
 });
      // PAYOUT: use Net Accommodation = TOTAL PAYOUT + length-of-stay-discount - cleaning - linen - community fee - taxes
+      html+="</table></div>";
 html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>ACCOMMODATION</th><th>PMC</th><th>OWNER PAYOUT</th></tr>";
 p.reservations.forEach(row=>{
   const totalPayout = num(row["TOTAL PAYOUT"]);
