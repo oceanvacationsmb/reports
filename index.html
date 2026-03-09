@@ -864,7 +864,7 @@ function displayStatement(){
     if(type==="draft"){
       html+="<div class='summary-grid'>";
       html+="<div class='summary-card'><div class='summary-label'>PAYOUT</div><div class='summary-value'>"+money(p.gross)+"</div></div>";
-html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
       html+="<div class='summary-card'><div class='summary-label'>CLEANING FEE</div><div class='summary-value'>"+money(p.clean)+"</div></div>";
       html+="<div class='summary-card'><div class='summary-label'>WEBSITE/VRBO FEE</div><div class='summary-value'>"+money(p.websiteFee)+"</div></div>";
       html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
@@ -921,6 +921,34 @@ html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8).toUpperCase()+"</td><td
     html+="</div>";
   });
   document.getElementById("mainContent").innerHTML=html;
+}
+
+  else{
+
+html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>ACCOMMODATION</th><th>PMC</th><th>OWNER PAYOUT</th></tr>";
+
+p.reservations
+.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"]))
+.forEach(row=>{
+
+let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
+const pm=a*t.percent;
+const owner=a-pm;
+
+const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
+const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
+
+html+="<tr>";
+html+="<td>"+row["CONFIRMATION CODE"].substring(0,8).toUpperCase()+"</td>";
+html+="<td>"+checkin+"-"+checkout+"</td>";
+html+="<td>"+row["PLATFORM"]+"</td>";
+html+="<td>"+money(a)+"</td>";
+html+="<td>"+money(pm)+"</td>";
+html+="<td>"+money(owner)+"</td>";
+html+="</tr>";
+
+});
+
 }
 
 function deleteExpenseLocal(id){
