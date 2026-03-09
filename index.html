@@ -917,8 +917,8 @@ html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8).toUpperCase()+"</td><td
 
 }else{
 
-html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>ACCOMMODATION</th><th>PMC</th><th>OWNER PAYOUT</th></tr>";
-
+html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>ACCOMMODATION</th><th>PMC</th><th>EXPENSES</th><th>OWNER PAYOUT</th></tr>";
+     
 p.reservations.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"])).forEach(row=>{
 
 let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
@@ -934,6 +934,7 @@ html+="<td>"+checkin+"-"+checkout+"</td>";
 html+="<td>"+row["PLATFORM"]+"</td>";
 html+="<td>"+money(a)+"</td>";
 html+="<td>"+money(pm)+"</td>";
+html+="<td>"+money(0)+"</td>";
 html+="<td>"+money(owner)+"</td>";
 html+="</tr>";
 
