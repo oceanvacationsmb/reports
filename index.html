@@ -904,19 +904,24 @@ html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8)+"</td><td>"+checkin+"-"
 
 });
      // PAYOUT: use Net Accommodation = TOTAL PAYOUT + length-of-stay-discount - cleaning - linen - community fee - taxes
-      html+="</table></div>";
-html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>ACCOMMODATION</th><th>PMC</th><th>OWNER PAYOUT</th></tr>";
-p.reservations.forEach(row=>{
-  const totalPayout = num(row["TOTAL PAYOUT"]);
+      html+="</table>";
+      html+="<table style='margin-top:10px'><tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>ACCOMMODATION</th><th>PMC</th><th>OWNER PAYOUT</th></tr>";
+      p.reservations.forEach(row=>{
 
-  const cleaning = (row["STATUS"]||"").toLowerCase().includes("cancelled") ? 0 : num(row["CLEANING FARE"]);
+const stayDiscount = num(row["LENGTH OF STAY DISCOUNT"]);
+let accommodation = num(row["ACCOMMODATION FARE"]) - num(row["MARKUP"]) + stayDiscount;
 
-  const cityTax = num(row["CITY TAX"]) || 0;
-  const stateTax = num(row["STATE TAX"]) || 0;
-  const countyTax = num(row["COUNTY TAX"]) || 0;
-  const occupancyTax = num(row["OCCUPANCY TAX"]) || 0;
-  const taxes = cityTax + stateTax + countyTax + occupancyTax;
+const pm = accommodation * t.percent;
+const owner = accommodation - pm;
 
+const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
+const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
+
+html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8)+"</td><td>"+checkin+"-"+checkout+"</td><td>"+row["PLATFORM"]+"</td><td>"+money(accommodation)+"</td><td>"+money(pm)+"</td><td>"+money(owner)+"</td></tr>";
+
+});
+html+="</table></div>";
+      
   // Your CSV: LENGTH OF STAY DISCOUNT is often blank or negative (e.g. -546)
   // We ADD it exactly as a signed value.
   const stayDiscount = num(row["LENGTH OF STAY DISCOUNT"]);
