@@ -1009,28 +1009,55 @@ if(type==="draft"){
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>COMMISSION FEE ("+t.salesFeePercent+"%)</span><span>"+money(salesFee)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:12px;border-top:1px solid #ddd;font-weight:bold'><span>COMMISSION DUE</span><span>"+money(salesFee)+"</span></div></div></div>";
 
-    let taxHtml="";
-
+let taxHtml="";
 let anyTax=false;
 
 Object.keys(propertyTotals).forEach(prop=>{
 
 const p=propertyTotals[prop];
 
-const tax=p.tax||0;
-const reportable=p.owner-tax;
+let taxTotal=0;
+let payoutTotal=0;
 
-if(tax>0) anyTax=true;
+p.reservations.forEach(row=>{
+
+const city=num(row["CITY TAX"]);
+const state=num(row["STATE TAX"]);
+const county=num(row["COUNTY TAX"]);
+const occ=num(row["OCCUPANCY TAX"]);
+
+const tax=city+state+county+occ;
+
+if(tax>0){
+
+anyTax=true;
+
+let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
+const pm=a*t.percent;
+const payout=a-pm;
+
+taxTotal+=tax;
+payoutTotal+=payout;
+
+}
+
+});
+
+if(taxTotal>0){
 
 let muni=[];
 municipalities.forEach(m=>{
 if(propertySettings[prop] && propertySettings[prop][m]) muni.push(m);
 });
 
+const reportAmount=payoutTotal-taxTotal;
+
 taxHtml+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'>";
-taxHtml+="<span>"+prop+" ("+(muni.join(", ")||"NO MUNICIPALITY SET")+")</span>";
-taxHtml+="<span>"+money(tax>0?reportable:0)+"</span>";
+taxHtml+="<span>"+prop+" ("+muni.join(", ")+")</span>";
+taxHtml+="<span>"+money(reportAmount)+"</span>";
 taxHtml+="</div>";
+
+}
 
 });
 
