@@ -40,7 +40,7 @@ tr:nth-child(even){background:#fafafa}
 .property-icon{font-size:18px;margin-right:10px}
 .summary-title{font-size:12px;font-weight:bold;text-transform:uppercase;text-align:center;margin:20px 0}
 .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}
-.summary-card{background:#f9f5f9;border:1px solid #ddd;padding:12px;text-align:center;border-radius:5px}
+.summary-card{background:#f9f9f9;border:1px solid #ddd;padding:12px;text-align:center;border-radius:5px}
 .summary-label{font-size:10px;color:#666;font-weight:bold;text-transform:uppercase}
 .summary-value{font-size:14px;font-weight:bold;color:#000;margin-top:6px}
 .amount-due-container{text-align:center;margin:30px 0}
@@ -184,17 +184,6 @@ const municipalities=["SC","MB","NMB","SSB","HC"];
 function num(v){return parseFloat((v||"0").toString().replace(/[$,]/g,""))||0;}
 function money(v){return"$"+(Number(v)||0).toFixed(2);}
 
-// NEW: read linen fee from possible column names (keeps code resilient)
-function linenFee(row){
-  return (
-    num(row["LINEN FEE"]) ||
-    num(row["LINENS FEE"]) ||
-    num(row["LINEN"]) ||
-    num(row["LINENS"]) ||
-    0
-  );
-}
-
 function updateTokenStatus(){
   const status=document.getElementById("tokenStatus");
   if(githubToken){
@@ -258,7 +247,7 @@ function runIncomeReport(){
 
       p.reservations.forEach(r=>{
 
-        let a = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"])+ num(r["LENGTH OF STAY DISCOUNT"]);
+        let a = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
         const commFee = num(r["COMMUNITY FEE"])||0;
         a = a - commFee;
 
@@ -789,7 +778,7 @@ function processData(){
     let gross=0,acc=0,clean=0,pmc=0,websiteFee=0,totalTax=0;
     byProp[prop].forEach(row=>{
       const g=num(row["TOTAL PAYOUT"]);
-      let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"])+ num(row["LENGTH OF STAY DISCOUNT"]);
+      let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
       const commFee=num(row["COMMUNITY FEE"])||0;
       a=a-commFee;
       const c=(row["STATUS"]||"").toLowerCase().includes("cancelled")?0:num(row["CLEANING FARE"]);
@@ -887,7 +876,7 @@ function displayStatement(){
     if(type==="draft"){
       html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>ACCOMMODATION</th><th>PMC</th><th>CLEANING</th><th>WEBSITE</th><th>AMOUNT DUE</th></tr>";
       p.reservations.forEach(row=>{
-        let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"])+ num(row["LENGTH OF STAY DISCOUNT"]);
+        let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
         const commFee=num(row["COMMUNITY FEE"])||0;
         a=a-commFee;
         const g=num(row["TOTAL PAYOUT"]);
@@ -900,43 +889,26 @@ function displayStatement(){
         html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8)+"</td><td>"+checkin+"-"+checkout+"</td><td>"+row["PLATFORM"]+"</td><td>"+money(a)+"</td><td>"+money(pm)+"</td><td>"+money(c)+"</td><td>"+money(w)+"</td><td>"+money(pm+c+w)+"</td></tr>";
       });
     }else{
-     // PAYOUT: use Net Accommodation = TOTAL PAYOUT + length-of-stay-discount - cleaning - linen - community fee - taxes
-html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>ACCOMMODATION</th><th>PMC</th><th>OWNER PAYOUT</th></tr>";
-p.reservations.forEach(row=>{
-  const totalPayout = num(row["TOTAL PAYOUT"]);
-
-  const cleaning = (row["STATUS"]||"").toLowerCase().includes("cancelled") ? 0 : num(row["CLEANING FARE"]);
-  const commFee = num(row["COMMUNITY FEE"]) || 0;
-
-  const cityTax = num(row["CITY TAX"]) || 0;
-  const stateTax = num(row["STATE TAX"]) || 0;
-  const countyTax = num(row["COUNTY TAX"]) || 0;
-  const occupancyTax = num(row["OCCUPANCY TAX"]) || 0;
-  const taxes = cityTax + stateTax + countyTax + occupancyTax;
-
-  // Your CSV: LENGTH OF STAY DISCOUNT is often blank or negative (e.g. -546)
-  // We ADD it exactly as a signed value.
-  const stayDiscount = num(row["LENGTH OF STAY DISCOUNT"]);
-
-  // Linen fee: only if a column exists (your pasted CSV does NOT include one)
-  const linen =
-    num(row["LINEN FEE"]) ||
-    num(row["LINENS FEE"]) ||
-    num(row["LINEN"]) ||
-    num(row["LINENS"]) ||
-    0;
-
-  const netAcc = totalPayout + stayDiscount - cleaning - linen - commFee - taxes;
-
-  const pm = netAcc * t.percent;
-
-  const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
-  const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
-
-  if(totalPayout===0)return;
-
-  html+="<tr><td>"+(row["CONFIRMATION CODE"]||"").substring(0,8)+"</td><td>"+checkin+"-"+checkout+"</td><td>"+(row["PLATFORM"]||"")+"</td><td>"+money(netAcc)+"</td><td>"+money(pm)+"</td><td>"+money(netAcc-pm)+"</td></tr>";
-});
+      html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>ACCOMMODATION</th><th>PMC</th><th>OWNER PAYOUT</th></tr>";
+      p.reservations.forEach(row=>{
+        let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
+        const commFee=num(row["COMMUNITY FEE"])||0;
+        a=a-commFee;
+        const g=num(row["TOTAL PAYOUT"]);
+        const pm=a*t.percent;
+        const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
+        const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
+        if(g===0)return;
+        html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8)+"</td><td>"+checkin+"-"+checkout+"</td><td>"+row["PLATFORM"]+"</td><td>"+money(a)+"</td><td>"+money(pm)+"</td><td>"+money(a-pm)+"</td></tr>";
+      });
+    }
+    html+="</table></div>";
+    if(exp.length>0){
+      html+="<div style='margin-top:15px'><div class='section-title'>EXPENSES</div><table style='margin-top:10px'>";
+      html+="<tr><th>TYPE</th><th>VENDOR</th><th>AMOUNT</th><th>ACTION</th></tr>";
+      exp.forEach(e=>{
+        html+="<tr><td>"+e.type+"</td><td>"+e.vendor+"</td><td>"+money(e.amount)+"</td><td><button class='btn btn-danger btn-small' onclick='deleteExpenseLocal("+e.id+")'>DELETE</button></td></tr>";
+      });
       html+="</table></div>";
     }
     html+="</div>";
