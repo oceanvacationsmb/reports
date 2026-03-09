@@ -45,8 +45,13 @@ page-break-before:always;
 }.property-title{font-size:14px;font-weight:bold;margin-bottom:15px;display:flex;align-items:center;text-transform:uppercase}
 .property-icon{font-size:18px;margin-right:10px}
 .summary-title{font-size:12px;font-weight:bold;text-transform:uppercase;text-align:center;margin:20px 0}
-.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}
-.summary-card{background:#fff;color:#000;border:1px solid #ddd;border-radius:6px;padding:18px;text-align:center;}
+.summary-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+gap:12px;
+margin:20px 0;
+page-break-inside:avoid;
+}.summary-card{background:#fff;color:#000;border:1px solid #ddd;border-radius:6px;padding:18px;text-align:center;}
 .summary-label{font-size:10px;color:#000;font-weight:bold;text-transform:uppercase}
 .summary-value{font-size:14px;font-weight:bold;color:#000;margin-top:6px}
 .amount-due-container{text-align:center;margin:30px 0}
