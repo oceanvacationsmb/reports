@@ -872,24 +872,37 @@ function displayStatement(){
     const exp=expenses.filter(e=>e.property===prop&&e.owner===currentOwner);
     html+="<div class='property-section'><div class='property-title'><span class='property-icon'>🏠</span>"+prop.toUpperCase()+"</div>";
     
-    if(type==="draft"){
-      html+="<div class='summary-grid'>";
-      html+="<div class='summary-card'><div class='summary-label'>PAYOUT</div><div class='summary-value'>"+money(p.gross)+"</div></div>";
-html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
-      html+="<div class='summary-card'><div class='summary-label'>CLEANING FEE</div><div class='summary-value'>"+money(p.clean)+"</div></div>";
-      html+="<div class='summary-card'><div class='summary-label'>WEBSITE/VRBO FEE</div><div class='summary-value'>"+money(p.websiteFee)+"</div></div>";
-      html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
-      html+="<div class='summary-card'><div class='summary-label'>PMC ("+(t.percent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
-      html+="</div>";
-      html+="<div class='amount-due-container'><div class='amount-due-box'><div class='amount-due-label'>AMOUNT DUE</div><div class='amount-due-value'>"+money(r)+"</div></div></div>";
-    }else{
-      html+="<div class='summary-grid'>";
-      html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
-      html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
-      html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
-      html+="</div>";
-      html+="<div class='summary-card'><div class='summary-label'>OWNER PAYOUT</div><div class='summary-value'>"+money(r)+"</div></div>";
-    }
+ if(type==="draft"){
+  html+="<div class='summary-grid'>";
+  html+="<div class='summary-card'><div class='summary-label'>PAYOUT</div><div class='summary-value'>"+money(p.gross)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>CLEANING FEE</div><div class='summary-value'>"+money(p.clean)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>WEBSITE/VRBO FEE</div><div class='summary-value'>"+money(p.websiteFee)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>PMC ("+(t.percent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
+  html+="</div>";
+
+  html+="<div style='margin:40px 0;text-align:center;display:block;width:100%'>";
+  html+="<div style='display:inline-block;padding:25px 60px;border:1px solid #ddd;border-radius:8px;background:#fff'>";
+  html+="<div style='font-weight:bold;margin-bottom:8px'>AMOUNT DUE</div>";
+  html+="<div style='font-size:38px;font-weight:bold'>"+money(r)+"</div>";
+  html+="</div></div>";
+
+}else{
+
+  html+="<div class='summary-grid'>";
+  html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
+  html+="</div>";
+
+  html+="<div style='margin:40px 0;text-align:center;display:block;width:100%'>";
+  html+="<div style='display:inline-block;padding:25px 60px;border:1px solid #ddd;border-radius:8px;background:#fff'>";
+  html+="<div style='font-weight:bold;margin-bottom:8px'>OWNER PAYOUT</div>";
+  html+="<div style='font-size:38px;font-weight:bold'>"+money(r)+"</div>";
+  html+="</div></div>";
+
+}
     
     html+="<div style='margin-top:15px'><div class='section-title'>RESERVATIONS</div><table style='margin-top:10px'>";
    if(type==="draft"){
