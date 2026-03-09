@@ -921,28 +921,7 @@ html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8)+"</td><td>"+checkin+"-"
 });
 html+="</table></div>";
       
-  // Your CSV: LENGTH OF STAY DISCOUNT is often blank or negative (e.g. -546)
-  // We ADD it exactly as a signed value.
-  const stayDiscount = num(row["LENGTH OF STAY DISCOUNT"]);
-
-  // Linen fee: only if a column exists (your pasted CSV does NOT include one)
-  const linen =
-    num(row["LINEN FEE"]) ||
-    num(row["LINENS FEE"]) ||
-    num(row["LINEN"]) ||
-    num(row["LINENS"]) ||
-    0;
-
-const netAcc = num(row["ACCOMMODATION FARE"]) - num(row["MARKUP"]) + num(row["LENGTH OF STAY DISCOUNT"]);
-  const pm = netAcc * t.percent;
-
-  const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
-  const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
-
-  if(totalPayout===0)return;
-
-  html+="<tr><td>"+(row["CONFIRMATION CODE"]||"").substring(0,8)+"</td><td>"+checkin+"-"+checkout+"</td><td>"+(row["PLATFORM"]||"")+"</td><td>"+money(netAcc)+"</td><td>"+money(pm)+"</td><td>"+money(netAcc-pm)+"</td></tr>";
-});
+  });
       html+="</table></div>";
     }
     html+="</div>";
