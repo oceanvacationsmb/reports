@@ -40,11 +40,11 @@ tr:nth-child(even){background:#fafafa}
 .property-icon{font-size:18px;margin-right:10px}
 .summary-title{font-size:12px;font-weight:bold;text-transform:uppercase;text-align:center;margin:20px 0}
 .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}
-.summary-card{background:#f9f9f9;border:1px solid #ddd;padding:12px;text-align:center;border-radius:5px}
-.summary-label{font-size:10px;color:#666;font-weight:bold;text-transform:uppercase}
+.summary-card{background:#fff;color:#000;border:1px solid #ddd;border-radius:6px;padding:18px;text-align:center;}
+.summary-label{font-size:10px;color:#000;font-weight:bold;text-transform:uppercase}
 .summary-value{font-size:14px;font-weight:bold;color:#000;margin-top:6px}
 .amount-due-container{text-align:center;margin:30px 0}
-.amount-due-box{background:#000;color:#fff;border:none;border-radius:5px;padding:20px;display:inline-block;min-width:300px}
+.amount-due-box{background:#fff;color:#000;border:1px solid #ddd;border-radius:5px;padding:20px;display:inline-block;min-width:300px}
 .amount-due-label{font-size:12px;font-weight:bold;text-transform:uppercase;margin-bottom:10px}
 .amount-due-value{font-size:32px;font-weight:bold}
 .modal{display:none;position:fixed;z-index:1001;left:50%;top:50%;transform:translate(-50%,-50%);width:90%;max-width:500px;background:#333;color:#fff;border-radius:8px;padding:30px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto}
@@ -852,7 +852,7 @@ function displayStatement(){
     html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
-    html+="<div class='summary-card'<div class='summary-label'>OWNER PAYOUT</div><div class='summary-value'>"+money(masterTotals.owner)+"</div></div>";
+html+="<div class='summary-card'><div class='summary-label'>OWNER PAYOUT</div><div class='summary-value'>"+money(masterTotals.owner)+"</div></div>";
   }
   html+="</div>";
   Object.keys(propertyTotals).forEach(prop=>{
@@ -877,7 +877,7 @@ html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><
       html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
       html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
       html+="</div>";
-      html+="<div class='amount-due-container'><div class='amount-due-box'><div class='amount-due-label'>OWNER PAYOUT</div><div class='amount-due-value'>"+money(r)+"</div></div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>OWNER PAYOUT</div><div class='summary-value'>"+money(r)+"</div></div>";
     }
     
     html+="<div style='margin-top:15px'><div class='section-title'>RESERVATIONS</div><table style='margin-top:10px'>";
