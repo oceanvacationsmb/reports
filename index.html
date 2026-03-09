@@ -854,7 +854,8 @@ function displayStatement(){
     
     if(type==="draft"){
       html+="<div class='summary-grid'>";
-      html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>PAYOUT</div><div class='summary-value'>"+money(p.gross)+"</div></div>";
+html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
       html+="<div class='summary-card'><div class='summary-label'>CLEANING FEE</div><div class='summary-value'>"+money(p.clean)+"</div></div>";
       html+="<div class='summary-card'><div class='summary-label'>WEBSITE/VRBO FEE</div><div class='summary-value'>"+money(p.websiteFee)+"</div></div>";
       html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
@@ -863,7 +864,8 @@ function displayStatement(){
       html+="<div class='amount-due-container'><div class='amount-due-box'><div class='amount-due-label'>AMOUNT DUE</div><div class='amount-due-value'>"+money(r)+"</div></div></div>";
     }else{
       html+="<div class='summary-grid'>";
-      html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>PAYOUT</div><div class='summary-value'>"+money(p.gross)+"</div></div>";
+html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
       html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
       html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
       html+="</div>";
@@ -872,7 +874,7 @@ function displayStatement(){
     
     html+="<div style='margin-top:15px'><div class='section-title'>RESERVATIONS</div><table style='margin-top:10px'>";
     if(type==="draft"){
-      html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>ACCOMMODATION</th><th>PMC</th><th>CLEANING</th><th>WEBSITE/VRBO FEE</th><th>AMOUNT DUE</th></tr>";
+      html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>PAYOUT</th><th>ACCOMMODATION</th><th>PMC</th><th>CLEANING</th><th>WEBSITE</th><th>AMOUNT DUE</th></tr>";
       p.reservations.forEach(row=>{
         let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
         const g=num(row["TOTAL PAYOUT"]);
