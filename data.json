@@ -158,15 +158,5 @@
     "NMB - 400A": {},
     "NMB - 705-2": {}
   },
-  "expenses": [
-    {
-      "id": 1772548996240,
-      "owner": "GHO REVOCABLE TRUST",
-      "type": "ADJUSTMENT",
-      "property": "MB - 209/5112",
-      "vendor": "MANUAL ADJUSTMENT",
-      "amount": 1712,
-      "notes": "MONTHLY RENTAL - PAID 1 MONTH - 2ND MONTH WILL PAY ON APRIL "
-    }
-  ]
+  "expenses": []
 }
