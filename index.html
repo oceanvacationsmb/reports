@@ -182,8 +182,9 @@ let sessionExpenses=[];
 const municipalities=["SC","MB","NMB","SSB","HC"];
 
 function num(v){return parseFloat((v||"0").toString().replace(/[$,]/g,""))||0;}
-function money(v){return"$"+(Number(v)||0).toFixed(2);}
-
+function money(v){
+  return "$"+(Number(v)||0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+}
 function updateTokenStatus(){
   const status=document.getElementById("tokenStatus");
   if(githubToken){
