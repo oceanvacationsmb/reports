@@ -857,7 +857,7 @@ function displayStatement(){
   html+="</div>";
   Object.keys(propertyTotals).forEach(prop=>{
     const p=propertyTotals[prop];
-    const r=type==="draft"?p.draft:p.owner;
+    const r = type==="draft" ? (p.pmc + p.clean + p.websiteFee + p.expenses) : p.owner;
     const exp=expenses.filter(e=>e.property===prop&&e.owner===currentOwner);
     html+="<div class='property-section'><div class='property-title'><span class='property-icon'>🏠</span>"+prop.toUpperCase()+"</div>";
     
