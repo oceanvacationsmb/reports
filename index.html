@@ -1109,14 +1109,27 @@ html2pdf().set(opt).from(element).save();
 }
   
 loadData();
-  function deleteExpenseLocal(id){
+ function deleteExpenseLocal(id){
 
 if(!confirm("Delete expense?")) return;
 
 expenses = expenses.filter(e => e.id !== id);
 
+const savedOwner=currentOwner;
+const savedMonth=document.getElementById("monthSelect").value;
+const savedYear=document.getElementById("yearSelect").value;
+
+saveToGitHub("expenses",()=>{
+
+currentOwner=savedOwner;
+document.getElementById("ownerSelect").value=savedOwner;
+document.getElementById("monthSelect").value=savedMonth;
+document.getElementById("yearSelect").value=savedYear;
+
 processData();
 displayStatement();
+
+});
 
 }
 </script>
