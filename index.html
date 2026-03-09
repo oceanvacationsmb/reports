@@ -787,7 +787,9 @@ if(t.type==="draft" && g>0){
   const source=(row["SOURCE"]||"").toLowerCase();
 
 if(source.includes("website")){
-  w = (g * 0.01) + 0.30;
+  const markup = num(row["MARKUP"]);
+  const base = g + markup;
+  w = (base * 0.01) + 0.30;
 }
 
   if(platform.includes("homeaway")){
@@ -890,7 +892,9 @@ const platform=(row["PLATFORM"]||"").toLowerCase();
 const source=(row["SOURCE"]||"").toLowerCase();
 
 if(source.includes("website")){
-  w = (g * 0.01) + 0.30;
+  const markup = num(row["MARKUP"]);
+  const base = g + markup;
+  w = (base * 0.01) + 0.30;
 }
 
 if(platform.includes("homeaway")){
