@@ -1095,6 +1095,9 @@ function closeAll(){
 
 function downloadPDF(){
 
+const btn=document.querySelector(".action-buttons");
+if(btn) btn.style.display="none";
+
 const element=document.getElementById("content");
 
 const opt={
@@ -1105,7 +1108,9 @@ html2canvas:{scale:2},
 jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
 };
 
-html2pdf().set(opt).from(element).save();
+html2pdf().set(opt).from(element).save().then(()=>{
+if(btn) btn.style.display="flex";
+});
 
 }
   
