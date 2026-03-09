@@ -916,33 +916,11 @@ html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8)+"</td><td>"+checkin+"-"
       html+="<tr><th>TYPE</th><th>VENDOR</th><th>AMOUNT</th><th>ACTION</th></tr>";
       exp.forEach(e=>{
         html+="<tr><td>"+e.type+"</td><td>"+e.vendor+"</td><td>"+money(e.amount)+"</td><td><button class='btn btn-danger btn-small' onclick='deleteExpenseLocal("+e.id+")'>DELETE</button></td></tr>";
-     });
-});
-}
-else{
-
-html+="<table style='margin-top:10px'>";
-
-html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>ACCOMMODATION</th><th>PMC</th><th>OWNER PAYOUT</th></tr>";
-
-p.reservations.forEach(row=>{
-
-let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
-const pm=a*t.percent;
-
-const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
-const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
-
-html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8)+"</td><td>"+checkin+"-"+checkout+"</td><td>"+row["PLATFORM"]+"</td><td>"+money(a)+"</td><td>"+money(pm)+"</td><td>"+money(a-pm)+"</td></tr>";
-
-});
-
-html+="</table></div>";
-}
-html+="</div>";
-
-});
-  
+      });
+      html+="</table></div>";
+    }
+    html+="</div>";
+  });
   document.getElementById("mainContent").innerHTML=html;
 }
 
