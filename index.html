@@ -923,14 +923,12 @@ html+="<tr><td>"+(row["CONFIRMATION CODE"]||"").substring(0,8)+"</td><td>"+check
 });
 
 html+="</table>";
-
-});
 html+="</div>";
+
 });
 
 document.getElementById("mainContent").innerHTML=html;
 }
-
 function deleteExpenseLocal(id){
   if(!confirm("Delete?"))return;
   expenses=expenses.filter(e=>e.id!==id);
