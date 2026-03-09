@@ -884,7 +884,16 @@ html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><
         const g=num(row["TOTAL PAYOUT"]);
         const c=(row["STATUS"]||"").toLowerCase().includes("cancelled")?0:num(row["CLEANING FARE"]);
         const pm=a*t.percent;
-        const w=a>0&&!row["CONFIRMATION CODE"].toUpperCase().startsWith("HA")&&(row["PLATFORM"]||"").toLowerCase().includes("website")?g*0.01:0;
+        let w=0;
+const platform=(row["PLATFORM"]||"").toLowerCase();
+
+if(platform.includes("website")){
+  w = g * 0.01;
+}
+
+if(platform.includes("homeaway")){
+  w = g * 0.05;
+}
         const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
         const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
         if(g===0)return;
