@@ -918,17 +918,17 @@ const owner = accommodation - pm;
 const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
 const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
 
-html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8)+"</td><td>"+checkin+"-"+checkout+"</td><td>"+row["PLATFORM"]+"</td><td>"+money(accommodation)+"</td><td>"+money(pm)+"</td><td>"+money(owner)+"</td></tr>";
+html+="<tr><td>"+(row["CONFIRMATION CODE"]||"").substring(0,8)+"</td><td>"+checkin+"-"+checkout+"</td><td>"+row["PLATFORM"]+"</td><td>"+money(accommodation)+"</td><td>"+money(pm)+"</td><td>"+money(owner)+"</td></tr>";
+
 });
 
 html+="</table>";
 
-}
-      
-  });
-    html+="</div>";
-  });
-  document.getElementById("mainContent").innerHTML=html;
+});
+html+="</div>";
+});
+
+document.getElementById("mainContent").innerHTML=html;
 }
 
 function deleteExpenseLocal(id){
