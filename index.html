@@ -184,6 +184,17 @@ const municipalities=["SC","MB","NMB","SSB","HC"];
 function num(v){return parseFloat((v||"0").toString().replace(/[$,]/g,""))||0;}
 function money(v){return"$"+(Number(v)||0).toFixed(2);}
 
+// NEW: read linen fee from possible column names (keeps code resilient)
+function linenFee(row){
+  return (
+    num(row["LINEN FEE"]) ||
+    num(row["LINENS FEE"]) ||
+    num(row["LINEN"]) ||
+    num(row["LINENS"]) ||
+    0
+  );
+}
+
 function updateTokenStatus(){
   const status=document.getElementById("tokenStatus");
   if(githubToken){
@@ -758,7 +769,7 @@ function processData(){
   const year=parseInt(document.getElementById("yearSelect").value);
   const t=OWNERS[currentOwner];
   propertyTotals={};
-  masterTotals={gross:0,acc:0,clean:0,pmc:0,expenses:0,draft:0,owner:0,websiteFee:0,vrboFee:0,totalTaxCollected:0};
+  masterTotals={gross:0,acc:0,clean:0,pmc:0,expenses:0,draft:0,owner:0,websiteFee:0,totalTaxCollected:0};
   taxByProperty={};
   let byProp={};
   
@@ -775,7 +786,7 @@ function processData(){
   });
   
   Object.keys(byProp).forEach(prop=>{
-    let gross=0,acc=0,clean=0,pmc=0,websiteFee=0,vrboFee=0,totalTax=0;
+    let gross=0,acc=0,clean=0,pmc=0,websiteFee=0,totalTax=0;
     byProp[prop].forEach(row=>{
       const g=num(row["TOTAL PAYOUT"]);
       let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"])+ num(row["LENGTH OF STAY DISCOUNT"]);
@@ -811,13 +822,12 @@ function processData(){
     const exp=expenses.filter(e=>e.property===prop&&e.owner===currentOwner).reduce((sum,e)=>sum+e.amount,0);
     const draft=pmc+clean+websiteFee+exp;
     const owner=acc-pmc-exp;
-    propertyTotals[prop]={gross:gross,acc:acc,clean:clean,pmc:pmc,websiteFee:websiteFee,vrboFee:vrboFee,expenses:exp,draft:draft,owner:owner,tax:totalTax,reservations:byProp[prop]};
+    propertyTotals[prop]={gross:gross,acc:acc,clean:clean,pmc:pmc,websiteFee:websiteFee,expenses:exp,draft:draft,owner:owner,tax:totalTax,reservations:byProp[prop]};
     masterTotals.gross+=gross;
     masterTotals.acc+=acc;
     masterTotals.clean+=clean;
     masterTotals.pmc+=pmc;
     masterTotals.websiteFee+=websiteFee;
-    masterTotals.vrboFee+=vrboFee;
     masterTotals.expenses+=exp;
     masterTotals.draft+=draft;
     masterTotals.owner+=owner;
@@ -844,7 +854,6 @@ function displayStatement(){
     html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>AMOUNT DUE</div><div class='summary-value' style='color:#fff'>"+money(masterTotals.draft)+"</div></div>";
   }else{
     html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>WEBSITE/VRBO FEE</div><div class='summary-value'>"+money(masterTotals.websiteFee + masterTotals.vrboFee)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
     html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>OWNER PAYOUT</div><div class='summary-value' style='color:#fff'>"+money(masterTotals.owner)+"</div></div>";
@@ -868,7 +877,6 @@ function displayStatement(){
     }else{
       html+="<div class='summary-grid'>";
       html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
-      html+="<div class='summary-card'><div class='summary-label'>WEBSITE/VRBO FEE</div><div class='summary-value'>"+money(p.websiteFee + p.vrboFee)+"</div></div>";
       html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
       html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
       html+="</div>";
@@ -892,47 +900,43 @@ function displayStatement(){
         html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8)+"</td><td>"+checkin+"-"+checkout+"</td><td>"+row["PLATFORM"]+"</td><td>"+money(a)+"</td><td>"+money(pm)+"</td><td>"+money(c)+"</td><td>"+money(w)+"</td><td>"+money(pm+c+w)+"</td></tr>";
       });
     }else{
-      // PAYOUT: Accommodation = ACCOMMODATION FARE - MARKUP + LENGTH OF STAY DISCOUNT
-      // Website fee = 1% of TOTAL PAYOUT (website platform ONLY - NOT manual)
-      // VRBO/HomeAway fee = 5% of TOTAL PAYOUT
-      html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>GROSS PAYOUT</th><th>ACCOMMODATION</th><th>WEBSITE/VRBO FEE</th><th>PMC</th><th>OWNER PAYOUT</th></tr>";
-      
-      p.reservations.forEach(row=>{
-        const totalPayout = num(row["TOTAL PAYOUT"]);
-        const platform = (row["PLATFORM"] || "").toLowerCase().trim();
-        
-        // Accommodation ONLY: FARE - MARKUP + DISCOUNT (NO community fee, NO taxes)
-        const accom = num(row["ACCOMMODATION FARE"]) - num(row["MARKUP"]) + num(row["LENGTH OF STAY DISCOUNT"]);
-        
-        // Platform fee: 1% for "website" ONLY, 5% for "homeaway" or "vrbo", 0% for all others
-        let platformFee = 0;
-        if(platform === "website") {
-          platformFee = totalPayout * 0.01;
-        } else if(platform === "homeaway" || platform === "vrbo") {
-          platformFee = totalPayout * 0.05;
-        }
-        
-        // PMC calculated on accommodation
-        const pm = accom * t.percent;
-        
-        // Owner payout: accommodation - PMC - platform fee
-        const ownerPayout = accom - pm - platformFee;
-        
-        const checkin = row["CHECK-IN DATE"] ? row["CHECK-IN DATE"].split("-").slice(1).join("/") : "";
-        const checkout = row["CHECK-OUT DATE"] ? row["CHECK-OUT DATE"].split("-").slice(1).join("/") : "";
-        
-        if(totalPayout === 0) return;
-        
-        html += "<tr><td>" + (row["CONFIRMATION CODE"] || "").substring(0,8) + "</td><td>" + checkin + "-" + checkout + "</td><td>" + platform + "</td><td>" + money(totalPayout) + "</td><td>" + money(accom) + "</td><td>" + money(platformFee) + "</td><td>" + money(pm) + "</td><td>" + money(ownerPayout) + "</td></tr>";
-      });
-      html+="</table></div>";
-    }
-    if(exp.length>0){
-      html+="<div style='margin-top:15px'><div class='section-title'>EXPENSES</div><table style='margin-top:10px'>";
-      html+="<tr><th>TYPE</th><th>VENDOR</th><th>AMOUNT</th><th>ACTION</th></tr>";
-      exp.forEach(e=>{
-        html+="<tr><td>"+e.type+"</td><td>"+e.vendor+"</td><td>"+money(e.amount)+"</td><td><button class='btn btn-danger btn-small' onclick='deleteExpenseLocal("+e.id+")'>DELETE</button></td></tr>";
-      });
+     // PAYOUT: use Net Accommodation = TOTAL PAYOUT + length-of-stay-discount - cleaning - linen - community fee - taxes
+html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>ACCOMMODATION</th><th>PMC</th><th>OWNER PAYOUT</th></tr>";
+p.reservations.forEach(row=>{
+  const totalPayout = num(row["TOTAL PAYOUT"]);
+
+  const cleaning = (row["STATUS"]||"").toLowerCase().includes("cancelled") ? 0 : num(row["CLEANING FARE"]);
+  const commFee = num(row["COMMUNITY FEE"]) || 0;
+
+  const cityTax = num(row["CITY TAX"]) || 0;
+  const stateTax = num(row["STATE TAX"]) || 0;
+  const countyTax = num(row["COUNTY TAX"]) || 0;
+  const occupancyTax = num(row["OCCUPANCY TAX"]) || 0;
+  const taxes = cityTax + stateTax + countyTax + occupancyTax;
+
+  // Your CSV: LENGTH OF STAY DISCOUNT is often blank or negative (e.g. -546)
+  // We ADD it exactly as a signed value.
+  const stayDiscount = num(row["LENGTH OF STAY DISCOUNT"]);
+
+  // Linen fee: only if a column exists (your pasted CSV does NOT include one)
+  const linen =
+    num(row["LINEN FEE"]) ||
+    num(row["LINENS FEE"]) ||
+    num(row["LINEN"]) ||
+    num(row["LINENS"]) ||
+    0;
+
+  const netAcc = totalPayout + stayDiscount - cleaning - linen - commFee - taxes;
+
+  const pm = netAcc * t.percent;
+
+  const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
+  const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
+
+  if(totalPayout===0)return;
+
+  html+="<tr><td>"+(row["CONFIRMATION CODE"]||"").substring(0,8)+"</td><td>"+checkin+"-"+checkout+"</td><td>"+(row["PLATFORM"]||"")+"</td><td>"+money(netAcc)+"</td><td>"+money(pm)+"</td><td>"+money(netAcc-pm)+"</td></tr>";
+});
       html+="</table></div>";
     }
     html+="</div>";
@@ -973,4 +977,45 @@ function generateSummary(){
     html+="<div style='margin:20px auto;padding:15px;border:2px solid #ffc107;background:#fff3cd;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px;text-transform:uppercase'>💰 DRAFT BREAKDOWN</div><div style='text-align:left;color:#333'>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>CLEANING FEE</span><span>"+money(masterTotals.clean)+"</span></div>";
-    html+="<div style='display:flex;justify
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>WEBSITE (1%)</span><span>"+money(masterTotals.websiteFee)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>EXPENSES</span><span>"+money(masterTotals.expenses)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>PMC ("+(t.percent*100).toFixed(2)+"%)</span><span>"+money(masterTotals.pmc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold'><span>AMOUNT DUE</span><span>"+money(masterTotals.draft)+"</span></div></div></div>";
+    html+="<div style='margin:20px auto;padding:15px;border:2px solid #fbc02d;background:#fff9c4;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#f57f17;margin-bottom:10px;text-transform:uppercase'>💳 SALES COMMISSION DUE</div><div style='text-align:left;color:#333'>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>PMC COLLECTED</span><span>"+money(masterTotals.pmc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>COMMISSION FEE ("+t.salesFeePercent+"%)</span><span>"+money(salesFee)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold'><span>COMMISSION DUE</span><span>"+money(salesFee)+"</span></div></div></div>";
+  }else{
+    html+="<div style='margin:20px auto;padding:15px;border:2px solid #4caf50;background:#e8f5e9;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#2e7d32;margin-bottom:10px;text-transform:uppercase'>💰 PAYOUT SUMMARY</div><div style='text-align:left;color:#333'>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #c8e6c9'><span>TOTAL ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #c8e6c9'><span>COMMISSION ("+(t.percent*100).toFixed(2)+"%)</span><span>"+money(masterTotals.pmc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #c8e6c9'><span>MINUS PMC</span><span>-"+money(masterTotals.pmc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #c8e6c9'><span>MINUS EXPENSES</span><span>-"+money(masterTotals.expenses)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:12px;background:#2e7d32;color:#fff;font-weight:bold'><span>OWNER PAYOUT</span><span>"+money(masterTotals.owner)+"</span></div></div></div>";
+    html+="<div style='margin:20px auto;padding:15px;border:2px solid #fbc02d;background:#fff9c4;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#f57f17;margin-bottom:10px;text-transform:uppercase'>💳 SALES COMMISSION</div><div style='text-align:left;color:#333'>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>PMC COLLECTED</span><span>"+money(masterTotals.pmc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>COMMISSION FEE ("+t.salesFeePercent+"%)</span><span>"+money(salesFee)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold'><span>COMMISSION DUE</span><span>"+money(salesFee)+"</span></div></div></div>";
+  }
+  
+  html+="<div style='background:#d4edda;border:2px solid #28a745;padding:15px;margin:15px 0;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#155724;text-transform:uppercase;margin-bottom:10px'>🏦 PMC BANK TRANSFER</div><div style='font-size:18px;font-weight:bold;color:#155724'>"+money(masterTotals.pmc)+"</div></div>";
+  
+  document.getElementById("mainContent").innerHTML=html;
+}
+
+function openModal(id){
+  document.getElementById("modalOverlay").classList.add("show");
+  document.getElementById(id).classList.add("show");
+}
+
+function closeAll(){
+  document.getElementById("modalOverlay").classList.remove("show");
+  document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));
+}
+
+loadData();
+</script>
+</body>
+</html>
