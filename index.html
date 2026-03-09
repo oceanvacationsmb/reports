@@ -926,8 +926,7 @@ p.reservations.forEach(row=>{
     num(row["LINENS"]) ||
     0;
 
-  const netAcc = totalPayout + stayDiscount - cleaning - linen - commFee - taxes;
-
+const netAcc = num(row["ACCOMMODATION FARE"]) - num(row["MARKUP"]) + num(row["LENGTH OF STAY DISCOUNT"]);
   const pm = netAcc * t.percent;
 
   const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
