@@ -885,7 +885,10 @@ html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><
       p.reservations.forEach(row=>{
         let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
         const g=num(row["TOTAL PAYOUT"]);
-        const c=(row["STATUS"]||"").toLowerCase().includes("cancelled")?0:num(row["CLEANING FARE"]);
+        let c=num(row["CLEANING FARE"]);
+if((row["STATUS"]||"").toLowerCase().includes("cancelled")){
+  c=0;
+}
         const pm=a*t.percent;
         let w=0;
 const platform=(row["PLATFORM"]||"").toLowerCase();
