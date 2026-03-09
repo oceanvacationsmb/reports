@@ -999,7 +999,6 @@ if(type==="draft"){
 
     html+="<div style='margin:20px auto;padding:15px;border:1px solid #ddd;background:#fff;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#000;margin-bottom:10px;text-transform:uppercase'>💰 PAYOUT SUMMARY</div><div style='text-align:left;color:#000'>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>TOTAL ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
-    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>COMMISSION ("+(t.percent*100).toFixed(2)+"%)</span><span>"+money(masterTotals.pmc)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>MINUS PMC</span><span>-"+money(masterTotals.pmc)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>MINUS EXPENSES</span><span>-"+money(masterTotals.expenses)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:12px;border-top:1px solid #ddd;font-weight:bold'><span>OWNER PAYOUT</span><span>"+money(masterTotals.owner)+"</span></div></div></div>";
