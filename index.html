@@ -838,7 +838,7 @@ if(source.includes("website")){
 function displayStatement(){
   const t=OWNERS[currentOwner];
   const type=t.type;
-  let html="<div class='action-buttons'><button class='copy-link-btn' onclick='generateLink()'>🔗 GENERATE & COPY LINK</button></div>";
+  let html="<div class='action-buttons'><button class='copy-link-btn' onclick='downloadPDF()'>📄 DOWNLOAD PDF</button></div>";
   html+="<div class='summary-title'>FINANCIAL SUMMARY</div><div class='summary-grid'>";
   if(type==="draft"){
     html+="<div class='summary-card'><div class='summary-label'>GROSS PAYOUT</div><div class='summary-value'>"+money(masterTotals.gross)+"</div></div>";
@@ -1018,6 +1018,22 @@ function closeAll(){
   document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));
 }
 
+function downloadPDF(){
+
+const element=document.getElementById("content");
+
+const opt={
+margin:0.3,
+filename:currentOwner+"-statement.pdf",
+image:{type:'jpeg',quality:1},
+html2canvas:{scale:2},
+jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
+};
+
+html2pdf().set(opt).from(element).save();
+
+}
+  
 loadData();
   function deleteExpenseLocal(id){
 
