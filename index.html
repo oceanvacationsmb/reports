@@ -899,7 +899,7 @@ function displayStatement(){
         const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
         const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
         if(g===0)return;
-        html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8)+"</td><td>"+checkin+"-"+checkout+"</td><td>"+row["PLATFORM"]+"</td><td>"+money(a)+"</td><td>"+money(pm)+"</td><td>"+money(c)+"</td><td>"+money(w)+"</td><td>"+money(pm+c+w)+"</td></tr>";
+        html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8)+"</td><td>"+checkin+"-"+checkout+"</td><td>"+row["PLATFORM"]+"</td><td>"+money(g)+"</td><td>"+money(a)+"</td><td>"+money(pm)+"</td><td>"+money(c)+"</td><td>"+money(w)+"</td><td>"+money(pm+c+w)+"</td></tr>";
       });
     }else{
      // PAYOUT: use Net Accommodation = TOTAL PAYOUT + length-of-stay-discount - cleaning - linen - community fee - taxes
@@ -978,7 +978,7 @@ function generateSummary(){
     html+="<div style='margin:20px auto;padding:15px;border:2px solid #ffc107;background:#fff3cd;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#856404;margin-bottom:10px;text-transform:uppercase'>💰 DRAFT BREAKDOWN</div><div style='text-align:left;color:#333'>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>CLEANING FEE</span><span>"+money(masterTotals.clean)+"</span></div>";
-    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>WEBSITE (1%)</span><span>"+money(masterTotals.websiteFee)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>WEBSITE / VRBO FEE</span><span>"+money(masterTotals.websiteFee)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>EXPENSES</span><span>"+money(masterTotals.expenses)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>PMC ("+(t.percent*100).toFixed(2)+"%)</span><span>"+money(masterTotals.pmc)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold'><span>AMOUNT DUE</span><span>"+money(masterTotals.draft)+"</span></div></div></div>";
