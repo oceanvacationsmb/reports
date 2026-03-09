@@ -872,7 +872,12 @@ html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><
       html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
       html+="<div class='summary-card'><div class='summary-label'>PMC ("+(t.percent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
       html+="</div>";
-      html+="<div style='text-align:right;font-weight:bold;font-size:18px;margin:15px 0'>AMOUNT DUE: "+money(r)+"</div>";
+      html+="<div class='amount-due-container'>";
+html+="<div class='amount-due-box'>";
+html+="<div class='amount-due-label'>AMOUNT DUE</div>";
+html+="<div class='amount-due-value'>"+money(r)+"</div>";
+html+="</div>";
+html+="</div>";
       html+="<div style='margin:25px 0;text-align:center;page-break-inside:avoid'>";
 html+="<div style='display:inline-block;border:1px solid #ddd;padding:20px;border-radius:5px;background:#fff'>";
 html+="<div style='font-size:12px;font-weight:bold;margin-bottom:8px'>AMOUNT DUE</div>";
