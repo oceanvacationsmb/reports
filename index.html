@@ -994,11 +994,12 @@ function openModal(id){
 }
 
 function closeAll(){
-  document.getElementById("modalOverlay").classList.remove("show");
-  document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));
+  document.getElementById("modalOverlay").style.display="none";
+  document.querySelectorAll(".modal").forEach(m=>m.style.display="none");
 }
 
 loadData();
+
 </script>
 </body>
 </html>
