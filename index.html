@@ -842,53 +842,85 @@ if(t.type === "draft"){
 }
 
 function displayStatement(){
-  const t=OWNERS[currentOwner];
-  const type=t.type;
+
+  const t = OWNERS[currentOwner];
+  const type = t.type;
 
   let html="<div class='action-buttons'><button class='copy-link-btn' onclick='generateLink()'>🔗 GENERATE & COPY LINK</button></div>";
-  html+="<div class='summary-title'>FINANCIAL SUMMARY</div><div class='summary-grid'>";
+
+  html+="<div class='summary-title'>FINANCIAL SUMMARY</div>";
+  html+="<div class='summary-grid'>";
 
   if(type==="draft"){
+
     html+="<div class='summary-card'><div class='summary-label'>GROSS PAYOUT</div><div class='summary-value'>"+money(masterTotals.gross)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>CLEANING FEE</div><div class='summary-value'>"+money(masterTotals.clean)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>WEBSITE (1%)</div><div class='summary-value'>"+money(masterTotals.websiteFee)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>PMC ("+(t.percent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
-    html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>AMOUNT DUE</div><div class='summary-value' style='color:#fff'>"+money(masterTotals.draft)+"</div></div>";
+
+    html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'>";
+    html+="<div class='summary-label' style='color:#fff'>AMOUNT DUE</div>";
+    html+="<div class='summary-value' style='color:#fff'>"+money(masterTotals.draft)+"</div>";
+    html+="</div>";
+
   }else{
+
     html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
-    html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'><div class='summary-label' style='color:#fff'>OWNER PAYOUT</div><div class='summary-value' style='color:#fff'>"+money(masterTotals.owner)+"</div></div>";
+
+    html+="<div class='summary-card' style='background:#000;color:#fff;border-color:#000'>";
+    html+="<div class='summary-label' style='color:#fff'>OWNER PAYOUT</div>";
+    html+="<div class='summary-value' style='color:#fff'>"+money(masterTotals.owner)+"</div>";
+    html+="</div>";
+
   }
 
   html+="</div>";
 
   Object.keys(propertyTotals).forEach(prop=>{
-    const p=propertyTotals[prop];
-    const r=type==="draft"?p.draft:p.owner;
 
-    html+="<div class='property-section'><div class='property-title'><span class='property-icon'>🏠</span>"+prop.toUpperCase()+"</div>";
+    const p = propertyTotals[prop];
+    const r = type==="draft" ? p.draft : p.owner;
 
-    html+="<div style='margin-top:15px'><div class='section-title'>RESERVATIONS</div><table style='margin-top:10px'>";
+    html+="<div class='property-section'>";
+    html+="<div class='property-title'><span class='property-icon'>🏠</span>"+prop.toUpperCase()+"</div>";
+
+    html+="<div style='margin-top:15px'>";
+    html+="<div class='section-title'>RESERVATIONS</div>";
+    html+="<table style='margin-top:10px'>";
 
     if(type==="draft"){
+
       html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>GROSS PAYOUT</th><th>ACCOMMODATION</th><th>PMC</th><th>CLEANING</th><th>WEBSITE/VRBO FEE</th><th>AMOUNT DUE</th></tr>";
 
       p.reservations.forEach(row=>{
 
-        let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"])+num(row["LENGTH OF STAY DISCOUNT"]);
+        let a = num(row["ACCOMMODATION FARE"]) - num(row["MARKUP"]) + num(row["LENGTH OF STAY DISCOUNT"]);
 
-        const g=num(row["TOTAL PAYOUT"]);
-        const c=(row["STATUS"]||"").toLowerCase().includes("cancelled")?0:num(row["CLEANING FARE"]);
-        const pm=a*t.percent;
-        const w=a>0&&!row["CONFIRMATION CODE"].toUpperCase().startsWith("HA")&&(row["PLATFORM"]||"").toLowerCase().includes("website")?g*0.01:0;
+        const g = num(row["TOTAL PAYOUT"]);
+        const c = (row["STATUS"]||"").toLowerCase().includes("cancelled") ? 0 : num(row["CLEANING FARE"]);
+        const pm = a * t.percent;
 
-        const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
-        const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
+        const w = a>0 && !row["CONFIRMATION CODE"].toUpperCase().startsWith("HA") &&
+        (row["PLATFORM"]||"").toLowerCase().includes("website") ? g*0.01 : 0;
 
-        html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8)+"</td><td>"+checkin+"-"+checkout+"</td><td>"+row["PLATFORM"]+"</td><td>"+money(g)+"</td><td>"+money(a)+"</td><td>"+money(pm)+"</td><td>"+money(c)+"</td><td>"+money(w)+"</td><td>"+money(pm+c+w)+"</td></tr>";
+        const checkin = row["CHECK-IN DATE"] ? row["CHECK-IN DATE"].split("-").slice(1).join("/") : "";
+        const checkout = row["CHECK-OUT DATE"] ? row["CHECK-OUT DATE"].split("-").slice(1).join("/") : "";
+
+        html+="<tr>";
+        html+="<td>"+row["CONFIRMATION CODE"].substring(0,8)+"</td>";
+        html+="<td>"+checkin+"-"+checkout+"</td>";
+        html+="<td>"+row["PLATFORM"]+"</td>";
+        html+="<td>"+money(g)+"</td>";
+        html+="<td>"+money(a)+"</td>";
+        html+="<td>"+money(pm)+"</td>";
+        html+="<td>"+money(c)+"</td>";
+        html+="<td>"+money(w)+"</td>";
+        html+="<td>"+money(pm+c+w)+"</td>";
+        html+="</tr>";
 
       });
 
@@ -899,46 +931,65 @@ function displayStatement(){
       p.reservations.forEach(row=>{
 
         const stayDiscount = num(row["LENGTH OF STAY DISCOUNT"]);
+
         let accommodation = num(row["ACCOMMODATION FARE"]) - num(row["MARKUP"]) + stayDiscount;
 
         const pm = accommodation * t.percent;
         const owner = accommodation - pm;
 
-        const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
-        const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
+        const checkin = row["CHECK-IN DATE"] ? row["CHECK-IN DATE"].split("-").slice(1).join("/") : "";
+        const checkout = row["CHECK-OUT DATE"] ? row["CHECK-OUT DATE"].split("-").slice(1).join("/") : "";
 
-        html+="<tr><td>"+(row["CONFIRMATION CODE"]||"").substring(0,8)+"</td><td>"+checkin+"-"+checkout+"</td><td>"+row["PLATFORM"]+"</td><td>"+money(accommodation)+"</td><td>"+money(pm)+"</td><td>"+money(owner)+"</td></tr>";
+        html+="<tr>";
+        html+="<td>"+(row["CONFIRMATION CODE"]||"").substring(0,8)+"</td>";
+        html+="<td>"+checkin+"-"+checkout+"</td>";
+        html+="<td>"+row["PLATFORM"]+"</td>";
+        html+="<td>"+money(accommodation)+"</td>";
+        html+="<td>"+money(pm)+"</td>";
+        html+="<td>"+money(owner)+"</td>";
+        html+="</tr>";
 
       });
 
     }
 
-    html+="</table></div></div>";
+    html+="</table>";
+    html+="</div>";
+    html+="</div>";
 
   });
 
-  document.getElementById("mainContent").innerHTML=html;
+  document.getElementById("mainContent").innerHTML = html;
 }
 
-  function deleteExpenseLocal(id){
-  if(!confirm("Delete?"))return;
-  expenses=expenses.filter(e=>e.id!==id);
+
+function deleteExpenseLocal(id){
+  if(!confirm("Delete?")) return;
+  expenses = expenses.filter(e=>e.id!==id);
   processData();
   displayStatement();
 }
 
+
 function generateLink(){
   alert("✓ Dropbox feature coming soon!");
 }
+
 
 function openModal(id){
   document.getElementById("modalOverlay").classList.add("show");
   document.getElementById(id).classList.add("show");
 }
 
+
 function closeAll(){
   document.getElementById("modalOverlay").style.display="none";
   document.querySelectorAll(".modal").forEach(m=>m.style.display="none");
 }
 
+
 loadData();
+
+  </script>
+</body>
+</html>
