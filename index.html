@@ -784,10 +784,11 @@ function processData(){
       let w=0;
 if(t.type==="draft" && g>0){
   const platform=(row["PLATFORM"]||"").toLowerCase();
+  const source=(row["SOURCE"]||"").toLowerCase();
 
-  if(platform.includes("website")){
-    w = g * 0.01;
-  }
+if(source.includes("website")){
+  w = (g * 0.01) + 0.30;
+}
 
   if(platform.includes("homeaway")){
   w = num(row["CHANNEL COMMISSION"]);
@@ -886,9 +887,10 @@ html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><
         const pm=a*t.percent;
         let w=0;
 const platform=(row["PLATFORM"]||"").toLowerCase();
+const source=(row["SOURCE"]||"").toLowerCase();
 
-if(platform.includes("website")){
-  w = g * 0.01;
+if(source.includes("website")){
+  w = (g * 0.01) + 0.30;
 }
 
 if(platform.includes("homeaway")){
