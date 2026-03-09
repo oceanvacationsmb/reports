@@ -35,23 +35,12 @@ tr:nth-child(even){background:#fafafa}
 .action-buttons button{padding:10px 20px;font-size:12px;cursor:pointer;border:none;border-radius:3px;color:#fff;font-weight:bold;text-transform:uppercase}
 .back-btn{background:#666}
 .print-btn{background:#e74c3c}
-.property-section{
-margin:40px 0;
-padding:20px;
-border:1px solid #ddd;
-border-radius:5px;
-background:#fff;
-page-break-before:always;
-}.property-title{font-size:14px;font-weight:bold;margin-bottom:15px;display:flex;align-items:center;text-transform:uppercase}
+.property-section{margin:40px 0;padding:20px;border:1px solid #ddd;border-radius:5px;background:#fff}
+.property-title{font-size:14px;font-weight:bold;margin-bottom:15px;display:flex;align-items:center;text-transform:uppercase}
 .property-icon{font-size:18px;margin-right:10px}
 .summary-title{font-size:12px;font-weight:bold;text-transform:uppercase;text-align:center;margin:20px 0}
-.summary-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-gap:12px;
-margin:20px 0;
-page-break-inside:avoid;
-}.summary-card{background:#fff;color:#000;border:1px solid #ddd;border-radius:6px;padding:18px;text-align:center;}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}
+.summary-card{background:#fff;color:#000;border:1px solid #ddd;border-radius:6px;padding:18px;text-align:center;}
 .summary-label{font-size:10px;color:#000;font-weight:bold;text-transform:uppercase}
 .summary-value{font-size:14px;font-weight:bold;color:#000;margin-top:6px}
 .amount-due-container{text-align:center;margin:30px 0}
@@ -852,38 +841,19 @@ function displayStatement(){
   let html="<div class='action-buttons'><button class='copy-link-btn' onclick='downloadPDF()'>📄 DOWNLOAD PDF</button></div>";
   html+="<div class='summary-title'>FINANCIAL SUMMARY</div><div class='summary-grid'>";
   if(type==="draft"){
-  html+="<div class='summary-grid'>";
-  html+="<div class='summary-card'><div class='summary-label'>PAYOUT</div><div class='summary-value'>"+money(p.gross)+"</div></div>";
-  html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
-  html+="<div class='summary-card'><div class='summary-label'>CLEANING FEE</div><div class='summary-value'>"+money(p.clean)+"</div></div>";
-  html+="<div class='summary-card'><div class='summary-label'>WEBSITE/VRBO FEE</div><div class='summary-value'>"+money(p.websiteFee)+"</div></div>";
-  html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
-  html+="<div class='summary-card'><div class='summary-label'>PMC ("+(t.percent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
-  html+="</div>";
-
-  html+="<div style='width:100%;margin:40px 0;text-align:center'>";
-  html+="<table style='margin:auto;border:1px solid #ddd;border-radius:8px;padding:30px 80px;background:#fff'>";
-  html+="<tr><td style='text-align:center;font-weight:bold;padding-bottom:10px'>AMOUNT DUE</td></tr>";
-  html+="<tr><td style='text-align:center;font-size:40px;font-weight:bold'>"+money(r)+"</td></tr>";
-  html+="</table>";
-  html+="</div>";
-
-}else{
-
-  html+="<div class='summary-grid'>";
-  html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
-  html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
-  html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
-  html+="</div>";
-
-  html+="<div style='width:100%;margin:40px 0;text-align:center'>";
-  html+="<table style='margin:auto;border:1px solid #ddd;border-radius:8px;padding:30px 80px;background:#fff'>";
-  html+="<tr><td style='text-align:center;font-weight:bold;padding-bottom:10px'>OWNER PAYOUT</td></tr>";
-  html+="<tr><td style='text-align:center;font-size:40px;font-weight:bold'>"+money(r)+"</td></tr>";
-  html+="</table>";
-  html+="</div>";
-
-}
+    html+="<div class='summary-card'><div class='summary-label'>GROSS PAYOUT</div><div class='summary-value'>"+money(masterTotals.gross)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>CLEANING FEE</div><div class='summary-value'>"+money(masterTotals.clean)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>WEBSITE/VRBO FEE </div><div class='summary-value'>"+money(masterTotals.websiteFee)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>PMC ("+(t.percent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>AMOUNT DUE</div><div class='summary-value'>"+money(masterTotals.draft)+"</div></div>";
+  }else{
+    html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>OWNER PAYOUT</div><div class='summary-value'>"+money(masterTotals.owner)+"</div></div>";
+  }
   html+="</div>";
   Object.keys(propertyTotals).forEach(prop=>{
     const p=propertyTotals[prop];
@@ -891,37 +861,24 @@ function displayStatement(){
     const exp=expenses.filter(e=>e.property===prop&&e.owner===currentOwner);
     html+="<div class='property-section'><div class='property-title'><span class='property-icon'>🏠</span>"+prop.toUpperCase()+"</div>";
     
- if(type==="draft"){
-  html+="<div class='summary-grid'>";
-  html+="<div class='summary-card'><div class='summary-label'>PAYOUT</div><div class='summary-value'>"+money(p.gross)+"</div></div>";
-  html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
-  html+="<div class='summary-card'><div class='summary-label'>CLEANING FEE</div><div class='summary-value'>"+money(p.clean)+"</div></div>";
-  html+="<div class='summary-card'><div class='summary-label'>WEBSITE/VRBO FEE</div><div class='summary-value'>"+money(p.websiteFee)+"</div></div>";
-  html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
-  html+="<div class='summary-card'><div class='summary-label'>PMC ("+(t.percent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
-  html+="</div>";
-
-  html+="<div style='margin:40px 0;text-align:center;display:block;width:100%'>";
-  html+="<div style='display:inline-block;padding:25px 60px;border:1px solid #ddd;border-radius:8px;background:#fff'>";
-  html+="<div style='font-weight:bold;margin-bottom:8px'>AMOUNT DUE</div>";
-  html+="<div style='font-size:38px;font-weight:bold'>"+money(r)+"</div>";
-  html+="</div></div>";
-
-}else{
-
-  html+="<div class='summary-grid'>";
-  html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
-  html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
-  html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
-  html+="</div>";
-
-  html+="<div style='margin:40px 0;text-align:center;display:block;width:100%'>";
-  html+="<div style='display:inline-block;padding:25px 60px;border:1px solid #ddd;border-radius:8px;background:#fff'>";
-  html+="<div style='font-weight:bold;margin-bottom:8px'>OWNER PAYOUT</div>";
-  html+="<div style='font-size:38px;font-weight:bold'>"+money(r)+"</div>";
-  html+="</div></div>";
-
-}
+    if(type==="draft"){
+      html+="<div class='summary-grid'>";
+      html+="<div class='summary-card'><div class='summary-label'>PAYOUT</div><div class='summary-value'>"+money(p.gross)+"</div></div>";
+html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>CLEANING FEE</div><div class='summary-value'>"+money(p.clean)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>WEBSITE/VRBO FEE</div><div class='summary-value'>"+money(p.websiteFee)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>PMC ("+(t.percent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
+      html+="</div>";
+      html+="<div class='amount-due-container'><div class='amount-due-box'><div class='amount-due-label'>AMOUNT DUE</div><div class='amount-due-value'>"+money(r)+"</div></div></div>";
+    }else{
+      html+="<div class='summary-grid'>";
+      html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
+      html+="</div>";
+      html+="<div class='summary-card'><div class='summary-label'>OWNER PAYOUT</div><div class='summary-value'>"+money(r)+"</div></div>";
+    }
     
     html+="<div style='margin-top:15px'><div class='section-title'>RESERVATIONS</div><table style='margin-top:10px'>";
    if(type==="draft"){
@@ -1138,9 +1095,6 @@ function closeAll(){
 
 function downloadPDF(){
 
-const btn=document.querySelector(".copy-link-btn");
-if(btn) btn.style.display="none";
-
 const element=document.getElementById("content");
 
 const opt={
@@ -1151,11 +1105,7 @@ html2canvas:{scale:2},
 jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
 };
 
-html2pdf().set(opt).from(element).save().then(()=>{
-
-if(btn) btn.style.display="block";
-
-});
+html2pdf().set(opt).from(element).save();
 
 }
   
