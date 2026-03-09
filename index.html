@@ -853,6 +853,7 @@ function displayStatement(){
     html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>OWNER PAYOUT</div><div class='summary-value'>"+money(masterTotals.owner)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>TRANSFER TO OPERATIONS</div><div class='summary-value'>CLEANING: "+money(masterTotals.clean)+"<br>EXPENSES: "+money(masterTotals.expenses)+"<br><strong>TOTAL: "+money(masterTotals.clean+masterTotals.expenses)+"</strong></div></div>";
   }
   html+="</div>";
   Object.keys(propertyTotals).forEach(prop=>{
