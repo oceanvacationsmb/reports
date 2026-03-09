@@ -418,6 +418,8 @@ function openOwners(){
     html+="</select>";
     html+="<label class='modal-label'>🔗 GUESTY REPORT URL</label>";
     html+="<input type='text' value='"+(o.guestyReportUrl||"")+"' onchange=\"OWNERS['"+name+"'].guestyReportUrl=this.value\" class='modal-input' placeholder='https://guesty.com/...'>";
+    html+="<label class='modal-label'>PROPERTIES (comma separated)</label>";
+html+="<input type='text' value='"+((o.properties||[]).join(","))+"' onchange=\"OWNERS['"+name+"'].properties=this.value.split(',').map(p=>p.trim())\" class='modal-input' placeholder='MB - 4765, OD - 1102'>";
     html+="<button class='btn btn-danger' onclick=\"deleteOwner('"+name+"')\" style='width:100%;margin-top:10px;padding:8px'>🗑️ DELETE OWNER</button>";
     html+="</div>";
   });
@@ -433,7 +435,7 @@ function addOwner(){
   const type=document.getElementById("ownerType").value;
   const guestyUrl=document.getElementById("ownerGuestyUrl").value.trim();
   if(!name)return alert("Enter owner name");
-  OWNERS[name]={email:email,percent:comm/100,salesFeePercent:sales,type:type,guestyReportUrl:guestyUrl};
+  OWNERS[name]={email:email,percent:comm/100,salesFeePercent:sales,type:type,guestyReportUrl:guestyUrl,properties:[]};
   document.getElementById("ownerName").value="";
   document.getElementById("ownerEmail").value="";
   document.getElementById("ownerComm").value="";
@@ -770,6 +772,8 @@ function processData(){
     const y=parseInt(row["CHECK-IN DATE"].split("-")[0]);
     if(m!==month||y!==year)return;
     const prop=row["LISTING'S NICKNAME"]||"Unknown";
+    const ownerProps = OWNERS[currentOwner].properties || [];
+if(ownerProps.length && !ownerProps.includes(prop)) return;
     if(!byProp[prop])byProp[prop]=[];
     byProp[prop].push(row);
     
