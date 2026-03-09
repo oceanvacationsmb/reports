@@ -892,7 +892,7 @@ if(platform.includes("website")){
 }
 
 if(platform.includes("homeaway")){
-  w = g * 0.05;
+  w = num(row["CHANNEL COMMISSION"]);
 }
         const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
         const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
