@@ -254,7 +254,7 @@ function runIncomeReport(){
         html += "<tr>";
         html += "<td>"+prop+"</td>";
         html += "<td>"+r["CHECK-IN DATE"]+" - "+r["CHECK-OUT DATE"]+"</td>";
-        html += "<td>"+money(source=="website" ? a+num(row["MARKUP"]) : a)+"</td>";
+        html += "<td>"+money(source.includes("website") ? a+num(row["MARKUP"]) : a)+"</td>";
         html += "</tr>";
       });
     });
