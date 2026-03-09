@@ -312,7 +312,7 @@ function show1099(){
   html += "<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>" + money(masterTotals.acc) + "</div></div>";
   html += "<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>" + money(masterTotals.pmc) + "</div></div>";
   html += "<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>" + money(masterTotals.expenses) + "</div></div>";
-  html += "<div class='summary-card'<div class='summary-label' style='color:#fff'>NET TO OWNER</div><div class='summary-value' style='color:#fff'>" + money(masterTotals.owner) + "</div></div>";
+  html += "<div class='summary-card'<div class='summary-label' >NET TO OWNER</div><div class='summary-value'>" + money(masterTotals.owner) + "</div></div>";
 
   html += "</div>";
 
@@ -847,12 +847,12 @@ function displayStatement(){
     html+="<div class='summary-card'><div class='summary-label'>WEBSITE/VRBO FEE </div><div class='summary-value'>"+money(masterTotals.websiteFee)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>PMC ("+(t.percent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
-    html+="<div class='summary-card'<div class='summary-label' style='color:#fff'>AMOUNT DUE</div><div class='summary-value' style='color:#fff'>"+money(masterTotals.draft)+"</div></div>";
+    html+="<div class='summary-card'<div class='summary-label'>AMOUNT DUE</div><div class='summary-value'>"+money(masterTotals.draft)+"</div></div>";
   }else{
     html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
-    html+="<div class='summary-card'<div class='summary-label' style='color:#fff'>OWNER PAYOUT</div><div class='summary-value' style='color:#fff'>"+money(masterTotals.owner)+"</div></div>";
+    html+="<div class='summary-card'<div class='summary-label'>OWNER PAYOUT</div><div class='summary-value'>"+money(masterTotals.owner)+"</div></div>";
   }
   html+="</div>";
   Object.keys(propertyTotals).forEach(prop=>{
