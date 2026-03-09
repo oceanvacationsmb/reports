@@ -183,7 +183,8 @@ const municipalities=["SC","MB","NMB","SSB","HC"];
 
 function num(v){return parseFloat((v||"0").toString().replace(/[$,]/g,""))||0;}
 function money(v){
-  return "$"+(Number(v)||0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+  const n = parseFloat(v) || 0;
+  return "$" + n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 function updateTokenStatus(){
   const status=document.getElementById("tokenStatus");
