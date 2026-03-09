@@ -1018,6 +1018,16 @@ function closeAll(){
 }
 
 loadData();
+  function deleteExpenseLocal(id){
+
+if(!confirm("Delete expense?")) return;
+
+expenses = expenses.filter(e => e.id !== id);
+
+processData();
+displayStatement();
+
+}
 </script>
 </body>
 </html>
