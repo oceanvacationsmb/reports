@@ -164,7 +164,11 @@
     "MB - Tuscan B": {},
     "NMB - 400A": {},
     "NMB - 705-2": {},
-    "GCSSB - 113B-15S": {}
+    "GCSSB - 113B-15S": {
+      "SC": true,
+      "SSB": true,
+      "HC": true
+    }
   },
   "expenses": []
 }
