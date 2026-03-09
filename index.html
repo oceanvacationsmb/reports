@@ -924,7 +924,7 @@ p.reservations.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DAT
 let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
 const pm=a*t.percent;
 const owner=a-pm;
-
+if(owner<=0) return;
 const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
 const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
 
