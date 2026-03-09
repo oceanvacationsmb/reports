@@ -1007,7 +1007,9 @@ html+="<div style='display:flex;justify-content:space-between;padding:8px 0;bord
 html+="<div style='display:flex;justify-content:space-between;padding:12px;border-top:1px solid #ddd;font-weight:bold'><span>TOTAL TRANSFER</span><span>"+money(masterTotals.clean + masterTotals.expenses)+"</span></div></div></div>";
 }
   
-  html+="<div style='background:#d4edda;border:2px solid #28a745;padding:15px;margin:15px 0;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#155724;text-transform:uppercase;margin-bottom:10px'>🏦 PMC BANK TRANSFER</div><div style='font-size:18px;font-weight:bold;color:#155724'>"+money(masterTotals.pmc)+"</div></div>";
+  html+="<div style='margin:20px auto;padding:15px;border:1px solid #ddd;background:#fff;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#000;margin-bottom:10px;text-transform:uppercase'>🏦 PMC BANK TRANSFER</div><div style='text-align:left;color:#000'>";
+html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>TOTAL ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+html+="<div style='display:flex;justify-content:space-between;padding:12px;border-top:1px solid #ddd;font-weight:bold'><span>PMC ("+(t.percent*100).toFixed(2)+"%)</span><span>"+money(masterTotals.pmc)+"</span></div></div></div>";
   
   document.getElementById("mainContent").innerHTML=html;
 }
