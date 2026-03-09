@@ -793,13 +793,18 @@ function processData(){
       const c=(row["STATUS"]||"").toLowerCase().includes("cancelled")?0:num(row["CLEANING FARE"]);
       const p=a*t.percent;
       let w=0;
-      if(t.type==="draft"&&a>0){
-        const code=row["CONFIRMATION CODE"]||"";
-        const platform=row["PLATFORM"]||"";
-        if(!code.toUpperCase().startsWith("HA")&&(platform.toLowerCase().includes("website")||platform.toLowerCase().includes("manual"))){
-          w=g*0.01;
-        }
-      }
+      let w = 0;
+
+if(t.type === "draft"){
+  const platform = (row["PLATFORM"] || "").toLowerCase();
+
+  if(platform.includes("vrbo") || platform.includes("homeaway")){
+    w = g * 0.05;
+  }
+  else if(platform.includes("website") || platform.includes("manual")){
+    w = g * 0.01;
+  }
+}
       gross+=g;
       acc+=a;
       clean+=c;
