@@ -852,19 +852,38 @@ function displayStatement(){
   let html="<div class='action-buttons'><button class='copy-link-btn' onclick='downloadPDF()'>📄 DOWNLOAD PDF</button></div>";
   html+="<div class='summary-title'>FINANCIAL SUMMARY</div><div class='summary-grid'>";
   if(type==="draft"){
-    html+="<div class='summary-card'><div class='summary-label'>GROSS PAYOUT</div><div class='summary-value'>"+money(masterTotals.gross)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>CLEANING FEE</div><div class='summary-value'>"+money(masterTotals.clean)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>WEBSITE/VRBO FEE </div><div class='summary-value'>"+money(masterTotals.websiteFee)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>PMC ("+(t.percent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>AMOUNT DUE</div><div class='summary-value'>"+money(masterTotals.draft)+"</div></div>";
-  }else{
-    html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>OWNER PAYOUT</div><div class='summary-value'>"+money(masterTotals.owner)+"</div></div>";
-  }
+  html+="<div class='summary-grid'>";
+  html+="<div class='summary-card'><div class='summary-label'>PAYOUT</div><div class='summary-value'>"+money(p.gross)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>CLEANING FEE</div><div class='summary-value'>"+money(p.clean)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>WEBSITE/VRBO FEE</div><div class='summary-value'>"+money(p.websiteFee)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>PMC ("+(t.percent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
+  html+="</div>";
+
+  html+="<div style='width:100%;margin:40px 0;text-align:center'>";
+  html+="<table style='margin:auto;border:1px solid #ddd;border-radius:8px;padding:30px 80px;background:#fff'>";
+  html+="<tr><td style='text-align:center;font-weight:bold;padding-bottom:10px'>AMOUNT DUE</td></tr>";
+  html+="<tr><td style='text-align:center;font-size:40px;font-weight:bold'>"+money(r)+"</td></tr>";
+  html+="</table>";
+  html+="</div>";
+
+}else{
+
+  html+="<div class='summary-grid'>";
+  html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
+  html+="</div>";
+
+  html+="<div style='width:100%;margin:40px 0;text-align:center'>";
+  html+="<table style='margin:auto;border:1px solid #ddd;border-radius:8px;padding:30px 80px;background:#fff'>";
+  html+="<tr><td style='text-align:center;font-weight:bold;padding-bottom:10px'>OWNER PAYOUT</td></tr>";
+  html+="<tr><td style='text-align:center;font-size:40px;font-weight:bold'>"+money(r)+"</td></tr>";
+  html+="</table>";
+  html+="</div>";
+
+}
   html+="</div>";
   Object.keys(propertyTotals).forEach(prop=>{
     const p=propertyTotals[prop];
