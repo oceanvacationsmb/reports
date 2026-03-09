@@ -1001,7 +1001,7 @@ function generateSummary(){
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>PMC COLLECTED</span><span>"+money(masterTotals.pmc)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>COMMISSION FEE ("+t.salesFeePercent+"%)</span><span>"+money(salesFee)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:12px;background:#000;color:#fff;font-weight:bold'><span>COMMISSION DUE</span><span>"+money(salesFee)+"</span></div></div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>TRUST → OPERATIONS TRANSFER</div><div class='summary-value'>Cleaning: "+money(masterTotals.clean)+"<br>Expenses: "+money(masterTotals.expenses)+"<br><strong>Total: "+money(masterTotals.clean+masterTotals.expenses)+"</strong></div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>TRUST EXPENSES TRANSFER</div><div class='summary-value'>"+money(masterTotals.clean + masterTotals.expenses)+"</div></div>";
   }
   
   html+="<div style='background:#d4edda;border:2px solid #28a745;padding:15px;margin:15px 0;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#155724;text-transform:uppercase;margin-bottom:10px'>🏦 PMC BANK TRANSFER</div><div style='font-size:18px;font-weight:bold;color:#155724'>"+money(masterTotals.pmc)+"</div></div>";
