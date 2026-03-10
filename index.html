@@ -243,12 +243,7 @@ function runIncomeReport(){
     html += "<table>";
     html += "<tr><th>PROPERTY</th><th>CHECK-IN / CHECK-OUT</th><th>ACCOMMODATION</th></tr>";
 
-    const ownerExpenses = expenses.filter(e => 
-  e.owner === currentOwner && e.property === "OWNER"
-);
-
-if(ownerExpenses.length > 0){
-
+   
 html += "<div class='property-section'>";
 
 html += "<div class='invoice-header'>";
@@ -884,6 +879,14 @@ if(source.includes("website")){
         }
       }
     });
+
+    // ADD OWNER LEVEL EXPENSES
+const ownerChargesTotal = expenses
+.filter(e => e.owner === currentOwner && e.property === "OWNER")
+.reduce((sum,e)=>sum+e.amount,0);
+
+masterTotals.expenses += ownerChargesTotal;
+    
     const exp=expenses
 .filter(e=>e.owner===currentOwner && e.property===prop)
 .reduce((sum,e)=>sum+e.amount,0);
@@ -931,6 +934,8 @@ const ownerExpenses = expenses.filter(e =>
 e.owner === currentOwner && e.property === "OWNER"
 );
 
+  const ownerChargesTotal = ownerExpenses.reduce((sum,e)=>sum+e.amount,0);
+
 if(ownerExpenses.length>0){
 
 html+="<div class='property-section'>";
@@ -966,6 +971,12 @@ html+="<td><button class='btn btn-danger btn-small' onclick='deleteExpenseLocal(
 html+="</tr>";
 });
 
+html+="<tr style='font-weight:bold;border-top:2px solid #000'>";
+html+="<td colspan='3'>TOTAL OWNER CHARGES</td>";
+html+="<td>"+money(ownerChargesTotal)+"</td>";
+html+="<td></td>";
+html+="</tr>";
+  
 html+="</table>";
 
 html+="</div>";
