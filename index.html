@@ -889,8 +889,7 @@ if(source.includes("website")){
 .reduce((sum,e)=>sum+e.amount,0);
 
 const ownerExp=expenses
-.filter(e=>e.owner===currentOwner && e.property==="OWNER")
-.reduce((sum,e)=>sum+e.amount,0);
+
     const draft=pmc+clean+websiteFee+exp;
     const owner=acc-pmc-exp;
     propertyTotals[prop]={gross:gross,acc:acc,clean:clean,pmc:pmc,websiteFee:websiteFee,expenses:exp,draft:draft,owner:owner,tax:totalTax,reservations:byProp[prop]};
@@ -899,9 +898,9 @@ const ownerExp=expenses
     masterTotals.clean+=clean;
     masterTotals.pmc+=pmc;
     masterTotals.websiteFee+=websiteFee;
-    masterTotals.expenses+=exp+ownerExp;
+    masterTotals.expenses+=exp;
     masterTotals.draft+=draft;
-    masterTotals.owner+=owner-ownerExp;
+    masterTotals.owner+=owner;
     masterTotals.totalTaxCollected+=totalTax;
     
     if(taxByProperty[prop]){
@@ -1275,7 +1274,12 @@ processData();
 displayStatement();
 
 });
+const ownerExpTotal=expenses
+.filter(e=>e.owner===currentOwner && e.property==="OWNER")
+.reduce((sum,e)=>sum+e.amount,0);
 
+masterTotals.expenses+=ownerExpTotal;
+masterTotals.owner-=ownerExpTotal;
 }
 </script>
 </body>
