@@ -147,7 +147,7 @@ tr:nth-child(even){background:#fafafa}
   <div class="modal-field">
 <label class="modal-label">INVOICE (OPTIONAL)</label>
 <input type="file" id="expenseInvoice" class="modal-input" accept=".pdf,.jpg,.jpeg,.png"></div>
-<div class="modal-actions"><button class="btn-add" onclick="submitExpense()">✓ ADD EXPENSE</button><button class="btn-cancel" onclick="doneAddingExpenses()">✓ DONE</button></div>
+<div class="modal-actions"><button id="addExpenseBtn" class="btn-add" onclick="submitExpense()">✓ ADD EXPENSE</button><button class="btn-cancel" onclick="doneAddingExpenses()">✓ DONE</button></div>
 <div id="expenseListDisplay" class="expense-list" style="display:none"></div>
 </div>
 </div>
@@ -718,7 +718,12 @@ if(file){
       notes:document.getElementById("expenseNotes").value,
       invoice:invoiceData
     });
-    alert("RECORDED");
+    const btn=document.getElementById("addExpenseBtn");
+btn.textContent="✓ EXPENSE RECORDED";
+
+setTimeout(()=>{
+btn.textContent="✓ ADD EXPENSE";
+},1000);
 
     displaySessionExpenses();
   };
@@ -737,7 +742,12 @@ expenses.push({
   notes:document.getElementById("expenseNotes").value,
   invoice:null
 });
-  alert("RECORDED");
+  const btn=document.getElementById("addExpenseBtn");
+btn.textContent="✓ EXPENSE RECORDED";
+
+setTimeout(()=>{
+btn.textContent="✓ ADD EXPENSE";
+},1000);
   sessionExpenses.push({id:expenseId,type:type,property:prop,vendor:vendor,amount:amount});
   
   document.getElementById("expenseType").value="MAINTENANCE";
