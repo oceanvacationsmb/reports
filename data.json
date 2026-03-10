@@ -172,16 +172,6 @@
   },
   "expenses": [
     {
-      "id": 1773180317771,
-      "owner": "ERAN MARON",
-      "type": "MAINTENANCE",
-      "property": "OWNER",
-      "vendor": "MANUAL ADJUSTMENT",
-      "amount": 1000,
-      "notes": "",
-      "invoice": "Invoice_26CBTOL1513_from_NSAR_Ind_LLC_dba_CBT_Hospitality_Supplies.pdf"
-    },
-    {
       "id": 1773182737319,
       "owner": "ERAN MARON",
       "type": "MAINTENANCE",
