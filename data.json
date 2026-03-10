@@ -170,5 +170,16 @@
       "HC": true
     }
   },
-  "expenses": []
+  "expenses": [
+    {
+      "id": 1773176807346,
+      "owner": "ERAN MARON",
+      "type": "MAINTENANCE",
+      "property": "OWNER",
+      "vendor": "MANUAL ADJUSTMENT",
+      "amount": 1000,
+      "notes": "",
+      "invoice": ""
+    }
+  ]
 }
