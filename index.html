@@ -859,20 +859,17 @@ function displayStatement(){
     const exp=expenses.filter(e=>e.property===prop&&e.owner===currentOwner);
     html+="<div class='property-section'><div class='property-title'><span class='property-icon'>🏠</span>"+prop.toUpperCase()+"</div>";
     
-    if(type==="draft"){
-      html+="<div class='summary-grid'>";
-      html+="<div class='summary-card'><div class='summary-label'>PAYOUT</div><div class='summary-value'>"+money(p.gross)+"</div></div>";
-html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
-      html+="<div class='summary-card'><div class='summary-label'>CLEANING FEE</div><div class='summary-value'>"+money(p.clean)+"</div></div>";
-      html+="<div class='summary-card'><div class='summary-label'>WEBSITE/VRBO FEE</div><div class='summary-value'>"+money(p.websiteFee)+"</div></div>";
-      html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
-      html+="<div class='summary-card'><div class='summary-label'>PMC ("+(t.percent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
-      html+="</div>";
-      html+="<div style='text-align:center;font-size:22px;font-weight:bold;margin:25px 0'>AMOUNT DUE: "+money(r)+"</div>";
-      html+="<div style='margin:25px 0;text-align:center;page-break-inside:avoid'>";
-html+="<div style='display:inline-block;border:1px solid #ddd;padding:20px;border-radius:5px;background:#fff'>";
-html+="<div style='font-size:12px;font-weight:bold;margin-bottom:8px'>AMOUNT DUE</div>";
-html+="<div style='font-size:32px;font-weight:bold'>"+money(r)+"</div>";
+   if(type==="draft"){
+  html+="<div class='summary-grid'>";
+  html+="<div class='summary-card'><div class='summary-label'>PAYOUT</div><div class='summary-value'>"+money(p.gross)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>CLEANING FEE</div><div class='summary-value'>"+money(p.clean)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>WEBSITE/VRBO FEE</div><div class='summary-value'>"+money(p.websiteFee)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>PMC ("+(t.percent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
+  html+="</div>";
+  html+="<div style='text-align:center;font-size:22px;font-weight:bold;margin:25px 0'>AMOUNT DUE: "+money(r)+"</div>";
+}
 html+="</div></div>";
     }else{
       html+="<div class='summary-grid'>";
