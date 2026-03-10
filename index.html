@@ -1251,6 +1251,10 @@ function closeAll(){
 function downloadPDF(){
 
 const btn=document.querySelector(".action-buttons");
+
+const actionCols=document.querySelectorAll(".no-print");
+actionCols.forEach(el=>el.style.display="none");
+
 document.querySelectorAll(".btn-danger").forEach(b=>b.style.display="none");
 if(btn) btn.style.display="none";
 
@@ -1265,8 +1269,13 @@ jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
 };
 
 html2pdf().set(opt).from(element).save().then(()=>{
+
 if(btn) btn.style.display="flex";
+
+actionCols.forEach(el=>el.style.display="");
+
 document.querySelectorAll(".btn-danger").forEach(b=>b.style.display="inline-block");
+
 });
 
 }
