@@ -180,6 +180,16 @@
       "amount": 1000,
       "notes": "",
       "invoice": ""
+    },
+    {
+      "id": 1773178190283,
+      "owner": "ERAN MARON",
+      "type": "MAINTENANCE",
+      "property": "GC - 1211A",
+      "vendor": "MANUAL ADJUSTMENT",
+      "amount": 500,
+      "notes": "",
+      "invoice": ""
     }
   ]
 }
