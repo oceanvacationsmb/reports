@@ -172,16 +172,6 @@
   },
   "expenses": [
     {
-      "id": 1773104832550,
-      "owner": "ERAN MARON",
-      "type": "REPAIR",
-      "property": "OWNER",
-      "vendor": "ECIA",
-      "amount": 1000,
-      "notes": "",
-      "invoice": ""
-    },
-    {
       "id": 1773104861383,
       "owner": "ERAN MARON",
       "type": "MAINTENANCE",
