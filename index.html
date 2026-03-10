@@ -901,6 +901,17 @@ const ownerExp=expenses
     masterTotals.expenses+=exp;
     masterTotals.draft+=draft;
     masterTotals.owner+=owner;
+    const ownerExpTotal = expenses
+.filter(e => e.owner === currentOwner && e.property === "OWNER")
+.reduce((sum,e)=>sum+e.amount,0);
+
+masterTotals.expenses += ownerExpTotal;
+
+if(OWNERS[currentOwner].type === "draft"){
+masterTotals.draft += ownerExpTotal;
+}else{
+masterTotals.owner -= ownerExpTotal;
+}
     masterTotals.totalTaxCollected+=totalTax;
     
     if(taxByProperty[prop]){
@@ -1274,12 +1285,7 @@ processData();
 displayStatement();
 
 });
-const ownerExpTotal=expenses
-.filter(e=>e.owner===currentOwner && e.property==="OWNER")
-.reduce((sum,e)=>sum+e.amount,0);
 
-masterTotals.expenses+=ownerExpTotal;
-masterTotals.owner-=ownerExpTotal;
 }
 </script>
 </body>
