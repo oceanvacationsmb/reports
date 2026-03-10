@@ -1135,22 +1135,6 @@ html+="<td>"+money(e.amount)+"</td>";
 html+="<td class='no-print'><button class='btn btn-danger btn-small' onclick='deleteExpenseLocal("+e.id+")'>DELETE</button></td>";
 html+="</tr>";
 
-if(e.invoice){
-
-html+="<tr>";
-html+="<td colspan='4' style='text-align:center;padding:20px'>";
-
-if(e.invoice.startsWith("data:application/pdf")){
-html+="<iframe src='"+e.invoice+"' style='width:500px;height:600px;border:1px solid #ccc'></iframe>";
-}else{
-html+="<img src='"+e.invoice+"' style='max-width:500px;border:1px solid #ccc;border-radius:6px'>";
-}
-
-html+="</td>";
-html+="</tr>";
-
-}
-
 });
   html+="</table></div>";
   let invoices = exp.filter(e => e.invoice);
@@ -1162,10 +1146,10 @@ html+="<div class='section-title'>INVOICES</div>";
 
 invoices.forEach(e=>{
 
-html+="<div style='margin:20px auto'>";
+html+="<div style='margin:20px auto; page-break-before:always; text-align:center'>";
 
 if(e.invoice.startsWith("data:application/pdf")){
-html+="<iframe src='"+e.invoice+"' style='width:650px;height:800px;border:1px solid #ccc'></iframe>";
+html+="<embed src='"+e.invoice+"' type='application/pdf' style='width:650px;height:800px;border:1px solid #ccc'>";
 }else{
 html+="<img src='"+e.invoice+"' style='max-width:650px;border:1px solid #ccc;border-radius:6px'>";
 }
