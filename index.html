@@ -243,6 +243,50 @@ function runIncomeReport(){
     html += "<table>";
     html += "<tr><th>PROPERTY</th><th>CHECK-IN / CHECK-OUT</th><th>ACCOMMODATION</th></tr>";
 
+    const ownerExpenses = expenses.filter(e => 
+  e.owner === currentOwner && e.property === "OWNER"
+);
+
+if(ownerExpenses.length > 0){
+
+html += "<div class='property-section'>";
+
+html += "<div class='invoice-header'>";
+html += "<div class='company-info'>";
+html += "<div class='company-name'>OCEAN VACATIONS</div>";
+html += "<div>www.oceanvacationsmb.com</div>";
+html += "<div>oceanvacationsmb@gmail.com</div>";
+html += "<div>843-222-6516</div>";
+html += "</div>";
+
+html += "<div class='right-header'>";
+html += "<div class='statement-date'>"+document.getElementById("statementDate").innerHTML+"</div>";
+html += "<div class='period-date'>"+document.getElementById("periodDate").innerHTML+"</div>";
+html += "</div>";
+
+html += "</div>";
+
+html += "<div class='property-title'><span class='property-icon'>💰</span>OWNER CHARGES</div>";
+
+html += "<table>";
+html += "<tr><th>TYPE</th><th>VENDOR</th><th>NOTES</th><th>AMOUNT</th></tr>";
+
+ownerExpenses.forEach(e=>{
+html += "<tr>";
+html += "<td>"+e.type+"</td>";
+html += "<td>"+e.vendor+"</td>";
+html += "<td>"+(e.notes||"")+"</td>";
+html += "<td>"+money(e.amount)+"</td>";
+html += "</tr>";
+});
+
+html += "</table>";
+
+html += "</div>";
+
+}
+    
+    
     Object.keys(propertyTotals).forEach(prop=>{
       const p = propertyTotals[prop];
 
