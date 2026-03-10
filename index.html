@@ -1249,6 +1249,7 @@ function closeAll(){
 function downloadPDF(){
 
 const btn=document.querySelector(".action-buttons");
+document.querySelectorAll(".btn-danger").forEach(b=>b.style.display="none");
 if(btn) btn.style.display="none";
 
 const element=document.getElementById("content");
@@ -1263,6 +1264,7 @@ jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
 
 html2pdf().set(opt).from(element).save().then(()=>{
 if(btn) btn.style.display="flex";
+document.querySelectorAll(".btn-danger").forEach(b=>b.style.display="inline-block");
 });
 
 }
