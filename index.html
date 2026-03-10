@@ -141,6 +141,9 @@ tr:nth-child(even){background:#fafafa}
 <div class="modal-field"><label class="modal-label">VENDOR</label><select id="expenseVendor" class="modal-input"></select></div>
 <div class="modal-field"><label class="modal-label">AMOUNT</label><input type="number" id="expenseAmount" class="modal-input" placeholder="0.00" step="0.01"></div>
 <div class="modal-field"><label class="modal-label">NOTES</label><input type="text" id="expenseNotes" class="modal-input" placeholder="Optional notes"></div>
+  <div class="modal-field">
+<label class="modal-label">INVOICE (OPTIONAL)</label>
+<input type="file" id="expenseInvoice" class="modal-input" accept=".pdf,.jpg,.jpeg,.png"></div>
 <div class="modal-actions"><button class="btn-add" onclick="submitExpense()">✓ ADD EXPENSE</button><button class="btn-cancel" onclick="doneAddingExpenses()">✓ DONE</button></div>
 <div id="expenseListDisplay" class="expense-list" style="display:none"></div>
 </div>
