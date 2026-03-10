@@ -172,16 +172,6 @@
   },
   "expenses": [
     {
-      "id": 1773105720885,
-      "owner": "ERAN MARON",
-      "type": "MAINTENANCE",
-      "property": "GC - 1211A",
-      "vendor": "ECIA",
-      "amount": 1000,
-      "notes": "",
-      "invoice": ""
-    },
-    {
       "id": 1773105735745,
       "owner": "ERAN MARON",
       "type": "MAINTENANCE",
