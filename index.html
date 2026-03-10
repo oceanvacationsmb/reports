@@ -982,7 +982,7 @@ html+="<td>"+e.type+"</td>";
 html+="<td>"+e.vendor+"</td>";
 html+="<td>"+(e.notes||"")+"</td>";
 html+="<td>"+money(e.amount)+"</td>";
-hhtml+="<td class='no-print'><button class='btn btn-danger btn-small' onclick='deleteExpenseLocal("+e.id+")'>DELETE</button></td>";
+html+="<td class='no-print'><button class='btn btn-danger btn-small' onclick='deleteExpenseLocal("+e.id+")'>DELETE</button></td>";
 html+="</tr>";
 });
 
@@ -1101,9 +1101,9 @@ html+="</table></div>";
 
 if(exp.length>0){
   html+="<div style='margin-top:15px'><div class='section-title'>EXPENSES</div><table style='margin-top:10px'>";
-  html+="<tr><th>TYPE</th><th>VENDOR</th><th>AMOUNT</th><th class="no-print">ACTION</th></tr>";
+  html+="<tr><th>TYPE</th><th>VENDOR</th><th>AMOUNT</th><th class='no-print'>ACTION</th></tr>";
   exp.forEach(e=>{
-    html+="<tr><td>"+e.type+"</td><td>"+e.vendor+"</td><td>"+money(e.amount)+"</td><td class="no-print"><button class='btn btn-danger btn-small' onclick='deleteExpenseLocal("+e.id+")'>DELETE</button></td></tr>";
+    html+="<tr><td>"+e.type+"</td><td>"+e.vendor+"</td><td>"+money(e.amount)+"</td><td class='no-print'><button class='btn btn-danger btn-small' onclick='deleteExpenseLocal("+e.id+")'>DELETE</button></td></tr>";
   });
   html+="</table></div>";
 }
