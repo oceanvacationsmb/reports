@@ -830,6 +830,9 @@ function processData(){
   const t=OWNERS[currentOwner];
   propertyTotals={};
   masterTotals={gross:0,acc:0,clean:0,pmc:0,expenses:0,draft:0,owner:0,websiteFee:0,totalTaxCollected:0};
+  const ownerExpTotal = expenses
+.filter(e => e.owner === currentOwner && e.property === "OWNER")
+.reduce((sum,e)=>sum+e.amount,0);
   taxByProperty={};
   let byProp={};
   
@@ -901,11 +904,9 @@ const ownerExp=expenses
     masterTotals.expenses+=exp;
     masterTotals.draft+=draft;
     masterTotals.owner+=owner;
+    masterTotals.expenses += ownerExpTotal;
     const ownerExpTotal = expenses
-.filter(e => e.owner === currentOwner && e.property === "OWNER")
-.reduce((sum,e)=>sum+e.amount,0);
 
-masterTotals.expenses += ownerExpTotal;
 
 if(OWNERS[currentOwner].type === "draft"){
 masterTotals.draft += ownerExpTotal;
