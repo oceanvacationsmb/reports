@@ -170,16 +170,5 @@
       "HC": true
     }
   },
-  "expenses": [
-    {
-      "id": 1773159754060,
-      "owner": "GHO REVOCABLE TRUST",
-      "type": "POOL CLEANING",
-      "property": "MB - 7500",
-      "vendor": "ECIA",
-      "amount": 2000,
-      "notes": "",
-      "invoice": "ERAN MARON-statement (33).pdf"
-    }
-  ]
+  "expenses": []
 }
