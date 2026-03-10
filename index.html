@@ -857,7 +857,24 @@ function displayStatement(){
   ? ((p.pmc||0) + (p.clean||0) + (p.websiteFee||0) + (p.expenses||0))
   : (p.owner||0);
     const exp=expenses.filter(e=>e.property===prop&&e.owner===currentOwner);
-    html+="<div class='property-section'><div class='property-title'><span class='property-icon'>🏠</span>"+prop.toUpperCase()+"</div>";
+    html+="<div class='property-section'>";
+
+html+="<div class='invoice-header'>";
+html+="<div class='company-info'>";
+html+="<div class='company-name'>OCEAN VACATIONS</div>";
+html+="<div>www.oceanvacationsmb.com</div>";
+html+="<div>oceanvacationsmb@gmail.com</div>";
+html+="<div>843-222-6516</div>";
+html+="</div>";
+
+html+="<div class='right-header'>";
+html+="<div class='statement-date'>"+document.getElementById("statementDate").innerHTML+"</div>";
+html+="<div class='period-date'>"+document.getElementById("periodDate").innerHTML+"</div>";
+html+="</div>";
+
+html+="</div>";
+
+html+="<div class='property-title'><span class='property-icon'>🏠</span>"+prop.toUpperCase()+"</div>";
     
    if(type==="draft"){
   html+="<div class='summary-grid'>";
