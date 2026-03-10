@@ -847,6 +847,14 @@ function processData(){
     
     if(!propertySettings[prop])propertySettings[prop]={};
   });
+
+  masterTotals.expenses += ownerExpTotal;
+
+if(OWNERS[currentOwner].type === "draft"){
+masterTotals.draft += ownerExpTotal;
+}else{
+masterTotals.owner -= ownerExpTotal;
+}
   
   Object.keys(byProp).forEach(prop=>{
     let gross=0,acc=0,clean=0,pmc=0,websiteFee=0,totalTax=0;
@@ -904,12 +912,7 @@ const ownerExp=expenses
     masterTotals.expenses+=exp;
     masterTotals.draft+=draft;
     masterTotals.owner+=owner;
-    masterTotals.expenses += ownerExpTotal;
-    const ownerExpTotal = expenses
-
-
-if(OWNERS[currentOwner].type === "draft"){
-masterTotals.draft += ownerExpTotal;
+   
 }else{
 masterTotals.owner -= ownerExpTotal;
 }
