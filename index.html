@@ -299,7 +299,7 @@ html += "</div>";
         html += "<tr>";
         html += "<td>"+prop+"</td>";
         html += "<td>"+r["CHECK-IN DATE"]+" - "+r["CHECK-OUT DATE"]+"</td>";
-        html += "<td>"+money(source.includes("website") ? a+num(row["MARKUP"]) : a)+"</td>";
+        html += "<td>"+money(a)+"</td>";
         html += "</tr>";
       });
     });
@@ -899,7 +899,7 @@ if(source.includes("website")){
 .filter(e=>e.owner===currentOwner && e.property===prop)
 .reduce((sum,e)=>sum+e.amount,0);
 
-const ownerExp=expenses
+
 
     const draft=pmc+clean+websiteFee+exp;
     const owner=acc-pmc-exp;
@@ -913,22 +913,14 @@ const ownerExp=expenses
     masterTotals.draft+=draft;
     masterTotals.owner+=owner;
    
-}else{
-masterTotals.owner -= ownerExpTotal;
-}
+
     masterTotals.totalTaxCollected+=totalTax;
     
     if(taxByProperty[prop]){
       taxByProperty[prop].netReportable=owner-totalTax;
-      masterTotals.expenses += ownerExpTotal;
-
-if(OWNERS[currentOwner].type==="draft"){
-masterTotals.draft += ownerExpTotal;
-}else{
-masterTotals.owner -= ownerExpTotal;
-}
-    }
+      }
   });
+  }
   
 
 function displayStatement(){
