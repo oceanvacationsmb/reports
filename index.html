@@ -70,20 +70,7 @@ tr:nth-child(even){background:#fafafa}
 .expense-item-delete{background:#dc3545;color:#fff;border:none;padding:5px 10px;border-radius:3px;cursor:pointer;font-size:9px;font-weight:bold}
 @media print{.sidebar,.back-btn,.print-btn,.copy-link-btn,.btn-danger{display:none}.main{margin-left:0;width:100%}.page{padding:20px}}
 @media print{
-.no-print{display:none}}
-  
-  .attachment-block{
-text-align:center;
-margin-top:20px;
-}
-
-.attachment-block img{
-max-width:500px;
-width:100%;
-display:block;
-margin:10px auto;
-border:1px solid #ccc;
-border-radius:6px;
+.no-print{display:none}
 }
 </style>
 </head>
@@ -95,7 +82,6 @@ border-radius:6px;
 <div class="section"><label class="label">MONTH</label><select id="monthSelect"></select></div>
 <div class="section"><label class="label">YEAR</label><select id="yearSelect"></select></div>
 <div class="section"><label class="label">UPLOAD CSV</label><input type="file" id="csvFile" accept=".csv"></div>
-<input type="file" id="attachmentUpload" accept="image/*">
 <button class="btn btn-primary" onclick="generateStatement()">▶ STATEMENT</button>
 <button class="btn btn-success" onclick="openAddExpense()" style="font-size:13px;font-weight:bold">💰 ADD EXPENSE</button>
 <button class="btn btn-success" onclick="generateSummary()">📊 SUMMARY REPORT</button>
@@ -920,7 +906,7 @@ if(source.includes("website")){
 
     const draft=pmc+clean+websiteFee+exp;
     const owner=acc-pmc-exp;
-    propertyTotals[prop]={gross:gross,acc:acc,clean:clean,pmc:pmc,websiteFee:websiteFee,expenses:exp,draft:draft,owner:owner,attachments:[]}
+    propertyTotals[prop]={gross:gross,acc:acc,clean:clean,pmc:pmc,websiteFee:websiteFee,expenses:exp,draft:draft,owner:owner,tax:totalTax,reservations:byProp[prop]};
     masterTotals.gross+=gross;
     masterTotals.acc+=acc;
     masterTotals.clean+=clean;
@@ -1120,35 +1106,12 @@ if(exp.length>0){
     html+="<tr><td>"+e.type+"</td><td>"+e.vendor+"</td><td>"+money(e.amount)+"</td><td class='no-print'><button class='btn btn-danger btn-small' onclick='deleteExpenseLocal("+e.id+")'>DELETE</button></td></tr>";
   });
   html+="</table></div>";
-  if(p.attachments && p.attachments.length){
-html+="<div class='attachment-block'>";
-p.attachments.forEach(a=>{
-html+="<img src='"+a+"'>";
-});
-html+="</div>";
-}
-  
 }
 
 html+="</div>";
 });
-  document.getElementById("mainContent").innerHTML=html;
+document.getElementById("mainContent").innerHTML=html;
 }
-
-document.getElementById("attachmentUpload").addEventListener("change",function(){
-const file=this.files[0];
-if(!file)return;
-
-const reader=new FileReader();
-reader.onload=function(e){
-const prop=Object.keys(propertyTotals)[0];
-if(propertyTotals[prop]){
-propertyTotals[prop].attachments.push(e.target.result);
-displayStatement();
-}
-};
-reader.readAsDataURL(file);
-});
 
 function generateSummary(){
   if(!csvData||csvData.length===0)return alert("Generate statement first");
