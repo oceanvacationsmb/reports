@@ -918,6 +918,11 @@ masterTotals.owner -= ownerExpTotal;
       taxByProperty[prop].netReportable=owner-totalTax;
     }
   });
+  const ownerExpTotal = expenses
+.filter(e => e.owner === currentOwner && e.property === "OWNER")
+.reduce((sum,e)=>sum+e.amount,0);
+
+masterTotals.expenses = masterTotals.expenses + ownerExpTotal;
 }
 
 function displayStatement(){
