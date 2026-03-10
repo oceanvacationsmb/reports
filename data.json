@@ -170,16 +170,5 @@
       "HC": true
     }
   },
-  "expenses": [
-    {
-      "id": 1773179620704,
-      "owner": "ERAN MARON",
-      "type": "MAINTENANCE",
-      "property": "GC - 601B",
-      "vendor": "MANUAL ADJUSTMENT",
-      "amount": 1000,
-      "notes": "",
-      "invoice": ""
-    }
-  ]
+  "expenses": []
 }
