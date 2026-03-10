@@ -180,6 +180,16 @@
       "amount": 2000,
       "notes": "CREDIT",
       "invoice": "ERAN MARON-statement (27).pdf"
+    },
+    {
+      "id": 1773104832550,
+      "owner": "ERAN MARON",
+      "type": "REPAIR",
+      "property": "OWNER",
+      "vendor": "ECIA",
+      "amount": 1000,
+      "notes": "",
+      "invoice": ""
     }
   ]
 }
