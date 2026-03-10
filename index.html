@@ -686,6 +686,11 @@ function openAddExpense(){
 function submitExpense(){
   const type=document.getElementById("expenseType").value;
   const prop=document.getElementById("expenseProperty").value;
+  let propertyValue = prop;
+
+if(prop === "OWNER"){
+propertyValue = "OWNER";
+}
   const vendor=document.getElementById("expenseVendor").value;
   const amount=parseFloat(document.getElementById("expenseAmount").value);
   if(!currentOwner||!prop||!vendor||!amount)return alert("Fill all fields");
@@ -919,6 +924,34 @@ function displayStatement(){
     html+="<div class='summary-card'><div class='summary-label'>OWNER PAYOUT</div><div class='summary-value'>"+money(masterTotals.owner)+"</div></div>";
   }
   html+="</div>";
+
+const ownerExpenses = expenses.filter(e =>
+e.owner === currentOwner && e.property === "OWNER"
+);
+
+if(ownerExpenses.length>0){
+
+html+="<div class='property-section'>";
+
+html+="<div class='property-title'><span class='property-icon'>💰</span>OWNER CHARGES</div>";
+
+html+="<table>";
+html+="<tr><th>TYPE</th><th>VENDOR</th><th>NOTES</th><th>AMOUNT</th></tr>";
+
+ownerExpenses.forEach(e=>{
+html+="<tr>";
+html+="<td>"+e.type+"</td>";
+html+="<td>"+e.vendor+"</td>";
+html+="<td>"+(e.notes||"")+"</td>";
+html+="<td>"+money(e.amount)+"</td>";
+html+="</tr>";
+});
+
+html+="</table>";
+html+="</div>";
+
+}
+  
   Object.keys(propertyTotals).forEach(prop=>{
     const p=propertyTotals[prop];
     const r = type==="draft"
