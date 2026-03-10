@@ -639,7 +639,19 @@ function submitExpense(){
   if(!currentOwner||!prop||!vendor||!amount)return alert("Fill all fields");
   
   const expenseId=Date.now();
-  expenses.push({id:expenseId,owner:currentOwner,type:type,property:prop,vendor:vendor,amount:amount,notes:document.getElementById("expenseNotes").value});
+  const file=document.getElementById("expenseInvoice").files[0];
+const invoice=file ? file.name : "";
+
+expenses.push({
+id:expenseId,
+owner:currentOwner,
+type:type,
+property:prop,
+vendor:vendor,
+amount:amount,
+notes:document.getElementById("expenseNotes").value,
+invoice:invoice
+});
   sessionExpenses.push({id:expenseId,type:type,property:prop,vendor:vendor,amount:amount});
   
   document.getElementById("expenseType").value="MAINTENANCE";
@@ -647,6 +659,7 @@ function submitExpense(){
   document.getElementById("expenseVendor").value="";
   document.getElementById("expenseAmount").value="";
   document.getElementById("expenseNotes").value="";
+  document.getElementById("expenseInvoice").value="";
   
   displaySessionExpenses();
 }
