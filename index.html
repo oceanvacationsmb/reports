@@ -1036,7 +1036,7 @@ ownerInvoices.forEach(e=>{
 html+="<div style='margin:20px auto; page-break-before:always; text-align:center'>";
 
 if(e.invoice.startsWith("data:application/pdf")){
-html+="<embed src='"+e.invoice+"' type='application/pdf' style='width:650px;height:800px;border:1px solid #ccc'>";
+html+="<iframe src='"+e.invoice+"' style='width:650px;height:800px;border:1px solid #ccc'></iframe>";
 }else{
 html+="<img src='"+e.invoice+"' style='max-width:650px;border:1px solid #ccc;border-radius:6px'>";
 }
@@ -1173,12 +1173,13 @@ html+="<td class='no-print'><button class='btn btn-danger btn-small' onclick='de
 html+="</tr>";
 
 });
-  html+="</table></div>";
+  html+="</table>";
+html+="</div>";
   let invoices = exp.filter(e => e.invoice);
 
 if(invoices.length>0){
 
-html+="<div style='margin-top:25px;text-align:center'>";
+html+="<div class='property-section' style='text-align:center'>";
 html+="<div class='section-title'>INVOICES</div>";
 
 invoices.forEach(e=>{
