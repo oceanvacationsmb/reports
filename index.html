@@ -718,6 +718,7 @@ if(file){
       notes:document.getElementById("expenseNotes").value,
       invoice:invoiceData
     });
+    alert("RECORDED");
 
     displaySessionExpenses();
   };
@@ -736,6 +737,7 @@ expenses.push({
   notes:document.getElementById("expenseNotes").value,
   invoice:null
 });
+  alert("RECORDED");
   sessionExpenses.push({id:expenseId,type:type,property:prop,vendor:vendor,amount:amount});
   
   document.getElementById("expenseType").value="MAINTENANCE";
