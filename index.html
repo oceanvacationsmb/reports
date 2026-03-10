@@ -614,20 +614,28 @@ function updateVendorDropdown(){
 function openAddExpense(){
   if(!currentOwner)return alert("Select owner first");
   if(Object.keys(propertyTotals).length===0)return alert("Generate statement first");
+
   sessionExpenses=[];
   document.getElementById("expenseCheckmark").style.display="none";
   document.getElementById("expenseFormContent").style.display="block";
   document.getElementById("expenseListDisplay").style.display="none";
+
   const prop=document.getElementById("expenseProperty");
+
   prop.innerHTML="<option>-- SELECT --</option>";
+
+  prop.innerHTML+="<option value='OWNER'>OWNER: "+currentOwner+"</option>";
+
   Object.keys(propertyTotals).forEach(p=>{
-    prop.innerHTML+="<option>"+p+"</option>";
+    prop.innerHTML+="<option value='"+p+"'>PROPERTY: "+p+"</option>";
   });
+
   document.getElementById("expenseType").value="MAINTENANCE";
   document.getElementById("expenseProperty").value="";
   document.getElementById("expenseVendor").value="";
   document.getElementById("expenseAmount").value="";
   document.getElementById("expenseNotes").value="";
+
   openModal("expenseModal");
 }
 
