@@ -1464,7 +1464,7 @@ pagebreak:{mode:['css','legacy']},
 jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
 };
   
-html2pdf().set(opt).from(element).save().then(()=>{
+setTimeout(function(){html2pdf().set(opt).from(element).save().then(()=>{
  
 if(btn) btn.style.display="flex";
 
@@ -1472,7 +1472,7 @@ actionCols.forEach(el=>el.style.display="");
 
 document.querySelectorAll(".btn-danger").forEach(b=>b.style.display="inline-block");
 
-});
+});},800);
 
 }
   
