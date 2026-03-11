@@ -7,17 +7,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
- .property-section{
-margin:0;
-padding:20px;
-background:#fff;
-}
-
-tr{
-page-break-inside: avoid;
-}
-body{font-family:Arial;background:background:#fff;color:#000}
-.sidebar{width:280px;background:#333;color:#fff;padding:20px;height:100vh;overflow-y:auto;position:fixed;left:0;top:0}
+ 
+body{font-family:Arial;background:#fff;color:#000}
+ .sidebar{width:280px;background:#333;color:#fff;padding:20px;height:100vh;overflow-y:auto;position:fixed;left:0;top:0}
 .sidebar h3{margin-bottom:20px;font-size:16px;border-bottom:2px solid #fff;padding-bottom:10px}
 .section{margin-bottom:20px}
 .label{font-size:11px;font-weight:bold;color:#aaa;margin-bottom:5px;display:block}
@@ -138,8 +130,8 @@ box-shadow:none
 .no-print{display:none}
 }
 
- @page{
-margin:0;
+ page{
+margin:20px;
 }
   
 </style>
@@ -1097,13 +1089,14 @@ html+="</table>";
 
 if(ownerInvoices.length>0){
 
-html+="<div style='margin-top:25px;text-align:center'>";
+html+="<div style='text-align:center'>";
+ 
+ ownerInvoices.forEach(e=>{
 
-ownerInvoices.forEach(e=>{
-
-html+="<div style='page-break-before:always;text-align:center'>";
+html+="<div style='text-align:center'>";
   if(e.invoice.startsWith("data:application/pdf")){
-html+="<canvas id='pdf-"+e.id+"' style='max-width:100%'></canvas>";setTimeout(function(){
+html+="<canvas id='pdf-"+e.id+"' style='max-width:100%;page-break-inside:avoid'></canvas>";
+   setTimeout(function(){
 
 pdfjsLib.getDocument(e.invoice).promise.then(function(pdf){
 
@@ -1269,14 +1262,13 @@ html+="</tr>";
 html+="</div>";
   let invoices = exp.filter(e => e.invoice);
 if(invoices.length>0){
-html+="<div style='page-break-before:always;text-align:center'>";
-invoices.forEach(e=>{
+html+="<div style='text-align:center;page-break-before:avoid'>";
+ invoices.forEach(e=>{
 
 html+="<div style='text-align:center'>";
  if(e.invoice.startsWith("data:application/pdf")){
 
-html+="<canvas id='pdf-"+e.id+"' style='max-width:100%'></canvas>";
-
+html+="<canvas id='pdf-"+e.id+"' style='max-width:100%;page-break-inside:avoid'></canvas>";
 setTimeout(function(){
 
 pdfjsLib.getDocument(e.invoice).promise.then(function(pdf){
