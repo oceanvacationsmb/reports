@@ -5,6 +5,20 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+ 
+ /* FIX: Forces invoices to start on a new page without extra blanks */
+.property-section {
+    page-break-before: always !important; /* This pushes the invoice to a fresh page */
+    break-before: page !important;
+    page-break-after: auto !important;
+    margin-bottom: 0 !important;
+}
+
+img, canvas {
+    max-height: 95vh !important; /* Shrinks image slightly so it fits the page perfectly */
+    display: block !important;
+    margin: 0 auto !important;
+}
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
  
@@ -1456,13 +1470,13 @@ const element=document.getElementById("content");
  element.style.background="#fff";
 
 const opt = {
-  margin: [0.3, 0.3, 0.5, 0.3], // top, left, bottom, right
+  margin: [0.5, 0.3, 0.5, 0.3],
   filename: currentOwner + "-statement.pdf",
   image: { type: 'jpeg', quality: 0.98 },
-  html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+  html2canvas: { scale: 2, useCORS: true },
   jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
-  // THIS LINE REMOVES THE BLANK PAGES:
-  pagebreak: { mode: ['css', 'legacy'], before: '.next-page-element' }
+  // THIS TELLS THE PDF TO LOOK AT THE CSS ABOVE FOR BREAKS:
+  pagebreak: { mode: 'css' } 
 };
   
 setTimeout(function(){html2pdf().set(opt).from(element).save().then(()=>{
