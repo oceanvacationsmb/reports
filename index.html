@@ -1461,7 +1461,7 @@ filename:currentOwner+"-statement.pdf",
 image:{type:'jpeg',quality:1},
 html2canvas:{scale:2,useCORS:true},
 pagebreak:{mode:['css','legacy']},
-jsPDF:{unit:'mm',format:'letter',orientation:'portrait'}pagebreak: { mode: ['css', 'legacy'] }
+jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
 };
   
 setTimeout(function(){html2pdf().set(opt).from(element).save().then(()=>{
