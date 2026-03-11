@@ -1112,7 +1112,7 @@ ownerInvoices.forEach(e=>{
 html+="<div style='margin:20px auto; page-break-inside:avoid; text-align:center'>";
 if(e.invoice.startsWith("data:application/pdf")){
 
-html+="<canvas id='pdf-"+e.id+"' style='max-width:100%;border:1px solid #ccc'></canvas>";
+html+="<canvas id='pdf-"+e.id+"' style='max-width:100%'></canvas>";
 
 setTimeout(function(){
 
@@ -1138,6 +1138,8 @@ viewport:viewport
 });
 
 },100);
+
+}
 
 }else{
 
@@ -1289,8 +1291,35 @@ invoices.forEach(e=>{
 
 html+="<div style='margin:20px auto; page-break-inside:avoid; text-align:center'>";  
 if(e.invoice.startsWith("data:application/pdf")){
-html+="<div style='padding:40px;text-align:center;border:1px solid #ccc;page-break-before:always;page-break-after:always'>";html+="PDF ATTACHMENT";
-html+="</div>";
+
+html+="<canvas id='pdf-"+e.id+"' style='max-width:100%'></canvas>";
+
+setTimeout(function(){
+
+pdfjsLib.getDocument(e.invoice).promise.then(function(pdf){
+
+pdf.getPage(1).then(function(page){
+
+const canvas=document.getElementById("pdf-"+e.id);
+const context=canvas.getContext("2d");
+
+const viewport=page.getViewport({scale:2});
+
+canvas.height=viewport.height;
+canvas.width=viewport.width;
+
+page.render({
+canvasContext:context,
+viewport:viewport
+});
+
+});
+
+});
+
+},100);
+
+}
 }else{
 html+="<img src='"+e.invoice+"' style='max-width:100%'>";}
 
