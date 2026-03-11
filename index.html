@@ -27,7 +27,20 @@ select,input{width:100%;padding:8px;margin:5px 0;border:1px solid #555;backgroun
 .owner-name{text-align:center;font-size:28px;margin-bottom:10px;font-weight:bold;color:#000}
 .owner-details{text-align:center;font-size:13px;color:#666;margin-bottom:40px}
 .owner-detail-item{display:inline-block;margin:0 15px}
-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:9px}
+table{
+width:100%;
+border-collapse:collapse;
+margin:20px 0;
+font-size:9px;
+page-break-inside:avoid;
+break-inside:avoid;
+}
+
+  tr{
+page-break-inside:avoid;
+break-inside:avoid;
+}
+  
 th,td{border:1px solid #e0e0e0;padding:6px;text-align:left}
 th{background:#f5f5f5;color:#000;font-weight:bold;text-transform:uppercase}
 tr:nth-child(even){background:#fafafa}
@@ -36,10 +49,27 @@ tr:nth-child(even){background:#fafafa}
 .back-btn{background:#666}
 .print-btn{background:#e74c3c}
 .property-section{margin:0;padding:20px;border:1px solid #ddd;border-radius:5px;background:#fff;page-break-before:always;break-before:page;page-break-inside:avoid;}
-.property-title{font-size:14px;font-weight:bold;margin-bottom:15px;display:flex;align-items:center;text-transform:uppercase}
+.property-title{
+font-size:14px;
+font-weight:bold;
+margin-bottom:15px;
+display:flex;
+align-items:center;
+text-transform:uppercase;
+page-break-after:avoid;
+}
+
 .property-icon{font-size:18px;margin-right:10px}
 .summary-title{font-size:12px;font-weight:bold;text-transform:uppercase;text-align:center;margin:20px 0}
-.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}
+.summary-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+gap:12px;
+margin:20px 0;
+page-break-inside:avoid;
+break-inside:avoid;
+}
+  
 .summary-card{background:#fff;color:#000;border:1px solid #ddd;border-radius:6px;padding:18px;text-align:center;}
 .summary-label{font-size:10px;color:#000;font-weight:bold;text-transform:uppercase}
 .summary-value{font-size:14px;font-weight:bold;color:#000;margin-top:6px}
@@ -1356,7 +1386,7 @@ const opt={
 margin:0.3,
 filename:currentOwner+"-statement.pdf",
 image:{type:'jpeg',quality:1},
-html2canvas:{scale:2},
+html2canvas:{scale:html2canvas:{scale:3,useCORS:true},},
 pagebreak:{mode:['avoid-all','css','legacy']},
 jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
 };
