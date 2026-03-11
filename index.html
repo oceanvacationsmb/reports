@@ -727,7 +727,10 @@ btn.textContent="✓ ADD EXPENSE";
 
     displaySessionExpenses();
   };
-
+if(file.type==="application/pdf"){
+alert("Please upload invoice as JPG or PNG for PDF reports.");
+return;
+}
   reader.readAsDataURL(file);
   return;
 }
@@ -1033,8 +1036,7 @@ html+="<div class='section-title'>INVOICES</div>";
 
 ownerInvoices.forEach(e=>{
 
-html+="<div style='margin:20px auto; page-break-before:always; text-align:center'>";
-
+html+="<div style='margin:20px auto; page-break-before:always; page-break-inside:avoid; text-align:center'>";
 if(e.invoice.startsWith("data:application/pdf")){
 html+="<div style='padding:40px;border:1px solid #ccc;font-size:18px'>PDF ATTACHMENT</div>";
 }else{
@@ -1184,8 +1186,8 @@ html+="<div class='section-title'>INVOICES</div>";
 
 invoices.forEach(e=>{
 
-html+="<div style='margin:20px auto; page-break-before:always; text-align:center'>";
-
+html+="<div style='margin:20px auto; page-break-before:always; page-break-inside:avoid; text-align:center'>";
+  
 if(e.invoice.startsWith("data:application/pdf")){
 html+="<div style='padding:40px;border:1px solid #ccc;font-size:18px'>PDF ATTACHMENT</div>";
 }else{
