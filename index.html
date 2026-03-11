@@ -1060,8 +1060,7 @@ e.owner === currentOwner && e.property === "OWNER"
 
 if(ownerExpenses.length>0){
 
-html+="<div class='property-section'>";
-
+html+="<div class='property-section' style='page-break-before:always'>";
 html+="<div class='invoice-header'>";
 html+="<div class='company-info'>";
 html+="<div class='company-name'>OCEAN VACATIONS</div>";
@@ -1156,7 +1155,7 @@ html+="</div>";
   ? ((p.pmc||0) + (p.clean||0) + (p.websiteFee||0) + (p.expenses||0))
   : (p.owner||0);
     const exp=expenses.filter(e=>e.property===prop&&e.owner===currentOwner);
-    html+="<div class='property-section'>";
+    html+="<div class='property-section' style='page-break-before:always'>";
 
 html+="<div class='invoice-header'>";
 html+="<div class='company-info'>";
