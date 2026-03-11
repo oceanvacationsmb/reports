@@ -1455,13 +1455,14 @@ if(btn) btn.style.display="none";
 const element=document.getElementById("content");
  element.style.background="#fff";
 
-const opt={
-margin:0.3,
-filename:currentOwner+"-statement.pdf",
-image:{type:'jpeg',quality:1},
-html2canvas:{scale:2,useCORS:true},
-pagebreak:{mode:['css','legacy']},
-jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
+const opt = {
+  margin: 0.3,
+  filename: currentOwner + "-statement.pdf",
+  image: { type: 'jpeg', quality: 1 },
+  html2canvas: { scale: 2, useCORS: true },
+  jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+  // THIS FIXES THE BLANK PAGE:
+  pagebreak: { mode: ['css', 'legacy'] }
 };
   
 setTimeout(function(){html2pdf().set(opt).from(element).save().then(()=>{
