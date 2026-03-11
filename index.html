@@ -1277,8 +1277,9 @@ html+="<div style='text-align:center'>";
 
 invoices.forEach(e=>{
 
-html+="<div style='margin:0 auto; text-align:center'>";
-if(e.invoice.startsWith("data:application/pdf")){
+html+="<div style='page-break-before:always;text-align:center'>";
+
+ if(e.invoice.startsWith("data:application/pdf")){
 
 html+="<canvas id='pdf-"+e.id+"' style='max-width:100%'></canvas>";
 
