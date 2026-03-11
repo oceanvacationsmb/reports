@@ -7,11 +7,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-  .property-section{
+ .property-section{
 margin:0;
 padding:20px;
 background:#fff;
-page-break-inside:avoid;
+page-break-before:always;
 }
 
 tr{
@@ -48,8 +48,6 @@ width:100%;
 border-collapse:collapse;
 margin:20px 0;
 font-size:9px;
-page-break-inside:avoid;
-break-inside:avoid;
 }
 
   tr{
@@ -68,7 +66,7 @@ tr:nth-child(even){background:#fafafa}
 margin:0;
 padding:20px;
 background:#fff;
-page-break-inside:avoid;
+page-break-before:always;
 }
 .property-title{
 font-size:14px;
@@ -1109,7 +1107,7 @@ html+="<div class='section-title'>INVOICES</div>";
 
 ownerInvoices.forEach(e=>{
 
-html+="<div style='margin:20px auto; page-break-inside:avoid; text-align:center'>";
+html+="<div style='margin:20px auto;text-align:center'>";
 if(e.invoice.startsWith("data:application/pdf")){
 
 html+="<canvas id='pdf-"+e.id+"' style='max-width:100%'></canvas>";
