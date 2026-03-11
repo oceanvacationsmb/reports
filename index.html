@@ -130,18 +130,6 @@ box-shadow:none
 .no-print{display:none}
 }
 
-/* FIX: Stops blank pages after attachments */
-.property-section {
-    page-break-after: auto !important;
-    break-after: auto !important;
-    margin-bottom: 0 !important;
-}
-img, canvas {
-    max-height: 98% !important;
-    page-break-inside: avoid !important;
-    display: block !important;
-}
- 
   </style>
 </head>
 <body>
@@ -1511,19 +1499,6 @@ displayStatement();
 
 });
 
-}
- function downloadStatementPDF() {
-    const element = document.getElementById('content');
-    const opt = {
-        margin: [10, 10, 10, 10],
-        filename: 'Ocean_Vacations_Report.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' },  pagebreak: { mode: ['css', 'legacy'] }
-      // THIS IS THE FIX: It tells the PDF to ignore "ghost" empty spaces
-        pagebreak: { mode: ['css', 'legacy'] }
-    };
-    html2pdf().set(opt).from(element).save();
 }
 </script>
 </body>
