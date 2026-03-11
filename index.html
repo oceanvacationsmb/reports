@@ -727,10 +727,7 @@ btn.textContent="✓ ADD EXPENSE";
 
     displaySessionExpenses();
   };
-if(file.type==="application/pdf"){
-alert("Please upload invoice as JPG or PNG for PDF reports.");
-return;
-}
+
   reader.readAsDataURL(file);
   return;
 }
