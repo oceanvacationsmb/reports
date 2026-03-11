@@ -416,7 +416,8 @@ function show1099(){
   html += "<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>" + money(masterTotals.acc) + "</div></div>";
   html += "<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>" + money(masterTotals.pmc) + "</div></div>";
   html += "<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>" + money(masterTotals.expenses) + "</div></div>";
-html+="<div class='summary-card'<div class='summary-label' >NET TO OWNER</div><div class='summary-value'>" + money(masterTotals.owner) + "</div></div>";
+  html += "<div class='summary-card'<div class='summary-label' >NET TO OWNER</div><div class='summary-value'>" + money(masterTotals.owner) + "</div></div>";
+
   html += "</div>";
 
   document.getElementById("mainContent").innerHTML = html;
@@ -956,13 +957,8 @@ masterTotals.owner -= ownerExpTotal;
     let gross=0,acc=0,clean=0,pmc=0,websiteFee=0,totalTax=0;
     byProp[prop].forEach(row=>{
       const g=num(row["TOTAL PAYOUT"]);
-      let a = row.accOverride !== undefined
-  ? parseFloat(row.accOverride)
-  : num(row["ACCOMMODATION FARE"]) - num(row["MARKUP"]);
-
-const c = row.cleanOverride !== undefined
-  ? parseFloat(row.cleanOverride)
-  : ((row["STATUS"]||"").toLowerCase().includes("cancel") ? 0 : num(row["CLEANING FARE"]));
+      let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
+      const c=(row["STATUS"]||"").toLowerCase().includes("cancel")?0:num(row["CLEANING FARE"]);
       const p=a*t.percent;
       let w=0;
 if(t.type==="draft" && g>0){
@@ -1180,24 +1176,18 @@ html+="<div class='property-title'><span class='property-icon'>🏠</span>"+prop
       html+="</div>";
       html+="<div style='text-align:center;font-size:22px;font-weight:bold;margin:25px 0'>OWNER PAYOUT: "+money(r)+"</div>";
     }
-    html+="<div style='margin-top:15px'><div class='section-title'>RESERVATIONS "+
-"<button id='editBtn' class='btn-small no-print' style='margin-left:10px;background:#000;color:#fff' onclick='enableEdit()'>EDIT</button>"+
-"<button id='saveBtn' class='btn-small no-print' style='margin-left:10px;background:#28a745;color:#fff;display:none' onclick='saveEdit()'>SAVE</button>"+
-"</div><table style='margin-top:10px'>";
+    
+    html+="<div style='margin-top:15px'><div class='section-title'>RESERVATIONS</div><table style='margin-top:10px'>";
+   if(type==="draft"){
+
 html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>PAYOUT</th><th>ACCOMMODATION</th><th>PMC</th><th>CLEANING</th><th>WEBSITE/VRBO FEE</th><th>AMOUNT DUE</th></tr>";
 
-p.reservations.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"])).forEach((row,i)=>{
- 
-let a = row.accOverride !== undefined 
-  ? row.accOverride 
-  : num(row["ACCOMMODATION FARE"]) - num(row["MARKUP"]);
- 
- const g=num(row["TOTAL PAYOUT"]);
-const c = row.cleanOverride !== undefined
-  ? row.cleanOverride
-  : ((row["STATUS"]||"").toLowerCase().includes("cancel") ? 0 : num(row["CLEANING FARE"]));
- 
- const pm=a*t.percent;
+p.reservations.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"])).forEach(row=>{
+
+let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
+const g=num(row["TOTAL PAYOUT"]);
+const c=(row["STATUS"]||"").toLowerCase().includes("cancel")?0:num(row["CLEANING FARE"]);
+const pm=a*t.percent;
 
 let w=0;
 const platform=(row["PLATFORM"]||"").toLowerCase();
@@ -1218,20 +1208,8 @@ const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).j
 
 if(g===0)return;
 
-html+="<tr>";
-html+="<td>"+row["CONFIRMATION CODE"].substring(0,8).toUpperCase()+"</td>";
-html+="<td>"+checkin+"-"+checkout+"</td>";
-html+="<td>"+((source=="website" ? "Website" : source=="manual_direct" ? "Website Old" : source=="manual_vrbo" || source=="vrbo_manual" ? "VRBO OLD" : row["PLATFORM"]) + ((row["STATUS"]||"").toLowerCase().includes("cancel") ? " Cancelled" : ""))+"</td>";
-html+="<td>"+money(g)+"</td>";
+html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8).toUpperCase()+"</td><td>"+checkin+"-"+checkout+"</td><td>"+((source=="website" ? "Website" : source=="manual_direct" ? "Website Old" : source=="manual_vrbo" || source=="vrbo_manual" ? "VRBO OLD" : row["PLATFORM"]) + ((row["STATUS"]||"").toLowerCase().includes("cancel") ? " Cancelled" : ""))+"</td><td>"+money(g)+"</td><td>"+money(source=="website" ? a+num(row["MARKUP"]) : a)+"</td><td>"+money(pm)+"</td><td>"+money(c)+"</td><td>"+money(w)+"</td><td>"+money(pm+c+w)+"</td></tr>";
 
-html+="<td><input type='number' class='edit-field' disabled value='"+a+"' style='width:80px' onchange='propertyTotals[\""+prop+"\"].reservations["+i+"].accOverride=parseFloat(this.value)||0'></td>";
-html+="<td>"+money(pm)+"</td>";
-
-html+="<td><input type='number' class='edit-field' disabled value='"+c+"' style='width:80px' onchange='propertyTotals[\""+prop+"\"].reservations["+i+"].cleanOverride=parseFloat(this.value)||0'></td>";
-html+="<td>"+money(w)+"</td>";
-html+="<td>"+money(pm+c+w)+"</td>";
-html+="</tr>";
- 
 });
 
 }else{
@@ -1497,32 +1475,7 @@ document.querySelectorAll(".btn-danger").forEach(b=>b.style.display="inline-bloc
 });},800);
 
 }
-
-function enableEdit(){
-
-document.querySelectorAll(".edit-field").forEach(f=>{
-f.disabled=false;
-});
-
-document.getElementById("editBtn").style.display="none";
-document.getElementById("saveBtn").style.display="inline-block";
-
-}
-
-function saveEdit(){
-
-document.querySelectorAll(".edit-field").forEach(f=>{
-f.disabled=true;
-});
-
-processData();
-displayStatement();
-
-document.getElementById("editBtn").style.display="inline-block";
-document.getElementById("saveBtn").style.display="none";
-
-}
- 
+  
 loadData();
  function deleteExpenseLocal(id){
 
@@ -1550,3 +1503,4 @@ displayStatement();
 </script>
 </body>
 </html>
+
