@@ -26,9 +26,10 @@ background:#fff;
 padding:10px;
 border-radius:0;
 box-shadow:none;
+page-break-after:avoid;
+
 }
-.invoice-header{display:flex;justify-content:space-between;margin-bottom:40px;border-bottom:2px solid #000;padding-bottom:30px;page-break-inside:avoid;break-inside:avoid;}
-.company-info{font-size:11px;line-height:1.8}
+.invoice-header{display:flex;justify-content:space-between;margin-bottom:40px;border-bottom:2px solid #000;padding-bottom:30px;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid;break-after:avoid;}.company-info{font-size:11px;line-height:1.8}
 .company-name{font-size:20px;font-weight:bold;margin-bottom:5px}
 .report-title{text-align:center;font-size:32px;font-weight:bold;margin:40px 0 10px 0;letter-spacing:2px}
 .owner-name{text-align:center;font-size:28px;margin-bottom:10px;font-weight:bold;color:#000}
@@ -39,9 +40,16 @@ width:100%;
 border-collapse:collapse;
 margin:20px 0;
 font-size:9px;
+page-break-inside:avoid;
+
 }
 
   tr{
+page-break-inside:avoid;
+break-inside:avoid;
+}
+
+ img{
 page-break-inside:avoid;
 break-inside:avoid;
 }
@@ -64,7 +72,15 @@ tr:nth-child(even){background:#fafafa}
 margin:0;
 padding:20px;
 background:#fff;
+page-break-inside:avoid;
+break-inside:avoid;
 }
+
+ img{
+page-break-inside:avoid;
+break-inside:avoid;
+}
+ 
 .property-title{
 font-size:14px;
 font-weight:bold;
@@ -73,6 +89,7 @@ display:flex;
 align-items:center;
 text-transform:uppercase;
 page-break-after:avoid;
+ break-after:avoid;
 }
 
 .property-icon{font-size:18px;margin-right:10px}
@@ -1096,7 +1113,7 @@ if(ownerInvoices.length>0){
 
 html+="<div style='text-align:center'>";
   if(e.invoice.startsWith("data:application/pdf")){
-html+="<canvas id='pdf-"+e.id+"' style='max-width:100%;page-break-inside:avoid'></canvas>";
+html+="<canvas id='pdf-"+e.id+"' style='max-width:100%;display:block'></canvas>";
    setTimeout(function(){
 
 pdfjsLib.getDocument(e.invoice).promise.then(function(pdf){
@@ -1106,7 +1123,7 @@ pdf.getPage(1).then(function(page){
 const canvas=document.getElementById("pdf-"+e.id);
 const context=canvas.getContext("2d");
 
-const viewport=page.getViewport({scale:1.25});
+const viewport=page.getViewport({scale:1});
 
 canvas.height=viewport.height;
 canvas.width=viewport.width;
@@ -1124,8 +1141,8 @@ viewport:viewport
 
 }else{
 
-html+="<img src='"+e.invoice+"' style='max-width:100%'>";
-}
+html+="<img src='"+e.invoice+"' style='max-width:100%;display:block'>";
+  }
 
 html+="</div>";
 
@@ -1263,14 +1280,13 @@ html+="</tr>";
 html+="</div>";
   let invoices = exp.filter(e => e.invoice);
 if(invoices.length>0){
-html+="<div style='text-align:center'>";
  invoices.forEach(e=>{
 
-html+="<div style='text-align:center'>";
+html+="<div style='text-align:center;page-break-inside:avoid'>";
  if(e.invoice.startsWith("data:application/pdf")){
 
-html+="<canvas id='pdf-"+e.id+"' style='max-width:100%;page-break-inside:avoid'></canvas>";
-setTimeout(function(){
+html+="<canvas id='pdf-"+e.id+"' style='max-width:100%;display:block'></canvas>";
+  setTimeout(function(){
 
 pdfjsLib.getDocument(e.invoice).promise.then(function(pdf){
 
@@ -1296,13 +1312,10 @@ viewport:viewport
 },100);
 
 }else{
-html+="<img src='"+e.invoice+"' style='max-width:100%'>";}
-
+html+="<img src='"+e.invoice+"' style='max-width:100%;display:block'>";
 html+="</div>";
 
 });
-
-html+="</div>";
 
 }
 }
@@ -1461,11 +1474,11 @@ const element=document.getElementById("content");
  element.style.background="#fff";
 
 const opt={
-margin:0.3,
+margin:0,
 filename:currentOwner+"-statement.pdf",
 image:{type:'jpeg',quality:1},
-html2canvas:{scale:2,useCORS:true},
-pagebreak:{mode:['css','legacy']},
+html2canvas:{scale:1.5,useCORS:true},
+pagebreak:{mode:['css']},
 jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
 };
   
