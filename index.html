@@ -1102,8 +1102,8 @@ html+="<div style='margin-top:25px;text-align:center'>";
 
 ownerInvoices.forEach(e=>{
 
-html+="<div style='margin:20px auto;text-align:center'>";
-if(e.invoice.startsWith("data:application/pdf")){
+html+="<div style='page-break-before:always;text-align:center'>";
+ if(e.invoice.startsWith("data:application/pdf")){
 
 html+="<canvas id='pdf-"+e.id+"' style='max-width:100%'></canvas>";setTimeout(function(){
 
@@ -1277,8 +1277,7 @@ html+="<div style='text-align:center'>";
 
 invoices.forEach(e=>{
 
-html+="<div style='page-break-before:always;text-align:center'>";
-
+html+="<div style='text-align:center'>";
  if(e.invoice.startsWith("data:application/pdf")){
 
 html+="<canvas id='pdf-"+e.id+"' style='max-width:100%'></canvas>";
