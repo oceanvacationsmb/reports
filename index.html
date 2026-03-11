@@ -1135,8 +1135,7 @@ viewport:viewport
 
 }else{
 
-html+="<img src='"+e.invoice+"' style='max-width:100%;border:1px solid #ccc;border-radius:6px'>";
-
+html+="<img src='"+e.invoice+"' style='max-width:100%'>";
 }
 
 html+="</div>";
@@ -1287,8 +1286,7 @@ if(e.invoice.startsWith("data:application/pdf")){
 html+="<div style='padding:40px;text-align:center;border:1px solid #ccc;page-break-before:always;page-break-after:always'>";html+="PDF ATTACHMENT";
 html+="</div>";
 }else{
-html+="<img src='"+e.invoice+"' style='max-width:100%;border:1px solid #ccc;border-radius:6px'>";
-}
+html+="<img src='"+e.invoice+"' style='max-width:100%'>";}
 
 html+="</div>";
 
