@@ -125,24 +125,32 @@ padding:0;
 border-radius:0;
 box-shadow:none
 @media print {
-    /* FORCE ATTACHMENTS TO START ON A NEW PAGE */
-    .property-section, 
-    .invoice-header,
-    .property-title {
+    .sidebar, .back-btn, .print-btn, .copy-link-btn, .btn-danger, .no-print {
+        display: none !important;
+    }
+
+    .main { margin-left: 0 !important; width: 100% !important; }
+    .page { padding: 0 !important; margin: 0 !important; box-shadow: none !important; }
+
+    /* THIS FORCES THE NEW PAGE FOR EVERY SECTION & ATTACHMENT */
+    .property-section {
         page-break-before: always !important;
         break-before: page !important;
         display: block !important;
         width: 100% !important;
+        margin: 0 !important;
+        padding: 20px 0 !important;
     }
 
-    /* Keep the images on one page without spilling over */
+    /* KEEPS ATTACHMENTS FROM SPILLING OVER */
     img, canvas {
-        max-height: 80vh !important; 
+        max-height: 85vh !important;
         max-width: 100% !important;
         display: block !important;
         margin: 0 auto !important;
         page-break-inside: avoid !important;
     }
+}
 
     /* Prevent the main page from being messy */
     .page {
@@ -1490,9 +1498,9 @@ const opt = {
   margin: [0.5, 0.3, 0.5, 0.3],
   filename: currentOwner + "-statement.pdf",
   image: { type: 'jpeg', quality: 0.98 },
-  html2canvas: { scale: 2, useCORS: true },
+  html2canvas: { scale: 2, useCORS: true, letterRendering: true },
   jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
-  // THIS IS THE FIX:
+  // CRITICAL: Tells the PDF to break pages based on the CSS above
   pagebreak: { mode: 'css' }
 };
   
