@@ -1464,8 +1464,8 @@ pagebreak:{mode:['css','legacy']},
 jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
 };
   
-html2pdf().set(opt).from(element).save().then(()=>{
-
+html2pdf().set(opt).from(element).toPdf().get('pdf').then(function(pdf){pdf.save(currentOwner+"-statement.pdf");});
+ 
 if(btn) btn.style.display="flex";
 
 actionCols.forEach(el=>el.style.display="");
