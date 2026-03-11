@@ -125,30 +125,29 @@ padding:0;
 border-radius:0;
 box-shadow:none
 @media print {
-    /* FORCE EVERY NEW SECTION TO A NEW PAGE */
+    /* FORCE ATTACHMENTS TO START ON A NEW PAGE */
     .property-section, 
-    .invoice-header, 
-    #mainContent > div,
-    [style*="page-break-before"] {
+    .invoice-header,
+    .property-title {
         page-break-before: always !important;
         break-before: page !important;
         display: block !important;
-        clear: both !important;
+        width: 100% !important;
     }
 
-    /* FIX IMAGES TO BE FULL PAGE */
+    /* Keep the images on one page without spilling over */
     img, canvas {
-        max-height: 82vh !important; /* Slightly smaller to ensure no "spill-over" blank pages */
+        max-height: 80vh !important; 
         max-width: 100% !important;
         display: block !important;
         margin: 0 auto !important;
         page-break-inside: avoid !important;
     }
-    
-    /* REMOVE SPACING AT TOP OF NEW PAGES */
+
+    /* Prevent the main page from being messy */
     .page {
-        margin-top: 0 !important;
-        padding-top: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 }
   
@@ -1491,10 +1490,10 @@ const opt = {
   margin: [0.5, 0.3, 0.5, 0.3],
   filename: currentOwner + "-statement.pdf",
   image: { type: 'jpeg', quality: 0.98 },
-  html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+  html2canvas: { scale: 2, useCORS: true },
   jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
-  // THIS IS THE CRITICAL LINE:
-  pagebreak: { mode: 'css' } 
+  // THIS IS THE FIX:
+  pagebreak: { mode: 'css' }
 };
   
 setTimeout(function(){html2pdf().set(opt).from(element).save().then(()=>{
