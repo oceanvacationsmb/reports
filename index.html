@@ -130,6 +130,18 @@ box-shadow:none
 .no-print{display:none}
 }
 
+/* FIX: Stops blank pages after attachments */
+.property-section {
+    page-break-after: auto !important;
+    break-after: auto !important;
+    margin-bottom: 0 !important;
+}
+img, canvas {
+    max-height: 98% !important;
+    page-break-inside: avoid !important;
+    display: block !important;
+}
+ 
   </style>
 </head>
 <body>
@@ -140,7 +152,7 @@ box-shadow:none
 <div class="section"><label class="label">MONTH</label><select id="monthSelect"></select></div>
 <div class="section"><label class="label">YEAR</label><select id="yearSelect"></select></div>
 <div class="section"><label class="label">UPLOAD CSV</label><input type="file" id="csvFile" accept=".csv"></div>
-<button class="btn btn-primary" onclick="generateStatement()">▶ STATEMENT</button>
+<button class="btn btn-primary" onclick="generateStatement(); downloadStatementPDF();">▶ STATEMENT</button>
 <button class="btn btn-success" onclick="openAddExpense()" style="font-size:13px;font-weight:bold">💰 ADD EXPENSE</button>
 <button class="btn btn-success" onclick="generateSummary()">📊 SUMMARY REPORT</button>
 <div class="settings-header">📊 REPORTS</div>
@@ -1499,6 +1511,19 @@ displayStatement();
 
 });
 
+}
+ function downloadStatementPDF() {
+    const element = document.getElementById('content');
+    const opt = {
+        margin: [10, 10, 10, 10],
+        filename: 'Ocean_Vacations_Report.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' },
+        // THIS IS THE FIX: It tells the PDF to ignore "ghost" empty spaces
+        pagebreak: { mode: ['css', 'legacy'] }
+    };
+    html2pdf().set(opt).from(element).save();
 }
 </script>
 </body>
