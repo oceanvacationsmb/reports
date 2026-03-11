@@ -1103,8 +1103,7 @@ html+="<div style='margin-top:25px;text-align:center'>";
 ownerInvoices.forEach(e=>{
 
 html+="<div style='page-break-before:always;text-align:center'>";
- if(e.invoice.startsWith("data:application/pdf")){
-
+  if(e.invoice.startsWith("data:application/pdf")){
 html+="<canvas id='pdf-"+e.id+"' style='max-width:100%'></canvas>";setTimeout(function(){
 
 pdfjsLib.getDocument(e.invoice).promise.then(function(pdf){
