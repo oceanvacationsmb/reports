@@ -20,7 +20,7 @@ select,input{width:100%;padding:8px;margin:5px 0;border:1px solid #555;backgroun
 .btn-danger{background:#dc3545}
 .main{margin-left:280px;padding:20px;width:calc(100% - 280px)}
 .page{background:#fff;padding:40px;border-radius:5px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
-.invoice-header{display:flex;justify-content:space-between;margin-bottom:40px;border-bottom:2px solid #000;padding-bottom:30px}
+.invoice-header{display:flex;justify-content:space-between;margin-bottom:40px;border-bottom:2px solid #000;padding-bottom:30px;page-break-inside:avoid;break-inside:avoid;}
 .company-info{font-size:11px;line-height:1.8}
 .company-name{font-size:20px;font-weight:bold;margin-bottom:5px}
 .report-title{text-align:center;font-size:32px;font-weight:bold;margin:40px 0 10px 0;letter-spacing:2px}
@@ -1357,6 +1357,7 @@ margin:0.3,
 filename:currentOwner+"-statement.pdf",
 image:{type:'jpeg',quality:1},
 html2canvas:{scale:2},
+pagebreak:{mode:['avoid-all','css','legacy']},
 jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
 };
 
