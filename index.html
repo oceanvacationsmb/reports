@@ -1386,11 +1386,11 @@ const opt={
 margin:0.3,
 filename:currentOwner+"-statement.pdf",
 image:{type:'jpeg',quality:1},
-html2canvas:{scale:html2canvas:{scale:3,useCORS:true},},
+html2canvas:{scale:3,useCORS:true},
 pagebreak:{mode:['avoid-all','css','legacy']},
 jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
 };
-
+  
 html2pdf().set(opt).from(element).save().then(()=>{
 
 if(btn) btn.style.display="flex";
