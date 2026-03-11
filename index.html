@@ -124,44 +124,39 @@ width:100%
 padding:0;
 border-radius:0;
 box-shadow:none
- @media print{
-.sidebar,
-.back-btn,
-.print-btn,
-.copy-link-btn,
-.btn-danger{
-display:none
-}
+@media print {
+    /* Hide UI elements */
+    .sidebar, .back-btn, .print-btn, .copy-link-btn, .btn-danger, .no-print {
+        display: none !important;
+    }
 
-.main{
-margin-left:0;
-width:100%
-}
+    .main { margin-left: 0; width: 100%; }
 
-.page{
-padding:0;
-border-radius:0;
-box-shadow:none
-}
+    /* FORCE START AT THE TOP OF A NEW PAGE */
+    .property-section, 
+    .invoice-header, 
+    .report-title, 
+    #mainContent > div {
+        page-break-before: always !important;
+        break-before: page !important;
+        margin-top: 0 !important;
+        padding-top: 20px !important;
+    }
 
-/* PASTE THIS PART BELOW */
-/* FORCE INVOICE TO START ON NEW PAGE */
-/* FORCE EVERY SECTION TO START ON A NEW PAGE */
-.property-section, .invoice-header {
-    page-break-before: always !important;
-    break-before: page !important;
-    page-break-after: avoid !important;
-    display: block !important;
-    clear: both !important;
-}
+    /* PREVENT CUTS: Keep tables and cards together */
+    table, tr, .summary-card {
+        page-break-inside: avoid !important;
+    }
 
-/* ATTACHMENT IMAGE FIX */
-img, canvas {
-    max-height: 90vh !important; /* Shrunk slightly more to ensure no overflow */
-    max-width: 100% !important;
-    display: block !important;
-    margin: 0 auto !important;
-    page-break-inside: avoid !important;
+    /* ATTACHMENT IMAGES: Scale to fit one full page perfectly */
+    img, canvas {
+        max-height: 85vh !important; /* Leaves room for headers/footers */
+        max-width: 100% !important;
+        display: block !important;
+        margin: 0 auto !important;
+        page-break-inside: avoid !important;
+        page-break-after: avoid !important;
+    }
 }
   
   @media print{
@@ -1500,12 +1495,17 @@ const element=document.getElementById("content");
  element.style.background="#fff";
 
 const opt = {
-  margin: [0.5, 0.3, 0.5, 0.3],
+  margin: [0.5, 0.3, 0.5, 0.3], // Adds breathing room for headers
   filename: currentOwner + "-statement.pdf",
   image: { type: 'jpeg', quality: 0.98 },
-  html2canvas: { scale: 2, useCORS: true },
+  html2canvas: { 
+      scale: 2, 
+      useCORS: true, 
+      logging: false,
+      letterRendering: true 
+  },
   jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
-  // THIS IS THE KEY:
+  // THIS IS THE MOST IMPORTANT LINE:
   pagebreak: { mode: 'css' } 
 };
   
