@@ -1099,15 +1099,13 @@ html+="</table>";
 if(ownerInvoices.length>0){
 
 html+="<div style='margin-top:25px;text-align:center'>";
-html+="<div class='section-title'>INVOICES</div>";
 
 ownerInvoices.forEach(e=>{
 
 html+="<div style='margin:20px auto;text-align:center'>";
 if(e.invoice.startsWith("data:application/pdf")){
 
-html+="<canvas id='pdf-"+e.id+"' style='max-width:100%;page-break-before:always'></canvas>";
-setTimeout(function(){
+html+="<canvas id='pdf-"+e.id+"' style='max-width:100%'></canvas>";setTimeout(function(){
 
 pdfjsLib.getDocument(e.invoice).promise.then(function(pdf){
 
@@ -1276,11 +1274,10 @@ html+="</div>";
 if(invoices.length>0){
 
 html+="<div style='text-align:center'>";
-html+="<div class='section-title'>INVOICES</div>";
 
 invoices.forEach(e=>{
 
-html+="<div style='margin:20px auto; text-align:center'>";
+html+="<div style='margin:0 auto; text-align:center'>";
 if(e.invoice.startsWith("data:application/pdf")){
 
 html+="<canvas id='pdf-"+e.id+"' style='max-width:100%'></canvas>";
