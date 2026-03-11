@@ -1281,7 +1281,7 @@ html+="<div class='section-title'>INVOICES</div>";
 
 invoices.forEach(e=>{
 
-html+="<div style='margin:20px auto; page-break-inside:avoid; text-align:center'>";  
+html+="<div style='margin:20px auto; text-align:center'>";
 if(e.invoice.startsWith("data:application/pdf")){
 
 html+="<canvas id='pdf-"+e.id+"' style='max-width:100%'></canvas>";
