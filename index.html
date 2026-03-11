@@ -1106,8 +1106,7 @@ ownerInvoices.forEach(e=>{
 html+="<div style='margin:20px auto;text-align:center'>";
 if(e.invoice.startsWith("data:application/pdf")){
 
-html+="<canvas id='pdf-"+e.id+"' style='max-width:100%'></canvas>";
-
+html+="<canvas id='pdf-"+e.id+"' style='max-width:100%;page-break-before:always'></canvas>";
 setTimeout(function(){
 
 pdfjsLib.getDocument(e.invoice).promise.then(function(pdf){
