@@ -1456,13 +1456,13 @@ const element=document.getElementById("content");
  element.style.background="#fff";
 
 const opt = {
-  margin: 0.3,
+  margin: [0.3, 0.3, 0.5, 0.3], // top, left, bottom, right
   filename: currentOwner + "-statement.pdf",
-  image: { type: 'jpeg', quality: 1 },
-  html2canvas: { scale: 2, useCORS: true },
+  image: { type: 'jpeg', quality: 0.98 },
+  html2canvas: { scale: 2, useCORS: true, letterRendering: true },
   jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
-  // THIS FIXES THE BLANK PAGE:
-  pagebreak: { mode: ['css', 'legacy'] }
+  // THIS LINE REMOVES THE BLANK PAGES:
+  pagebreak: { mode: ['css', 'legacy'], before: '.next-page-element' }
 };
   
 setTimeout(function(){html2pdf().set(opt).from(element).save().then(()=>{
