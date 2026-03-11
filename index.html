@@ -125,37 +125,30 @@ padding:0;
 border-radius:0;
 box-shadow:none
 @media print {
-    /* Hide UI elements */
-    .sidebar, .back-btn, .print-btn, .copy-link-btn, .btn-danger, .no-print {
-        display: none !important;
-    }
-
-    .main { margin-left: 0; width: 100%; }
-
-    /* FORCE START AT THE TOP OF A NEW PAGE */
+    /* FORCE EVERY NEW SECTION TO A NEW PAGE */
     .property-section, 
     .invoice-header, 
-    .report-title, 
-    #mainContent > div {
+    #mainContent > div,
+    [style*="page-break-before"] {
         page-break-before: always !important;
         break-before: page !important;
-        margin-top: 0 !important;
-        padding-top: 20px !important;
+        display: block !important;
+        clear: both !important;
     }
 
-    /* PREVENT CUTS: Keep tables and cards together */
-    table, tr, .summary-card {
-        page-break-inside: avoid !important;
-    }
-
-    /* ATTACHMENT IMAGES: Scale to fit one full page perfectly */
+    /* FIX IMAGES TO BE FULL PAGE */
     img, canvas {
-        max-height: 85vh !important; /* Leaves room for headers/footers */
+        max-height: 82vh !important; /* Slightly smaller to ensure no "spill-over" blank pages */
         max-width: 100% !important;
         display: block !important;
         margin: 0 auto !important;
         page-break-inside: avoid !important;
-        page-break-after: avoid !important;
+    }
+    
+    /* REMOVE SPACING AT TOP OF NEW PAGES */
+    .page {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
     }
 }
   
@@ -1495,17 +1488,12 @@ const element=document.getElementById("content");
  element.style.background="#fff";
 
 const opt = {
-  margin: [0.5, 0.3, 0.5, 0.3], // Adds breathing room for headers
+  margin: [0.5, 0.3, 0.5, 0.3],
   filename: currentOwner + "-statement.pdf",
   image: { type: 'jpeg', quality: 0.98 },
-  html2canvas: { 
-      scale: 2, 
-      useCORS: true, 
-      logging: false,
-      letterRendering: true 
-  },
+  html2canvas: { scale: 2, useCORS: true, letterRendering: true },
   jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
-  // THIS IS THE MOST IMPORTANT LINE:
+  // THIS IS THE CRITICAL LINE:
   pagebreak: { mode: 'css' } 
 };
   
