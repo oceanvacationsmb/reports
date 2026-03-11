@@ -145,19 +145,19 @@ box-shadow:none
 }
 
 /* PASTE THIS PART BELOW */
+/* FORCE INVOICE TO START ON NEW PAGE */
 .property-section {
     page-break-before: always !important;
     break-before: page !important;
-    page-break-after: auto !important;
+    page-break-after: avoid !important; /* Prevents the blank page after */
     margin-bottom: 0 !important;
 }
 
 img, canvas {
-    max-height: 95vh !important;
+    max-height: 92vh !important; /* Shrink slightly more to guarantee it fits on one page */
     display: block !important;
     margin: 0 auto !important;
-}
-/* END OF NEW PART */
+    page-break-inside: avoid !important;
 }
   
   @media print{
@@ -1501,7 +1501,7 @@ const opt = {
   image: { type: 'jpeg', quality: 0.98 },
   html2canvas: { scale: 2, useCORS: true },
   jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
-  // THIS TELLS THE PDF TO LOOK AT THE CSS ABOVE FOR BREAKS:
+  // THIS LINE IS CRITICAL:
   pagebreak: { mode: 'css' } 
 };
   
