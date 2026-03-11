@@ -1035,7 +1035,7 @@ ownerInvoices.forEach(e=>{
 
 html+="<div style='margin:20px auto; page-break-before:always; page-break-inside:avoid; text-align:center'>";
 if(e.invoice.startsWith("data:application/pdf")){
-html+="<div style='padding:40px;border:1px solid #ccc;font-size:18px'>PDF ATTACHMENT</div>";
+html+="<object data='"+e.invoice+"' type='application/pdf' style='width:100%;height:900px;border:1px solid #ccc'></object>";
 }else{
 html+="<img src='"+e.invoice+"' style='max-width:100%;border:1px solid #ccc;border-radius:6px'>";
 }
@@ -1186,7 +1186,7 @@ invoices.forEach(e=>{
 html+="<div style='margin:20px auto; page-break-before:always; page-break-inside:avoid; text-align:center'>";
   
 if(e.invoice.startsWith("data:application/pdf")){
-html+="<div style='padding:40px;border:1px solid #ccc;font-size:18px'>PDF ATTACHMENT</div>";
+html+="<object data='"+e.invoice+"' type='application/pdf' style='width:100%;height:900px;border:1px solid #ccc'></object>";
 }else{
 html+="<img src='"+e.invoice+"' style='max-width:100%;border:1px solid #ccc;border-radius:6px'>";
 }
