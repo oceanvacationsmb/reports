@@ -1091,7 +1091,7 @@ html+="<div style='text-align:center'>";
 
 html+="<div style='text-align:center;page-break-after:avoid'>";
   if(e.invoice.startsWith("data:application/pdf")){
-html+="<canvas id='pdf-"+e.id+"' style='max-width:100%;page-break-inside:avoid'></canvas>";
+html+="<canvas id='pdf-"+e.id+"' style='max-width:100%;display:block'></canvas>";
    setTimeout(function(){
 
 pdfjsLib.getDocument(e.invoice).promise.then(function(pdf){
@@ -1264,8 +1264,8 @@ html+="<div style='text-align:center'>";
 html+="<div style='text-align:center'>";
  if(e.invoice.startsWith("data:application/pdf")){
 
-html+="<canvas id='pdf-"+e.id+"' style='max-width:100%;page-break-inside:avoid'></canvas>";
-setTimeout(function(){
+html+="<canvas id='pdf-"+e.id+"' style='max-width:100%;display:block'></canvas>";
+  setTimeout(function(){
 
 pdfjsLib.getDocument(e.invoice).promise.then(function(pdf){
 
