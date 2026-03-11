@@ -1143,7 +1143,7 @@ html+="</div>";
   ? ((p.pmc||0) + (p.clean||0) + (p.websiteFee||0) + (p.expenses||0))
   : (p.owner||0);
     const exp=expenses.filter(e=>e.property===prop&&e.owner===currentOwner);
-    html+="<div class='property-section' style='page-break-before:always'>";
+    html+="<div class='property-section' style='break-before:page'>";
    
 html+="<div class='invoice-header'>";
 html+="<div class='company-info'>";
