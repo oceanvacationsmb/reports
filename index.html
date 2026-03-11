@@ -6,19 +6,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
  
- /* FIX: Forces invoices to start on a new page without extra blanks */
-.property-section {
-    page-break-before: always !important; /* This pushes the invoice to a fresh page */
-    break-before: page !important;
-    page-break-after: auto !important;
-    margin-bottom: 0 !important;
-}
-
-img, canvas {
-    max-height: 95vh !important; /* Shrinks image slightly so it fits the page perfectly */
-    display: block !important;
-    margin: 0 auto !important;
-}
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
  
@@ -137,6 +124,45 @@ width:100%
 padding:0;
 border-radius:0;
 box-shadow:none
+ @media print{
+.sidebar,
+.back-btn,
+.print-btn,
+.copy-link-btn,
+.btn-danger{
+display:none
+}
+
+.main{
+margin-left:0;
+width:100%
+}
+
+.page{
+padding:0;
+border-radius:0;
+box-shadow:none
+}
+
+/* PASTE THIS PART BELOW */
+.property-section {
+    page-break-before: always !important;
+    break-before: page !important;
+    page-break-after: auto !important;
+    margin-bottom: 0 !important;
+}
+
+img, canvas {
+    max-height: 95vh !important;
+    display: block !important;
+    margin: 0 auto !important;
+}
+/* END OF NEW PART */
+}
+  
+  @media print{
+.no-print{display:none}
+}
 }
 }
   
