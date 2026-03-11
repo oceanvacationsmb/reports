@@ -1182,12 +1182,10 @@ html+="<div class='property-title'><span class='property-icon'>🏠</span>"+prop
       html+="<div style='text-align:center;font-size:22px;font-weight:bold;margin:25px 0'>OWNER PAYOUT: "+money(r)+"</div>";
     }
     
-    html+="<div style='margin-top:15px'><div class='section-title'>
-RESERVATIONS
-<button id='editBtn' class='btn-small no-print' style='margin-left:10px;background:#000;color:#fff' onclick='enableEdit()'>EDIT</button>
-<button id='saveBtn' class='btn-small no-print' style='margin-left:10px;background:#28a745;color:#fff;display:none' onclick='saveEdit()'>SAVE</button>
-</div><table style='margin-top:10px'>";
-   if(type==="draft"){
+   html+="<div style='margin-top:15px'><div class='section-title'>RESERVATIONS "+
+"<button id='editBtn' class='btn-small no-print' style='margin-left:10px;background:#000;color:#fff' onclick='enableEdit()'>EDIT</button>"+
+"<button id='saveBtn' class='btn-small no-print' style='margin-left:10px;background:#28a745;color:#fff;display:none' onclick='saveEdit()'>SAVE</button>"+
+"</div><table style='margin-top:10px'>";
 
 html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>PAYOUT</th><th>ACCOMMODATION</th><th>PMC</th><th>CLEANING</th><th>WEBSITE/VRBO FEE</th><th>AMOUNT DUE</th></tr>";
 
@@ -1229,12 +1227,12 @@ html+="<td>"+checkin+"-"+checkout+"</td>";
 html+="<td>"+((source=="website" ? "Website" : source=="manual_direct" ? "Website Old" : source=="manual_vrbo" || source=="vrbo_manual" ? "VRBO OLD" : row["PLATFORM"]) + ((row["STATUS"]||"").toLowerCase().includes("cancel") ? " Cancelled" : ""))+"</td>";
 html+="<td>"+money(g)+"</td>";
 
-html+="<td><input type='number' class='edit-field' disabled value='"+a+"' style='width:80px' onchange='propertyTotals[\""+prop+"\"].reservations["+i+"].accOverride=parseFloat(this.value)||0;processData();displayStatement();'></td>";
+html+="<td><input type='number' class='edit-field' disabled value='"+a+"' style='width:80px'<td><input type='number' class='edit-field' disabled value='"+a+"' style='width:80px' onchange='propertyTotals[""+prop+""].reservations["+i+"].accOverride=parseFloat(this.value)||0;'></td>
 
 html+="<td>"+money(pm)+"</td>";
 
-html+="<td><input type='number' class='edit-field' disabled value='"+c+"' style='width:80px' onchange='propertyTotals[\""+prop+"\"].reservations["+i+"].cleanOverride=parseFloat(this.value)||0;processData();displayStatement();'></td>";
-
+<td><input type='number' class='edit-field' disabled value='"+c+"' style='width:80px' onchange='propertyTotals[""+prop+""].reservations["+i+"].cleanOverride=parseFloat(this.value)||0;'></td>
+   
 html+="<td>"+money(w)+"</td>";
 html+="<td>"+money(pm+c+w)+"</td>";
 html+="</tr>";
