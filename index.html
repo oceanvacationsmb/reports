@@ -1036,9 +1036,9 @@ ownerInvoices.forEach(e=>{
 html+="<div style='margin:20px auto; page-break-before:always; text-align:center'>";
 
 if(e.invoice.startsWith("data:application/pdf")){
-html+="<iframe src='"+e.invoice+"' style='width:650px;height:800px;border:1px solid #ccc'></iframe>";
+html+="<iframe src='"+e.invoice+"' style='width:100%;height:1000px;border:1px solid #ccc'></iframe>";
 }else{
-html+="<img src='"+e.invoice+"' style='max-width:650px;border:1px solid #ccc;border-radius:6px'>";
+html+="<img src='"+e.invoice+"' style='max-width:100%;border:1px solid #ccc;border-radius:6px'>";
 }
 
 html+="</div>";
@@ -1187,8 +1187,7 @@ invoices.forEach(e=>{
 html+="<div style='margin:20px auto; page-break-before:always; text-align:center'>";
 
 if(e.invoice.startsWith("data:application/pdf")){
-html+="<embed src='"+e.invoice+"' type='application/pdf' style='width:650px;height:800px;border:1px solid #ccc'>";
-}else{
+html+="<iframe src='"+e.invoice+"' style='width:100%;height:1000px;border:1px solid #ccc'></iframe>";}else{
 html+="<img src='"+e.invoice+"' style='max-width:650px;border:1px solid #ccc;border-radius:6px'>";
 }
 
