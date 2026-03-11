@@ -4,6 +4,7 @@
 <title>Ocean Vacations - Reservation Report</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:Arial;background:#f5f5f5;color:#000;display:flex}
@@ -1065,11 +1066,38 @@ ownerInvoices.forEach(e=>{
 
 html+="<div style='margin:20px auto; page-break-inside:avoid; text-align:center'>";
 if(e.invoice.startsWith("data:application/pdf")){
-html+="<div style='padding:40px;text-align:center;border:1px solid #ccc'>";
-html+="PDF ATTACHMENT";
-html+="</div>";
+
+html+="<canvas id='pdf-"+e.id+"' style='max-width:100%;border:1px solid #ccc'></canvas>";
+
+setTimeout(function(){
+
+pdfjsLib.getDocument(e.invoice).promise.then(function(pdf){
+
+pdf.getPage(1).then(function(page){
+
+const canvas=document.getElementById("pdf-"+e.id);
+const context=canvas.getContext("2d");
+
+const viewport=page.getViewport({scale:2});
+
+canvas.height=viewport.height;
+canvas.width=viewport.width;
+
+page.render({
+canvasContext:context,
+viewport:viewport
+});
+
+});
+
+});
+
+},100);
+
 }else{
+
 html+="<img src='"+e.invoice+"' style='max-width:100%;border:1px solid #ccc;border-radius:6px'>";
+
 }
 
 html+="</div>";
