@@ -1519,8 +1519,9 @@ displayStatement();
         filename: 'Ocean_Vacations_Report.pdf',
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' },
-        // THIS IS THE FIX: It tells the PDF to ignore "ghost" empty spaces
+jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' },
+  pagebreak: { mode: ['css', 'legacy'] }
+};        // THIS IS THE FIX: It tells the PDF to ignore "ghost" empty spaces
         pagebreak: { mode: ['css', 'legacy'] }
     };
     html2pdf().set(opt).from(element).save();
