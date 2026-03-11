@@ -1225,12 +1225,12 @@ html+="<td>"+checkin+"-"+checkout+"</td>";
 html+="<td>"+((source=="website" ? "Website" : source=="manual_direct" ? "Website Old" : source=="manual_vrbo" || source=="vrbo_manual" ? "VRBO OLD" : row["PLATFORM"]) + ((row["STATUS"]||"").toLowerCase().includes("cancel") ? " Cancelled" : ""))+"</td>";
 html+="<td>"+money(g)+"</td>";
 
-html+="<td><input type='number' class='edit-field' disabled value='"+a+"' style='width:80px'<td><input type='number' class='edit-field' disabled value='"+a+"' style='width:80px' onchange='propertyTotals[""+prop+""].reservations["+i+"].accOverride=parseFloat(this.value)||0;'></td>
+html+="<td><input type='number' class='edit-field' disabled value='"+a+"' style='width:80px' onchange='propertyTotals[\""+prop+"\"].reservations["+i+"].accOverride=parseFloat(this.value)||0;'></td>";
 
 html+="<td>"+money(pm)+"</td>";
 
-<td><input type='number' class='edit-field' disabled value='"+c+"' style='width:80px' onchange='propertyTotals[""+prop+""].reservations["+i+"].cleanOverride=parseFloat(this.value)||0;'></td>
-   
+html+="<td><input type='number' class='edit-field' disabled value='"+c+"' style='width:80px' onchange='propertyTotals[\""+prop+"\"].reservations["+i+"].cleanOverride=parseFloat(this.value)||0;'></td>";
+ 
 html+="<td>"+money(w)+"</td>";
 html+="<td>"+money(pm+c+w)+"</td>";
 html+="</tr>";
