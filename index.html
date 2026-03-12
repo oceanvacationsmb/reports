@@ -351,24 +351,17 @@ html += "</div>";
     Object.keys(propertyTotals).forEach(prop=>{
       const p = propertyTotals[prop];
 
-      p.reservations.forEach((r,i)=>{
+      p.reservations.forEach(r=>{
 
         let a = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
         const commFee = num(r["COMMUNITY FEE"])||0;
         a = a - commFee;
 
         html += "<tr>";
-html += "<td>"+prop+"</td>";
-html += "<td>"+r["CHECK-IN DATE"]+" - "+r["CHECK-OUT DATE"]+"</td>";
-
-if(type==="draft"){
-html += "<td><input id='acc_"+i+"' type='number' value='"+a+"' style='width:90px'></td>";
-html += "<td><button onclick='saveAcc("+i+")'>Save</button></td>";
-}else{
-html += "<td>"+money(a)+"</td>";
-}
-
-html += "</tr>";
+        html += "<td>"+prop+"</td>";
+        html += "<td>"+r["CHECK-IN DATE"]+" - "+r["CHECK-OUT DATE"]+"</td>";
+        html += "<td>"+money(a)+"</td>";
+        html += "</tr>";
       });
     });
 
@@ -1507,27 +1500,6 @@ displayStatement();
 });
 
 }
-
- function displayStatement(){
-   ...
-}
-
-function generateLink(){
-   ...
-}
-
-function downloadPDF(){
-   ...
-}
-
-/* ADD IT HERE */
-
-function saveAcc(i){
-const val = document.getElementById("acc_"+i).value;
-if(!val) return;
-alert("Accommodation updated to $" + Number(val).toFixed(2));
-}
- 
 </script>
 </body>
 </html>
