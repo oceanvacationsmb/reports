@@ -1534,21 +1534,29 @@ const clean = row.querySelector(".clean");
 const accVal = Number(accInput.value)||0;
 const cleanVal = Number(cleanInput.value)||0;
 
+ if(accVal < 0 || cleanVal < 0) return;
+
 const prop = row.dataset.prop;
 const index = row.dataset.row;
 
-propertyTotals[prop].reservations[index]["ACCOMMODATION FARE"] = accVal;
-propertyTotals[prop].reservations[index]["COMMUNITY FEE"] = cleanVal;
+const r = propertyTotals[prop].reservations[index];
+
+r["ACCOMMODATION FARE"] = accVal + num(r["MARKUP"]) + cleanVal;
+r["COMMUNITY FEE"] = cleanVal;
 
 acc.dataset.val=accVal;
 clean.dataset.val=cleanVal;
 
 acc.innerHTML="$"+accVal.toFixed(2);
 clean.innerHTML="$"+cleanVal.toFixed(2);
+row.style.background="#fff8cc";
 
 e.target.innerText="Edit";
 e.target.classList.remove("saveRow");
 e.target.classList.add("editRow");
+
+processData();
+displayStatement();
 
 }
 
