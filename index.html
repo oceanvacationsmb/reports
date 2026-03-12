@@ -234,7 +234,7 @@ box-shadow:none
 
 <script>
 function getGitHubAPI(){
-  return "https://raw.githubusercontent.com/oceanvacationsmb/reports/main/data.json";
+  return "https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json";
 }
 
 let gitHubData={},OWNERS={},vendors=[],expenses=[],csvData=[],propertySettings={},currentOwner="",masterTotals={},propertyTotals={},taxByProperty={},githubToken="";
