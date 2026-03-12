@@ -170,5 +170,16 @@
       "HC": true
     }
   },
-  "expenses": []
+  "expenses": [
+    {
+      "id": 1773341996159,
+      "owner": "GHO REVOCABLE TRUST",
+      "type": "MAINTENANCE",
+      "property": "OWNER",
+      "vendor": "ECIA",
+      "amount": 1000,
+      "notes": "",
+      "invoice": null
+    }
+  ]
 }
