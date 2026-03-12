@@ -1547,7 +1547,7 @@ const cleanVal = Number(cleanInput.value)||0;
  if(accVal < 0 || cleanVal < 0) return;
 
 const prop = row.dataset.prop;
-const index = row.dataset.row;
+const index = parseInt(row.dataset.row);
 
 const r = propertyTotals[prop].reservations[index];
 
