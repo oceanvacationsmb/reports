@@ -357,13 +357,11 @@ html += "</div>";
         const commFee = num(r["COMMUNITY FEE"])||0;
         a = a - commFee;
 
-html += "<tr data-prop='"+prop+"' data-row='"+i+"'>";
-html += "<td>"+prop+"</td>";
-html += "<td>"+r["CHECK-IN DATE"]+" - "+r["CHECK-OUT DATE"]+"</td>";
-html += "<td class='acc' data-val='"+a+"'>"+money(a)+"</td>";
-html += "<td class='clean' data-val='"+commFee+"'>"+money(commFee)+"</td>";
-html += "<td><button class='editRow'>Edit</button></td>";
-html += "</tr>";
+        html += "<tr>";
+        html += "<td>"+prop+"</td>";
+        html += "<td>"+r["CHECK-IN DATE"]+" - "+r["CHECK-OUT DATE"]+"</td>";
+        html += "<td>"+money(a)+"</td>";
+        html += "</tr>";
       });
     });
 
@@ -1182,10 +1180,10 @@ html+="<div class='property-title'><span class='property-icon'>🏠</span>"+prop
     html+="<div style='margin-top:15px'><div class='section-title'>RESERVATIONS</div><table style='margin-top:10px'>";
    if(type==="draft"){
 
-html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>PAYOUT</th><th>ACCOMMODATION</th><th>PMC</th><th>CLEANING</th><th>WEBSITE/VRBO FEE</th><th>AMOUNT DUE</th><th>ACTION</th></tr>";
-    
-p.reservations.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"])).forEach((row,i)=>{
- 
+html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>PAYOUT</th><th>ACCOMMODATION</th><th>PMC</th><th>CLEANING</th><th>WEBSITE/VRBO FEE</th><th>AMOUNT DUE</th></tr>";
+
+p.reservations.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"])).forEach(row=>{
+
 let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
 const g=num(row["TOTAL PAYOUT"]);
 const c=(row["STATUS"]||"").toLowerCase().includes("cancel")?0:num(row["CLEANING FARE"]);
@@ -1210,18 +1208,8 @@ const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).j
 
 if(g===0)return;
 
-html+="<tr data-prop='"+prop+"' data-row='"+i+"'>";
-html+="<td>"+row["CONFIRMATION CODE"].substring(0,8).toUpperCase()+"</td>";
-html+="<td>"+checkin+"-"+checkout+"</td>";
-html+="<td>"+((source=="website" ? "Website" : source=="manual_direct" ? "Website Old" : source=="manual_vrbo" || source=="vrbo_manual" ? "VRBO OLD" : row["PLATFORM"]) + ((row["STATUS"]||"").toLowerCase().includes("cancel") ? " Cancelled" : ""))+"</td>";
-html+="<td>"+money(g)+"</td>";
-html+="<td class='acc' data-val='"+a+"'>"+money(a)+"</td>";
-html+="<td>"+money(pm)+"</td>";
-html+="<td class='clean' data-val='"+c+"'>"+money(c)+"</td>";
-html+="<td>"+money(w)+"</td>";
-html+="<td>"+money(pm+c+w)+"</td>";
-html+="<td><button class='editRow'>Edit</button></td>";
-html+="</tr>";
+html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8).toUpperCase()+"</td><td>"+checkin+"-"+checkout+"</td><td>"+((source=="website" ? "Website" : source=="manual_direct" ? "Website Old" : source=="manual_vrbo" || source=="vrbo_manual" ? "VRBO OLD" : row["PLATFORM"]) + ((row["STATUS"]||"").toLowerCase().includes("cancel") ? " Cancelled" : ""))+"</td><td>"+money(g)+"</td><td>"+money(source=="website" ? a+num(row["MARKUP"]) : a)+"</td><td>"+money(pm)+"</td><td>"+money(c)+"</td><td>"+money(w)+"</td><td>"+money(pm+c+w)+"</td></tr>";
+
 });
 
 }else{
@@ -1510,74 +1498,8 @@ processData();
 displayStatement();
 
 });
-  }
-document.addEventListener("click",function(e){
-
-if(e.target.classList.contains("editRow")){
-
-const row = e.target.closest("tr");
-
-const acc = row.querySelector(".acc");
-const clean = row.querySelector(".clean");
-
-const accVal = acc.dataset.val;
-const cleanVal = clean.dataset.val;
-
-acc.innerHTML = "<input class='accInput' type='number' value='"+accVal+"' style='width:90px'>";
-clean.innerHTML = "<input class='cleanInput' type='number' value='"+cleanVal+"' style='width:90px'>";
-
-e.target.innerText="Save";
-e.target.classList.remove("editRow");
-e.target.classList.add("saveRow");
 
 }
-
-else if(e.target.classList.contains("saveRow")){
-
-const row = e.target.closest("tr");
-
-const accInput = row.querySelector(".accInput");
-const cleanInput = row.querySelector(".cleanInput");
-
-const acc = row.querySelector(".acc");
-const clean = row.querySelector(".clean");
-
-const accVal = Number(accInput.value)||0;
-const cleanVal = Number(cleanInput.value)||0;
-
- if(accVal < 0 || cleanVal < 0) return;
-
-const prop = row.dataset.prop;
-const index = parseInt(row.dataset.row);
-
-const r = propertyTotals[prop].reservations[index];
-
-const oldAcc = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
-const oldClean = num(r["CLEANING FARE"]);
-
-r["ACCOMMODATION FARE"] = accVal + num(r["MARKUP"]);
-r["CLEANING FARE"] = cleanVal;
-acc.dataset.val = accVal;
-clean.dataset.val = cleanVal;
- 
-propertyTotals[prop].acc += (accVal - oldAcc);
-propertyTotals[prop].clean += (cleanVal - oldClean);
-
-acc.innerHTML="$"+accVal.toFixed(2);
-clean.innerHTML="$"+cleanVal.toFixed(2);
-row.style.background="#fff8cc";
-
-e.target.innerText="Edit";
-e.target.classList.remove("saveRow");
-e.target.classList.add("editRow");
-
-processData();
-displayStatement();
-
-}
-
-});
-  
 </script>
 </body>
 </html>
