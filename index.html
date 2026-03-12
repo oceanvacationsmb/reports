@@ -1553,10 +1553,10 @@ const index = parseInt(row.dataset.row);
 const r = propertyTotals[prop].reservations[index];
 
 const oldAcc = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
-const oldClean = num(r["COMMUNITY FEE"]);
+const oldClean = num(r["CLEANING FARE"]);
 
 r["ACCOMMODATION FARE"] = accVal + num(r["MARKUP"]);
-r["COMMUNITY FEE"] = cleanVal;
+r["CLEANING FARE"] = cleanVal;
 acc.dataset.val = accVal;
 clean.dataset.val = cleanVal;
  
