@@ -357,11 +357,11 @@ html += "</div>";
         const commFee = num(r["COMMUNITY FEE"])||0;
         a = a - commFee;
 
-        html += "<tr>";
+html += "<tr data-prop='"+prop+"' data-row='"+i+"'>";
 html += "<td>"+prop+"</td>";
 html += "<td>"+r["CHECK-IN DATE"]+" - "+r["CHECK-OUT DATE"]+"</td>";
-html += "<td class='acc'>"+money(a)+"</td>";
-html += "<td class='clean'>"+money(commFee)+"</td>";
+html += "<td class='acc' data-val='"+a+"'>"+money(a)+"</td>";
+html += "<td class='clean' data-val='"+commFee+"'>"+money(commFee)+"</td>";
 html += "<td><button class='editRow'>Edit</button></td>";
 html += "</tr>";
       });
@@ -1500,7 +1500,60 @@ processData();
 displayStatement();
 
 });
+document.addEventListener("click",function(e){
 
+if(e.target.classList.contains("editRow")){
+
+const row = e.target.closest("tr");
+
+const acc = row.querySelector(".acc");
+const clean = row.querySelector(".clean");
+
+const accVal = acc.dataset.val;
+const cleanVal = clean.dataset.val;
+
+acc.innerHTML = "<input class='accInput' type='number' value='"+accVal+"' style='width:90px'>";
+clean.innerHTML = "<input class='cleanInput' type='number' value='"+cleanVal+"' style='width:90px'>";
+
+e.target.innerText="Save";
+e.target.classList.remove("editRow");
+e.target.classList.add("saveRow");
+
+}
+
+else if(e.target.classList.contains("saveRow")){
+
+const row = e.target.closest("tr");
+
+const accInput = row.querySelector(".accInput");
+const cleanInput = row.querySelector(".cleanInput");
+
+const acc = row.querySelector(".acc");
+const clean = row.querySelector(".clean");
+
+const accVal = Number(accInput.value)||0;
+const cleanVal = Number(cleanInput.value)||0;
+
+const prop = row.dataset.prop;
+const index = row.dataset.row;
+
+propertyTotals[prop].reservations[index]["ACCOMMODATION FARE"] = accVal;
+propertyTotals[prop].reservations[index]["COMMUNITY FEE"] = cleanVal;
+
+acc.dataset.val=accVal;
+clean.dataset.val=cleanVal;
+
+acc.innerHTML="$"+accVal.toFixed(2);
+clean.innerHTML="$"+cleanVal.toFixed(2);
+
+e.target.innerText="Edit";
+e.target.classList.remove("saveRow");
+e.target.classList.add("editRow");
+
+}
+
+});
+  
 }
 </script>
 </body>
