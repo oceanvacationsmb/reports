@@ -1554,6 +1554,8 @@ const r = propertyTotals[prop].reservations[index];
 
 r["ACCOMMODATION FARE"] = accVal + num(r["MARKUP"]) + cleanVal;
 r["COMMUNITY FEE"] = cleanVal;
+propertyTotals[prop].acc += (accVal - (num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]) - num(r["COMMUNITY FEE"])));
+propertyTotals[prop].clean += (cleanVal - num(r["COMMUNITY FEE"]));
 
 acc.dataset.val=accVal;
 clean.dataset.val=cleanVal;
