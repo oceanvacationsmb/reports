@@ -1182,10 +1182,10 @@ html+="<div class='property-title'><span class='property-icon'>🏠</span>"+prop
     html+="<div style='margin-top:15px'><div class='section-title'>RESERVATIONS</div><table style='margin-top:10px'>";
    if(type==="draft"){
 
-html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>PAYOUT</th><th>ACCOMMODATION</th><th>PMC</th><th>CLEANING</th><th>WEBSITE/VRBO FEE</th><th>AMOUNT DUE</th></tr>";
-
-p.reservations.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"])).forEach(row=>{
-
+html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>PAYOUT</th><th>ACCOMMODATION</th><th>PMC</th><th>CLEANING</th><th>WEBSITE/VRBO FEE</th><th>AMOUNT DUE</th><th>ACTION</th></tr>";
+    
+p.reservations.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"])).forEach((row,i)=>{
+ 
 let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
 const g=num(row["TOTAL PAYOUT"]);
 const c=(row["STATUS"]||"").toLowerCase().includes("cancel")?0:num(row["CLEANING FARE"]);
@@ -1210,8 +1210,18 @@ const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).j
 
 if(g===0)return;
 
-html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8).toUpperCase()+"</td><td>"+checkin+"-"+checkout+"</td><td>"+((source=="website" ? "Website" : source=="manual_direct" ? "Website Old" : source=="manual_vrbo" || source=="vrbo_manual" ? "VRBO OLD" : row["PLATFORM"]) + ((row["STATUS"]||"").toLowerCase().includes("cancel") ? " Cancelled" : ""))+"</td><td>"+money(g)+"</td><td>"+money(source=="website" ? a+num(row["MARKUP"]) : a)+"</td><td>"+money(pm)+"</td><td>"+money(c)+"</td><td>"+money(w)+"</td><td>"+money(pm+c+w)+"</td></tr>";
-
+html+="<tr data-prop='"+prop+"' data-row='"+i+"'>";
+html+="<td>"+row["CONFIRMATION CODE"].substring(0,8).toUpperCase()+"</td>";
+html+="<td>"+checkin+"-"+checkout+"</td>";
+html+="<td>"+((source=="website" ? "Website" : source=="manual_direct" ? "Website Old" : source=="manual_vrbo" || source=="vrbo_manual" ? "VRBO OLD" : row["PLATFORM"]) + ((row["STATUS"]||"").toLowerCase().includes("cancel") ? " Cancelled" : ""))+"</td>";
+html+="<td>"+money(g)+"</td>";
+html+="<td class='acc' data-val='"+a+"'>"+money(a)+"</td>";
+html+="<td>"+money(pm)+"</td>";
+html+="<td class='clean' data-val='"+c+"'>"+money(c)+"</td>";
+html+="<td>"+money(w)+"</td>";
+html+="<td>"+money(pm+c+w)+"</td>";
+html+="<td><button class='editRow'>Edit</button></td>";
+html+="</tr>";
 });
 
 }else{
