@@ -344,8 +344,8 @@ html += "</div>";
 html += "</div>";
 
 html += "<div style='text-align:center;font-size:22px;font-weight:bold;margin-bottom:10px'>GROSS RENTAL INCOME REPORT</div>";
-html += "<div style='text-align:center;font-size:14px;margin-bottom:5px'>"+p.reservations[0]["PROPERTY ADDRESS"]+"</div>";
-html += "<div style='text-align:center;font-size:13px;margin-bottom:20px'>PERIOD "+fromDate+" - "+toDate+"</div>";
+html += "<div style='text-align:center;font-size:14px;margin-bottom:5px'>"+(p.reservations.length ? p.reservations[0]["PROPERTY ADDRESS"] : "")+"</div>";
+html += "<div style='text-align:center;font-size:13px;margin-bottom:20px'>PERIOD "+new Date(fromDate).toLocaleDateString()+" - "+new Date(toDate).toLocaleDateString()+"</div>";
 html += "<table>";
    
    html += "<tr><th>CODE</th><th>PROPERTY</th><th>CHECK-IN / CHECK-OUT</th><th>PAYOUT</th></tr>";
