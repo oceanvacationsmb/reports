@@ -357,14 +357,6 @@ html += "<table>";
    
    html += "<tr><th>CODE</th><th>PROPERTY</th><th>CHECK-IN / CHECK-OUT</th><th>PAYOUT</th></tr>";
 
-    const ownerExpenses = expenses.filter(e => 
-  e.owner === currentOwner && e.property === "OWNER"
-);
-
-if(ownerExpenses.length > 0){
-
-html += "<div class='property-section'>";
-
 html += "<div class='invoice-header'>";
 html += "<div class='company-info'>";
 html += "<div class='company-name'>OCEAN VACATIONS INC.</div>";
