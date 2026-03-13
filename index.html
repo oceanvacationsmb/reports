@@ -575,8 +575,8 @@ if(checkIn > toDate) return;
                
 
 const payout = num(r["TOTAL PAYOUT"]);
-       const acc = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
 const clean = num(r["CLEANING FARE"]) || 0;
+const acc = payout - clean;
 const pmc = acc * OWNERS[currentOwner].percent;
 
 totalPayout += payout;
@@ -636,9 +636,9 @@ if(toDate && checkIn > toDate) return;
 const payout = num(r["TOTAL PAYOUT"]);
 if(payout === 0) return;
 
-const acc = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
+const payout = num(r["TOTAL PAYOUT"]);
 const clean = num(r["CLEANING FARE"]) || 0;
-const pmc = acc * OWNERS[currentOwner].percent;
+const acc = payout - clean;
 
 
 });
@@ -1248,10 +1248,11 @@ masterTotals.owner -= ownerExpTotal;
   Object.keys(byProp).forEach(prop=>{
     let gross=0,acc=0,clean=0,pmc=0,websiteFee=0,totalTax=0;
     byProp[prop].forEach(row=>{
-      const g=num(row["TOTAL PAYOUT"]);
-      let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
-      const c=(row["STATUS"]||"").toLowerCase().includes("cancel")?0:num(row["CLEANING FARE"]);
-      const p=a*t.percent;
+      const g = num(row["TOTAL PAYOUT"]);
+const c = (row["STATUS"]||"").toLowerCase().includes("cancel") ? 0 : num(row["CLEANING FARE"]);
+let a = g - c;
+const p = a * t.percent;
+     
       let w=0;
 if(t.type==="draft" && g>0){
   const platform=(row["PLATFORM"]||"").toLowerCase();
@@ -1491,10 +1492,10 @@ html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>PAYOUT</th><th>ACCOMMO
     
 p.reservations.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"])).forEach((row,i)=>{
  
-let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
-const g=num(row["TOTAL PAYOUT"]);
-const c=(row["STATUS"]||"").toLowerCase().includes("cancel")?0:num(row["CLEANING FARE"]);
-const pm=a*t.percent;
+const g = num(row["TOTAL PAYOUT"]);
+const c = (row["STATUS"]||"").toLowerCase().includes("cancel") ? 0 : num(row["CLEANING FARE"]);
+let a = g - c;
+const pm = a * t.percent;
 
 let w=0;
 const platform=(row["PLATFORM"]||"").toLowerCase();
@@ -1952,10 +1953,9 @@ const index = parseInt(row.dataset.row);
 
 const r = propertyTotals[prop].reservations[index];
 
-const oldAcc = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
+const oldAcc = num(r["TOTAL PAYOUT"]) - num(r["CLEANING FARE"]);
 const oldClean = num(r["CLEANING FARE"]);
 
-r["ACCOMMODATION FARE"] = accVal + num(r["MARKUP"]);
 r["CLEANING FARE"] = cleanVal;
 acc.dataset.val = accVal;
 clean.dataset.val = cleanVal;
