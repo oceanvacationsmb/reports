@@ -238,30 +238,44 @@ box-shadow:none
 
 <script>
 
- function testGuestyCSV(){
+ function loadGuestyCSV(){
 
-const url = "PASTE_GUESTY_EXPORT_LINK_HERE";
+const url = "https://app.guesty.com/api/reservations-report-export/export-csv";
 
-fetch(url)
-.then(r => r.text())
-.then(csv => {
+const payload = {
+viewId:"69a6927d86385caeec420a8f",
+columns:"listing.nickname integration.platform confirmationCode checkInDate checkOutDate money.hostPayout money.fareAccommodation money.invoiceItems.MAR money.fareCleaning feeCommunity money.hostServiceFee preCancelationMoney.hostPayout feeBooking status source customFields.68e44b138e7b460011d90661",
+filters:'{"localTime.checkIn":{"@between":["2026-03-01T00:00:00-05:00","2026-03-31T00:00:00-04:00"]}}',
+sort:"listing.nickname",
+timezone:"America/New_York"
+};
 
-console.log("CSV downloaded");
+fetch(url,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+credentials:"include",
+body:JSON.stringify(payload)
+})
+.then(r=>r.text())
+.then(csv=>{
 
 csvData = Papa.parse(csv,{
 header:true,
 skipEmptyLines:true
 }).data;
 
-console.log(csvData);
-
-alert("CSV loaded from Guesty successfully");
+processData();
+displayStatement();
 
 })
 .catch(err=>{
 console.error(err);
 alert("Guesty download failed");
 });
+
+}
 
 }
  
