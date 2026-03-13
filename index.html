@@ -370,10 +370,10 @@ html += "<div>oceanvacationsmb@gmail.com</div>";
 html += "<div>843-222-6516</div>";
 html += "</div>";
 
-html += "<div class='right-header'>";
-html += "<div class='statement-date'>"+document.getElementById("statementDate").innerHTML+"</div>";
-html += "<div class='period-date'>"+document.getElementById("periodDate").innerHTML+"</div>";
-html += "</div>";
+const today = new Date();
+const todayFormatted = today.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}).toUpperCase();
+
+html += "<div class='statement-date'>STATEMENT DATE:<br><strong>"+todayFormatted+"</strong></div>";
 
 html += "</div>";
 
