@@ -684,15 +684,6 @@ summary += "<div class='summary-card'><div class='summary-label'>PMC</div><div c
 summary += "</div>";
 
 html = summary + html;
-
-summary += "<div class='summary-grid'>";
-summary += "<div class='summary-card'><div class='summary-label'>PAYOUT</div><div class='summary-value'>"+money(totalPayout)+"</div></div>";
-summary += "<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(totalAcc)+"</div></div>";
-summary += "<div class='summary-card'><div class='summary-label'>CLEANING</div><div class='summary-value'>"+money(totalCleaning)+"</div></div>";
-summary += "<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(totalPMC)+"</div></div>";
-summary += "</div>";
-
-html = summary + html;
   document.getElementById("mainContent").innerHTML = html;
 }
 function showHistory(){
