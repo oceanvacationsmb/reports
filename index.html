@@ -1104,8 +1104,8 @@ function updateHeaderDates(){
   let nextMonth=month+1,nextYear=year;
   if(nextMonth>12){nextMonth=1;nextYear++;}
   document.getElementById("reportTitle").textContent="RESERVATION REPORT";
-  document.getElementById("statementDate").innerHTML="STATEMENT DATE:<br><strong>"+months[nextMonth-1]+" 1ST "+nextYear+"</strong>";
-  document.getElementById("periodDate").innerHTML="PERIOD: "+months[month-1]+" 1ST - "+last+"TH "+year;
+  document.getElementById("statementDate").innerHTML="STATEMENT DATE:<br><strong>"+months[nextMonth-1]+" 1 "+nextYear+"</strong>";
+  document.getElementById("periodDate").innerHTML="PERIOD: "+months[month-1]+" 1 - "+last+" "+year;
   document.getElementById("periodUnderTitle").innerText="";
   document.getElementById("ownerTitle").textContent=currentOwner.toUpperCase();
   
