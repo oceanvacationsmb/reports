@@ -516,8 +516,7 @@ const payout = num(r["TOTAL PAYOUT"]);
 html += "<tr>";
 html += "<td>"+r["CONFIRMATION CODE"].substring(0,8).toUpperCase()+"</td>";
 html += "<td>"+prop+"</td>";
-const outDate = checkOut ? checkOut.split("-")[1]+"/"+checkOut.split("-")[2]+"/"+checkOut.split("-")[0] : "";
-
+html += "<td>"+r["CHECK-IN DATE"].split("-")[1]+"/"+r["CHECK-IN DATE"].split("-")[2]+"/"+r["CHECK-IN DATE"].split("-")[0]+" - "+r["CHECK-OUT DATE"].split("-")[1]+"/"+r["CHECK-OUT DATE"].split("-")[2]+"/"+r["CHECK-OUT DATE"].split("-")[0]+"</td>";
 html += "<td>"+money(payout)+"</td>";
 html += "</tr>";
       });
