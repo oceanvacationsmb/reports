@@ -340,8 +340,9 @@ html += "</div>";
 const today = new Date();
 const todayFormatted = today.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}).toUpperCase();
 
-html += "<div class='statement-date'>STATEMENT DATE:<br><strong>"+todayFormatted+"</strong></div>";
-
+html += "<div class='right-header'>";
+html += "<div class='statement-date'><strong>STATEMENT DATE:</strong> "+todayFormatted+"</div>";
+html += "<div class='period-date'>"+document.getElementById("periodDate").innerHTML+"</div>";
 html += "</div>";
 
 const firstRow = csvData[0];
@@ -373,8 +374,9 @@ html += "</div>";
 const today = new Date();
 const todayFormatted = today.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}).toUpperCase();
 
-html += "<div class='statement-date'>STATEMENT DATE:<br><strong>"+todayFormatted+"</strong></div>";
-
+html += "<div class='right-header'>";
+html += "<div class='statement-date'><strong>STATEMENT DATE:</strong> "+todayFormatted+"</div>";
+html += "<div class='period-date'>"+document.getElementById("periodDate").innerHTML+"</div>";
 html += "</div>";
 
 html += "<div class='property-title'><span class='property-icon'>💰</span>OWNER CHARGES</div>";
