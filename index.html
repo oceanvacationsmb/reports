@@ -640,24 +640,6 @@ const acc = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
 const clean = num(r["CLEANING FARE"]) || 0;
 const pmc = acc * OWNERS[currentOwner].percent;
 
-const inDate = checkIn.split("-")[1]+"/"+checkIn.split("-")[2]+"/"+checkIn.split("-")[0];
-const outDate = checkOut.split("-")[1]+"/"+checkOut.split("-")[2]+"/"+checkOut.split("-")[0];
-
-html += "<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:12px'>";
-
-html += "<div>";
-html += "<strong>"+r["CONFIRMATION CODE"].substring(0,8).toUpperCase()+"</strong>";
-html += " | "+inDate+" - "+outDate;
-html += "</div>";
-
-html += "<div>";
-html += "PAYOUT: "+money(payout)+" | ";
-html += "ACC: "+money(acc)+" | ";
-html += "CLEANING: "+money(clean)+" | ";
-html += "PMC: "+money(pmc);
-html += "</div>";
-
-html += "</div>";
 
 });
 
