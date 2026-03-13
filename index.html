@@ -279,16 +279,15 @@ if(!csvData || csvData.length===0){
 
   html += "<div class='property-section'>";
 
-  html += "<div style='margin-bottom:15px;border-bottom:1px solid #ccc;padding-bottom:10px'>";
-
+html += "<div style='margin-bottom:15px;border-bottom:1px solid #ccc;padding-bottom:10px'>";
 html += "<label style='font-weight:bold;margin-right:5px'>REPORT TYPE</label>";
-html += "<select id='incomeType' style='width:150px;margin-right:20px' onchange='incomeTypeChanged()'>";
+html += "<select id='incomeType' style='width:150px' onchange='incomeTypeChanged()'>";
 html += "<option value='full'>RESERVATION REPORT</option>";
 html += "<option value='gri'>GRI REPORT</option>";
 html += "</select>";
 
 html += "<label style='font-weight:bold;margin-right:5px'>PROPERTY</label>";
-html += "<select id='incomeProperty' style='width:200px;margin-right:20px'>";
+html += "<select id='incomeProperty' style='width:200px'>";
 
 html += "<option value='all'>ALL PROPERTIES</option>";
 
@@ -305,6 +304,7 @@ html += "<option value='month'>SPECIFIC MONTH</option>";
 html += "<option value='year'>CURRENT YEAR</option>";
 html += "<option value='lastyear'>LAST YEAR</option>";
 html += "</select>";
+ html += "<button onclick='runIncomeReport()' style='padding:6px 14px;background:#000;color:#fff;border:none;border-radius:4px;font-weight:bold'>RUN REPORT</button>";
 
 html += "</div>";
 html += "<div id='dateOptions' style='margin-top:8px'></div>";
@@ -314,9 +314,38 @@ function runIncomeReport(){
 
   const type = document.getElementById("incomeType").value;
 const selectedProperty = document.getElementById("incomeProperty").value;
+ const mode = document.getElementById("dateMode").value;
 
-let fromDate = document.getElementById("incomeFrom").value;
-let toDate = document.getElementById("incomeTo").value;
+let fromDate = "";
+let toDate = "";
+
+if(mode === "dates"){
+fromDate = document.getElementById("incomeFrom").value;
+toDate = document.getElementById("incomeTo").value;
+}
+
+if(mode === "month"){
+const m = document.getElementById("incomeMonth").value;
+const y = document.getElementById("incomeYear").value;
+
+const lastDay = new Date(y, m, 0).getDate();
+
+fromDate = y + "-" + String(m).padStart(2,"0") + "-01";
+toDate = y + "-" + String(m).padStart(2,"0") + "-" + lastDay;
+}
+
+if(mode === "year"){
+const y = new Date().getFullYear();
+fromDate = y + "-01-01";
+toDate = y + "-12-31";
+}
+
+if(mode === "lastyear"){
+const y = new Date().getFullYear() - 1;
+fromDate = y + "-01-01";
+toDate = y + "-12-31";
+}
+
 
 const mode = document.getElementById("dateMode").value;
 
@@ -349,7 +378,23 @@ let html = "";
 
 html += "<div style='font-weight:bold'>PROPERTY: "+(selectedProperty==="all"?"ALL PROPERTIES":selectedProperty)+"</div>";
 
-html += "<div style='margin-top:5px'>PERIOD: "+fromDate+" - "+toDate+"</div>";
+const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+
+let periodText = fromDate + " - " + toDate;
+
+if(mode === "month"){
+periodText = months[parseInt(document.getElementById("incomeMonth").value)-1] + " " + document.getElementById("incomeYear").value;
+}
+
+if(mode === "year"){
+periodText = "YEAR " + new Date().getFullYear();
+}
+
+if(mode === "lastyear"){
+periodText = "YEAR " + (new Date().getFullYear()-1);
+}
+
+html += "<div style='margin-top:5px'>PERIOD: "+periodText+"</div>";
 
 html += "</div>";
 
@@ -1829,6 +1874,44 @@ prop.insertAdjacentHTML("afterbegin","<option value='all'>ALL PROPERTIES</option
 
 }
 
+ function updateDateOptions(){
+
+const mode = document.getElementById("dateMode").value;
+const box = document.getElementById("dateOptions");
+
+let html = "";
+
+if(mode === "dates"){
+
+html += "<label style='font-weight:bold'>FROM</label>";
+html += "<input type='date' id='incomeFrom' style='margin-left:10px;margin-right:20px;width:160px'>";
+
+html += "<label style='font-weight:bold'>TO</label>";
+html += "<input type='date' id='incomeTo' style='margin-left:10px;width:160px'>";
+
+}
+
+if(mode === "month"){
+
+html += "<label style='font-weight:bold'>MONTH</label>";
+html += "<select id='incomeMonth' style='margin-left:10px;margin-right:20px;width:150px'>";
+
+const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+
+months.forEach((m,i)=>{
+html += "<option value='"+(i+1)+"'>"+m+"</option>";
+});
+
+html += "</select>";
+
+html += "<label style='font-weight:bold'>YEAR</label>";
+html += "<input type='number' id='incomeYear' value='"+new Date().getFullYear()+"' style='margin-left:10px;width:100px'>";
+
+}
+
+box.innerHTML = html;
+
+}
 loadData();
  
  function deleteExpenseLocal(id){
