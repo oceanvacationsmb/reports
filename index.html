@@ -418,7 +418,7 @@ let a = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
 const commFee = num(r["COMMUNITY FEE"])||0;
 
 a = a - commFee;
-
+totalGross += a;
 totalAcc += a;
 
 html += "<tr>";
