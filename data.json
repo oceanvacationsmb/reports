@@ -6,8 +6,166 @@
       "salesFeePercent": 5,
       "type": "draft",
       "guestyReportUrl": "https://guesty-pmc-api.onrender.com/reservations"
+    },
+    "GHO REVOCABLE TRUST": {
+      "email": "",
+      "percent": 0.1,
+      "salesFeePercent": 5,
+      "type": "payout",
+      "guestyReportUrl": "https://guesty-pmc-api.onrender.com/reservations"
+    },
+    "1463 - NICOLE": {
+      "email": "",
+      "percent": 0.12,
+      "salesFeePercent": 5,
+      "type": "payout",
+      "guestyReportUrl": "https://guesty-pmc-api.onrender.com/reservations"
+    },
+    "113-15 - MAT": {
+      "email": "",
+      "percent": 0.12,
+      "salesFeePercent": 5,
+      "type": "payout",
+      "guestyReportUrl": "https://guesty-pmc-api.onrender.com/reservations"
+    },
+    "113-13 - CARL": {
+      "email": "",
+      "percent": 0.12,
+      "salesFeePercent": 5,
+      "type": "payout",
+      "guestyReportUrl": "https://guesty-pmc-api.onrender.com/reservations"
+    },
+    "115C-15 - CHRIS": {
+      "email": "",
+      "percent": 0.12,
+      "salesFeePercent": 10,
+      "type": "payout",
+      "guestyReportUrl": "https://guesty-pmc-api.onrender.com/reservations"
+    },
+    "469C - ASSAF": {
+      "email": "adahabani@gmail.com",
+      "percent": 0.12,
+      "salesFeePercent": 5,
+      "type": "payout",
+      "guestyReportUrl": ""
+    },
+    "1552 - YEN": {
+      "email": "tristate1391@gmail.com",
+      "percent": 0.15,
+      "salesFeePercent": 5,
+      "type": "payout",
+      "guestyReportUrl": ""
+    },
+    "508/1-2  - KOBI": {
+      "email": "kobiswisa26@gmail.com",
+      "percent": 0.15,
+      "salesFeePercent": 10,
+      "type": "payout",
+      "guestyReportUrl": ""
+    },
+    "214 - GTI GROUP TAL": {
+      "email": "zilkerinvestments@gmail.com",
+      "percent": 0.12,
+      "salesFeePercent": 10,
+      "type": "payout",
+      "guestyReportUrl": ""
+    },
+    "2131 - GSD INVESTMENTS": {
+      "email": "office@rodriguezlc.com",
+      "percent": 0.15,
+      "salesFeePercent": 5,
+      "type": "payout",
+      "guestyReportUrl": ""
+    },
+    "4679/204 - MORENA": {
+      "email": "",
+      "percent": 0.12,
+      "salesFeePercent": 5,
+      "type": "payout",
+      "guestyReportUrl": ""
+    },
+    "4631/301 - ORIT": {
+      "email": "oritedri1@hotmail.com",
+      "percent": 0.12,
+      "salesFeePercent": 5,
+      "type": "payout",
+      "guestyReportUrl": ""
     }
   },
-  "vendors": [],
-  "properties": {}
-}
+  "vendors": [
+    {
+      "id": 1771293036520,
+      "name": "ECIA",
+      "phone": ""
+    },
+    {
+      "id": 1772548956644,
+      "name": "MANUAL ADJUSTMENT",
+      "phone": ""
+    }
+  ],
+  "properties": {
+    "MB - 4765": {
+      "SC": true,
+      "MB": true,
+      "HC": true
+    },
+    "MB - 7500": {
+      "SC": true,
+      "MB": true,
+      "HC": true
+    },
+    "GCSSB - 204-2D": {
+      "SC": true,
+      "MB": false,
+      "HC": true
+    },
+    "MB - 209/5113": {
+      "SC": true,
+      "MB": true,
+      "HC": true,
+      "NMB": false
+    },
+    "MB - 2000": {
+      "SC": true,
+      "MB": true,
+      "HC": true
+    },
+    "MB - 209/5112": {
+      "SC": true,
+      "MB": true,
+      "HC": true
+    },
+    "GCSSB - 113B-12S": {},
+    "MB - Tuscan A": {},
+    "NMB - 204-28N": {
+      "SC": false
+    },
+    "GC - 1211A": {},
+    "GC - 601B": {},
+    "GC - 827B": {},
+    "GCSSB - 113A-12S": {},
+    "MB - Tuscan C": {},
+    "NMB - 1004": {},
+    "NMB - 204-27N": {},
+    "NMB - 304B": {},
+    "NMB - 703-2": {},
+    "NMB - 709-2": {},
+    "GC - 601A": {},
+    "MB - 469C": {
+      "SC": true,
+      "HC": true
+    },
+    "MB - 4631/301": {
+      "SC": true,
+      "MB": true,
+      "HC": true
+    },
+    "MB - Tuscan B": {},
+    "NMB - 400A": {},
+    "NMB - 705-2": {},
+    "GCSSB - 113B-15S": {
+      "SC": true,
+      "SSB": true,
+      "HC": true
+    }
