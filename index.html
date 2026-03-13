@@ -27,7 +27,7 @@ padding:10px;
 border-radius:0;
 box-shadow:none;
 }
-.invoice-header{display:none;justify-content:space-between;margin-bottom:40px;border-bottom:2px solid #000;padding-bottom:30px;page-break-inside:avoid;break-inside:avoid;}
+.invoice-header{display:flex;justify-content:space-between;margin-bottom:40px;border-bottom:2px solid #000;padding-bottom:30px;page-break-inside:avoid;break-inside:avoid;}
 .company-info{font-size:11px;line-height:1.8}
 .company-name{font-size:20px;font-weight:bold;margin-bottom:5px}
 .report-title{text-align:center;font-size:32px;font-weight:bold;margin:40px 0 10px 0;letter-spacing:2px}
@@ -226,6 +226,9 @@ box-shadow:none
 </div>
 </div>
 <div class="report-title" id="reportTitle">WELCOME!</div>
+
+<div id="periodUnderTitle" style="text-align:center;font-size:14px;margin-top:-15px;margin-bottom:25px;font-weight:bold"></div>
+
 <div class="owner-name" id="ownerTitle"></div>
 <div class="owner-details" id="ownerDetails"></div>
 <div id="mainContent"><div style="text-align:center;padding:40px;color:#666">Loading data from GitHub...</div></div>
@@ -1091,6 +1094,8 @@ function updateHeaderDates(){
   document.getElementById("reportTitle").textContent="RESERVATION REPORT";
   document.getElementById("statementDate").innerHTML="STATEMENT DATE:<br><strong>"+months[nextMonth-1]+" 1ST "+nextYear+"</strong>";
   document.getElementById("periodDate").innerHTML="PERIOD: "+months[month-1]+" 1ST - "+last+"TH "+year;
+  document.getElementById("periodUnderTitle").innerText =
+  document.getElementById("periodDate").innerText;
   document.getElementById("ownerTitle").textContent=currentOwner.toUpperCase();
   
   const t=OWNERS[currentOwner];
@@ -1197,7 +1202,7 @@ if(source.includes("website")){
   
 
 function displayStatement(){
-document.getElementById("invoiceHeader").style.display="";
+document.querySelectorAll(".invoice-header").forEach(el=>el.style.display="none");
 document.getElementById("reportTitle").style.display="";
 document.getElementById("ownerTitle").style.display="";
 document.getElementById("ownerDetails").style.display="";
