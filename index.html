@@ -349,9 +349,10 @@ html += "</div>";
 const firstRow = csvData[0];
 const propertyAddress = firstRow["PROPERTY ADDRESS"] || "";
 
-html += "<div style='text-align:center;font-size:18px;font-weight:bold;margin:20px 0'>GROSS RENTAL INCOME REPORT</div>";
-html += "<div style='text-align:center;font-size:18px;font-weight:bold;margin-bottom:20px'>"+propertyAddress+"</div>";
+html += "<div style='text-align:center;font-size:18px;font-weight:bold;margin:25px 0 5px 0'>GROSS RENTAL INCOME REPORT</div>";
+html += "<div style='text-align:center;font-size:18px;font-weight:bold;margin-bottom:25px'>"+propertyAddress+"</div>";
 
+html += "<div style='margin-top:30px'></div>";
 html += "<table>";
    
    html += "<tr><th>CODE</th><th>PROPERTY</th><th>CHECK-IN / CHECK-OUT</th><th>PAYOUT</th></tr>";
