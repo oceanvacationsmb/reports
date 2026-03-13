@@ -1655,9 +1655,7 @@ function closeAll(){
   document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));
 }
 
-function downloadPDF(){
- 
- function downloadIncomePDF(){
+function downloadIncomePDF(){
 
 const element=document.getElementById("incomeReportResult");
 
@@ -1672,6 +1670,9 @@ jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
 html2pdf().set(opt).from(element).save();
 
 }
+
+function downloadPDF(){
+ 
 
 const btn=document.querySelector(".action-buttons");
 
