@@ -274,6 +274,7 @@ function showIncomeReport(){
   html += "</div>";
 
   html += "<div class='summary-card' style='margin-bottom:20px'>";
+  html += "<div class='summary-label'>GROSS INCOME REVENUE</div>";
   html += "<div class='summary-value'>"+money(masterTotals.acc)+"</div>";
   html += "</div>";
 
@@ -343,9 +344,8 @@ html += "</div>";
 
 html += "</div>";
 
-html += "<div style='text-align:center;font-size:22px;font-weight:bold;margin-bottom:10px'>GROSS RENTAL INCOME REPORT</div>";
-html += "<div style='text-align:center;font-size:14px;margin-bottom:5px'>"+(p.reservations.length ? p.reservations[0]["PROPERTY ADDRESS"] : "")+"</div>";
-html += "<div style='text-align:center;font-size:13px;margin-bottom:20px'>PERIOD "+new Date(fromDate).toLocaleDateString()+" - "+new Date(toDate).toLocaleDateString()+"</div>";
+html += "<div class='property-title'><span class='property-icon'>📊</span> GROSS RENTAL INCOME REPORT</div>";
+
 html += "<table>";
    
    html += "<tr><th>CODE</th><th>PROPERTY</th><th>CHECK-IN / CHECK-OUT</th><th>PAYOUT</th></tr>";
@@ -394,13 +394,6 @@ Object.keys(propertyTotals).forEach(prop=>{
 if(selectedProperty !== "all" && prop !== selectedProperty) return;
 
 const p = propertyTotals[prop];
- Object.keys(propertyTotals).forEach(prop=>{
-
-if(selectedProperty !== "all" && prop !== selectedProperty) return;
-
-const p = propertyTotals[prop];
-
-html += "<div style='text-align:center;font-size:14px;margin-bottom:5px'>"+p.reservations[0]["PROPERTY ADDRESS"]+"</div>";
 html += "<tr>";
 html += "<td colspan='5' style='font-weight:bold;background:#f5f5f5'>"+prop.toUpperCase()+"</td>";
 html += "</tr>";
@@ -495,7 +488,7 @@ html += "</table>";
 
 html += "</div>";
 
-});
+}
     
     
     Object.keys(propertyTotals).forEach(prop=>{
@@ -530,7 +523,6 @@ html += "<td>"+prop+"</td>";
 html += "<td>"+r["CHECK-IN DATE"].split("-")[1]+"/"+r["CHECK-IN DATE"].split("-")[2]+"/"+r["CHECK-IN DATE"].split("-")[0]+" - "+r["CHECK-OUT DATE"].split("-")[1]+"/"+r["CHECK-OUT DATE"].split("-")[2]+"/"+r["CHECK-OUT DATE"].split("-")[0]+"</td>";html += "<td>"+money(payout)+"</td>";
 html += "</tr>";
       });
-   });
     
 
    html += "<tr>";
