@@ -273,9 +273,8 @@ function showIncomeReport(){
   html += "On this page you can run report for single, multiple or all properties.";
   html += "</div>";
 
-  html += "<div class='summary-card' style='margin-bottom:20px'>";
-  html += "<div class='summary-label'>GROSS INCOME REVENUE</div>";
-  html += "<div class='summary-value'>"+money(masterTotals.acc)+"</div>";
+  html += "<div style='text-align:center;font-size:18px;font-weight:bold;margin-bottom:25px'>";
+  html += "GROSS RENTAL REVENUE: "+money(masterTotals.acc);
   html += "</div>";
 
   html += "<div style='margin-bottom:20px'>";
@@ -349,9 +348,8 @@ html += "</div>";
 
 const firstRow = csvData[0];
 const propertyAddress = firstRow["PROPERTY ADDRESS"] || "";
-
-html += "<div style='text-align:center;font-size:18px;font-weight:bold;margin:25px 0 5px 0'>GROSS RENTAL INCOME REPORT</div>";
 html += "<div style='text-align:center;font-size:18px;font-weight:bold;margin-bottom:25px'>"+propertyAddress+"</div>";
+html += "<div style='text-align:center;font-size:18px;font-weight:bold;margin-bottom:25px'>GROSS RENTAL REVENUE: "+money(masterTotals.acc)+"</div>";
 
 html += "<div style='margin-top:30px'></div>";
 html += "<table>";
