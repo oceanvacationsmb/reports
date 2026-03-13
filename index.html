@@ -622,37 +622,10 @@ const p = propertyTotals[prop];
 
       html += "<div class='property-section'>";
 html += "<div class='property-title'>"+prop+"</div>";
-     html += "<table>";
-html += "<tr>";
-html += "<th>PROPERTY</th>";
-html += "<th>GRI</th>";
-html += "<th>ACCOMMODATION</th>";
-html += "<th>CLEANING</th>";
-html += "<th>PMC</th>";
-html += "</tr>";
 
-const gri = num(r["TOTAL PAYOUT"]);
-const markup = num(r["MARKUP"]) || 0;
-const discount = num(r["LENGTH OF STAY DISCOUNT"]) || 0;
-
-const acc = num(r["ACCOMMODATION FARE"]) - markup + discount;
-const clean = num(r["CLEANING FARE"]) || 0;
-const pmc = acc * OWNERS[currentOwner].percent;
-
-if(gri === 0) return;
-
-html += "<tr>";
-html += "<td>"+prop+"</td>";
-html += "<td>"+money(gri)+"</td>";
-html += "<td>"+money(acc)+"</td>";
-html += "<td>"+money(clean)+"</td>";
-html += "<td>"+money(pmc)+"</td>";
-html += "</tr>";
-
-totalPayout += gri;
-totalAcc += acc;
-totalCleaning += clean;
-totalPMC += pmc;
+p.reservations
+.sort((a,b)=>new Date(a["CHECK-IN DATE"]) - new Date(b["CHECK-IN DATE"]))
+.forEach(r=>{
 
 const checkIn = r["CHECK-IN DATE"];
 const checkOut = r["CHECK-OUT DATE"];
@@ -675,6 +648,15 @@ html += "</div>";
   }
 
  let summary = "";
+
+summary += "<div class='summary-grid'>";
+summary += "<div class='summary-card'><div class='summary-label'>PAYOUT</div><div class='summary-value'>"+money(totalPayout)+"</div></div>";
+summary += "<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(totalAcc)+"</div></div>";
+summary += "<div class='summary-card'><div class='summary-label'>CLEANING</div><div class='summary-value'>"+money(totalCleaning)+"</div></div>";
+summary += "<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(totalPMC)+"</div></div>";
+summary += "</div>";
+
+html = summary + html;
 
 summary += "<div class='summary-grid'>";
 summary += "<div class='summary-card'><div class='summary-label'>PAYOUT</div><div class='summary-value'>"+money(totalPayout)+"</div></div>";
