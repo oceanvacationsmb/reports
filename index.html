@@ -348,7 +348,7 @@ html += "<div class='property-title'><span class='property-icon'>📊</span> GRO
 
 html += "<table>";
    
-    html += "<tr><th>PROPERTY</th><th>CHECK-IN / CHECK-OUT</th><th>ACCOMMODATION</th></tr>";
+   html += "<tr><th>CODE</th><th>PROPERTY</th><th>CHECK-IN / CHECK-OUT</th><th>ACCOMMODATION</th><th>CLEANING</th></tr>";
 
     const ownerExpenses = expenses.filter(e => 
   e.owner === currentOwner && e.property === "OWNER"
@@ -394,8 +394,13 @@ Object.keys(propertyTotals).forEach(prop=>{
 if(selectedProperty !== "all" && prop !== selectedProperty) return;
 
 const p = propertyTotals[prop];
+html += "<tr>";
+html += "<td colspan='5' style='font-weight:bold;background:#f5f5f5'>"+prop.toUpperCase()+"</td>";
+html += "</tr>";
 
-p.reservations.forEach(r=>{
+p.reservations
+.sort((a,b)=>new Date(a["CHECK-IN DATE"]) - new Date(b["CHECK-IN DATE"]))
+.forEach(r=>{
 
 const checkIn = r["CHECK-IN DATE"];
 
@@ -408,6 +413,12 @@ const commFee = num(r["COMMUNITY FEE"])||0;
 a = a - commFee;
 
 totalAcc += a;
+
+html += "<tr>";
+html += "<td>"+prop+"</td>";
+html += "<td>"+r["CHECK-IN DATE"]+" - "+r["CHECK-OUT DATE"]+"</td>";
+html += "<td>"+money(a)+"</td>";
+html += "</tr>";
 
 });
 
@@ -500,7 +511,8 @@ if(checkIn > toDate) return;
         const commFee = num(r["COMMUNITY FEE"])||0;
         a = a - commFee;
 
-html += "<tr data-prop='"+prop+"' data-row='"+i+"'>";
+html += "<tr>";
+html += "<td>"+r["CONFIRMATION CODE"].substring(0,8).toUpperCase()+"</td>";
 html += "<td>"+prop+"</td>";
 html += "<td>"+r["CHECK-IN DATE"]+" - "+r["CHECK-OUT DATE"]+"</td>";
 html += "<td class='acc' data-val='"+a+"'>"+money(a)+"</td>";
