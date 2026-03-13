@@ -394,6 +394,13 @@ Object.keys(propertyTotals).forEach(prop=>{
 if(selectedProperty !== "all" && prop !== selectedProperty) return;
 
 const p = propertyTotals[prop];
+ Object.keys(propertyTotals).forEach(prop=>{
+
+if(selectedProperty !== "all" && prop !== selectedProperty) return;
+
+const p = propertyTotals[prop];
+
+html += "<div style='text-align:center;font-size:14px;margin-bottom:5px'>"+p.reservations[0]["PROPERTY ADDRESS"]+"</div>";
 html += "<tr>";
 html += "<td colspan='5' style='font-weight:bold;background:#f5f5f5'>"+prop.toUpperCase()+"</td>";
 html += "</tr>";
