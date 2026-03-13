@@ -1511,14 +1511,7 @@ document.getElementById("reportTitle").style.display="none";
 document.getElementById("ownerTitle").style.display="none";
 document.getElementById("ownerDetails").style.display="none";
  
-  if(!csvData||csvData.length===0)return alert("Generate statement first");
-  const month=parseInt(document.getElementById("monthSelect").value);
-  const year=parseInt(document.getElementById("yearSelect").value);
-  const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
-  const last=new Date(year,month,0).getDate();
-  let nextMonth=month+1,nextYear=year;
-  if(nextMonth>12){nextMonth=1;nextYear++;}
-    
+     
   const t=OWNERS[currentOwner];
   const type=t.type;
   const salesFee=masterTotals.pmc*(t.salesFeePercent/100);
@@ -1531,6 +1524,14 @@ document.getElementById("ownerDetails").style.display="none";
   html += "<div style='font-size:14px;margin-top:5px'>TYPE: "+t.type.toUpperCase()+"</div>";
 
   html += "<div style='font-size:14px'>COMMISSION: "+(t.percent*100).toFixed(2)+"%</div>";
+ 
+  if(!csvData||csvData.length===0)return alert("Generate statement first");
+  const month=parseInt(document.getElementById("monthSelect").value);
+  const year=parseInt(document.getElementById("yearSelect").value);
+  const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+  const last=new Date(year,month,0).getDate();
+  let nextMonth=month+1,nextYear=year;
+  if(nextMonth>12){nextMonth=1;nextYear++;}
 
   
   html += "</div>";
