@@ -531,7 +531,10 @@ html += "<td>"+r["CHECK-IN DATE"].split("-")[1]+"/"+r["CHECK-IN DATE"].split("-"
        html += "</tr>";
       });
     
-
+html += "<tr>";
+html += "<td colspan='2' style='text-align:right;font-weight:bold'>TOTAL</td>";
+html += "<td style='font-weight:bold'>"+money(totalGross)+"</td>";
+html += "</tr>";
    
    });
     html += "</table>";
