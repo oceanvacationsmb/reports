@@ -84,12 +84,5 @@
       "type": "payout",
       "guestyReportUrl": ""
     },
-    "4631/301 - ORIT": {
-      "email": "oritedri1@hotmail.com",
-      "percent": 0.12,
-      "salesFeePercent": 5,
-      "type": "payout",
-      "guestyReportUrl": ""
-    }
-  },
+  
 
