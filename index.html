@@ -347,31 +347,6 @@ toDate = y + "-12-31";
 }
 
 
-const mode = document.getElementById("dateMode").value;
-
-const today = new Date();
-
-if(mode === "year"){
-fromDate = today.getFullYear()+"-01-01";
-toDate = today.getFullYear()+"-12-31";
-}
-
-if(mode === "lastyear"){
-const y = today.getFullYear()-1;
-fromDate = y+"-01-01";
-toDate = y+"-12-31";
-}
-
-if(mode === "month"){
-const m = document.getElementById("monthSelect").value;
-const y = document.getElementById("yearSelect").value;
-
-const lastDay = new Date(y, m, 0).getDate();
-
-fromDate = y+"-"+String(m).padStart(2,"0")+"-01";
-toDate = y+"-"+String(m).padStart(2,"0")+"-"+lastDay;
-}
-
 
 let html = "";
  html += "<div style='text-align:center;margin-bottom:20px;font-size:12px'>";
@@ -691,7 +666,7 @@ summary += "<div class='summary-card'><div class='summary-label'>PMC</div><div c
 summary += "</div>";
 
 html = summary + html;
-  document.getElementById("incomeReportResult").innerHTML = html;
+  document.getElementById("mainContent").innerHTML = html;
 }
 function showHistory(){
 
