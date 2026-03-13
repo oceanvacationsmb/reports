@@ -344,11 +344,11 @@ html += "</div>";
 
 html += "</div>";
 
-html += "<div class='property-title'><span class='property-icon'>📊</span> GROSS RENTAL INCOME REPORT</div>";
-   const firstRow = csvData[0];
+const firstRow = csvData[0];
 const propertyAddress = firstRow["PROPERTY ADDRESS"] || "";
 
-html += "<div style='text-align:center;font-size:12px;margin-bottom:15px;font-weight:bold'>"+propertyAddress+"</div>";
+html += "<div style='text-align:center;font-size:18px;font-weight:bold;margin:20px 0'>GROSS RENTAL INCOME REPORT</div>";
+html += "<div style='text-align:center;font-size:18px;font-weight:bold;margin-bottom:20px'>"+propertyAddress+"</div>";
 
 html += "<table>";
    
@@ -529,10 +529,7 @@ html += "</tr>";
       });
     
 
-   html += "<tr>";
-html += "<td colspan='3' style='font-weight:bold;text-align:right'>TOTAL "+prop.toUpperCase()+" PAYOUT</td>";
-html += "<td style='font-weight:bold'>"+money(propertyPayoutTotal)+"</td>";
-html += "</tr>";
+   
    });
     html += "</table>";
 
