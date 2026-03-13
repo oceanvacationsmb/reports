@@ -279,15 +279,16 @@ if(!csvData || csvData.length===0){
 
   html += "<div class='property-section'>";
 
-  html += "<div style='margin-bottom:20px'>";
-  html += "<label style='font-weight:bold'>REPORT TYPE</label>";
-  html += "<select id='incomeType' style='width:200px;margin-left:10px' onchange='incomeTypeChanged()'>";
-  html += "<option value='full'>RESERVATION REPORT</option>";
-  html += "<option value='gri'>GRI REPORT</option>";
-  html += "</select>";
+  html += "<div style='margin-bottom:15px;border-bottom:1px solid #ccc;padding-bottom:10px'>";
 
- html += "<label style='font-weight:bold;margin-left:20px'>PROPERTY</label>";
-html += "<select id='incomeProperty' style='width:220px;margin-left:10px'>";
+html += "<label style='font-weight:bold;margin-right:5px'>REPORT TYPE</label>";
+html += "<select id='incomeType' style='width:150px;margin-right:20px' onchange='incomeTypeChanged()'>";
+html += "<option value='full'>RESERVATION REPORT</option>";
+html += "<option value='gri'>GRI REPORT</option>";
+html += "</select>";
+
+html += "<label style='font-weight:bold;margin-right:5px'>PROPERTY</label>";
+html += "<select id='incomeProperty' style='width:200px;margin-right:20px'>";
 
 html += "<option value='all'>ALL PROPERTIES</option>";
 
@@ -296,38 +297,17 @@ html += "<option value='"+p+"'>"+p+"</option>";
 });
 
 html += "</select>";
- html += "<div style='margin-top:15px'>";
 
-html += "<label style='font-weight:bold'>DATE TYPE</label>";
-html += "<select id='dateMode' style='margin-left:10px;width:180px'>";
-html += "<option value='custom'>CUSTOM RANGE</option>";
+html += "<label style='font-weight:bold;margin-right:5px'>RANGE</label>";
+html += "<select id='dateMode' style='width:180px' onchange='updateDateOptions()'>";
+html += "<option value='dates'>BETWEEN DATES</option>";
 html += "<option value='month'>SPECIFIC MONTH</option>";
 html += "<option value='year'>CURRENT YEAR</option>";
 html += "<option value='lastyear'>LAST YEAR</option>";
 html += "</select>";
 
-html += "<div style='margin-top:10px'>";
-
-html += "<label style='font-weight:bold'>FROM</label>";
-html += "<input type='date' id='incomeFrom' style='margin-left:10px'>";
-
-html += "<label style='font-weight:bold;margin-left:20px'>TO</label>";
-html += "<input type='date' id='incomeTo' style='margin-left:10px'>";
-
 html += "</div>";
-
-html += "</div>";
-  html += "<button style='margin-left:15px;padding:6px 12px;background:#000;color:#fff;border:none;border-radius:4px' onclick='runIncomeReport()'>RUN</button>";
-  html += "</div>";
-
-  html += "<div class='action-buttons'>";
-html += "<button class='print-btn' onclick='downloadIncomePDF()'>📄 DOWNLOAD PDF</button>";
-html += "</div>";
-
-html += "<div id='incomeReportResult'></div>";
-
-  html += "</div>";
-
+html += "<div id='dateOptions' style='margin-top:8px'></div>";
   document.getElementById("mainContent").innerHTML = html;
 }
 function runIncomeReport(){
