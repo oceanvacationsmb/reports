@@ -1213,7 +1213,6 @@ const t=OWNERS[currentOwner];
  
   const type=t.type;
   let html="<div class='action-buttons'><button class='copy-link-btn' onclick='downloadPDF()'>📄 DOWNLOAD PDF</button></div>";
-  html+="<div style='text-align:center;font-size:13px;margin-bottom:20px'><strong>"+document.getElementById("periodDate").innerText+"</strong></div>";
   if(type==="draft"){
     html+="<div class='summary-card'><div class='summary-label'>GROSS PAYOUT</div><div class='summary-value'>"+money(masterTotals.gross)+"</div></div>";
     html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
