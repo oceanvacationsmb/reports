@@ -213,7 +213,7 @@ box-shadow:none
 
 <div class="main">
 <div id="content" class="page">
-<div class="invoice-header">
+<div class="invoice-header" id="invoiceHeader">
 <div class="company-info">
 <div class="company-name">OCEAN VACATIONS</div>
 <div>www.oceanvacationsmb.com</div>
@@ -257,7 +257,7 @@ function updateTokenStatus(){
   }
 }
 function showIncomeReport(){
-
+document.getElementById("invoiceHeader").style.display="none";
 document.getElementById("reportTitle").style.display="none";
 document.getElementById("ownerTitle").style.display="none";
 document.getElementById("ownerDetails").style.display="none";
@@ -1197,7 +1197,7 @@ if(source.includes("website")){
   
 
 function displayStatement(){
-
+document.getElementById("invoiceHeader").style.display="";
 document.getElementById("reportTitle").style.display="";
 document.getElementById("ownerTitle").style.display="";
 document.getElementById("ownerDetails").style.display="";
