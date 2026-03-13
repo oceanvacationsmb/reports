@@ -365,6 +365,13 @@ toDate = y+"-"+String(m).padStart(2,"0")+"-"+lastDay;
 
 
 let html = "";
+ html += "<div style='text-align:center;margin-bottom:20px;font-size:12px'>";
+
+html += "<div style='font-weight:bold'>PROPERTY: "+(selectedProperty==="all"?"ALL PROPERTIES":selectedProperty)+"</div>";
+
+html += "<div style='margin-top:5px'>PERIOD: "+fromDate+" - "+toDate+"</div>";
+
+html += "</div>";
 
 let totalPayout = 0;
 let totalAcc = 0;
@@ -444,6 +451,8 @@ html += "</tr>";
 
 let totalAcc = 0;
 let totalGross = 0;
+
+ 
  
 Object.keys(propertyTotals).forEach(prop=>{
 
@@ -656,6 +665,16 @@ html += "</div>";
     });
   }
 
+ let summary = "";
+
+summary += "<div class='summary-grid'>";
+summary += "<div class='summary-card'><div class='summary-label'>PAYOUT</div><div class='summary-value'>"+money(totalPayout)+"</div></div>";
+summary += "<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(totalAcc)+"</div></div>";
+summary += "<div class='summary-card'><div class='summary-label'>CLEANING</div><div class='summary-value'>"+money(totalCleaning)+"</div></div>";
+summary += "<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(totalPMC)+"</div></div>";
+summary += "</div>";
+
+html = summary + html;
  let summary = "";
 
 summary += "<div class='summary-grid'>";
