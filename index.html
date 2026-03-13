@@ -496,6 +496,7 @@ html += "</div>";
 if(selectedProperty !== "all" && prop !== selectedProperty) return;
 
 const p = propertyTotals[prop];
+     let propertyPayoutTotal = 0;
 
       p.reservations.forEach(r=>{
        if(fromDate){
