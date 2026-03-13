@@ -1525,6 +1525,7 @@ document.getElementById("periodDate").style.display="none";
   html += "<div style='font-size:14px;margin-top:5px'>TYPE: "+t.type.toUpperCase()+"</div>";
 
   html += "<div style='font-size:14px'>COMMISSION: "+(t.percent*100).toFixed(2)+"%</div>";
+  html += "<div style='font-size:14px;margin-top:5px'>"+document.getElementById("periodDate").innerText+"</div>";
  
   if(!csvData||csvData.length===0)return alert("Generate statement first");
   const month=parseInt(document.getElementById("monthSelect").value);
