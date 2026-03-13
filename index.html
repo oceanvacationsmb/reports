@@ -274,7 +274,6 @@ function showIncomeReport(){
   html += "</div>";
 
   html += "<div class='summary-card' style='margin-bottom:20px'>";
-  html += "<div class='summary-label'>GROSS INCOME REVENUE</div>";
   html += "<div class='summary-value'>"+money(masterTotals.acc)+"</div>";
   html += "</div>";
 
@@ -344,8 +343,9 @@ html += "</div>";
 
 html += "</div>";
 
-html += "<div class='property-title'><span class='property-icon'>📊</span> GROSS RENTAL INCOME REPORT</div>";
-
+html += "<div style='text-align:center;font-size:22px;font-weight:bold;margin-bottom:10px'>GROSS RENTAL INCOME REPORT</div>";
+   html += "<div style='text-align:center;font-size:14px;margin-bottom:5px'>"+r["PROPERTY ADDRESS"]+"</div>";
+   html += "<div style='text-align:center;font-size:13px;margin-bottom:20px'>PERIOD "+fromDate+" - "+toDate+"</div>";
 html += "<table>";
    
    html += "<tr><th>CODE</th><th>PROPERTY</th><th>CHECK-IN / CHECK-OUT</th><th>PAYOUT</th></tr>";
