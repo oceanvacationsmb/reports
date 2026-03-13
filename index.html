@@ -1672,16 +1672,12 @@ html2pdf().set(opt).from(element).save();
 }
 
 function downloadPDF(){
- 
-function downloadPDF(){
- 
- function downloadIncomePDF(){
 
-const element=document.getElementById("incomeReportResult");
+const element=document.getElementById("statementContainer");
 
 const opt={
 margin:0.3,
-filename:"income-report.pdf",
+filename:"statement.pdf",
 image:{type:'jpeg',quality:1},
 html2canvas:{scale:2,useCORS:true},
 jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
