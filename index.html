@@ -345,6 +345,10 @@ html += "</div>";
 html += "</div>";
 
 html += "<div class='property-title'><span class='property-icon'>📊</span> GROSS RENTAL INCOME REPORT</div>";
+   const firstRow = csvData[0];
+const propertyAddress = firstRow["PROPERTY ADDRESS"] || "";
+
+html += "<div style='text-align:center;font-size:12px;margin-bottom:15px;font-weight:bold'>"+propertyAddress+"</div>";
 
 html += "<table>";
    
