@@ -348,7 +348,7 @@ html += "<div class='property-title'><span class='property-icon'>📊</span> GRO
 
 html += "<table>";
    
-   html += "<tr><th>CODE</th><th>PROPERTY</th><th>CHECK-IN / CHECK-OUT</th><th>ACCOMMODATION</th><th>CLEANING</th></tr>";
+   html += "<tr><th>CODE</th><th>PROPERTY</th><th>CHECK-IN / CHECK-OUT</th><th>PAYOUT</th></tr>";
 
     const ownerExpenses = expenses.filter(e => 
   e.owner === currentOwner && e.property === "OWNER"
@@ -507,7 +507,7 @@ const checkIn = r["CHECK-IN DATE"];
 if(checkIn > toDate) return;
 }
 
-        let a = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
+        let a = num(r["TOTAL PAYOUT"]);
         const commFee = num(r["COMMUNITY FEE"])||0;
         a = a - commFee;
 
@@ -571,6 +571,12 @@ function show1099(){
   document.getElementById("reportTitle").textContent = "1099 REPORT";
 
   let html = "<div class='summary-title'>1099 SUMMARY</div>";
+ let reportProperty = selectedProperty === "all" ? "ALL PROPERTIES" : selectedProperty;
+
+html += "<div style='margin-bottom:15px;font-size:11px;color:#666'>";
+html += "<strong>PROPERTY:</strong> "+reportProperty+"<br>";
+html += "<strong>PERIOD:</strong> "+document.getElementById("periodDate").innerText;
+html += "</div>";
   html += "<div class='summary-grid'>";
 
   html += "<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>" + money(masterTotals.acc) + "</div></div>";
