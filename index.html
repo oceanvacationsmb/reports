@@ -289,6 +289,8 @@ if(!csvData || csvData.length===0){
  html += "<label style='font-weight:bold;margin-left:20px'>PROPERTY</label>";
 html += "<select id='incomeProperty' style='width:220px;margin-left:10px'>";
 
+html += "<option value='all'>ALL PROPERTIES</option>";
+
 Object.keys(propertyTotals).forEach(p=>{
 html += "<option value='"+p+"'>"+p+"</option>";
 });
@@ -296,11 +298,23 @@ html += "<option value='"+p+"'>"+p+"</option>";
 html += "</select>";
  html += "<div style='margin-top:15px'>";
 
+html += "<label style='font-weight:bold'>DATE TYPE</label>";
+html += "<select id='dateMode' style='margin-left:10px;width:180px'>";
+html += "<option value='custom'>CUSTOM RANGE</option>";
+html += "<option value='month'>SPECIFIC MONTH</option>";
+html += "<option value='year'>CURRENT YEAR</option>";
+html += "<option value='lastyear'>LAST YEAR</option>";
+html += "</select>";
+
+html += "<div style='margin-top:10px'>";
+
 html += "<label style='font-weight:bold'>FROM</label>";
 html += "<input type='date' id='incomeFrom' style='margin-left:10px'>";
 
 html += "<label style='font-weight:bold;margin-left:20px'>TO</label>";
 html += "<input type='date' id='incomeTo' style='margin-left:10px'>";
+
+html += "</div>";
 
 html += "</div>";
   html += "<button style='margin-left:15px;padding:6px 12px;background:#000;color:#fff;border:none;border-radius:4px' onclick='runIncomeReport()'>RUN</button>";
@@ -319,12 +333,43 @@ html += "<div id='incomeReportResult'></div>";
 function runIncomeReport(){
 
   const type = document.getElementById("incomeType").value;
-  const selectedProperty = document.getElementById("incomeProperty").value;
-  const fromDate = document.getElementById("incomeFrom").value;
-  const toDate = document.getElementById("incomeTo").value;
+const selectedProperty = document.getElementById("incomeProperty").value;
 
-  let html = "";
-  let totalGross = 0;
+let fromDate = document.getElementById("incomeFrom").value;
+let toDate = document.getElementById("incomeTo").value;
+
+const mode = document.getElementById("dateMode").value;
+
+const today = new Date();
+
+if(mode === "year"){
+fromDate = today.getFullYear()+"-01-01";
+toDate = today.getFullYear()+"-12-31";
+}
+
+if(mode === "lastyear"){
+const y = today.getFullYear()-1;
+fromDate = y+"-01-01";
+toDate = y+"-12-31";
+}
+
+if(mode === "month"){
+const m = document.getElementById("monthSelect").value;
+const y = document.getElementById("yearSelect").value;
+
+const lastDay = new Date(y, m, 0).getDate();
+
+fromDate = y+"-"+String(m).padStart(2,"0")+"-01";
+toDate = y+"-"+String(m).padStart(2,"0")+"-"+lastDay;
+}
+
+
+ let html = "";
+
+let totalPayout = 0;
+let totalAcc = 0;
+let totalCleaning = 0;
+let totalPMC = 0;
 
   if(type === "gri"){
 
