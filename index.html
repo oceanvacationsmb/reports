@@ -1655,6 +1655,8 @@ function closeAll(){
   document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));
 }
 
+function downloadPDF(){
+ 
  function downloadIncomePDF(){
 
 const element=document.getElementById("incomeReportResult");
@@ -1662,22 +1664,6 @@ const element=document.getElementById("incomeReportResult");
 const opt={
 margin:0.3,
 filename:"income-report.pdf",
-image:{type:'jpeg',quality:1},
-html2canvas:{scale:2,useCORS:true},
-jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
-};
-
-html2pdf().set(opt).from(element).save();
-
-}
-
-function downloadPDF(){
-
-const element=document.getElementById("statementContainer");
-
-const opt={
-margin:0.3,
-filename:"statement.pdf",
 image:{type:'jpeg',quality:1},
 html2canvas:{scale:2,useCORS:true},
 jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
