@@ -441,8 +441,8 @@ function loadData(){
     return r.json();
   })
   .then(fileData=>{
-    const contentB64=fileData.content;
-    const contentDecoded=atob(contentB64);
+    const contentB64=fileData.content.replace(/\n/g,"");
+    const contentDecoded=atob(contentB64.replace(/\n/g,""));
     const data=JSON.parse(contentDecoded);
     
     gitHubData=data;
