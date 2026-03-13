@@ -1500,6 +1500,12 @@ document.getElementById("mainContent").innerHTML=html;
 }
 
 function generateSummary(){
+
+document.getElementById("invoiceHeader").style.display="none";
+document.getElementById("reportTitle").style.display="none";
+document.getElementById("ownerTitle").style.display="none";
+document.getElementById("ownerDetails").style.display="none";
+ 
   if(!csvData||csvData.length===0)return alert("Generate statement first");
   const month=parseInt(document.getElementById("monthSelect").value);
   const year=parseInt(document.getElementById("yearSelect").value);
