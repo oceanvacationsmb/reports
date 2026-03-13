@@ -1516,6 +1516,17 @@ function generateSummary(){
   const salesFee=masterTotals.pmc*(t.salesFeePercent/100);
   
   let html="<div class='action-buttons'><button class='back-btn' onclick='generateStatement()'>← BACK</button><button class='print-btn' onclick='window.print()'>🖨️ PRINT</button></div>";
+  html += "<div style='text-align:center;margin:20px 0'>";
+
+  html += "<div style='font-size:22px;font-weight:bold'>"+currentOwner.toUpperCase()+"</div>";
+
+  html += "<div style='font-size:14px;margin-top:5px'>TYPE: "+t.type.toUpperCase()+"</div>";
+
+  html += "<div style='font-size:14px'>COMMISSION: "+(t.percent*100).toFixed(2)+"%</div>";
+
+  html += "<div style='font-size:14px;margin-top:5px'>"+document.getElementById("periodDate").innerText+"</div>";
+
+  html += "</div>";
   
 if(type==="draft"){
     html+="<div style='margin:20px auto;padding:15px;border:1px solid #ddd;background:#fff;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#000;margin-bottom:10px;text-transform:uppercase'>💰 DRAFT BREAKDOWN</div><div style='text-align:left;color:#000'>";
