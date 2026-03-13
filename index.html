@@ -361,8 +361,6 @@ html += "<table>";
   e.owner === currentOwner && e.property === "OWNER"
 );
 
-if(ownerExpenses.length > 0){
-
 html += "<div class='property-section'>";
 
 html += "<div class='invoice-header'>";
@@ -1212,30 +1210,21 @@ const t=OWNERS[currentOwner];
  
   const type=t.type;
   let html="<div class='action-buttons'><button class='copy-link-btn' onclick='downloadPDF()'>📄 DOWNLOAD PDF</button></div>";
-
-html+="<div style='max-width:750px;margin:25px auto;padding:20px;border:2px solid #000;background:#fff;border-radius:5px'>";
-html+="<div style='font-size:18px;font-weight:bold;text-align:center;margin-bottom:15px'>SUMMARY</div>";
-
-if(type==="draft"){
-
-html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>PAYOUT</span><span>"+money(masterTotals.gross)+"</span></div>";
-html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
-html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>CLEANING FEE</span><span>"+money(masterTotals.clean)+"</span></div>";
-html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>WEBSITE / VRBO FEE</span><span>"+money(masterTotals.websiteFee)+"</span></div>";
-html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>EXPENSES</span><span>"+money(masterTotals.expenses)+"</span></div>";
-html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>PMC ("+(t.percent*100).toFixed(2)+"%)</span><span>"+money(masterTotals.pmc)+"</span></div>";
-html+="<div style='display:flex;justify-content:space-between;padding:10px 0;font-weight:bold'><span>AMOUNT DUE</span><span>"+money(masterTotals.draft)+"</span></div>";
-
-}else{
-
-html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
-html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>PMC</span><span>"+money(masterTotals.pmc)+"</span></div>";
-html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>EXPENSES</span><span>"+money(masterTotals.expenses)+"</span></div>";
-html+="<div style='display:flex;justify-content:space-between;padding:10px 0;font-weight:bold'><span>OWNER PAYOUT</span><span>"+money(masterTotals.owner)+"</span></div>";
-
-}
-
-html+="</div>";
+  if(type==="draft"){
+    html+="<div class='summary-card'><div class='summary-label'>GROSS PAYOUT</div><div class='summary-value'>"+money(masterTotals.gross)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>CLEANING FEE</div><div class='summary-value'>"+money(masterTotals.clean)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>WEBSITE/VRBO FEE </div><div class='summary-value'>"+money(masterTotals.websiteFee)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>PMC ("+(t.percent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>AMOUNT DUE</div><div class='summary-value'>"+money(masterTotals.draft)+"</div></div>";
+  }else{
+    html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
+    html+="<div class='summary-card'><div class='summary-label'>OWNER PAYOUT</div><div class='summary-value'>"+money(masterTotals.owner)+"</div></div>";
+  }
+  html+="</div>";
 
 const ownerExpenses = expenses.filter(e =>
 e.owner === currentOwner && e.property === "OWNER"
