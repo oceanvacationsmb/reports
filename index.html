@@ -338,11 +338,12 @@ html += "<div>843-222-6516</div>";
 html += "</div>";
 
 const today = new Date();
-const todayFormatted = today.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}).toUpperCase();
+const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+const todayText = months[today.getMonth()]+" "+today.getDate()+", "+today.getFullYear();
 
 html += "<div class='right-header'>";
-html += "<div class='statement-date'><strong>STATEMENT DATE:</strong> "+todayFormatted+"</div>";
-html += "<div class='period-date'>"+document.getElementById("periodDate").innerHTML+"</div>";
+html += "<div class='statement-date'>STATEMENT DATE: "+todayText+"</div>";
+html += "<div class='period-date'>"+document.getElementById("periodDate").innerText+"</div>";
 html += "</div>";
 
 const firstRow = csvData[0];
@@ -372,11 +373,12 @@ html += "<div>843-222-6516</div>";
 html += "</div>";
 
 const today = new Date();
-const todayFormatted = today.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}).toUpperCase();
+const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+const todayText = months[today.getMonth()]+" "+today.getDate()+", "+today.getFullYear();
 
 html += "<div class='right-header'>";
-html += "<div class='statement-date'><strong>STATEMENT DATE:</strong> "+todayFormatted+"</div>";
-html += "<div class='period-date'>"+document.getElementById("periodDate").innerHTML+"</div>";
+html += "<div class='statement-date'>STATEMENT DATE: "+todayText+"</div>";
+html += "<div class='period-date'>"+document.getElementById("periodDate").innerText+"</div>";
 html += "</div>";
 
 html += "<div class='property-title'><span class='property-icon'>💰</span>OWNER CHARGES</div>";
