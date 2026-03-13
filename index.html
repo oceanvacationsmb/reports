@@ -284,10 +284,33 @@ function showIncomeReport(){
   html += "<option value='full'>FULL REPORT</option>";
   html += "<option value='gri'>GRI REPORT</option>";
   html += "</select>";
+
+ html += "<label style='font-weight:bold;margin-left:20px'>PROPERTY</label>";
+html += "<select id='incomeProperty' style='width:220px;margin-left:10px'>";
+html += "<option value='all'>ALL PROPERTIES</option>";
+
+Object.keys(propertyTotals).forEach(p=>{
+html += "<option value='"+p+"'>"+p+"</option>";
+});
+
+html += "</select>";
+ html += "<div style='margin-top:15px'>";
+
+html += "<label style='font-weight:bold'>FROM</label>";
+html += "<input type='date' id='incomeFrom' style='margin-left:10px'>";
+
+html += "<label style='font-weight:bold;margin-left:20px'>TO</label>";
+html += "<input type='date' id='incomeTo' style='margin-left:10px'>";
+
+html += "</div>";
   html += "<button style='margin-left:15px;padding:6px 12px;background:#000;color:#fff;border:none;border-radius:4px' onclick='runIncomeReport()'>RUN</button>";
   html += "</div>";
 
-  html += "<div id='incomeReportResult'></div>";
+  html += "<div class='action-buttons'>";
+html += "<button class='print-btn' onclick='downloadIncomePDF()'>📄 DOWNLOAD PDF</button>";
+html += "</div>";
+
+html += "<div id='incomeReportResult'></div>";
 
   html += "</div>";
 
@@ -296,12 +319,35 @@ function showIncomeReport(){
 function runIncomeReport(){
 
   const type = document.getElementById("incomeType").value;
+  const selectedProperty = document.getElementById("incomeProperty").value;
+  const fromDate = document.getElementById("incomeFrom").value;
+  const toDate = document.getElementById("incomeTo").value;
 
   let html = "";
 
   if(type === "gri"){
 
-    html += "<table>";
+html += "<div class='property-section'>";
+
+html += "<div class='invoice-header'>";
+html += "<div class='company-info'>";
+html += "<div class='company-name'>OCEAN VACATIONS</div>";
+html += "<div>www.oceanvacationsmb.com</div>";
+html += "<div>oceanvacationsmb@gmail.com</div>";
+html += "<div>843-222-6516</div>";
+html += "</div>";
+
+html += "<div class='right-header'>";
+html += "<div class='statement-date'>"+document.getElementById("statementDate").innerHTML+"</div>";
+html += "<div class='period-date'>"+document.getElementById("periodDate").innerHTML+"</div>";
+html += "</div>";
+
+html += "</div>";
+
+html += "<div class='property-title'><span class='property-icon'>📊</span> GROSS RENTAL INCOME REPORT</div>";
+
+html += "<table>";
+   
     html += "<tr><th>PROPERTY</th><th>CHECK-IN / CHECK-OUT</th><th>ACCOMMODATION</th></tr>";
 
     const ownerExpenses = expenses.filter(e => 
@@ -341,6 +387,91 @@ html += "<td>"+money(e.amount)+"</td>";
 html += "</tr>";
 });
 
+let totalAcc = 0;
+
+Object.keys(propertyTotals).forEach(prop=>{
+
+if(selectedProperty !== "all" && prop !== selectedProperty) return;
+
+const p = propertyTotals[prop];
+
+p.reservations.forEach(r=>{
+
+const checkIn = r["CHECK-IN DATE"];
+
+if(fromDate && checkIn < fromDate) return;
+if(toDate && checkIn > toDate) return;
+
+let a = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
+const commFee = num(r["COMMUNITY FEE"])||0;
+
+a = a - commFee;
+
+totalAcc += a;
+
+});
+
+});
+
+html += "<tr>";
+html += "<td colspan='2' style='font-weight:bold'>TOTAL ACCOMMODATION</td>";
+html += "<td style='font-weight:bold'>"+money(totalAcc)+"</td>";
+html += "</tr>";
+
+Object.keys(propertyTotals).forEach(prop=>{
+
+if(selectedProperty !== "all" && prop !== selectedProperty) return;
+
+const p = propertyTotals[prop];
+
+p.reservations.forEach(r=>{
+
+const checkIn = r["CHECK-IN DATE"];
+
+if(fromDate && checkIn < fromDate) return;
+if(toDate && checkIn > toDate) return;
+
+const g = num(r["TOTAL PAYOUT"]);
+
+totalGross += g;
+
+});
+
+});
+
+html += "<tr>";
+ let totalCleaning = 0;
+
+Object.keys(propertyTotals).forEach(prop=>{
+
+if(selectedProperty !== "all" && prop !== selectedProperty) return;
+
+const p = propertyTotals[prop];
+
+p.reservations.forEach(r=>{
+
+const checkIn = r["CHECK-IN DATE"];
+
+if(fromDate && checkIn < fromDate) return;
+if(toDate && checkIn > toDate) return;
+
+const c = num(r["CLEANING FARE"]) || 0;
+
+totalCleaning += c;
+
+});
+
+});
+
+html += "<tr>";
+html += "<td colspan='2' style='font-weight:bold'>TOTAL CLEANING</td>";
+html += "<td style='font-weight:bold'>"+money(totalCleaning)+"</td>";
+html += "</tr>";
+html += "<td colspan='2' style='font-weight:bold'>TOTAL GROSS PAYOUT</td>";
+ 
+html += "<td style='font-weight:bold'>"+money(totalGross)+"</td>";
+html += "</tr>";
+ 
 html += "</table>";
 
 html += "</div>";
@@ -349,9 +480,21 @@ html += "</div>";
     
     
     Object.keys(propertyTotals).forEach(prop=>{
-      const p = propertyTotals[prop];
+
+if(selectedProperty !== "all" && prop !== selectedProperty) return;
+
+const p = propertyTotals[prop];
 
       p.reservations.forEach(r=>{
+       if(fromDate){
+const checkIn = r["CHECK-IN DATE"];
+if(checkIn < fromDate) return;
+}
+
+if(toDate){
+const checkIn = r["CHECK-IN DATE"];
+if(checkIn > toDate) return;
+}
 
         let a = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
         const commFee = num(r["COMMUNITY FEE"])||0;
@@ -372,7 +515,10 @@ html += "</tr>";
   } else {
 
     Object.keys(propertyTotals).forEach(prop=>{
-      const p = propertyTotals[prop];
+
+if(selectedProperty !== "all" && prop !== selectedProperty) return;
+
+const p = propertyTotals[prop];
 
       html += "<div class='property-section'>";
       html += "<div class='property-title'>"+prop+"</div>";
@@ -1455,6 +1601,22 @@ function closeAll(){
 }
 
 function downloadPDF(){
+ 
+ function downloadIncomePDF(){
+
+const element=document.getElementById("incomeReportResult");
+
+const opt={
+margin:0.3,
+filename:"income-report.pdf",
+image:{type:'jpeg',quality:1},
+html2canvas:{scale:2,useCORS:true},
+jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
+};
+
+html2pdf().set(opt).from(element).save();
+
+}
 
 const btn=document.querySelector(".action-buttons");
 
