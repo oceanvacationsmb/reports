@@ -416,13 +416,7 @@ totalAcc += a;
 
 html += "<tr>";
 html += "<td>"+prop+"</td>";
-const checkIn = r["CHECK-IN DATE"];
-const checkOut = r["CHECK-OUT DATE"];
-
-const inDate = checkIn ? checkIn.split("-")[1]+"/"+checkIn.split("-")[2]+"/"+checkIn.split("-")[0] : "";
-const outDate = checkOut ? checkOut.split("-")[1]+"/"+checkOut.split("-")[2]+"/"+checkOut.split("-")[0] : "";
-
-html += "<td>"+inDate+" - "+outDate+"</td>";
+html += "<td>"+r["CHECK-IN DATE"]+" - "+r["CHECK-OUT DATE"]+"</td>";
 html += "<td>"+money(a)+"</td>";
 html += "</tr>";
 
@@ -522,13 +516,8 @@ const payout = num(r["TOTAL PAYOUT"]);
 html += "<tr>";
 html += "<td>"+r["CONFIRMATION CODE"].substring(0,8).toUpperCase()+"</td>";
 html += "<td>"+prop+"</td>";
-const checkIn = r["CHECK-IN DATE"];
-const checkOut = r["CHECK-OUT DATE"];
-
-const inDate = checkIn ? checkIn.split("-")[1]+"/"+checkIn.split("-")[2]+"/"+checkIn.split("-")[0] : "";
 const outDate = checkOut ? checkOut.split("-")[1]+"/"+checkOut.split("-")[2]+"/"+checkOut.split("-")[0] : "";
 
-html += "<td>"+inDate+" - "+outDate+"</td>";
 html += "<td>"+money(payout)+"</td>";
 html += "</tr>";
       });
