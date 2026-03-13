@@ -1095,8 +1095,7 @@ function updateHeaderDates(){
   document.getElementById("reportTitle").textContent="RESERVATION REPORT";
   document.getElementById("statementDate").innerHTML="STATEMENT DATE:<br><strong>"+months[nextMonth-1]+" 1ST "+nextYear+"</strong>";
   document.getElementById("periodDate").innerHTML="PERIOD: "+months[month-1]+" 1ST - "+last+"TH "+year;
-  document.getElementById("periodUnderTitle").innerText =
-  document.getElementById("periodDate").innerText;
+  document.getElementById("periodUnderTitle").innerText="";
   document.getElementById("ownerTitle").textContent=currentOwner.toUpperCase();
   
   const t=OWNERS[currentOwner];
