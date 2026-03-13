@@ -635,8 +635,7 @@ if(toDate && checkIn > toDate) return;
 
 const payout = num(r["TOTAL PAYOUT"]);
 if(payout === 0) return;
-
-const payout = num(r["TOTAL PAYOUT"]);
+ 
 const clean = num(r["CLEANING FARE"]) || 0;
 const acc = payout - clean;
 
