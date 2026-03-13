@@ -511,13 +511,13 @@ if(checkIn > toDate) return;
         const commFee = num(r["COMMUNITY FEE"])||0;
         a = a - commFee;
 
+const payout = num(r["TOTAL PAYOUT"]);
+
 html += "<tr>";
 html += "<td>"+r["CONFIRMATION CODE"].substring(0,8).toUpperCase()+"</td>";
 html += "<td>"+prop+"</td>";
 html += "<td>"+r["CHECK-IN DATE"]+" - "+r["CHECK-OUT DATE"]+"</td>";
-html += "<td class='acc' data-val='"+a+"'>"+money(a)+"</td>";
-html += "<td class='clean' data-val='"+commFee+"'>"+money(commFee)+"</td>";
-html += "<td><button class='editRow'>Edit</button></td>";
+html += "<td>"+money(payout)+"</td>";
 html += "</tr>";
       });
     });
