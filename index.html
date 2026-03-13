@@ -275,6 +275,7 @@ if(!csvData || csvData.length===0){
   document.getElementById("reportTitle").textContent = "INCOME REPORT";
 
   let html = "";
+ let totalGross = 0;
 
   html += "<div class='property-section'>";
 
@@ -323,6 +324,7 @@ function runIncomeReport(){
   const toDate = document.getElementById("incomeTo").value;
 
   let html = "";
+  let totalGross = 0;
 
   if(type === "gri"){
 
@@ -518,6 +520,7 @@ if(checkIn > toDate) return;
                
 
 const payout = num(r["TOTAL PAYOUT"]);
+       totalGross += payout;
        if(payout === 0) return;
 
 propertyPayoutTotal += payout;
