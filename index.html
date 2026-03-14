@@ -139,6 +139,7 @@ box-shadow:none
 <div class="section"><label class="label">SELECT OWNER</label><select id="ownerSelect" onchange="onOwnerChange()"><option value="">-- SELECT --</option></select></div>
 <div class="section"><label class="label">MONTH</label><select id="monthSelect"></select></div>
 <div class="section"><label class="label">YEAR</label><select id="yearSelect"></select></div>
+<div class="section"><label class="label">UPLOAD CSV</label><input type="file" id="csvFile" accept=".csv"></div>
 <button class="btn btn-primary" onclick="generateStatement()">▶ STATEMENT</button>
 <button class="btn btn-success" onclick="openAddExpense()" style="font-size:13px;font-weight:bold">💰 ADD EXPENSE</button>
 <button class="btn btn-success" onclick="generateSummary()">📊 SUMMARY REPORT</button>
@@ -705,7 +706,7 @@ html += "</div>";
   html += "<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>" + money(masterTotals.acc) + "</div></div>";
   html += "<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>" + money(masterTotals.pmc) + "</div></div>";
   html += "<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>" + money(masterTotals.expenses) + "</div></div>";
-  html += "<div class='summary-card'<div class='summary-label' >NET TO OWNER</div><div class='summary-value'>" + money(masterTotals.owner) + "</div></div>";
+  html += "<div class='summary-card'><div class='summary-label' >NET TO OWNER</div><div class='summary-value'>" + money(masterTotals.owner) + "</div></div>";
 
   html += "</div>";
 
@@ -1158,7 +1159,11 @@ function setupToken(){
   localStorage.setItem("github_token",githubToken);
   
   fetch("https://api.github.com/user",{headers:{"Authorization":"token "+githubToken}})
-    .then(r=>r.json())
+   .then(r=>r.text())
+.then(data=>{
+console.log(data);
+return JSON.parse(data);
+})
     .then(u=>{
       if(u.message){
         alert("❌ Invalid token");
@@ -1180,64 +1185,131 @@ function setupDropbox(){
   const token=prompt("DROPBOX TOKEN:");
   if(token)localStorage.setItem("dropbox_token",token.trim());
 }
+let apiKey = localStorage.getItem("guesty_api_key") || "";
 
-async function generateStatement() {
-  currentOwner = document.getElementById("ownerSelect").value;
-  if (!currentOwner || !OWNERS[currentOwner]?.guestyReportUrl) {
-    alert("Select an owner with a valid Guesty URL first.");
-    return;
-  }
+function generateStatement(){
 
-  document.getElementById("mainContent").innerHTML = "<div style='text-align:center;padding:40px;'>Fetching Live Data...</div>";
+if(!currentOwner) return;
 
-  try {
-    // We use AllOrigins to bypass the CORS block
-    const response = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(OWNERS[currentOwner].guestyReportUrl));
-    const json = await response.json();
-    const doc = new DOMParser().parseFromString(json.contents, 'text/html');
-    const table = doc.querySelector('table');
-    
-    if (!table) {
-      alert("Table not found in the Guesty link. Is it a Shared Report?");
-      return;
-    }
+const reportUrl = OWNERS[currentOwner].guestyReportUrl;
 
-    const rows = Array.from(table.querySelectorAll('tr'));
-    // We get the actual headers from the Guesty HTML
-    const headers = Array.from(rows[0].querySelectorAll('th, td')).map(cell => cell.innerText.trim());
-    
-    // We convert the HTML rows into the exact csvData format your code expects
-    csvData = rows.slice(1).map(row => {
-      const cells = Array.from(row.querySelectorAll('td'));
-      let raw = {};
-      headers.forEach((header, i) => {
-        raw[header] = cells[i] ? cells[i].innerText.trim() : "";
-      });
+console.log("REPORT URL:", reportUrl);
 
-      // KEY STEP: We map Guesty's names to YOUR code's names
-      return {
-        "PROPERTY ADDRESS": raw["Listing Address"] || raw["Property"] || "",
-        "CHECK-IN DATE": raw["Check-in"] || raw["Check-in Date"] || "",
-        "CHECK-OUT DATE": raw["Check-out"] || raw["Check-out Date"] || "",
-        "TOTAL PAYOUT": raw["Payout"] || raw["Total Payout"] || "0",
-        "ACCOMMODATION FARE": raw["Accommodation"] || raw["Fare"] || "0",
-        "CLEANING FARE": raw["Cleaning Fee"] || raw["Cleaning"] || "0",
-        "CONFIRMATION CODE": raw["Confirmation Code"] || raw["Code"] || "",
-        "MARKUP": "0",
-        "COMMUNITY FEE": "0"
-      };
-    }).filter(row => row["CONFIRMATION CODE"] !== ""); // Only keep real reservations
+fetch(reportUrl)
+.then(r=>r.text())
+.then(csv=>{
 
-    // Now we run your existing logic exactly as if you uploaded a CSV
-    updateHeaderDates();
-    processData();
-    displayStatement();
+Papa.parse(csv,{
+header:true,
+skipEmptyLines:true,
+complete:function(result){
 
-  } catch (e) {
-    console.error(e);
-    alert("Failed to fetch. This usually means the proxy is down or the URL is wrong.");
-  }
+csvData = result.data;
+
+console.log("ROWS LOADED:", csvData.length);
+
+updateHeaderDates();
+processData();
+displayStatement();
+
 }
+});
+
+})
+.catch(err=>{
+console.error("Fetch error:",err);
+});
+
+}
+ 
+function processReservations(results){
+
+console.log("REAL FIRST RESULT:", results[0]);
+
+csvData = results.map(r => {
+
+const invoiceItems = r["money.invoiceItems"]?.children || [];
+
+let cityTax = 0;
+let stateTax = 0;
+let countyTax = 0;
+let occupancyTax = 0;
+
+invoiceItems.forEach(i=>{
+
+const name = (i.title || "").toLowerCase();
+const val = Number(i.value) || 0;
+
+/* STATE */
+if(name.includes("state"))
+stateTax += val;
+
+/* COUNTY */
+else if(name.includes("county") || name.includes("horry"))
+countyTax += val;
+
+/* CITY / MUNICIPAL */
+else if(
+name.includes("city") ||
+name.includes("mb") ||
+name.includes("north myrtle") ||
+name.includes("surfside")
+)
+cityTax += val;
+
+/* OCCUPANCY / ACCOMMODATIONS */
+else if(
+name.includes("occupancy") ||
+name.includes("accommodation") ||
+name.includes("tourism")
+)
+occupancyTax += val;
+
+});
+
+return {
+
+"CHECK-IN DATE": r.checkInDate?.value || "",
+"CHECK-OUT DATE": r.checkOutDate?.value || "",
+
+"LISTING'S NICKNAME": r["listing.nickname"]?.children || "",
+
+"TOTAL PAYOUT": r["money.hostPayout"]?.value || 0,
+
+"ACCOMMODATION FARE": r["money.fareAccommodation"]?.value || 0,
+
+"CLEANING FARE": r["money.fareCleaning"]?.value || 0,
+
+"PLATFORM": r["integration.platform"]?.children || "",
+
+"CONFIRMATION CODE": r.confirmationCode?.children || "",
+
+"STATUS": r.status?.children || "",
+
+"MARKUP": r["money.invoiceItems.MAR"]?.value || 0,
+
+"CHANNEL COMMISSION": r["money.hostServiceFee"]?.value || 0,
+
+"TAXES": r["money.totalTaxes"]?.value || 0,
+
+"CITY TAX": cityTax,
+"STATE TAX": stateTax,
+"COUNTY TAX": countyTax,
+"OCCUPANCY TAX": occupancyTax
+
+};
+
+});
+
+console.log("FIRST ROW", csvData[0]);
+
+updateHeaderDates();
+processData();
+displayStatement();
+
+}
+
+ 
 
 function updateHeaderDates(){
   const month=parseInt(document.getElementById("monthSelect").value);
@@ -1774,7 +1846,7 @@ municipalities.forEach(m=>{
 if(propertySettings[prop] && propertySettings[prop][m]) muni.push(m);
 });
 
-const reportAmount=payoutTotal-taxTotal;
+const reportAmount=payoutTotal;
 
 taxHtml+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'>";
 taxHtml+="<span>"+prop+" ("+muni.join(", ")+")</span>";
@@ -1954,7 +2026,7 @@ processData();
 displayStatement();
 
 });
-  }
+  } 
 document.addEventListener("click",function(e){
 
 if(e.target.classList.contains("editRow")){
