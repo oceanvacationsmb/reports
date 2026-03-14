@@ -1196,17 +1196,23 @@ const reportUrl = OWNERS[currentOwner].guestyReportUrl;
 console.log("REPORT URL:", reportUrl);
 
 fetch(reportUrl)
-.then(r=>r.json())
-.then(data=>{
+.then(r=>r.text())
+.then(html=>{
 
-const results = data.results || [];
+const match = html.match(/"results":(\[.*?\])\s*,/s);
+
+if(!match){
+console.error("Results not found");
+return;
+}
+
+const results = JSON.parse(match[1]);
 
 console.log("ROWS LOADED:", results.length);
 
 processReservations(results);
 
 })
-
 .catch(err=>{
 console.error("Fetch error:",err);
 });
