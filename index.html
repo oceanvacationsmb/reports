@@ -1186,8 +1186,15 @@ function generateStatement(){
 
 if(!currentOwner)return;
 
-fetch(OWNERS[currentOwner].guestyReportUrl,{headers:{
-Authorization:"8a32863cba1cd5066ef2c40ddd064ccb591c4111d70c650b75bcff6f6bab955c7504394415775586795e2f7408cb61b12277841485f5dc0b65b22b32a31ce7c3"
+const reportUrl = OWNERS[currentOwner].guestyReportUrl;
+
+const apiUrl = reportUrl.replace("/apps/reservations","/api/shared-reservations-reports").split("?")[0] + "?timezone=America/New_York&skip=0&limit=100";
+
+const apiKey = reportUrl.split("apiKey=")[1];
+
+fetch(apiUrl,{
+headers:{
+Authorization: apiKey
 }
 })
 .then(r=>r.json())
