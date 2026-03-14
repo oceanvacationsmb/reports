@@ -1199,7 +1199,12 @@ let allResults = [];
 function loadPage(){
 
 fetch(
-reportUrl + (reportUrl.includes("?") ? "&" : "?") + `skip=${skip}&limit=${limit}`
+reportUrl + (reportUrl.includes("?") ? "&" : "?") + `skip=${skip}&limit=${limit}`,
+{
+headers:{
+Authorization:"Bearer YOUR_API_KEY"
+}
+}
 )
 .then(r=>r.text())
 .then(data=>{
