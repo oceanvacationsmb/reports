@@ -1269,28 +1269,28 @@ occupancyTax += val;
 
 return {
 
-"CHECK-IN DATE": r.checkInDate?.value || "",
-"CHECK-OUT DATE": r.checkOutDate?.value || "",
+"CHECK-IN DATE": r["CHECK-IN DATE"] || "",
+"CHECK-OUT DATE": r["CHECK-OUT DATE"] || "",
 
-"LISTING'S NICKNAME": r["listing.nickname"]?.children || "",
+"LISTING'S NICKNAME": r["LISTING'S NICKNAME"] || "",
 
-"TOTAL PAYOUT": r["money.hostPayout"]?.value || 0,
+"TOTAL PAYOUT": Number(r["TOTAL PAYOUT"]) || 0,
 
-"ACCOMMODATION FARE": r["money.fareAccommodation"]?.value || 0,
+"ACCOMMODATION FARE": Number(r["ACCOMMODATION FARE"]) || 0,
 
-"CLEANING FARE": r["money.fareCleaning"]?.value || 0,
+"CLEANING FARE": Number(r["CLEANING FARE"]) || 0,
 
-"PLATFORM": r["integration.platform"]?.children || "",
+"PLATFORM": r["PLATFORM"] || "",
 
-"CONFIRMATION CODE": r.confirmationCode?.children || "",
+"CONFIRMATION CODE": r["CONFIRMATION CODE"] || "",
 
-"STATUS": r.status?.children || "",
+"STATUS": r["STATUS"] || "",
 
-"MARKUP": r["money.invoiceItems.MAR"]?.value || 0,
+"MARKUP": Number(r["MARKUP"]) || 0,
 
-"CHANNEL COMMISSION": r["money.hostServiceFee"]?.value || 0,
+"CHANNEL COMMISSION": Number(r["CHANNEL COMMISSION"]) || 0,
 
-"TAXES": r["money.totalTaxes"]?.value || 0,
+"TAXES": Number(r["TAXES"]) || 0,
 
 "CITY TAX": cityTax,
 "STATE TAX": stateTax,
