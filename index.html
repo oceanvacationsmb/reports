@@ -1195,10 +1195,9 @@ let allResults = [];
 function loadPage(){
 
 fetch(
-reportUrl.replace("/apps/reservations","/api/shared-reservations-reports").split("?")[0] +
-`?timezone=America/New_York&skip=${skip}&limit=${limit}`
+  reportUrl.replace("/apps/reservations","/api/shared-reservations-reports").split("?")[0] +
+  `?timezone=America/New_York&skip=${skip}&limit=${limit}`
 )
-})
 .then(r=>r.json())
 .then(data=>{
 
