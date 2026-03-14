@@ -1192,44 +1192,33 @@ function generateStatement(){
 if(!currentOwner) return;
 
 const reportUrl = OWNERS[currentOwner].guestyReportUrl;
+
 console.log("REPORT URL:", reportUrl);
 
-let skip = 0;
-const limit = 1000;
-let allResults = [];
+fetch(reportUrl)
+.then(r=>r.text())
+.then(csv=>{
 
-function loadPage(){
+Papa.parse(csv,{
+header:true,
+skipEmptyLines:true,
+complete:function(result){
 
-fetch("https://open-api.guesty.com/v1/reservations?skip="+skip+"&limit="+limit,{
-headers:{
-"Authorization":"Bearer "+apiKey,
-"Accept":"application/json"
-}
-})
+csvData = result.data;
 
-if(!data.results || data.results.length === 0){
+console.log("ROWS LOADED:", csvData.length);
 
-console.log("TOTAL RESERVATIONS LOADED:", allResults.length);
-
-processReservations(allResults);
-return;
+updateHeaderDates();
+processData();
+displayStatement();
 
 }
-
-allResults = allResults.concat(data.results);
-
-skip += limit;
-
-loadPage();
+});
 
 })
 .catch(err=>{
-console.error("Fetch error:", err);
+console.error("Fetch error:",err);
 });
-
-}
-
-loadPage();
 
 }
 
