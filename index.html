@@ -1204,9 +1204,13 @@ header:true,
 skipEmptyLines:true,
 complete:function(result){
 
-console.log("ROWS LOADED:", result.data.length);
+csvData = result.data;
 
-processReservations(result.data);
+console.log("ROWS LOADED:", csvData.length);
+
+updateHeaderDates();
+processData();
+displayStatement();
 
 }
 });
@@ -1220,11 +1224,9 @@ console.error("Fetch error:",err);
 
 function processReservations(results){
 
-const rows = results.data || results.rows || results;
+console.log("REAL FIRST RESULT:", results[0]);
 
-console.log("REAL FIRST RESULT:", rows[0]);
-
-csvData = rows.map(r => {
+csvData = results.map(r => {
 
 const invoiceItems = r["money.invoiceItems"]?.children || [];
 
@@ -1265,33 +1267,30 @@ occupancyTax += val;
 
 });
 
- console.log(r);
- 
 return {
 
-"CONFIRMATION CODE": r.confirmationCode?.children || r.confirmationCode?.value || "",
+"CHECK-IN DATE": r.checkInDate?.value || "",
+"CHECK-OUT DATE": r.checkOutDate?.value || "",
 
-"CHECK-IN DATE": r.checkInDate?.value || r.checkInDate?.children || "",
+"LISTING'S NICKNAME": r["listing.nickname"]?.children || "",
 
-"CHECK-OUT DATE": r.checkOutDate?.value || r.checkOutDate?.children || "",
+"TOTAL PAYOUT": r["money.hostPayout"]?.value || 0,
 
-"LISTING'S NICKNAME": r["listing.nickname"]?.children || r["listing.nickname"]?.value || "",
+"ACCOMMODATION FARE": r["money.fareAccommodation"]?.value || 0,
 
-"TOTAL PAYOUT": parseFloat(r["money.hostPayout"]?.value || r["money.hostPayout"]?.children || 0),
+"CLEANING FARE": r["money.fareCleaning"]?.value || 0,
 
-"ACCOMMODATION FARE": parseFloat(r["money.fareAccommodation"]?.value || r["money.fareAccommodation"]?.children || 0),
+"PLATFORM": r["integration.platform"]?.children || "",
 
-"CLEANING FARE": parseFloat(r["money.fareCleaning"]?.value || r["money.fareCleaning"]?.children || 0),
+"CONFIRMATION CODE": r.confirmationCode?.children || "",
 
-"MARKUP": parseFloat(r["money.invoiceItems.MAR"]?.value || r["money.invoiceItems.MAR"]?.children || 0),
+"STATUS": r.status?.children || "",
 
-"PLATFORM": r["integration.platform"]?.children || r["integration.platform"]?.value || "",
+"MARKUP": r["money.invoiceItems.MAR"]?.value || 0,
 
-"STATUS": r.status?.children || r.status?.value || "",
+"CHANNEL COMMISSION": r["money.hostServiceFee"]?.value || 0,
 
-"CHANNEL COMMISSION": parseFloat(r["money.hostServiceFee"]?.value || r["money.hostServiceFee"]?.children || 0),
-
-"TAXES": parseFloat(r["money.totalTaxes"]?.value || r["money.totalTaxes"]?.children || 0),
+"TAXES": r["money.totalTaxes"]?.value || 0,
 
 "CITY TAX": cityTax,
 "STATE TAX": stateTax,
