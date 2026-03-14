@@ -1195,18 +1195,13 @@ const reportUrl = OWNERS[currentOwner].guestyReportUrl;
 
 console.log("REPORT URL:", reportUrl);
 
-fetch(reportUrl)
-.then(r=>r.text())
-.then(html=>{
+const apiUrl = reportUrl.replace("/apps/reservations","/api/reservations");
 
-const match = html.match(/"results":(\[.*?\])\s*,/s);
+fetch(apiUrl)
+.then(r=>r.json())
+.then(data=>{
 
-if(!match){
-console.error("Results not found");
-return;
-}
-
-const results = JSON.parse(match[1]);
+const results = data.results || [];
 
 console.log("ROWS LOADED:", results.length);
 
