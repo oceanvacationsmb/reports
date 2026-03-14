@@ -1199,11 +1199,26 @@ Authorization: apiKey
 })
 .then(r=>r.json())
 .then(data=>{
- console.log(data);
 
 console.log(data);
-csvData = data.results;
- 
+
+csvData = data.results.map(r => ({
+  "CHECK-IN DATE": r.checkInDate,
+  "CHECK-OUT DATE": r.checkOutDate,
+  "LISTING'S NICKNAME": r.listingNickname,
+  "TOTAL PAYOUT": r.totalPayout,
+  "CLEANING FARE": r.cleaningFare,
+  "PLATFORM": r.platform,
+  "CONFIRMATION CODE": r.confirmationCode,
+  "STATUS": r.status,
+  "MARKUP": r.markup || 0,
+  "CHANNEL COMMISSION": r.channelCommission || 0,
+  "CITY TAX": r.cityTax || 0,
+  "STATE TAX": r.stateTax || 0,
+  "COUNTY TAX": r.countyTax || 0,
+  "OCCUPANCY TAX": r.occupancyTax || 0
+}));
+
 updateHeaderDates();
 processData();
 displayStatement();
