@@ -1190,51 +1190,52 @@ async function generateStatement() {
 
   document.getElementById("mainContent").innerHTML = "<div style='text-align:center;padding:40px;'>Fetching Live Data...</div>";
 
-  // Use a different proxy service
-  const proxyUrl = 'https://api.codetabs.com/v1/proxy?quest=';
-  const targetUrl = OWNERS[currentOwner].guestyReportUrl;
-
   try {
-    const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
-    if (!response.ok) throw new Error('Proxy error');
-    
-    const htmlString = await response.text();
-    const doc = new DOMParser().parseFromString(htmlString, 'text/html');
+    // We use AllOrigins to bypass the CORS block
+    const response = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(OWNERS[currentOwner].guestyReportUrl));
+    const json = await response.json();
+    const doc = new DOMParser().parseFromString(json.contents, 'text/html');
     const table = doc.querySelector('table');
     
     if (!table) {
-      alert("No table found. Check if the Guesty link is still active and Public.");
+      alert("Table not found in the Guesty link. Is it a Shared Report?");
       return;
     }
 
     const rows = Array.from(table.querySelectorAll('tr'));
+    // We get the actual headers from the Guesty HTML
     const headers = Array.from(rows[0].querySelectorAll('th, td')).map(cell => cell.innerText.trim());
     
+    // We convert the HTML rows into the exact csvData format your code expects
     csvData = rows.slice(1).map(row => {
       const cells = Array.from(row.querySelectorAll('td'));
       let raw = {};
-      headers.forEach((header, i) => raw[header] = cells[i] ? cells[i].innerText.trim() : "");
+      headers.forEach((header, i) => {
+        raw[header] = cells[i] ? cells[i].innerText.trim() : "";
+      });
 
+      // KEY STEP: We map Guesty's names to YOUR code's names
       return {
-        "PROPERTY ADDRESS": raw["Listing Address"] || raw["Property"] || raw["PROPERTY ADDRESS"],
-        "CHECK-IN DATE": raw["Check-in"] || raw["Check-in Date"] || raw["CHECK-IN DATE"],
-        "CHECK-OUT DATE": raw["Check-out"] || raw["Check-out Date"] || raw["CHECK-OUT DATE"],
-        "TOTAL PAYOUT": raw["Payout"] || raw["Total Payout"] || raw["TOTAL PAYOUT"],
-        "ACCOMMODATION FARE": raw["Accommodation"] || raw["Fare"] || raw["ACCOMMODATION FARE"],
-        "CLEANING FARE": raw["Cleaning Fee"] || raw["Cleaning"] || raw["CLEANING FARE"],
-        "CONFIRMATION CODE": raw["Confirmation Code"] || raw["Code"] || raw["CONFIRMATION CODE"],
+        "PROPERTY ADDRESS": raw["Listing Address"] || raw["Property"] || "",
+        "CHECK-IN DATE": raw["Check-in"] || raw["Check-in Date"] || "",
+        "CHECK-OUT DATE": raw["Check-out"] || raw["Check-out Date"] || "",
+        "TOTAL PAYOUT": raw["Payout"] || raw["Total Payout"] || "0",
+        "ACCOMMODATION FARE": raw["Accommodation"] || raw["Fare"] || "0",
+        "CLEANING FARE": raw["Cleaning Fee"] || raw["Cleaning"] || "0",
+        "CONFIRMATION CODE": raw["Confirmation Code"] || raw["Code"] || "",
         "MARKUP": "0",
         "COMMUNITY FEE": "0"
       };
-    }).filter(row => row["CONFIRMATION CODE"]);
+    }).filter(row => row["CONFIRMATION CODE"] !== ""); // Only keep real reservations
 
+    // Now we run your existing logic exactly as if you uploaded a CSV
     updateHeaderDates();
     processData();
     displayStatement();
 
   } catch (e) {
-    console.error("Fetch Error:", e);
-    alert("Failed to reach Guesty. Please try again in a moment.");
+    console.error(e);
+    alert("Failed to fetch. This usually means the proxy is down or the URL is wrong.");
   }
 }
 
