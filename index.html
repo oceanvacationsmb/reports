@@ -1202,7 +1202,8 @@ Authorization: apiKey
 
 console.log(data);
 
-csvData = data.results.map(r => ({
+csvData = data.results.map(r => {
+return {
   "CHECK-IN DATE": (r.checkInDate || "").toString().split("T")[0],
   "CHECK-OUT DATE": (r.checkOutDate || "").toString().split("T")[0],
   "LISTING'S NICKNAME": r.listingNickname,
@@ -1217,19 +1218,14 @@ csvData = data.results.map(r => ({
   "STATE TAX": r.stateTax || 0,
   "COUNTY TAX": r.countyTax || 0,
   "OCCUPANCY TAX": r.occupancyTax || 0
-}));
+};
+});
 
 updateHeaderDates();
 processData();
 displayStatement();
 
 });
-updateHeaderDates();
-processData();
-displayStatement();
-
-});
-
 }
 
 function updateHeaderDates(){
