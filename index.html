@@ -1204,8 +1204,18 @@ function loadPage(){
 fetch(
 reportUrl + (reportUrl.includes("?") ? "&" : "?") + `skip=${skip}&limit=${limit}`
 )
-.then(r=>r.json())
-.then(data=>{
+.then(r => r.text())
+.then(html => {
+
+const match = html.match(/window\.__INITIAL_STATE__\s*=\s*(\{.*?\});/s);
+
+if(!match){
+console.error("Guesty data not found in report page");
+return;
+}
+
+const json = JSON.parse(match[1]);
+const data = json.report || json;
 
 if(!data.results || data.results.length === 0){
 
