@@ -1227,7 +1227,48 @@ function processReservations(results){
 
 console.log("REAL FIRST RESULT:", results[0]);
 
-csvData = results.map(r => ({
+csvData = results.map(r => {
+
+const invoiceItems = r["money.invoiceItems"]?.children || [];
+
+let cityTax = 0;
+let stateTax = 0;
+let countyTax = 0;
+let occupancyTax = 0;
+
+invoiceItems.forEach(i=>{
+
+const name = (i.title || "").toLowerCase();
+const val = Number(i.value) || 0;
+
+/* STATE */
+if(name.includes("state"))
+stateTax += val;
+
+/* COUNTY */
+else if(name.includes("county") || name.includes("horry"))
+countyTax += val;
+
+/* CITY / MUNICIPAL */
+else if(
+name.includes("city") ||
+name.includes("mb") ||
+name.includes("north myrtle") ||
+name.includes("surfside")
+)
+cityTax += val;
+
+/* OCCUPANCY / ACCOMMODATIONS */
+else if(
+name.includes("occupancy") ||
+name.includes("accommodation") ||
+name.includes("tourism")
+)
+occupancyTax += val;
+
+});
+
+return {
 
 "CHECK-IN DATE": r.checkInDate?.value || "",
 "CHECK-OUT DATE": r.checkOutDate?.value || "",
@@ -1252,12 +1293,12 @@ csvData = results.map(r => ({
 
 "TAXES": r["money.totalTaxes"]?.value || 0,
 
-"CITY TAX": 0,
+"CITY TAX": r["money.totalTaxes"]?.value || 0,
 "STATE TAX": 0,
 "COUNTY TAX": 0,
 "OCCUPANCY TAX": 0
 
-}));
+};
 
 console.log("FIRST ROW", csvData[0]);
 
@@ -1268,6 +1309,7 @@ displayStatement();
 }
 
 });
+ 
 }
 
 function updateHeaderDates(){
@@ -1805,7 +1847,7 @@ municipalities.forEach(m=>{
 if(propertySettings[prop] && propertySettings[prop][m]) muni.push(m);
 });
 
-const reportAmount=payoutTotal-taxTotal;
+const reportAmount=payoutTotal;
 
 taxHtml+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'>";
 taxHtml+="<span>"+prop+" ("+muni.join(", ")+")</span>";
