@@ -1159,7 +1159,11 @@ function setupToken(){
   localStorage.setItem("github_token",githubToken);
   
   fetch("https://api.github.com/user",{headers:{"Authorization":"token "+githubToken}})
-    .then(r=>r.json())
+   .then(r=>r.text())
+.then(data=>{
+console.log(data);
+return JSON.parse(data);
+})
     .then(u=>{
       if(u.message){
         alert("❌ Invalid token");
@@ -1197,7 +1201,11 @@ function loadPage(){
 fetch(
 reportUrl + (reportUrl.includes("?") ? "&" : "?") + `skip=${skip}&limit=${limit}`
 )
-.then(r=>r.json())
+.then(r=>r.text())
+.then(data=>{
+console.log(data);
+return JSON.parse(data);
+})
 .then(data=>{
 
 if(!data.results || data.results.length === 0){
