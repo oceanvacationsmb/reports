@@ -1199,7 +1199,10 @@ fetch(reportUrl)
 .then(r=>r.text())
 .then(csv=>{
 
-Papa.parse(csv,{
+const start = csv.indexOf("CONFIRMATION CODE");
+const cleaned = csv.substring(start);
+
+Papa.parse(cleaned,{
 header:true,
 skipEmptyLines:true,
 complete:function(result){
