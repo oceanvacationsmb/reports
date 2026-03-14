@@ -1181,7 +1181,7 @@ function setupDropbox(){
   const token=prompt("DROPBOX TOKEN:");
   if(token)localStorage.setItem("dropbox_token",token.trim());
 }
-
+let apiKey = localStorage.getItem("guesty_api_key") || "";
 function generateStatement(){
 
 if(!currentOwner)return;
@@ -1196,9 +1196,8 @@ function loadPage(){
 
 fetch(
 reportUrl.replace("/apps/reservations","/api/shared-reservations-reports").split("?")[0] +
-`?timezone=America/New_York&skip=${skip}&limit=${limit}`,
-{
-headers:{ Authorization: apiKey }
+`?timezone=America/New_York&skip=${skip}&limit=${limit}`
+)
 })
 .then(r=>r.json())
 .then(data=>{
