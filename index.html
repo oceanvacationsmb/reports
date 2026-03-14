@@ -1201,8 +1201,8 @@ return r.text();
 })
 .then(function(html){
 
-/* extract Guesty data from page */
-const match = html.match(/window\.__INITIAL_STATE__\s*=\s*(\{[\s\S]*?\});/);
+/* find the Nuxt data block */
+const match = html.match(/window\.__NUXT__\s*=\s*(\{[\s\S]*?\});/);
 
 if(!match){
 console.error("Report data not found in page");
@@ -1210,7 +1210,6 @@ console.log("PAGE CONTENT SAMPLE:", html.substring(0,500));
 return;
 }
 
-/* parse JSON safely */
 let json;
 try{
 json = JSON.parse(match[1]);
@@ -1222,24 +1221,21 @@ return;
 /* locate reservations array */
 let results = [];
 
-if(json.report && json.report.results){
-results = json.report.results;
+if(json.data && json.data[0] && json.data[0].results){
+results = json.data[0].results;
 }
 else if(json.results){
 results = json.results;
-}
-else if(json.data && json.data.results){
-results = json.data.results;
 }
 
 console.log("ROWS LOADED:", results.length);
 
 if(!results.length){
-console.error("No reservation data found in report");
+console.error("No reservation data found");
 return;
 }
 
-/* send to existing mapper */
+/* pass to your existing mapper */
 processReservations(results);
 
 })
@@ -1248,7 +1244,7 @@ console.error("Fetch error:", err);
 });
 
 }
-
+ 
 function processReservations(results){
 
 console.log("REAL FIRST RESULT:", results[0]);
