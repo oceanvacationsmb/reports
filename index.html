@@ -1201,7 +1201,7 @@ Authorization: apiKey
 .then(data=>{
 
 console.log(data);
-
+console.log("REAL FIRST RESULT:", data.results[0]);
 csvData = data.results.map(r => ({
   "CHECK-IN DATE": (r.checkIn || "").toString().split("T")[0],
   "CHECK-OUT DATE": (r.checkOut || "").toString().split("T")[0],
