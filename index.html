@@ -1274,11 +1274,11 @@ return {
 
 "LISTING'S NICKNAME": r["listing.nickname"]?.children || "",
 
-"TOTAL PAYOUT": r["money.hostPayout"]?.value || 0,
-
-"ACCOMMODATION FARE": r["money.fareAccommodation"]?.value || 0,
-
-"CLEANING FARE": r["money.fareCleaning"]?.value || 0,
+"TOTAL PAYOUT": parseFloat(r["money.hostPayout"]?.children || 0),
+ 
+"ACCOMMODATION FARE": parseFloat(r["money.fareAccommodation"]?.children || 0),
+ 
+"CLEANING FARE": parseFloat(r["money.fareCleaning"]?.children || 0),
 
 "PLATFORM": r["integration.platform"]?.children || "",
 
