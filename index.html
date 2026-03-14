@@ -1195,21 +1195,9 @@ const reportUrl = OWNERS[currentOwner].guestyReportUrl;
 
 console.log("REPORT URL:", reportUrl);
 
-// create hidden iframe
-let frame = document.getElementById("guestyFrame");
-
-if(!frame){
-frame = document.createElement("iframe");
-frame.id = "guestyFrame";
-frame.style.display = "none";
-document.body.appendChild(frame);
-}
-
-frame.onload = function(){
-
-try{
-
-const html = frame.contentDocument.documentElement.innerHTML;
+fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(reportUrl))
+.then(r => r.text())
+.then(html => {
 
 const match = html.match(/window\.__INITIAL_STATE__\s*=\s*(\{.*?\});/s);
 
@@ -1226,8 +1214,11 @@ console.log("ROWS LOADED:", results.length);
 
 processReservations(results);
 
-}catch(e){
-console.error("Iframe parse error:", e);
+})
+.catch(err=>{
+console.error("Fetch error:", err);
+});
+
 }
 
 };
