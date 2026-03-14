@@ -1186,14 +1186,15 @@ function setupDropbox(){
   if(token)localStorage.setItem("dropbox_token",token.trim());
 }
 let apiKey = localStorage.getItem("guesty_api_key") || "";
+
 function generateStatement(){
 
-if(!currentOwner)return;
+if(!currentOwner) return;
 
 const reportUrl = OWNERS[currentOwner].guestyReportUrl;
- console.log("REPORT URL:", reportUrl);
+console.log("REPORT URL:", reportUrl);
 
- let skip = 0;
+let skip = 0;
 const limit = 1000;
 let allResults = [];
 
@@ -1202,24 +1203,34 @@ function loadPage(){
 fetch(
 reportUrl + (reportUrl.includes("?") ? "&" : "?") + `skip=${skip}&limit=${limit}`
 )
-.then(r => r.text())
-.then(data => {
+.then(r=>r.json())
+.then(data=>{
 
-console.log(data);
+if(!data.results || data.results.length === 0){
 
-});
+console.log("TOTAL RESERVATIONS LOADED:", allResults.length);
+
+processReservations(allResults);
+return;
 
 }
+
+allResults = allResults.concat(data.results);
 
 skip += limit;
 
 loadPage();
 
+})
+.catch(err=>{
+console.error("Fetch error:", err);
 });
 
 }
 
 loadPage();
+
+}
 
 function processReservations(results){
 
