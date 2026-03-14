@@ -1200,8 +1200,9 @@ Authorization: apiKey
 .then(r=>r.json())
 .then(data=>{
 
-csvData=data.results;
-
+console.log(data);
+csvData = data;
+ 
 updateHeaderDates();
 processData();
 displayStatement();
