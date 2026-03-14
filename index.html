@@ -1203,8 +1203,8 @@ Authorization: apiKey
 console.log(data);
 
 csvData = data.results.map(r => ({
-  "CHECK-IN DATE": r.checkInDate,
-  "CHECK-OUT DATE": r.checkOutDate,
+  "CHECK-IN DATE": (r.checkInDate || "").toString().split("T")[0],
+  "CHECK-OUT DATE": (r.checkOutDate || "").toString().split("T")[0],
   "LISTING'S NICKNAME": r.listingNickname,
   "TOTAL PAYOUT": r.totalPayout,
   "CLEANING FARE": r.cleaningFare,
@@ -1219,6 +1219,11 @@ csvData = data.results.map(r => ({
   "OCCUPANCY TAX": r.occupancyTax || 0
 }));
 
+updateHeaderDates();
+processData();
+displayStatement();
+
+});
 updateHeaderDates();
 processData();
 displayStatement();
