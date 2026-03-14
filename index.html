@@ -1199,8 +1199,6 @@ fetch(reportUrl)
 .then(r=>r.text())
 .then(csv=>{
 
- console.log(html);
- 
 Papa.parse(csv,{
 header:true,
 skipEmptyLines:true,
@@ -1273,28 +1271,28 @@ occupancyTax += val;
  
 return {
 
-"CHECK-IN DATE": r.checkInDate?.value || "",
-"CHECK-OUT DATE": r.checkOutDate?.value || "",
+"CHECK-IN DATE": r.checkInDate?.value || r.checkInDate?.children || "",
+"CHECK-OUT DATE": r.checkOutDate?.value || r.checkOutDate?.children || "",
 
-"LISTING'S NICKNAME": r["listing.nickname"]?.children || "",
+"LISTING'S NICKNAME": r["listing.nickname"]?.children || r["listing.nickname"]?.value || "",
 
-"TOTAL PAYOUT": parseFloat(r["money.hostPayout"]?.children || 0),
- 
-"ACCOMMODATION FARE": parseFloat(r["money.fareAccommodation"]?.children || 0),
- 
-"CLEANING FARE": parseFloat(r["money.fareCleaning"]?.children || 0),
+"TOTAL PAYOUT": parseFloat(r["money.hostPayout"]?.value || r["money.hostPayout"]?.children || 0),
 
-"PLATFORM": r["integration.platform"]?.children || "",
+"ACCOMMODATION FARE": parseFloat(r["money.fareAccommodation"]?.value || r["money.fareAccommodation"]?.children || 0),
 
-"CONFIRMATION CODE": r.confirmationCode?.children || "",
+"CLEANING FARE": parseFloat(r["money.fareCleaning"]?.value || r["money.fareCleaning"]?.children || 0),
 
-"STATUS": r.status?.children || "",
+"PLATFORM": r["integration.platform"]?.children || r["integration.platform"]?.value || "",
 
-"MARKUP": r["money.invoiceItems.MAR"]?.value || 0,
+"CONFIRMATION CODE": r.confirmationCode?.children || r.confirmationCode?.value || "",
 
-"CHANNEL COMMISSION": r["money.hostServiceFee"]?.value || 0,
+"STATUS": r.status?.children || r.status?.value || "",
 
-"TAXES": r["money.totalTaxes"]?.value || 0,
+"MARKUP": parseFloat(r["money.invoiceItems.MAR"]?.value || r["money.invoiceItems.MAR"]?.children || 0),
+
+"CHANNEL COMMISSION": parseFloat(r["money.hostServiceFee"]?.value || r["money.hostServiceFee"]?.children || 0),
+
+"TAXES": parseFloat(r["money.totalTaxes"]?.value || r["money.totalTaxes"]?.children || 0),
 
 "CITY TAX": cityTax,
 "STATE TAX": stateTax,
