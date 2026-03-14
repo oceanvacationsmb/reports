@@ -1195,8 +1195,8 @@ const reportUrl = OWNERS[currentOwner].guestyReportUrl;
 
 console.log("REPORT URL:", reportUrl);
 
-fetch(reportUrl)
-.then(r=>r.text())
+fetch(reportUrl + (reportUrl.includes("?") ? "&" : "?") + "format=json")
+.then(r=>r.json())
 .then(csv=>{
 
 Papa.parse(csv,{
