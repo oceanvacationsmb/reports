@@ -1200,9 +1200,14 @@ let allResults = [];
 function loadPage(){
 
 fetch(
-reportUrl + (reportUrl.includes("?") ? "&" : "?") + `skip=${skip}&limit=${limit}`
+reportUrl + (reportUrl.includes("?") ? "&" : "?") + `offset=${skip}&limit=${limit}`
 )
-.then(r=>r.json())
+.then(r=>{
+if(!r.ok){
+throw new Error("Fetch failed: "+r.status);
+}
+return r.json();
+})
 .then(data=>{
 
 if(!data.results || data.results.length === 0){
