@@ -1204,7 +1204,7 @@ console.log(data);
 
 csvData = data.results.map(r => ({
   "CHECK-IN DATE": (r.checkIn || "").toString().split("T")[0],
-  "CHECK-OUT DATE": (r.checkOutDate || "").toString().split("T")[0],
+  "CHECK-OUT DATE": (r.checkOut || "").toString().split("T")[0],
   "LISTING'S NICKNAME": r.listingNickname,
   "TOTAL PAYOUT": r.totalPayout,
   "CLEANING FARE": r.cleaningFare,
