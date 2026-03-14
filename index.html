@@ -1187,13 +1187,7 @@ function generateStatement(){
   window.open(OWNERS[currentOwner].guestyReportUrl, "_blank");
 }
 
-  }catch(err){
-    console.error("LOAD ERROR:", err);
-    alert("Failed loading Guesty data");
-  }
-}
-
-function updateHeaderDates(){
+  function updateHeaderDates(){
   const month=parseInt(document.getElementById("monthSelect").value);
   const year=parseInt(document.getElementById("yearSelect").value);
   const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
