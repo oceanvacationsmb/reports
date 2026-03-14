@@ -130,15 +130,11 @@ box-shadow:none
 .no-print{display:none}
 }
 
- page{
-margin:20px;
-}
-  
-</style>
+  </style>
 </head>
 <body>
 <div class="sidebar">
-<h3>🎯 OCEAN VACATIONS</h3>
+<h3>🎯 OCEAN VACATIONS INC.</h3>
 <div id="tokenStatus" class="token-status token-inactive">🔴 LOADING...</div>
 <div class="section"><label class="label">SELECT OWNER</label><select id="ownerSelect" onchange="onOwnerChange()"><option value="">-- SELECT --</option></select></div>
 <div class="section"><label class="label">MONTH</label><select id="monthSelect"></select></div>
@@ -217,9 +213,9 @@ margin:20px;
 
 <div class="main">
 <div id="content" class="page">
-<div class="invoice-header">
+<div class="invoice-header" id="invoiceHeader" style="display:none">
 <div class="company-info">
-<div class="company-name">OCEAN VACATIONS</div>
+<div class="company-name">OCEAN VACATIONS INC.</div>
 <div>www.oceanvacationsmb.com</div>
 <div>oceanvacationsmb@gmail.com</div>
 <div>843-222-6516</div>
@@ -229,7 +225,10 @@ margin:20px;
 <div class="period-date" id="periodDate"></div>
 </div>
 </div>
-<div class="report-title" id="reportTitle">RESERVATION REPORT</div>
+<div class="report-title" id="reportTitle">OCEAN VACATIONS ACCOUNTING SYSTEM</div>
+
+<div id="periodUnderTitle" style="text-align:center;font-size:14px;margin-top:-15px;margin-bottom:25px;font-weight:bold"></div>
+
 <div class="owner-name" id="ownerTitle"></div>
 <div class="owner-details" id="ownerDetails"></div>
 <div id="mainContent"><div style="text-align:center;padding:40px;color:#666">Loading data from GitHub...</div></div>
@@ -261,8 +260,14 @@ function updateTokenStatus(){
   }
 }
 function showIncomeReport(){
+document.getElementById("invoiceHeader").style.display="none";
+document.getElementById("reportTitle").style.display="none";
+document.getElementById("ownerTitle").style.display="none";
+document.getElementById("ownerDetails").style.display="none";
+document.getElementById("periodDate").style.display="none";
 
-  if(!csvData || csvData.length===0){
+if(!csvData || csvData.length===0){
+ 
     alert("Generate statement first");
     return;
   }
@@ -270,65 +275,164 @@ function showIncomeReport(){
   document.getElementById("reportTitle").textContent = "INCOME REPORT";
 
   let html = "";
+ let totalGross = 0;
 
   html += "<div class='property-section'>";
 
-  html += "<div style='font-size:12px;color:#666;margin-bottom:20px'>";
-  html += "On this page you can run report for single, multiple or all properties.";
-  html += "</div>";
+html += "<div style='margin-bottom:15px;border-bottom:1px solid #ccc;padding-bottom:10px'>";
+html += "<label style='font-weight:bold;margin-right:5px'>REPORT TYPE</label>";
+html += "<select id='incomeType' style='width:150px' onchange='incomeTypeChanged()'>";
+html += "<option value='full'>RESERVATION REPORT</option>";
+html += "<option value='gri'>GRI REPORT</option>";
+html += "</select>";
 
-  html += "<div class='summary-card' style='margin-bottom:20px'>";
-  html += "<div class='summary-label'>GROSS INCOME REVENUE</div>";
-  html += "<div class='summary-value'>"+money(masterTotals.acc)+"</div>";
-  html += "</div>";
+html += "<label style='font-weight:bold;margin-right:5px'>PROPERTY</label>";
+html += "<select id='incomeProperty' style='width:200px'>";
 
-  html += "<div style='margin-bottom:20px'>";
-  html += "<label style='font-weight:bold'>REPORT TYPE</label>";
-  html += "<select id='incomeType' style='width:200px;margin-left:10px'>";
-  html += "<option value='full'>FULL REPORT</option>";
-  html += "<option value='gri'>GRI REPORT</option>";
-  html += "</select>";
-  html += "<button style='margin-left:15px;padding:6px 12px;background:#000;color:#fff;border:none;border-radius:4px' onclick='runIncomeReport()'>RUN</button>";
-  html += "</div>";
+html += "<option value='all'>ALL PROPERTIES</option>";
 
-  html += "<div id='incomeReportResult'></div>";
+Object.keys(propertyTotals).forEach(p=>{
+html += "<option value='"+p+"'>"+p+"</option>";
+});
 
-  html += "</div>";
+html += "</select>";
 
+html += "<label style='font-weight:bold;margin-right:5px'>RANGE</label>";
+html += "<select id='dateMode' style='width:180px' onchange='updateDateOptions()'>";
+html += "<option value='dates'>BETWEEN DATES</option>";
+html += "<option value='month'>SPECIFIC MONTH</option>";
+html += "<option value='year'>CURRENT YEAR</option>";
+html += "<option value='lastyear'>LAST YEAR</option>";
+html += "</select>";
+ html += "<button onclick='runIncomeReport()' style='padding:6px 14px;background:#000;color:#fff;border:none;border-radius:4px;font-weight:bold'>RUN REPORT</button>";
+
+html += "</div>";
+html += "<div id='dateOptions' style='margin-top:8px'></div>";
   document.getElementById("mainContent").innerHTML = html;
 }
 function runIncomeReport(){
 
   const type = document.getElementById("incomeType").value;
+const selectedProperty = document.getElementById("incomeProperty").value;
+ const mode = document.getElementById("dateMode").value;
 
-  let html = "";
+let fromDate = "";
+let toDate = "";
+
+if(mode === "dates"){
+fromDate = document.getElementById("incomeFrom").value;
+toDate = document.getElementById("incomeTo").value;
+}
+
+if(mode === "month"){
+const m = document.getElementById("incomeMonth").value;
+const y = document.getElementById("incomeYear").value;
+
+const lastDay = new Date(y, m, 0).getDate();
+
+fromDate = y + "-" + String(m).padStart(2,"0") + "-01";
+toDate = y + "-" + String(m).padStart(2,"0") + "-" + lastDay;
+}
+
+if(mode === "year"){
+const y = new Date().getFullYear();
+fromDate = y + "-01-01";
+toDate = y + "-12-31";
+}
+
+if(mode === "lastyear"){
+const y = new Date().getFullYear() - 1;
+fromDate = y + "-01-01";
+toDate = y + "-12-31";
+}
+
+
+
+let html = "";
+ html += "<div style='text-align:center;margin-bottom:20px;font-size:12px'>";
+
+html += "<div style='font-weight:bold'>PROPERTY: "+(selectedProperty==="all"?"ALL PROPERTIES":selectedProperty)+"</div>";
+
+const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+
+let periodText = fromDate + " - " + toDate;
+
+if(mode === "month"){
+periodText = months[parseInt(document.getElementById("incomeMonth").value)-1] + " " + document.getElementById("incomeYear").value;
+}
+
+if(mode === "year"){
+periodText = "YEAR " + new Date().getFullYear();
+}
+
+if(mode === "lastyear"){
+periodText = "YEAR " + (new Date().getFullYear()-1);
+}
+
+html += "<div style='margin-top:5px'>PERIOD: "+periodText+"</div>";
+
+html += "</div>";
+
+let totalPayout = 0;
+let totalAcc = 0;
+let totalCleaning = 0;
+let totalPMC = 0;
 
   if(type === "gri"){
-
-    html += "<table>";
-    html += "<tr><th>PROPERTY</th><th>CHECK-IN / CHECK-OUT</th><th>ACCOMMODATION</th></tr>";
-
-    const ownerExpenses = expenses.filter(e => 
-  e.owner === currentOwner && e.property === "OWNER"
-);
-
-if(ownerExpenses.length > 0){
 
 html += "<div class='property-section'>";
 
 html += "<div class='invoice-header'>";
 html += "<div class='company-info'>";
-html += "<div class='company-name'>OCEAN VACATIONS</div>";
-html += "<div>www.oceanvacationsmb.com</div>";
-html += "<div>oceanvacationsmb@gmail.com</div>";
-html += "<div>843-222-6516</div>";
+html += "<div class='company-name'>OCEAN VACATIONS INC.</div>";
+html += "<div style='font-size:18px'>www.oceanvacationsmb.com</div>";
+html += "<div style='font-size:18px'>oceanvacationsmb@gmail.com</div>";
+html += "<div style='font-size:18px'>843-222-6516</div>";
 html += "</div>";
+
+const today = new Date();
+const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+const todayText = months[today.getMonth()]+" "+today.getDate()+", "+today.getFullYear();
 
 html += "<div class='right-header'>";
-html += "<div class='statement-date'>"+document.getElementById("statementDate").innerHTML+"</div>";
-html += "<div class='period-date'>"+document.getElementById("periodDate").innerHTML+"</div>";
+html += "<div class='statement-date'><strong>STATEMENT DATE: "+todayText+"</strong></div>";
+html += "<div class='period-date'><strong>"+document.getElementById("periodDate").innerText+"</strong></div>";
+html += "</div>";
+   html += "</div>";
+
+const firstRow = csvData[0];
+const propertyAddress = firstRow["PROPERTY ADDRESS"] || "";
+html += "<div style='text-align:center;font-size:18px;font-weight:bold;margin-bottom:25px'>"+propertyAddress+"</div>";
+html += "<div style='margin-top:30px'></div>";
+html += "<table>";
+   
+   html += "<tr><th>CODE</th><th>CHECK-IN / CHECK-OUT</th><th>PAYOUT</th></tr>";
+
+    const ownerExpenses = expenses.filter(e => 
+  e.owner === currentOwner && e.property === "OWNER"
+);
+
+   
+
+if(false){
+ 
+html += "<div class='property-section'>";
+
+html += "<div class='invoice-header'>";
+html += "<div class='company-info'>";
+html += "<div class='company-name'>OCEAN VACATIONS INC.</div>";
+html += "<div style='font-size:18px'>www.oceanvacationsmb.com</div>";
+html += "<div style='font-size:18px'>oceanvacationsmb@gmail.com</div>";
+html += "<div style='font-size:18px'>843-222-6516</div>";
 html += "</div>";
 
+const today = new Date();
+const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+const todayText = months[today.getMonth()]+" "+today.getDate()+", "+today.getFullYear();
+
+html += "<div class='right-header'>";
+html += "<div class='statement-date'>STATEMENT DATE: "+todayText+"</div>";
+html += "<div class='period-date'>"+document.getElementById("periodDate").innerText+"</div>";
 html += "</div>";
 
 html += "<div class='property-title'><span class='property-icon'>💰</span>OWNER CHARGES</div>";
@@ -345,6 +449,103 @@ html += "<td>"+money(e.amount)+"</td>";
 html += "</tr>";
 });
 
+let totalAcc = 0;
+let totalGross = 0;
+
+ 
+ 
+Object.keys(propertyTotals).forEach(prop=>{
+
+if(selectedProperty !== "all" && prop !== selectedProperty) return;
+
+const p = propertyTotals[prop];
+
+p.reservations
+.sort((a,b)=>new Date(a["CHECK-IN DATE"]) - new Date(b["CHECK-IN DATE"]))
+.forEach(r=>{
+
+const checkIn = r["CHECK-IN DATE"];
+
+if(fromDate && checkIn < fromDate) return;
+if(toDate && checkIn > toDate) return;
+
+let a = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
+const commFee = num(r["COMMUNITY FEE"])||0;
+
+a = a - commFee;
+totalGross += a;
+totalAcc += a;
+
+html += "<tr>";
+html += "<td>"+prop+"</td>";
+html += "<td>"+r["CHECK-IN DATE"].split("-")[1]+"/"+r["CHECK-IN DATE"].split("-")[2]+"/"+r["CHECK-IN DATE"].split("-")[0]+" - "+r["CHECK-OUT DATE"].split("-")[1]+"/"+r["CHECK-OUT DATE"].split("-")[2]+"/"+r["CHECK-OUT DATE"].split("-")[0]+"</td>";
+html += "<td>"+money(a)+"</td>";
+html += "</tr>";
+
+});
+
+});
+
+html += "<tr>";
+html += "<td colspan='2' style='font-weight:bold'>TOTAL ACCOMMODATION</td>";
+html += "<td style='font-weight:bold'>"+money(totalAcc)+"</td>";
+html += "</tr>";
+
+Object.keys(propertyTotals).forEach(prop=>{
+
+if(selectedProperty !== "all" && prop !== selectedProperty) return;
+
+const p = propertyTotals[prop];
+
+p.reservations.forEach(r=>{
+
+const checkIn = r["CHECK-IN DATE"];
+
+if(fromDate && checkIn < fromDate) return;
+if(toDate && checkIn > toDate) return;
+
+const g = num(r["TOTAL PAYOUT"]);
+
+totalGross += g;
+
+});
+
+});
+
+html += "<tr>";
+ let totalCleaning = 0;
+
+Object.keys(propertyTotals).forEach(prop=>{
+ let propertyPayoutTotal = 0;
+
+if(selectedProperty !== "all" && prop !== selectedProperty) return;
+
+const p = propertyTotals[prop];
+
+p.reservations.forEach(r=>{
+
+const checkIn = r["CHECK-IN DATE"];
+
+if(fromDate && checkIn < fromDate) return;
+if(toDate && checkIn > toDate) return;
+
+const c = num(r["CLEANING FARE"]) || 0;
+
+totalCleaning += c;
+
+});
+
+});
+
+html += "<tr>";
+html += "<td colspan='2' style='font-weight:bold'>TOTAL CLEANING</td>";
+html += "<td style='font-weight:bold'>"+money(totalCleaning)+"</td>";
+html += "</tr>";
+html += "<td colspan='2' style='font-weight:bold'>TOTAL GROSS PAYOUT</td>";
+ 
+html += "<td style='font-weight:bold'>"+money(totalGross)+"</td>";
+html += "</tr>";
+ 
 html += "</table>";
 
 html += "</div>";
@@ -353,39 +554,118 @@ html += "</div>";
     
     
     Object.keys(propertyTotals).forEach(prop=>{
-      const p = propertyTotals[prop];
+
+if(selectedProperty !== "all" && prop !== selectedProperty) return;
+
+const p = propertyTotals[prop];
+     let propertyPayoutTotal = 0;
 
       p.reservations.forEach(r=>{
+       if(fromDate){
+const checkIn = r["CHECK-IN DATE"];
+if(checkIn < fromDate) return;
+}
 
-        let a = num(r["ACCOMMODATION FARE"]) - num(r["MARKUP"]);
-        const commFee = num(r["COMMUNITY FEE"])||0;
-        a = a - commFee;
+if(toDate){
+const checkIn = r["CHECK-IN DATE"];
+if(checkIn > toDate) return;
+}
 
-        html += "<tr>";
-        html += "<td>"+prop+"</td>";
-        html += "<td>"+r["CHECK-IN DATE"]+" - "+r["CHECK-OUT DATE"]+"</td>";
-        html += "<td>"+money(a)+"</td>";
-        html += "</tr>";
+        let a = num(r["TOTAL PAYOUT"]);
+               
+
+const payout = num(r["TOTAL PAYOUT"]);
+const clean = num(r["CLEANING FARE"]) || 0;
+const acc = payout - clean;
+const pmc = acc * OWNERS[currentOwner].percent;
+
+totalPayout += payout;
+totalAcc += acc;
+totalCleaning += clean;
+totalPMC += pmc;
+       totalGross += payout;
+       if(payout === 0) return;
+
+propertyPayoutTotal += payout;
+
+html += "<tr>";
+html += "<td>"+r["CONFIRMATION CODE"].substring(0,8).toUpperCase()+"</td>";
+html += "<td>"+r["CHECK-IN DATE"].split("-")[1]+"/"+r["CHECK-IN DATE"].split("-")[2]+"/"+r["CHECK-IN DATE"].split("-")[0]+" - "+r["CHECK-OUT DATE"].split("-")[1]+"/"+r["CHECK-OUT DATE"].split("-")[2]+"/"+r["CHECK-OUT DATE"].split("-")[0]+"</td>";html += "<td class='gri-payout'>"+money(payout)+"</td>";
+       html += "</tr>";
       });
-    });
-
+    
+html += "<tr>";
+html += "<td colspan='2' style='text-align:right;font-weight:bold'>TOTAL</td>";
+html += "<td style='font-weight:bold'>"+money(totalGross)+"</td>";
+html += "</tr>";
+   
+   });
     html += "</table>";
 
   } else {
 
     Object.keys(propertyTotals).forEach(prop=>{
-      const p = propertyTotals[prop];
+
+if(selectedProperty !== "all" && prop !== selectedProperty) return;
+    
+     let totalGross = 0;
+
+document.querySelectorAll(".gri-payout").forEach(cell=>{
+    const v = parseFloat(cell.innerText.replace(/[$,]/g,"")) || 0;
+    totalGross += v;
+});
+
+const revenue = document.getElementById("griRevenue");
+if(revenue) revenue.innerText = "GROSS RENTAL REVENUE: " + money(totalGross);
+
+const p = propertyTotals[prop];
 
       html += "<div class='property-section'>";
-      html += "<div class='property-title'>"+prop+"</div>";
-      html += "<div>Accommodation: "+money(p.acc)+"</div>";
-      html += "<div>PMC: "+money(p.pmc)+"</div>";
-      html += "<div>Expenses: "+money(p.expenses)+"</div>";
-      html += "</div>";
+html += "<div class='property-title'>"+prop+"</div>";
+
+p.reservations
+.sort((a,b)=>new Date(a["CHECK-IN DATE"]) - new Date(b["CHECK-IN DATE"]))
+.forEach(r=>{
+
+const checkIn = r["CHECK-IN DATE"];
+const checkOut = r["CHECK-OUT DATE"];
+
+if(fromDate && checkIn < fromDate) return;
+if(toDate && checkIn > toDate) return;
+
+const payout = num(r["TOTAL PAYOUT"]);
+if(payout === 0) return;
+ 
+const clean = num(r["CLEANING FARE"]) || 0;
+const acc = payout - clean;
+
+
+});
+
+html += "</div>";
     });
   }
 
-  document.getElementById("incomeReportResult").innerHTML = html;
+ let summary = "";
+
+summary += "<div class='summary-grid'>";
+summary += "<div class='summary-card'><div class='summary-label'>PAYOUT</div><div class='summary-value'>"+money(totalPayout)+"</div></div>";
+summary += "<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(totalAcc)+"</div></div>";
+summary += "<div class='summary-card'><div class='summary-label'>CLEANING</div><div class='summary-value'>"+money(totalCleaning)+"</div></div>";
+summary += "<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(totalPMC)+"</div></div>";
+summary += "</div>";
+
+html = summary + html;
+
+summary += "<div class='summary-grid'>";
+summary += "<div class='summary-card'><div class='summary-label'>PAYOUT</div><div class='summary-value'>"+money(totalPayout)+"</div></div>";
+summary += "<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(totalAcc)+"</div></div>";
+summary += "<div class='summary-card'><div class='summary-label'>CLEANING</div><div class='summary-value'>"+money(totalCleaning)+"</div></div>";
+summary += "<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(totalPMC)+"</div></div>";
+summary += "</div>";
+
+html = summary + html;
+  document.getElementById("mainContent").innerHTML = html;
 }
 function showHistory(){
 
@@ -415,6 +695,12 @@ function show1099(){
   document.getElementById("reportTitle").textContent = "1099 REPORT";
 
   let html = "<div class='summary-title'>1099 SUMMARY</div>";
+ let reportProperty = selectedProperty === "all" ? "ALL PROPERTIES" : selectedProperty;
+
+html += "<div style='margin-bottom:15px;font-size:11px;color:#666'>";
+html += "<strong>PROPERTY:</strong> "+reportProperty+"<br>";
+html += "<strong>PERIOD:</strong> "+document.getElementById("periodDate").innerText;
+html += "</div>";
   html += "<div class='summary-grid'>";
 
   html += "<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>" + money(masterTotals.acc) + "</div></div>";
@@ -443,8 +729,8 @@ function loadData(){
     return r.json();
   })
   .then(fileData=>{
-    const contentB64=fileData.content;
-    const contentDecoded=atob(contentB64);
+    const contentB64=fileData.content.replace(/\n/g,"");
+    const contentDecoded=atob(contentB64.replace(/\n/g,""));
     const data=JSON.parse(contentDecoded);
     
     gitHubData=data;
@@ -469,7 +755,7 @@ function init(){
     buildYears();
   }
   updateVendorDropdown();
-  document.getElementById("mainContent").innerHTML="<div style='text-align:center;padding:40px;color:#666'>Ready to use! Select an owner and upload CSV to begin.</div>";
+  document.getElementById("mainContent").innerHTML="";
 }
 
 function buildOwners(){
@@ -917,8 +1203,9 @@ function updateHeaderDates(){
   let nextMonth=month+1,nextYear=year;
   if(nextMonth>12){nextMonth=1;nextYear++;}
   document.getElementById("reportTitle").textContent="RESERVATION REPORT";
-  document.getElementById("statementDate").innerHTML="STATEMENT DATE:<br><strong>"+months[nextMonth-1]+" 1ST "+nextYear+"</strong>";
-  document.getElementById("periodDate").innerHTML="PERIOD: "+months[month-1]+" 1ST - "+last+"TH "+year;
+  document.getElementById("statementDate").innerHTML="STATEMENT DATE:<br><strong>"+months[nextMonth-1]+" 1 "+nextYear+"</strong>";
+  document.getElementById("periodDate").innerHTML="PERIOD: "+months[month-1]+" 1 - "+last+" "+year;
+  document.getElementById("periodUnderTitle").innerText="";
   document.getElementById("ownerTitle").textContent=currentOwner.toUpperCase();
   
   const t=OWNERS[currentOwner];
@@ -960,10 +1247,11 @@ masterTotals.owner -= ownerExpTotal;
   Object.keys(byProp).forEach(prop=>{
     let gross=0,acc=0,clean=0,pmc=0,websiteFee=0,totalTax=0;
     byProp[prop].forEach(row=>{
-      const g=num(row["TOTAL PAYOUT"]);
-      let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
-      const c=(row["STATUS"]||"").toLowerCase().includes("cancel")?0:num(row["CLEANING FARE"]);
-      const p=a*t.percent;
+      const g = num(row["TOTAL PAYOUT"]);
+const c = (row["STATUS"]||"").toLowerCase().includes("cancel") ? 0 : num(row["CLEANING FARE"]);
+let a = g - c;
+const p = a * t.percent;
+     
       let w=0;
 if(t.type==="draft" && g>0){
   const platform=(row["PLATFORM"]||"").toLowerCase();
@@ -1025,25 +1313,40 @@ if(source.includes("website")){
   
 
 function displayStatement(){
-  const t=OWNERS[currentOwner];
+document.querySelectorAll(".invoice-header").forEach(el=>el.style.display="none");
+document.getElementById("reportTitle").style.display="";
+document.getElementById("ownerTitle").style.display="";
+document.getElementById("ownerDetails").style.display="";
+document.getElementById("periodDate").style.display="";
+
+const t=OWNERS[currentOwner];
+ 
   const type=t.type;
   let html="<div class='action-buttons'><button class='copy-link-btn' onclick='downloadPDF()'>📄 DOWNLOAD PDF</button></div>";
-  html+="<div class='summary-title'>FINANCIAL SUMMARY</div><div class='summary-grid'>";
-  if(type==="draft"){
-    html+="<div class='summary-card'><div class='summary-label'>GROSS PAYOUT</div><div class='summary-value'>"+money(masterTotals.gross)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>CLEANING FEE</div><div class='summary-value'>"+money(masterTotals.clean)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>WEBSITE/VRBO FEE </div><div class='summary-value'>"+money(masterTotals.websiteFee)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>PMC ("+(t.percent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>AMOUNT DUE</div><div class='summary-value'>"+money(masterTotals.draft)+"</div></div>";
-  }else{
-    html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(masterTotals.acc)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(masterTotals.pmc)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(masterTotals.expenses)+"</div></div>";
-    html+="<div class='summary-card'><div class='summary-label'>OWNER PAYOUT</div><div class='summary-value'>"+money(masterTotals.owner)+"</div></div>";
-  }
-  html+="</div>";
+
+html+="<div style='max-width:750px;margin:25px auto;padding:20px;border:2px solid #000;background:#fff;border-radius:5px'>";
+html+="<div style='font-size:18px;font-weight:bold;text-align:center;margin-bottom:15px'>SUMMARY</div>";
+
+if(type==="draft"){
+
+html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>PAYOUT</span><span>"+money(masterTotals.gross)+"</span></div>";
+html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>CLEANING FEE</span><span>"+money(masterTotals.clean)+"</span></div>";
+html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>WEBSITE / VRBO FEE</span><span>"+money(masterTotals.websiteFee)+"</span></div>";
+html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>EXPENSES</span><span>"+money(masterTotals.expenses)+"</span></div>";
+html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>PMC ("+(t.percent*100).toFixed(2)+"%)</span><span>"+money(masterTotals.pmc)+"</span></div>";
+html+="<div style='display:flex;justify-content:space-between;padding:10px 0;font-weight:bold'><span>AMOUNT DUE</span><span>"+money(masterTotals.draft)+"</span></div>";
+
+}else{
+
+html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>PMC</span><span>"+money(masterTotals.pmc)+"</span></div>";
+html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>EXPENSES</span><span>"+money(masterTotals.expenses)+"</span></div>";
+html+="<div style='display:flex;justify-content:space-between;padding:10px 0;font-weight:bold'><span>OWNER PAYOUT</span><span>"+money(masterTotals.owner)+"</span></div>";
+
+}
+
+html+="</div>";
 
 const ownerExpenses = expenses.filter(e =>
 e.owner === currentOwner && e.property === "OWNER"
@@ -1054,7 +1357,7 @@ if(ownerExpenses.length>0){
 html+="<div class='property-section' style='page-break-before:always'>";
 html+="<div class='invoice-header'>";
 html+="<div class='company-info'>";
-html+="<div class='company-name'>OCEAN VACATIONS</div>";
+html+="<div class='company-name'>OCEAN VACATIONS INC.</div>";
 html+="<div>www.oceanvacationsmb.com</div>";
 html+="<div>oceanvacationsmb@gmail.com</div>";
 html+="<div>843-222-6516</div>";
@@ -1144,10 +1447,10 @@ html+="</div>";
   : (p.owner||0);
     const exp=expenses.filter(e=>e.property===prop&&e.owner===currentOwner);
     html+="<div class='property-section' style='page-break-before:always'>";
-
+   
 html+="<div class='invoice-header'>";
 html+="<div class='company-info'>";
-html+="<div class='company-name'>OCEAN VACATIONS</div>";
+html+="<div class='company-name'>OCEAN VACATIONS INC.</div>";
 html+="<div>www.oceanvacationsmb.com</div>";
 html+="<div>oceanvacationsmb@gmail.com</div>";
 html+="<div>843-222-6516</div>";
@@ -1184,14 +1487,14 @@ html+="<div class='property-title'><span class='property-icon'>🏠</span>"+prop
     html+="<div style='margin-top:15px'><div class='section-title'>RESERVATIONS</div><table style='margin-top:10px'>";
    if(type==="draft"){
 
-html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>PAYOUT</th><th>ACCOMMODATION</th><th>PMC</th><th>CLEANING</th><th>WEBSITE/VRBO FEE</th><th>AMOUNT DUE</th></tr>";
-
-p.reservations.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"])).forEach(row=>{
-
-let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
-const g=num(row["TOTAL PAYOUT"]);
-const c=(row["STATUS"]||"").toLowerCase().includes("cancel")?0:num(row["CLEANING FARE"]);
-const pm=a*t.percent;
+html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>PAYOUT</th><th>ACCOMMODATION</th><th>PMC</th><th>CLEANING</th><th>WEBSITE/VRBO FEE</th><th>AMOUNT DUE</th><th class='no-print'>ACTION</th></tr>";
+    
+p.reservations.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"])).forEach((row,i)=>{
+ 
+const g = num(row["TOTAL PAYOUT"]);
+const c = (row["STATUS"]||"").toLowerCase().includes("cancel") ? 0 : num(row["CLEANING FARE"]);
+let a = g - c;
+const pm = a * t.percent;
 
 let w=0;
 const platform=(row["PLATFORM"]||"").toLowerCase();
@@ -1212,8 +1515,18 @@ const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).j
 
 if(g===0)return;
 
-html+="<tr><td>"+row["CONFIRMATION CODE"].substring(0,8).toUpperCase()+"</td><td>"+checkin+"-"+checkout+"</td><td>"+((source=="website" ? "Website" : source=="manual_direct" ? "Website Old" : source=="manual_vrbo" || source=="vrbo_manual" ? "VRBO OLD" : row["PLATFORM"]) + ((row["STATUS"]||"").toLowerCase().includes("cancel") ? " Cancelled" : ""))+"</td><td>"+money(g)+"</td><td>"+money(source=="website" ? a+num(row["MARKUP"]) : a)+"</td><td>"+money(pm)+"</td><td>"+money(c)+"</td><td>"+money(w)+"</td><td>"+money(pm+c+w)+"</td></tr>";
-
+html+="<tr data-prop='"+prop+"' data-row='"+i+"'>";
+html+="<td>"+row["CONFIRMATION CODE"].substring(0,8).toUpperCase()+"</td>";
+html+="<td>"+checkin+"-"+checkout+"</td>";
+html+="<td>"+((source=="website" ? "Website" : source=="manual_direct" ? "Website Old" : source=="manual_vrbo" || source=="vrbo_manual" ? "VRBO OLD" : row["PLATFORM"]) + ((row["STATUS"]||"").toLowerCase().includes("cancel") ? " Cancelled" : ""))+"</td>";
+html+="<td>"+money(g)+"</td>";
+html+="<td class='acc' data-val='"+a+"'>"+money(a)+"</td>";
+html+="<td>"+money(pm)+"</td>";
+html+="<td class='clean' data-val='"+c+"'>"+money(c)+"</td>";
+html+="<td>"+money(w)+"</td>";
+html+="<td>"+money(pm+c+w)+"</td>";
+html+="<td class='no-print'><button class='editRow'>Edit</button></td>";
+html+="</tr>";
 });
 
 }else{
@@ -1262,7 +1575,7 @@ html+="</tr>";
 html+="</div>";
   let invoices = exp.filter(e => e.invoice);
 if(invoices.length>0){
-html+="<div style='text-align:center;page-break-before:avoid'>";
+html+="<div style='text-align:center'>";
  invoices.forEach(e=>{
 
 html+="<div style='text-align:center'>";
@@ -1312,6 +1625,28 @@ document.getElementById("mainContent").innerHTML=html;
 }
 
 function generateSummary(){
+
+document.getElementById("invoiceHeader").style.display="none";
+document.getElementById("reportTitle").style.display="none";
+document.getElementById("ownerTitle").style.display="none";
+document.getElementById("ownerDetails").style.display="none";
+document.getElementById("periodDate").style.display="none";
+ 
+     
+  const t=OWNERS[currentOwner];
+  const type=t.type;
+  const salesFee=masterTotals.pmc*(t.salesFeePercent/100);
+  
+  let html="<div class='action-buttons'><button class='back-btn' onclick='generateStatement()'>← BACK</button><button class='print-btn' onclick='window.print()'>🖨️ PRINT</button></div>";
+  html += "<div style='text-align:center;margin:20px 0'>";
+
+  html += "<div style='font-size:22px;font-weight:bold'>"+currentOwner.toUpperCase()+"</div>";
+
+  html += "<div style='font-size:14px;margin-top:5px'>TYPE: "+t.type.toUpperCase()+"</div>";
+
+  html += "<div style='font-size:14px'>COMMISSION: "+(t.percent*100).toFixed(2)+"%</div>";
+  html += "<div style='font-size:14px;margin-top:5px'>"+document.getElementById("periodDate").innerText+"</div>";
+ 
   if(!csvData||csvData.length===0)return alert("Generate statement first");
   const month=parseInt(document.getElementById("monthSelect").value);
   const year=parseInt(document.getElementById("yearSelect").value);
@@ -1319,15 +1654,9 @@ function generateSummary(){
   const last=new Date(year,month,0).getDate();
   let nextMonth=month+1,nextYear=year;
   if(nextMonth>12){nextMonth=1;nextYear++;}
-  document.getElementById("reportTitle").textContent="SUMMARY REPORT";
-  document.getElementById("statementDate").innerHTML="STATEMENT DATE:<br><strong>"+months[nextMonth-1]+" 1ST "+nextYear+"</strong>";
-  document.getElementById("periodDate").innerHTML="PERIOD: "+months[month-1]+" 1ST - "+last+"TH "+year;
+
   
-  const t=OWNERS[currentOwner];
-  const type=t.type;
-  const salesFee=masterTotals.pmc*(t.salesFeePercent/100);
-  
-  let html="<div class='action-buttons'><button class='back-btn' onclick='generateStatement()'>← BACK</button><button class='print-btn' onclick='window.print()'>🖨️ PRINT</button></div>";
+  html += "</div>";
   
 if(type==="draft"){
     html+="<div style='margin:20px auto;padding:15px;border:1px solid #ddd;background:#fff;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#000;margin-bottom:10px;text-transform:uppercase'>💰 DRAFT BREAKDOWN</div><div style='text-align:left;color:#000'>";
@@ -1446,7 +1775,24 @@ function closeAll(){
   document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));
 }
 
+function downloadIncomePDF(){
+
+const element=document.getElementById("incomeReportResult");
+
+const opt={
+margin:0.3,
+filename:"income-report.pdf",
+image:{type:'jpeg',quality:1},
+html2canvas:{scale:2,useCORS:true},
+jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
+};
+
+html2pdf().set(opt).from(element).save();
+
+}
+
 function downloadPDF(){
+ 
 
 const btn=document.querySelector(".action-buttons");
 
@@ -1456,30 +1802,93 @@ actionCols.forEach(el=>el.style.display="none");
 document.querySelectorAll(".btn-danger").forEach(b=>b.style.display="none");
 if(btn) btn.style.display="none";
 
+document.getElementById("invoiceHeader").style.display="";
 const element=document.getElementById("content");
+ element.style.background="#fff";
 
 const opt={
 margin:0.3,
 filename:currentOwner+"-statement.pdf",
 image:{type:'jpeg',quality:1},
-html2canvas:{scale:3,useCORS:true},
+html2canvas:{scale:2,useCORS:true},
 pagebreak:{mode:['css','legacy']},
 jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
 };
   
-html2pdf().set(opt).from(element).save().then(()=>{
-
+setTimeout(function(){html2pdf().set(opt).from(element).save().then(()=>{
+ 
 if(btn) btn.style.display="flex";
 
 actionCols.forEach(el=>el.style.display="");
 
 document.querySelectorAll(".btn-danger").forEach(b=>b.style.display="inline-block");
 
-});
+document.getElementById("invoiceHeader").style.display="none";
+});},800);
 
 }
-  
+
+ function incomeTypeChanged(){
+
+const type = document.getElementById("incomeType").value;
+const prop = document.getElementById("incomeProperty");
+
+if(type === "gri"){
+
+if(prop.querySelector("option[value='all']")){
+prop.querySelector("option[value='all']").remove();
+}
+
+}else{
+
+if(!prop.querySelector("option[value='all']")){
+prop.insertAdjacentHTML("afterbegin","<option value='all'>ALL PROPERTIES</option>");
+}
+
+}
+
+}
+
+ function updateDateOptions(){
+
+const mode = document.getElementById("dateMode").value;
+const box = document.getElementById("dateOptions");
+
+let html = "";
+
+if(mode === "dates"){
+
+html += "<label style='font-weight:bold'>FROM</label>";
+html += "<input type='date' id='incomeFrom' style='margin-left:10px;margin-right:20px;width:160px'>";
+
+html += "<label style='font-weight:bold'>TO</label>";
+html += "<input type='date' id='incomeTo' style='margin-left:10px;width:160px'>";
+
+}
+
+if(mode === "month"){
+
+html += "<label style='font-weight:bold'>MONTH</label>";
+html += "<select id='incomeMonth' style='margin-left:10px;margin-right:20px;width:150px'>";
+
+const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+
+months.forEach((m,i)=>{
+html += "<option value='"+(i+1)+"'>"+m+"</option>";
+});
+
+html += "</select>";
+
+html += "<label style='font-weight:bold'>YEAR</label>";
+html += "<input type='number' id='incomeYear' value='"+new Date().getFullYear()+"' style='margin-left:10px;width:100px'>";
+
+}
+
+box.innerHTML = html;
+
+}
 loadData();
+ 
  function deleteExpenseLocal(id){
 
 if(!confirm("Delete expense?")) return;
@@ -1501,8 +1910,73 @@ processData();
 displayStatement();
 
 });
+  }
+document.addEventListener("click",function(e){
+
+if(e.target.classList.contains("editRow")){
+
+const row = e.target.closest("tr");
+
+const acc = row.querySelector(".acc");
+const clean = row.querySelector(".clean");
+
+const accVal = acc.dataset.val;
+const cleanVal = clean.dataset.val;
+
+acc.innerHTML = "<input class='accInput' type='number' value='"+accVal+"' style='width:90px'>";
+clean.innerHTML = "<input class='cleanInput' type='number' value='"+cleanVal+"' style='width:90px'>";
+
+e.target.innerText="Save";
+e.target.classList.remove("editRow");
+e.target.classList.add("saveRow");
 
 }
+
+else if(e.target.classList.contains("saveRow")){
+
+const row = e.target.closest("tr");
+
+const accInput = row.querySelector(".accInput");
+const cleanInput = row.querySelector(".cleanInput");
+
+const acc = row.querySelector(".acc");
+const clean = row.querySelector(".clean");
+
+const accVal = Number(accInput.value)||0;
+const cleanVal = Number(cleanInput.value)||0;
+
+ if(accVal < 0 || cleanVal < 0) return;
+
+const prop = row.dataset.prop;
+const index = parseInt(row.dataset.row);
+
+const r = propertyTotals[prop].reservations[index];
+
+const oldAcc = num(r["TOTAL PAYOUT"]) - num(r["CLEANING FARE"]);
+const oldClean = num(r["CLEANING FARE"]);
+
+r["CLEANING FARE"] = cleanVal;
+acc.dataset.val = accVal;
+clean.dataset.val = cleanVal;
+ 
+propertyTotals[prop].acc += (accVal - oldAcc);
+propertyTotals[prop].clean += (cleanVal - oldClean);
+
+acc.innerHTML="$"+accVal.toFixed(2);
+clean.innerHTML="$"+cleanVal.toFixed(2);
+row.style.background="#fff8cc";
+
+e.target.innerText="Edit";
+e.target.classList.remove("saveRow");
+e.target.classList.add("editRow");
+
+processData();
+displayStatement();
+
+}
+
+});
+  
 </script>
 </body>
 </html>
