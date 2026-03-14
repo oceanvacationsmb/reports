@@ -1183,21 +1183,16 @@ function setupDropbox(){
 }
 
 function generateStatement(){
-
-if(!currentOwner)return;
-
-fetch("https://guesty-api-5jnz.onrender.com/reservations")
-.then(r=>r.json())
-.then(data=>{
-
-csvData = data.results || data
-
-updateHeaderDates()
-processData()
-displayStatement()
-
-})
-
+  const file=document.getElementById("csvFile").files[0];
+  if(!file||!currentOwner)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    csvData=Papa.parse(e.target.result,{header:true,skipEmptyLines:true}).data;
+    updateHeaderDates();
+    processData();
+    displayStatement();
+  };
+  reader.readAsText(file);
 }
 
 function updateHeaderDates(){
