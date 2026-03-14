@@ -1195,29 +1195,41 @@ const reportUrl = OWNERS[currentOwner].guestyReportUrl;
 
 console.log("REPORT URL:", reportUrl);
 
-fetch(reportUrl)
-.then(r=>r.text())
-.then(html=>{
+let skip = 0;
+const limit = 1000;
+let allResults = [];
 
-const match = html.match(/window\.__INITIAL_STATE__\s*=\s*(\{.*?\});/s);
+function loadPage(){
 
-if(!match){
-console.error("Guesty data not found in report page");
+fetch(
+reportUrl + (reportUrl.includes("?") ? "&" : "?") + `skip=${skip}&limit=${limit}`
+)
+.then(r=>r.json())
+.then(data=>{
+
+if(!data.results || data.results.length === 0){
+
+console.log("TOTAL RESERVATIONS LOADED:", allResults.length);
+
+processReservations(allResults);
 return;
+
 }
 
-const json = JSON.parse(match[1]);
+allResults = allResults.concat(data.results);
 
-const results = json.report?.results || [];
+skip += limit;
 
-console.log("ROWS LOADED:", results.length);
-
-processReservations(results);
+loadPage();
 
 })
 .catch(err=>{
-console.error("Fetch error:",err);
+console.error("Fetch error:", err);
 });
+
+}
+
+loadPage();
 
 }
  
