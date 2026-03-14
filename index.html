@@ -1201,6 +1201,7 @@ Authorization: apiKey
 .then(data=>{
 
 console.log(data);
+ onsole.log("REAL FIRST RESULT:", data.results[0]);
 
 csvData = data.results.map(r => {
  console.log("FIRST ROW", csvData[0])
