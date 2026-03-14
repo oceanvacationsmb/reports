@@ -1182,17 +1182,18 @@ function setupDropbox(){
   if(token)localStorage.setItem("dropbox_token",token.trim());
 }
 
-function generateStatement(){
-  const file=document.getElementById("csvFile").files[0];
-  if(!file||!currentOwner)return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    csvData=Papa.parse(e.target.result,{header:true,skipEmptyLines:true}).data;
-    updateHeaderDates();
-    processData();
-    displayStatement();
-  };
-  reader.readAsText(file);
+async function generateStatement(){
+  if(!currentOwner) return;
+
+  const reportUrl = OWNERS[currentOwner].guestyReportUrl;
+
+  const res = await fetch(reportUrl);
+  const text = await res.text();
+
+  console.log("FIRST 1000 CHARS:");
+  console.log(text.slice(0,1000));
+
+  document.getElementById("mainContent").innerHTML = text;
 }
 
 function updateHeaderDates(){
