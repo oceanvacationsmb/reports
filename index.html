@@ -1203,6 +1203,7 @@ Papa.parse(csv,{
 header:true,
 skipEmptyLines:true,
 complete:function(result){
+ console.log("FIRST ROW RAW:", result.data[0]);
 
 csvData = result.data;
 
