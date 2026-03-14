@@ -706,7 +706,7 @@ html += "</div>";
   html += "<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>" + money(masterTotals.acc) + "</div></div>";
   html += "<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>" + money(masterTotals.pmc) + "</div></div>";
   html += "<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>" + money(masterTotals.expenses) + "</div></div>";
-  html += "<div class='summary-card'><div class='summary-label' >NET TO OWNER</div><div class='summary-value'>" + money(masterTotals.owner) + "</div></div>";
+  html += "<div class='summary-card'<div class='summary-label' >NET TO OWNER</div><div class='summary-value'>" + money(masterTotals.owner) + "</div></div>";
 
   html += "</div>";
 
@@ -1159,11 +1159,7 @@ function setupToken(){
   localStorage.setItem("github_token",githubToken);
   
   fetch("https://api.github.com/user",{headers:{"Authorization":"token "+githubToken}})
-   .then(r=>r.text())
-.then(data=>{
-console.log(data);
-return JSON.parse(data);
-})
+    .then(r=>r.json())
     .then(u=>{
       if(u.message){
         alert("❌ Invalid token");
@@ -1185,131 +1181,19 @@ function setupDropbox(){
   const token=prompt("DROPBOX TOKEN:");
   if(token)localStorage.setItem("dropbox_token",token.trim());
 }
-let apiKey = localStorage.getItem("guesty_api_key") || "";
 
 function generateStatement(){
-
-if(!currentOwner) return;
-
-const reportUrl = OWNERS[currentOwner].guestyReportUrl;
-
-console.log("REPORT URL:", reportUrl);
-
-fetch(reportUrl)
-.then(r=>r.text())
-.then(csv=>{
-
-Papa.parse(csv,{
-header:true,
-skipEmptyLines:true,
-complete:function(result){
-
-csvData = result.data;
-
-console.log("ROWS LOADED:", csvData.length);
-
-updateHeaderDates();
-processData();
-displayStatement();
-
+  const file=document.getElementById("csvFile").files[0];
+  if(!file||!currentOwner)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    csvData=Papa.parse(e.target.result,{header:true,skipEmptyLines:true}).data;
+    updateHeaderDates();
+    processData();
+    displayStatement();
+  };
+  reader.readAsText(file);
 }
-});
-
-})
-.catch(err=>{
-console.error("Fetch error:",err);
-});
-
-}
-
-function processReservations(results){
-
-console.log("REAL FIRST RESULT:", results[0]);
-
-csvData = results.map(r => {
-
-const invoiceItems = r["money.invoiceItems"]?.children || [];
-
-let cityTax = 0;
-let stateTax = 0;
-let countyTax = 0;
-let occupancyTax = 0;
-
-invoiceItems.forEach(i=>{
-
-const name = (i.title || "").toLowerCase();
-const val = Number(i.value) || 0;
-
-/* STATE */
-if(name.includes("state"))
-stateTax += val;
-
-/* COUNTY */
-else if(name.includes("county") || name.includes("horry"))
-countyTax += val;
-
-/* CITY / MUNICIPAL */
-else if(
-name.includes("city") ||
-name.includes("mb") ||
-name.includes("north myrtle") ||
-name.includes("surfside")
-)
-cityTax += val;
-
-/* OCCUPANCY / ACCOMMODATIONS */
-else if(
-name.includes("occupancy") ||
-name.includes("accommodation") ||
-name.includes("tourism")
-)
-occupancyTax += val;
-
-});
-
-return {
-
-"CHECK-IN DATE": r.checkInDate?.value || "",
-"CHECK-OUT DATE": r.checkOutDate?.value || "",
-
-"LISTING'S NICKNAME": r["listing.nickname"]?.children || "",
-
-"TOTAL PAYOUT": r["money.hostPayout"]?.value || 0,
-
-"ACCOMMODATION FARE": r["money.fareAccommodation"]?.value || 0,
-
-"CLEANING FARE": r["money.fareCleaning"]?.value || 0,
-
-"PLATFORM": r["integration.platform"]?.children || "",
-
-"CONFIRMATION CODE": r.confirmationCode?.children || "",
-
-"STATUS": r.status?.children || "",
-
-"MARKUP": r["money.invoiceItems.MAR"]?.value || 0,
-
-"CHANNEL COMMISSION": r["money.hostServiceFee"]?.value || 0,
-
-"TAXES": r["money.totalTaxes"]?.value || 0,
-
-"CITY TAX": cityTax,
-"STATE TAX": stateTax,
-"COUNTY TAX": countyTax,
-"OCCUPANCY TAX": occupancyTax
-
-};
-
-});
-
-console.log("FIRST ROW", csvData[0]);
-
-updateHeaderDates();
-processData();
-displayStatement();
-
-}
-
- 
 
 function updateHeaderDates(){
   const month=parseInt(document.getElementById("monthSelect").value);
@@ -1846,7 +1730,7 @@ municipalities.forEach(m=>{
 if(propertySettings[prop] && propertySettings[prop][m]) muni.push(m);
 });
 
-const reportAmount=payoutTotal;
+const reportAmount=payoutTotal-taxTotal;
 
 taxHtml+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'>";
 taxHtml+="<span>"+prop+" ("+muni.join(", ")+")</span>";
@@ -2026,7 +1910,7 @@ processData();
 displayStatement();
 
 });
-  } 
+  }
 document.addEventListener("click",function(e){
 
 if(e.target.classList.contains("editRow")){
