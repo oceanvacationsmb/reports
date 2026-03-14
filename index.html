@@ -1187,13 +1187,38 @@ async function generateStatement(){
 
   const reportUrl = OWNERS[currentOwner].guestyReportUrl;
 
-  const res = await fetch(reportUrl);
-  const text = await res.text();
+  try{
+    const res = await fetch(reportUrl);
+    const data = await res.json();
 
-  console.log("FIRST 1000 CHARS:");
-  console.log(text.slice(0,1000));
+    console.log("RAW DATA:", data);
 
-  document.getElementById("mainContent").innerHTML = text;
+    const rows = Array.isArray(data) ? data : (data.results || data.data || []);
+
+    csvData = rows.map(r => ({
+      "CHECK-IN DATE": r.checkInDate?.value || "",
+      "CHECK-OUT DATE": r.checkOutDate?.value || "",
+      "LISTING'S NICKNAME": r["listing.nickname"]?.children || "",
+      "TOTAL PAYOUT": r["money.hostPayout"]?.value || 0,
+      "ACCOMMODATION FARE": r["money.fareAccommodation"]?.value || 0,
+      "CLEANING FARE": r["money.fareCleaning"]?.value || 0,
+      "PLATFORM": r.source?.children || "",
+      "CONFIRMATION CODE": r.confirmationCode?.children || "",
+      "STATUS": r.status?.children || "",
+      "PROPERTY ADDRESS": r["customFields.68e44b138e7b460011d90661"]?.children || ""
+    }));
+
+    console.log("ROWS LOADED:", csvData.length);
+    console.log("FIRST ROW:", csvData[0]);
+
+    updateHeaderDates();
+    processData();
+    displayStatement();
+
+  }catch(err){
+    console.error("LOAD ERROR:", err);
+    alert("Failed loading Guesty data");
+  }
 }
 
 function updateHeaderDates(){
