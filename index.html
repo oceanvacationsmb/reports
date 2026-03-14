@@ -1199,18 +1199,9 @@ let allResults = [];
 function loadPage(){
 
 fetch(
-reportUrl + (reportUrl.includes("?") ? "&" : "?") + `skip=${skip}&limit=${limit}`,
-{
-headers:{
-Authorization:"Bearer YOUR_API_KEY"
-}
-}
+reportUrl + (reportUrl.includes("?") ? "&" : "?") + `skip=${skip}&limit=${limit}`
 )
-.then(r=>r.text())
-.then(data=>{
-console.log(data);
-return JSON.parse(data);
-})
+.then(r=>r.json())
 .then(data=>{
 
 if(!data.results || data.results.length === 0){
@@ -1230,8 +1221,6 @@ loadPage();
 });
 
 }
-
-loadPage();
 
 function processReservations(results){
 
