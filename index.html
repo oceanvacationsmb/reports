@@ -1196,32 +1196,58 @@ const reportUrl = OWNERS[currentOwner].guestyReportUrl;
 console.log("REPORT URL:", reportUrl);
 
 fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(reportUrl))
-.then(r => r.text())
-.then(html => {
+.then(function(r){
+return r.text();
+})
+.then(function(html){
 
-const match = html.match(/window\.__INITIAL_STATE__\s*=\s*(\{.*?\});/s);
+/* extract Guesty data from page */
+const match = html.match(/window\.__INITIAL_STATE__\s*=\s*(\{[\s\S]*?\});/);
 
 if(!match){
 console.error("Report data not found in page");
+console.log("PAGE CONTENT SAMPLE:", html.substring(0,500));
 return;
 }
 
-const json = JSON.parse(match[1]);
+/* parse JSON safely */
+let json;
+try{
+json = JSON.parse(match[1]);
+}catch(e){
+console.error("JSON parse failed:", e);
+return;
+}
 
-const results = json.report?.results || [];
+/* locate reservations array */
+let results = [];
+
+if(json.report && json.report.results){
+results = json.report.results;
+}
+else if(json.results){
+results = json.results;
+}
+else if(json.data && json.data.results){
+results = json.data.results;
+}
 
 console.log("ROWS LOADED:", results.length);
 
+if(!results.length){
+console.error("No reservation data found in report");
+return;
+}
+
+/* send to existing mapper */
 processReservations(results);
 
 })
-.catch(err=>{
+.catch(function(err){
 console.error("Fetch error:", err);
 });
 
 }
-
-};
 
 function processReservations(results){
 
