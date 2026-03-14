@@ -1183,16 +1183,24 @@ function setupDropbox(){
 }
 
 function generateStatement(){
-  const file=document.getElementById("csvFile").files[0];
-  if(!file||!currentOwner)return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    csvData=Papa.parse(e.target.result,{header:true,skipEmptyLines:true}).data;
-    updateHeaderDates();
-    processData();
-    displayStatement();
-  };
-  reader.readAsText(file);
+
+if(!currentOwner)return;
+
+fetch(OWNERS[currentOwner].guestyReportUrl,{headers:{
+Authorization:"8a32863cba1cd5066ef2c40ddd064ccb591c4111d70c650b75bcff6f6bab955c7504394415775586795e2f7408cb61b12277841485f5dc0b65b22b32a31ce7c3"
+}
+})
+.then(r=>r.json())
+.then(data=>{
+
+csvData=data.results;
+
+updateHeaderDates();
+processData();
+displayStatement();
+
+});
+
 }
 
 function updateHeaderDates(){
