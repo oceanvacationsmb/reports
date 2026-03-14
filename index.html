@@ -1193,45 +1193,46 @@ if(!currentOwner) return;
 
 const reportUrl = OWNERS[currentOwner].guestyReportUrl;
 
-const apiKey = reportUrl.split("apiKey=")[1];
+console.log("REPORT URL:", reportUrl);
 
-console.log("API KEY:", apiKey);
+// create hidden iframe
+let frame = document.getElementById("guestyFrame");
 
-let skip = 0;
-const limit = 1000;
-let allResults = [];
+if(!frame){
+frame = document.createElement("iframe");
+frame.id = "guestyFrame";
+frame.style.display = "none";
+document.body.appendChild(frame);
+}
 
-function loadPage(){
+frame.onload = function(){
 
-fetch(
-`https://report.guesty.com/api/reports/reservations?apiKey=${apiKey}&skip=${skip}&limit=${limit}`
-)
-.then(r=>r.json())
-.then(data=>{
+try{
 
-if(!data.results || data.results.length === 0){
+const html = frame.contentDocument.documentElement.innerHTML;
 
-console.log("TOTAL RESERVATIONS LOADED:", allResults.length);
+const match = html.match(/window\.__INITIAL_STATE__\s*=\s*(\{.*?\});/s);
 
-processReservations(allResults);
+if(!match){
+console.error("Report data not found in page");
 return;
-
 }
 
-allResults = allResults.concat(data.results);
+const json = JSON.parse(match[1]);
 
-skip += limit;
+const results = json.report?.results || [];
 
-loadPage();
+console.log("ROWS LOADED:", results.length);
 
-})
-.catch(err=>{
-console.error("Fetch error:",err);
-});
+processReservations(results);
 
+}catch(e){
+console.error("Iframe parse error:", e);
 }
 
-loadPage();
+};
+
+frame.src = reportUrl;
 
 }
  
