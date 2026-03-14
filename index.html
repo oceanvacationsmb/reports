@@ -1200,11 +1200,12 @@ let allResults = [];
 
 function loadPage(){
 
-fetch(
-reportUrl + (reportUrl.includes("?") ? "&" : "?") + `skip=${skip}&limit=${limit}`
-)
-.then(r=>r.json())
-.then(data=>{
+fetch("https://open-api.guesty.com/v1/reservations?skip="+skip+"&limit="+limit,{
+headers:{
+"Authorization":"Bearer "+apiKey,
+"Accept":"application/json"
+}
+})
 
 if(!data.results || data.results.length === 0){
 
