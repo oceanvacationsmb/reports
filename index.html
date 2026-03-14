@@ -1193,7 +1193,9 @@ if(!currentOwner) return;
 
 const reportUrl = OWNERS[currentOwner].guestyReportUrl;
 
-console.log("REPORT URL:", reportUrl);
+const apiKey = reportUrl.split("apiKey=")[1];
+
+console.log("API KEY:", apiKey);
 
 let skip = 0;
 const limit = 1000;
@@ -1202,20 +1204,10 @@ let allResults = [];
 function loadPage(){
 
 fetch(
-reportUrl + (reportUrl.includes("?") ? "&" : "?") + `skip=${skip}&limit=${limit}`
+`https://report.guesty.com/api/reports/reservations?apiKey=${apiKey}&skip=${skip}&limit=${limit}`
 )
-.then(r => r.text())
-.then(html => {
-
-const match = html.match(/window\.__INITIAL_STATE__\s*=\s*(\{.*?\});/s);
-
-if(!match){
-console.error("Guesty data not found in report page");
-return;
-}
-
-const json = JSON.parse(match[1]);
-const data = json.report || json;
+.then(r=>r.json())
+.then(data=>{
 
 if(!data.results || data.results.length === 0){
 
@@ -1234,7 +1226,7 @@ loadPage();
 
 })
 .catch(err=>{
-console.error("Fetch error:", err);
+console.error("Fetch error:",err);
 });
 
 }
