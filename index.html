@@ -1201,6 +1201,10 @@ function loadPage(){
 
 fetch(
 reportUrl + (reportUrl.includes("?") ? "&" : "?") + `offset=${skip}&limit=${limit}`
+ .then(r=>r.text())
+ .then(data=>{
+console.log(data);
+})
 )
 .then(r=>{
 if(!r.ok){
