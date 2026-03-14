@@ -1204,27 +1204,12 @@ reportUrl + (reportUrl.includes("?") ? "&" : "?") + `skip=${skip}&limit=${limit}
 )
 .then(r => r.text())
 .then(data => {
+
 console.log(data);
+
 });
 
 }
-.then(r=>{
-if(!r.ok){
-throw new Error("Fetch failed: "+r.status);
-}
-return r.json();
-})
-.then(data=>{
-
-if(!data.results || data.results.length === 0){
-
-console.log("TOTAL RESERVATIONS LOADED:", allResults.length);
-
-processReservations(allResults);
-return;
-}
-
-allResults = allResults.concat(data.results);
 
 skip += limit;
 
