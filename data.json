@@ -26,14 +26,14 @@
       "percent": 0.12,
       "salesFeePercent": 5,
       "type": "payout",
-      "guestyReportUrl": "https://guesty-pmc-api.onrender.com/reservations"
+      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=bbbab438244300805daaf5485d3b516cbeee616fba7e640fc3b80d0b648c01d13e3f70a2bde2abaf9deb3b661aabf1c17453fd4e6d799f380cfd059df66cf01e"
     },
     "113-13 - CARL": {
       "email": "",
       "percent": 0.12,
       "salesFeePercent": 5,
       "type": "payout",
-      "guestyReportUrl": "https://guesty-pmc-api.onrender.com/reservations"
+      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=d6ab951850fef54399e2206f36f4e79fb1b425a8e5c891076036b11f50da8870613a226021487307c8c5f51eae997a08dd7e112d013ef683728ad1d9220ee0b7"
     },
     "115C-15 - CHRIS": {
       "email": "",
