@@ -1225,15 +1225,17 @@ csvData = data.results.map(r => ({
 "MARKUP": r["money.invoiceItems.MAR"]?.value || 0,
 
 "CHANNEL COMMISSION": r["money.hostServiceFee"]?.value || 0,
-"TAXES": r["money.invoiceItems.TAX"]?.value || r["money.totalTaxes"]?.value || 0,
-"CITY TAX": 0,
-"STATE TAX": 0,
-"COUNTY TAX": 0,
-"OCCUPANCY TAX": 0
+"TAXES": r["money.totalTaxes"]?.value || 0,
+
+"CITY TAX": r["money.invoiceItems.TAX_CITY"]?.value || 0,
+"STATE TAX": r["money.invoiceItems.TAX_STATE"]?.value || 0,
+"COUNTY TAX": r["money.invoiceItems.TAX_COUNTY"]?.value || 0,
+"OCCUPANCY TAX": r["money.invoiceItems.TAX_OCCUPANCY"]?.value || 0
 
 }));
 
 console.log("FIRST ROW", csvData[0]);
+ console.log("TAX TEST", csvData[0]["CITY TAX"], csvData[0]["STATE TAX"]);
 
 updateHeaderDates();
 processData();
