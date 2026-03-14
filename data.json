@@ -12,7 +12,7 @@
       "percent": 0.1,
       "salesFeePercent": 5,
       "type": "payout",
-      "guestyReportUrl": "https://guesty-pmc-api.onrender.com/reservations"
+      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=05b79c86c4688c3409154f48ac9fde1fc59cc31c03126566cc8bfc55813fa89e01619ee48fd16a30476eb01ef6cb77ad9dbeca35b7ca188678462e8278c65022"
     },
     "1463 - NICOLE": {
       "email": "",
