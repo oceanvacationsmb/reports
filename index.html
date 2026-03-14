@@ -1190,21 +1190,20 @@ async function generateStatement() {
 
   document.getElementById("mainContent").innerHTML = "<div style='text-align:center;padding:40px;'>Fetching Live Data...</div>";
 
+  // Use a different proxy service
+  const proxyUrl = 'https://api.codetabs.com/v1/proxy?quest=';
+  const targetUrl = OWNERS[currentOwner].guestyReportUrl;
+
   try {
-    // We add 'https://cors-anywhere.herokuapp.com/' or similar to bypass the block
-    const proxyUrl = 'https://api.allorigins.win/get?url=';
-    const targetUrl = encodeURIComponent(OWNERS[currentOwner].guestyReportUrl);
+    const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
+    if (!response.ok) throw new Error('Proxy error');
     
-    const response = await fetch(proxyUrl + targetUrl);
-    const json = await response.json();
-    
-    // allOrigins wraps the HTML in a 'contents' property
-    const htmlString = json.contents;
+    const htmlString = await response.text();
     const doc = new DOMParser().parseFromString(htmlString, 'text/html');
     const table = doc.querySelector('table');
     
     if (!table) {
-      alert("Could not find data table. Make sure the Guesty link is 'Public'.");
+      alert("No table found. Check if the Guesty link is still active and Public.");
       return;
     }
 
@@ -1229,14 +1228,13 @@ async function generateStatement() {
       };
     }).filter(row => row["CONFIRMATION CODE"]);
 
-    // Proceed to your original display functions
     updateHeaderDates();
     processData();
     displayStatement();
 
   } catch (e) {
     console.error("Fetch Error:", e);
-    alert("Failed to fetch Guesty data. Check the console for details.");
+    alert("Failed to reach Guesty. Please try again in a moment.");
   }
 }
 
