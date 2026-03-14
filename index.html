@@ -1190,20 +1190,44 @@ const reportUrl = OWNERS[currentOwner].guestyReportUrl;
 
  let skip = 0;
 const limit = 1000;
-
-const apiKey = reportUrl.split("apiKey=")[1];
 let allResults = [];
-fetch(reportUrl.replace("/apps/reservations","/api/shared-reservations-reports").split("?")[0] + `?timezone=America/New_York&skip=${skip}&limit=${limit}`,{
-headers:{
-Authorization: apiKey
-}
+
+function loadPage(){
+
+fetch(
+reportUrl.replace("/apps/reservations","/api/shared-reservations-reports").split("?")[0] +
+`?timezone=America/New_York&skip=${skip}&limit=${limit}`,
+{
+headers:{ Authorization: apiKey }
 })
 .then(r=>r.json())
 .then(data=>{
 
-console.log(data);
-console.log("REAL FIRST RESULT:", data.results[0]);
-csvData = data.results.map(r => ({
+if(!data.results || data.results.length === 0){
+
+console.log("TOTAL RESERVATIONS LOADED:", allResults.length);
+
+processReservations(allResults);
+return;
+}
+
+allResults = allResults.concat(data.results);
+
+skip += limit;
+
+loadPage();
+
+});
+
+}
+
+loadPage();
+
+function processReservations(results){
+
+console.log("REAL FIRST RESULT:", results[0]);
+
+csvData = results.map(r => ({
 
 "CHECK-IN DATE": r.checkInDate?.value || "",
 "CHECK-OUT DATE": r.checkOutDate?.value || "",
@@ -1225,21 +1249,23 @@ csvData = data.results.map(r => ({
 "MARKUP": r["money.invoiceItems.MAR"]?.value || 0,
 
 "CHANNEL COMMISSION": r["money.hostServiceFee"]?.value || 0,
+
 "TAXES": r["money.totalTaxes"]?.value || 0,
 
-"CITY TAX": r["money.invoiceItems.TAX_CITY"]?.value || 0,
-"STATE TAX": r["money.invoiceItems.TAX_STATE"]?.value || 0,
-"COUNTY TAX": r["money.invoiceItems.TAX_COUNTY"]?.value || 0,
-"OCCUPANCY TAX": r["money.invoiceItems.TAX_OCCUPANCY"]?.value || 0
+"CITY TAX": 0,
+"STATE TAX": 0,
+"COUNTY TAX": 0,
+"OCCUPANCY TAX": 0
 
 }));
 
 console.log("FIRST ROW", csvData[0]);
- console.log("TAX TEST", csvData[0]["CITY TAX"], csvData[0]["STATE TAX"]);
 
 updateHeaderDates();
 processData();
 displayStatement();
+
+}
 
 });
 }
