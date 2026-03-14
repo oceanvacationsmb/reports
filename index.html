@@ -1224,9 +1224,11 @@ console.error("Fetch error:",err);
 
 function processReservations(results){
 
-console.log("REAL FIRST RESULT:", results[0]);
+const rows = results.data || results.rows || results;
 
-csvData = results.map(r => {
+console.log("REAL FIRST RESULT:", rows[0]);
+
+csvData = rows.map(r => {
 
 const invoiceItems = r["money.invoiceItems"]?.children || [];
 
