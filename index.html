@@ -1188,11 +1188,12 @@ if(!currentOwner)return;
 
 const reportUrl = OWNERS[currentOwner].guestyReportUrl;
 
-const apiUrl = reportUrl.replace("/apps/reservations","/api/shared-reservations-reports").split("?")[0] + "?timezone=America/New_York&skip=0&limit=1000";
+ let skip = 0;
+const limit = 1000;
 
 const apiKey = reportUrl.split("apiKey=")[1];
-
-fetch(apiUrl,{
+let allResults = [];
+fetch(reportUrl.replace("/apps/reservations","/api/shared-reservations-reports").split("?")[0] + `?timezone=America/New_York&skip=${skip}&limit=${limit}`,{
 headers:{
 Authorization: apiKey
 }
