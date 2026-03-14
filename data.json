@@ -19,7 +19,7 @@
       "percent": 0.12,
       "salesFeePercent": 5,
       "type": "payout",
-      "guestyReportUrl": "https://guesty-pmc-api.onrender.com/reservations"
+      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=1a58fc1af3815f9023a08e09c590a05f3f3d1c73dbc3ab2e19985ecfe0003aa87acc7e264983e31d5b10a98cf4fd9b4789de3cb864daf2031e42aae6266c92f5"
     },
     "113-15 - MAT": {
       "email": "",
@@ -40,56 +40,56 @@
       "percent": 0.12,
       "salesFeePercent": 10,
       "type": "payout",
-      "guestyReportUrl": "https://guesty-pmc-api.onrender.com/reservations"
+      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=0542d3c012e0c4bb62fe31f35ba940d1e7ee42da5c24e73cedc34d7fd794e256804ae48b3386d18beb91471e751355ca50ebef2512b865d769ea84debeba8ec7"
     },
     "469C - ASSAF": {
       "email": "adahabani@gmail.com",
       "percent": 0.12,
       "salesFeePercent": 5,
       "type": "payout",
-      "guestyReportUrl": ""
+      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=cf0997316ba50ce76dc77eb8f00b10dd266167ccbe9462d205edea9215afb74a0038d0e73a05af9f858c3f626d54c1cf5f2e6e3b14107d533ce4af7994465781"
     },
     "1552 - YEN": {
       "email": "tristate1391@gmail.com",
       "percent": 0.15,
       "salesFeePercent": 5,
       "type": "payout",
-      "guestyReportUrl": ""
+      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=9512389c04f387d631c31f5eb901ae89d56d646ebe156166da68e78502c1c64d6a8bab54753942cc5be2ab33ce8523e5902e9ddfd24285efb4786c2de32225d6"
     },
     "508/1-2  - KOBI": {
       "email": "kobiswisa26@gmail.com",
       "percent": 0.15,
       "salesFeePercent": 10,
       "type": "payout",
-      "guestyReportUrl": ""
+      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=386c28f3e370968e7efe7e756ef8315d2eb420606a662909377be671d9e966c0271af42d1a8a61d5621646d6d5a2f59bc8e621743bd7fc4c5994d695b4c870e8"
     },
     "214 - GTI GROUP TAL": {
       "email": "zilkerinvestments@gmail.com",
       "percent": 0.12,
       "salesFeePercent": 10,
       "type": "payout",
-      "guestyReportUrl": ""
+      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=e30ca84498f8e9ef64c9ff7ed2f0b40312a0e1df2a2e07044a86518a1233cd332d79595d24282bab03cf63c1d96b5237ba9ca14d35fd450c952b5f36f03eb5a1"
     },
     "2131 - GSD INVESTMENTS": {
       "email": "office@rodriguezlc.com",
       "percent": 0.15,
       "salesFeePercent": 5,
       "type": "payout",
-      "guestyReportUrl": ""
+      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=e30ca84498f8e9ef64c9ff7ed2f0b40312a0e1df2a2e07044a86518a1233cd332d79595d24282bab03cf63c1d96b5237ba9ca14d35fd450c952b5f36f03eb5a1"
     },
     "4679/204 - MORENA": {
       "email": "",
       "percent": 0.12,
       "salesFeePercent": 5,
       "type": "payout",
-      "guestyReportUrl": ""
+      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=22265c7b0f6a3a9ec499fe6571adaccc43bda8300ac343b0964ed4b0594856f376ef2593f8519135bf9d31be6c887e9fb68dd10cbfc8c0efe47ce2c91f626213"
     },
     "4631/301 - ORIT": {
       "email": "oritedri1@hotmail.com",
       "percent": 0.12,
       "salesFeePercent": 5,
       "type": "payout",
-      "guestyReportUrl": ""
+      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=b174e85aac48e85c71d5a8108b16136423de3155444160dc987a2a49561d6f17805e6f9896f016fee68e98b0067eb8b19d35a0168c018213ae7690dadd1a9b63"
     }
   },
   "vendors": [
