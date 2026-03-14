@@ -1203,6 +1203,7 @@ Authorization: apiKey
 console.log(data);
 
 csvData = data.results.map(r => {
+ console.log("FIRST ROW", csvData[0])
 return {
   "CHECK-IN DATE": (r.checkInDate || "").toString().split("T")[0],
   "CHECK-OUT DATE": (r.checkOutDate || "").toString().split("T")[0],
