@@ -1199,6 +1199,8 @@ fetch(reportUrl)
 .then(r=>r.text())
 .then(csv=>{
 
+ console.log(html);
+ 
 Papa.parse(csv,{
 header:true,
 skipEmptyLines:true,
