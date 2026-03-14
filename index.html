@@ -1196,24 +1196,16 @@ const reportUrl = OWNERS[currentOwner].guestyReportUrl;
 console.log("REPORT URL:", reportUrl);
 
 fetch(reportUrl)
-.then(r=>r.text())
-.then(csv=>{
+.then(r=>r.json())
+.then(data=>{
 
-Papa.parse(csv,{
-header:true,
-skipEmptyLines:true,
-complete:function(result){
+const results = data.results || [];
 
-csvData = result.data;
+console.log("ROWS LOADED:", results.length);
 
-console.log("ROWS LOADED:", csvData.length);
+processReservations(results);
 
-updateHeaderDates();
-processData();
-displayStatement();
-
-}
-});
+})
 
 })
 .catch(err=>{
