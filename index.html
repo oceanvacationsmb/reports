@@ -1195,56 +1195,33 @@ const reportUrl = OWNERS[currentOwner].guestyReportUrl;
 
 console.log("REPORT URL:", reportUrl);
 
-fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(reportUrl))
-.then(function(r){
-return r.text();
-})
-.then(function(html){
+fetch(reportUrl)
+.then(r=>r.text())
+.then(csv=>{
 
-/* find the Nuxt data block */
-const match = html.match(/window\.__NUXT__\s*=\s*(\{[\s\S]*?\});/);
+Papa.parse(csv,{
+header:true,
+skipEmptyLines:true,
+complete:function(result){
 
-if(!match){
-console.error("Report data not found in page");
-console.log("PAGE CONTENT SAMPLE:", html.substring(0,500));
-return;
+csvData = result.data;
+
+console.log("ROWS LOADED:", csvData.length);
+
+updateHeaderDates();
+processData();
+displayStatement();
+
 }
-
-let json;
-try{
-json = JSON.parse(match[1]);
-}catch(e){
-console.error("JSON parse failed:", e);
-return;
-}
-
-/* locate reservations array */
-let results = [];
-
-if(json.data && json.data[0] && json.data[0].results){
-results = json.data[0].results;
-}
-else if(json.results){
-results = json.results;
-}
-
-console.log("ROWS LOADED:", results.length);
-
-if(!results.length){
-console.error("No reservation data found");
-return;
-}
-
-/* pass to your existing mapper */
-processReservations(results);
+});
 
 })
-.catch(function(err){
-console.error("Fetch error:", err);
+.catch(err=>{
+console.error("Fetch error:",err);
 });
 
 }
- 
+
 function processReservations(results){
 
 console.log("REAL FIRST RESULT:", results[0]);
@@ -1292,28 +1269,28 @@ occupancyTax += val;
 
 return {
 
-"CHECK-IN DATE": r["CHECK-IN DATE"] || "",
-"CHECK-OUT DATE": r["CHECK-OUT DATE"] || "",
+"CHECK-IN DATE": r.checkInDate?.value || "",
+"CHECK-OUT DATE": r.checkOutDate?.value || "",
 
-"LISTING'S NICKNAME": r["LISTING'S NICKNAME"] || "",
+"LISTING'S NICKNAME": r["listing.nickname"]?.children || "",
 
-"TOTAL PAYOUT": Number(r["TOTAL PAYOUT"]) || 0,
+"TOTAL PAYOUT": r["money.hostPayout"]?.value || 0,
 
-"ACCOMMODATION FARE": Number(r["ACCOMMODATION FARE"]) || 0,
+"ACCOMMODATION FARE": r["money.fareAccommodation"]?.value || 0,
 
-"CLEANING FARE": Number(r["CLEANING FARE"]) || 0,
+"CLEANING FARE": r["money.fareCleaning"]?.value || 0,
 
-"PLATFORM": r["PLATFORM"] || "",
+"PLATFORM": r["integration.platform"]?.children || "",
 
-"CONFIRMATION CODE": r["CONFIRMATION CODE"] || "",
+"CONFIRMATION CODE": r.confirmationCode?.children || "",
 
-"STATUS": r["STATUS"] || "",
+"STATUS": r.status?.children || "",
 
-"MARKUP": Number(r["MARKUP"]) || 0,
+"MARKUP": r["money.invoiceItems.MAR"]?.value || 0,
 
-"CHANNEL COMMISSION": Number(r["CHANNEL COMMISSION"]) || 0,
+"CHANNEL COMMISSION": r["money.hostServiceFee"]?.value || 0,
 
-"TAXES": Number(r["TAXES"]) || 0,
+"TAXES": r["money.totalTaxes"]?.value || 0,
 
 "CITY TAX": cityTax,
 "STATE TAX": stateTax,
