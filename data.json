@@ -56,13 +56,6 @@
       "type": "payout",
       "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=9512389c04f387d631c31f5eb901ae89d56d646ebe156166da68e78502c1c64d6a8bab54753942cc5be2ab33ce8523e5902e9ddfd24285efb4786c2de32225d6"
     },
-    "508/1-2  - KOBI": {
-      "email": "kobiswisa26@gmail.com",
-      "percent": 0.15,
-      "salesFeePercent": 10,
-      "type": "payout",
-      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=386c28f3e370968e7efe7e756ef8315d2eb420606a662909377be671d9e966c0271af42d1a8a61d5621646d6d5a2f59bc8e621743bd7fc4c5994d695b4c870e8"
-    },
     "214 - GTI GROUP TAL": {
       "email": "zilkerinvestments@gmail.com",
       "percent": 0.12,
