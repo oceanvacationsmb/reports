@@ -83,6 +83,13 @@
       "salesFeePercent": 5,
       "type": "payout",
       "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=b174e85aac48e85c71d5a8108b16136423de3155444160dc987a2a49561d6f17805e6f9896f016fee68e98b0067eb8b19d35a0168c018213ae7690dadd1a9b63"
+    },
+    "KOBI - 508-1-2": {
+      "email": "",
+      "percent": 0.15,
+      "salesFeePercent": 5,
+      "type": "payout",
+      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=386c28f3e370968e7efe7e756ef8315d2eb420606a662909377be671d9e966c0271af42d1a8a61d5621646d6d5a2f59bc8e621743bd7fc4c5994d695b4c870e8"
     }
   },
   "vendors": [
