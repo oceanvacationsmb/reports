@@ -1187,31 +1187,32 @@ function setupDropbox(){
 }
 let apiKey = localStorage.getItem("guesty_api_key") || "";
 
-function generateStatement(){
+async function generateStatement(){
+  if(!currentOwner) return;
 
-if(!currentOwner) return;
+  const reportUrl = OWNERS[currentOwner].guestyReportUrl;
 
-const reportUrl = OWNERS[currentOwner].guestyReportUrl;
+  console.log("REPORT URL:", reportUrl);
 
-console.log("REPORT URL:", reportUrl);
+  fetch(reportUrl)
+  .then(r=>r.json())
+  .then(data=>{
 
-fetch(reportUrl)
-.then(r=>r.text())
-.then(csv=>{
+    console.log("RAW DATA:", data);
 
-Papa.parse(csv,{
-header:true,
-skipEmptyLines:true,
-complete:function(result){
+    const results = Array.isArray(data)
+      ? data
+      : (data.results || data.data || []);
 
-csvData = result.data;
+    console.log("ROWS LOADED:", results.length);
+    console.log("FIRST RESULT:", results[0]);
 
-console.log("ROWS LOADED:", csvData.length);
+    processReservations(results);
 
-updateHeaderDates();
-processData();
-displayStatement();
-
+  })
+  .catch(err=>{
+    console.error("Fetch error:", err);
+  });
 }
 });
 
