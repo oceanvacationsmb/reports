@@ -1195,6 +1195,32 @@ async function generateStatement(){
   console.log("REPORT URL:", reportUrl);
 
   fetch(reportUrl)
+  .then(r=>r.text())
+  .then(html=>{
+
+    console.log("FIRST 1000 CHARS:", html.slice(0,1000));
+
+    const match = html.match(/shared-reservations-reports[^"' ]*/);
+
+    if(!match){
+      alert("Could not find shared report data link");
+      return;
+    }
+
+    let apiUrl = match[0];
+
+    if(!apiUrl.startsWith("http")){
+      apiUrl = "https://report.guesty.com/" + apiUrl.replace(/^\/+/,"");
+    }
+
+    if(!apiUrl.includes("limit=")){
+      apiUrl += (apiUrl.includes("?") ? "&" : "?") + "limit=1000";
+    }
+
+    console.log("API URL:", apiUrl);
+
+    return fetch(apiUrl);
+  })
   .then(r=>r.json())
   .then(data=>{
 
@@ -1212,6 +1238,7 @@ async function generateStatement(){
   })
   .catch(err=>{
     console.error("Fetch error:", err);
+    alert("Failed loading Guesty data");
   });
 }
 
