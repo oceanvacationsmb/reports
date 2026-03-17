@@ -486,6 +486,7 @@ toDate = y + "-12-31";
 }
 
   const owner=OWNERS[currentOwner]||{};
+  const isDraftOwner=((owner.type||"").toLowerCase()==="draft");
   const ownerPercent=getEffectivePmcPercent(owner)||0;
   const monthNames=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
   let periodText = fromDate + " - " + toDate;
@@ -553,7 +554,8 @@ toDate = y + "-12-31";
         const payout=num(r["TOTAL PAYOUT"]);
         if(!payout) return;
         const cleaning=num(r["CLEANING FARE"]);
-        const acc=payout-cleaning;
+        const taxes=isDraftOwner?getRowTaxTotal(r):0;
+        const acc=payout-cleaning-taxes;
         const pmc=acc*ownerPercent;
         const prop=getPropertyKey(r);
         if(!byProperty[prop]) byProperty[prop]={label:getPropertyLabel(r,prop),payout:0,acc:0,cleaning:0,pmc:0};
@@ -1427,7 +1429,8 @@ masterTotals.owner -= ownerExpTotal + recurringTotal;
     byProp[prop].forEach(row=>{
       const g = num(row["TOTAL PAYOUT"]);
 const c = (row["STATUS"]||"").toLowerCase().includes("cancel") ? 0 : num(row["CLEANING FARE"]);
-let a = g - c;
+const taxForDraft=isDraft?getRowTaxTotal(row):0;
+let a = g - c - taxForDraft;
 const p = a * pmcPercent;
      
       let w=0;
@@ -1703,7 +1706,8 @@ p.reservations.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DAT
  
 const g = num(row["TOTAL PAYOUT"]);
 const c = (row["STATUS"]||"").toLowerCase().includes("cancel") ? 0 : num(row["CLEANING FARE"]);
-let a = g - c;
+const draftTax=getRowTaxTotal(row);
+let a = g - c - draftTax;
 const pm = a * pmcPercent;
 
 let w=0;
