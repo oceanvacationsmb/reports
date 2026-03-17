@@ -537,14 +537,15 @@ toDate = y + "-12-31";
       });
 
       html+="<div class='summary-grid'><div class='summary-card'><div class='summary-label'>GROSS PAYOUT</div><div class='summary-value'>"+money(totalPayout)+"</div></div></div>";
-      html+="<table><tr><th>CODE</th><th>CHECK-IN/OUT</th><th>GROSS PAYOUT</th></tr>";
+      html+="<table><tr><th>CODE</th><th>PROPERTY ADDRESS</th><th>CHECK-IN/OUT</th><th>GROSS PAYOUT</th></tr>";
       griRows.forEach(r=>{
         const payout=num(r["TOTAL PAYOUT"]);
         const code=(r["CONFIRMATION CODE"]||"").toString().substring(0,8).toUpperCase();
+        const address=getPropertyLabel(r,"-");
         const stay=(r["CHECK-IN DATE"]||"")+" - "+(r["CHECK-OUT DATE"]||"");
-        html+="<tr><td>"+code+"</td><td>"+stay+"</td><td>"+money(payout)+"</td></tr>";
+        html+="<tr><td>"+code+"</td><td>"+address+"</td><td>"+stay+"</td><td>"+money(payout)+"</td></tr>";
       });
-      html+="<tr><th colspan='2'>TOTAL</th><th>"+money(totalPayout)+"</th></tr></table>";
+      html+="<tr><th colspan='3'>TOTAL</th><th>"+money(totalPayout)+"</th></tr></table>";
     }else{
       const byProperty={};
       filtered.forEach(r=>{
