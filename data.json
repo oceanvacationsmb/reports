@@ -105,9 +105,9 @@
       "type": "payout",
       "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=386c28f3e370968e7efe7e756ef8315d2eb420606a662909377be671d9e966c0271af42d1a8a61d5621646d6d5a2f59bc8e621743bd7fc4c5994d695b4c870e8"
     },
-    "ALL": {
+    "ALL PROPERTIES": {
       "email": "",
-      "percent": 0.0012,
+      "percent": 0.00,
       "salesFeePercent": 5,
       "type": "payout",
       "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=b7a2056fa26f50386646cdb70fed37a2b3ace2ff3e329837a14c7f49baa65f66be1c89221558f4eab64374a81fbdcb83ed11614c622cf7f5f5bedbf7525daa14",
