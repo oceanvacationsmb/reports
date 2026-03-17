@@ -36,15 +36,27 @@
       "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=d6ab951850fef54399e2206f36f4e79fb1b425a8e5c891076036b11f50da8870613a226021487307c8c5f51eae997a08dd7e112d013ef683728ad1d9220ee0b7",
       "recurringCharges": [
         {
-          "label": "Pool cleaning $250",
+          "label": "Pool cleaning",
           "amount": 0
         },
         {
-          "label": "Pest control $45",
+          "label": "$250",
           "amount": 0
         },
         {
-          "label": "Landscaping $90",
+          "label": "Pest control",
+          "amount": 0
+        },
+        {
+          "label": "$45",
+          "amount": 0
+        },
+        {
+          "label": "Landscaping",
+          "amount": 0
+        },
+        {
+          "label": "$90",
           "amount": 0
         }
       ]
