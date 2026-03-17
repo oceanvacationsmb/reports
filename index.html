@@ -325,6 +325,23 @@ function money(v){
   return "$" + n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 
+function getPropertyKey(row){
+  const nickname=(row && row["LISTING'S NICKNAME"] ? row["LISTING'S NICKNAME"] : "").toString().trim();
+  const address=(row && row["PROPERTY ADDRESS"] ? row["PROPERTY ADDRESS"] : "").toString().trim();
+  return nickname || address || "Unknown";
+}
+
+function getPropertyLabel(row,fallback){
+  const address=(row && row["PROPERTY ADDRESS"] ? row["PROPERTY ADDRESS"] : "").toString().trim();
+  const nickname=(row && row["LISTING'S NICKNAME"] ? row["LISTING'S NICKNAME"] : "").toString().trim();
+  return address || nickname || (fallback||"Unknown");
+}
+
+function getPropertyLabelFromBucket(bucket,fallback){
+  const first=bucket && Array.isArray(bucket.reservations) && bucket.reservations.length ? bucket.reservations[0] : null;
+  return getPropertyLabel(first,fallback);
+}
+
 function recurringToText(list){
   if(!Array.isArray(list) || list.length===0) return "";
   return list.map(item=>{
@@ -394,13 +411,13 @@ function populateIncomePropertyOptions(){
   const propSet={};
 
   (csvData||[]).forEach(r=>{
-    const p=(r["LISTING'S NICKNAME"]||"").trim();
-    if(p) propSet[p]=true;
+    const key=getPropertyKey(r);
+    if(key) propSet[key]=getPropertyLabel(r,key);
   });
 
   propSel.innerHTML="<option value='all'>ALL PROPERTIES</option>";
   Object.keys(propSet).sort().forEach(p=>{
-    propSel.innerHTML+="<option value='"+p+"'>"+p+"</option>";
+    propSel.innerHTML+="<option value='"+p+"'>"+propSet[p]+"</option>";
   });
 
   if(current && propSel.querySelector("option[value='"+current.replace(/'/g,"\\'")+"']")){
@@ -479,19 +496,29 @@ toDate = y + "-12-31";
   }
 
   getRows.then(rows=>{
+    const propertyLabelByKey={};
+    (rows||[]).forEach(r=>{
+      const key=getPropertyKey(r);
+      if(!propertyLabelByKey[key]) propertyLabelByKey[key]=getPropertyLabel(r,key);
+    });
+
     const filtered=(rows||[]).filter(r=>{
       const ci=r["CHECK-IN DATE"]||"";
       if(fromDate && ci<fromDate) return false;
       if(toDate && ci>toDate) return false;
-      if(selectedProperty!=="all" && (r["LISTING'S NICKNAME"]||"")!==selectedProperty) return false;
+      if(selectedProperty!=="all" && getPropertyKey(r)!==selectedProperty) return false;
       return true;
     });
+
+    const selectedPropertyLabel=selectedProperty==="all"
+      ? "ALL PROPERTIES"
+      : (propertyLabelByKey[selectedProperty] || selectedProperty);
 
     let totalPayout=0,totalAcc=0,totalCleaning=0,totalPMC=0;
     let html="";
     html+="<div class='property-section'>";
     html+="<div class='invoice-header'><div class='company-info'><div class='company-name'>OCEAN VACATIONS INC.</div><div>www.oceanvacationsmb.com</div><div>oceanvacationsmb@gmail.com</div><div>843-222-6516</div></div><div class='right-header'><div class='statement-date'><strong>REPORT DATE: "+new Date().toLocaleDateString()+"</strong></div><div class='period-date'><strong>"+periodText+"</strong></div></div></div>";
-    html+="<div style='text-align:center;font-size:16px;font-weight:bold;margin-bottom:20px'>"+(selectedProperty==="all"?"ALL PROPERTIES":selectedProperty)+"</div>";
+    html+="<div style='text-align:center;font-size:16px;font-weight:bold;margin-bottom:20px'>"+selectedPropertyLabel+"</div>";
 
     if(type==="gri"){
       const griRows=[];
@@ -519,8 +546,8 @@ toDate = y + "-12-31";
         const cleaning=num(r["CLEANING FARE"]);
         const acc=payout-cleaning;
         const pmc=acc*ownerPercent;
-        const prop=(r["LISTING'S NICKNAME"]||"UNKNOWN").toString();
-        if(!byProperty[prop]) byProperty[prop]={payout:0,acc:0,cleaning:0,pmc:0};
+        const prop=getPropertyKey(r);
+        if(!byProperty[prop]) byProperty[prop]={label:getPropertyLabel(r,prop),payout:0,acc:0,cleaning:0,pmc:0};
         byProperty[prop].payout+=payout;
         byProperty[prop].acc+=acc;
         byProperty[prop].cleaning+=cleaning;
@@ -535,7 +562,7 @@ toDate = y + "-12-31";
       html+="<table><tr><th>PROPERTY</th><th>PAYOUT</th><th>ACCOMMODATION</th><th>CLEANING</th><th>PMC</th></tr>";
       Object.keys(byProperty).sort().forEach(prop=>{
         const p=byProperty[prop];
-        html+="<tr><td>"+prop+"</td><td>"+money(p.payout)+"</td><td>"+money(p.acc)+"</td><td>"+money(p.cleaning)+"</td><td>"+money(p.pmc)+"</td></tr>";
+        html+="<tr><td>"+p.label+"</td><td>"+money(p.payout)+"</td><td>"+money(p.acc)+"</td><td>"+money(p.cleaning)+"</td><td>"+money(p.pmc)+"</td></tr>";
       });
       html+="<tr><th>TOTAL</th><th>"+money(totalPayout)+"</th><th>"+money(totalAcc)+"</th><th>"+money(totalCleaning)+"</th><th>"+money(totalPMC)+"</th></tr></table>";
     }
@@ -1340,6 +1367,8 @@ function processData(){
   const month=parseInt(document.getElementById("monthSelect").value);
   const year=parseInt(document.getElementById("yearSelect").value);
   const t=OWNERS[currentOwner];
+  const pmcPercent=getEffectivePmcPercent(t);
+  const splitOwnerPercent=getSplitOwnerPercent(t);
   propertyTotals={};
   masterTotals={gross:0,acc:0,clean:0,pmc:0,expenses:0,draft:0,owner:0,websiteFee:0,totalTaxCollected:0,recurring:0};
   const ownerExpTotal = expenses
@@ -1355,7 +1384,7 @@ function processData(){
     const m=parseInt(row["CHECK-IN DATE"].split("-")[1]);
     const y=parseInt(row["CHECK-IN DATE"].split("-")[0]);
     if(m!==month||y!==year)return;
-    const prop=row["LISTING'S NICKNAME"]||"Unknown";
+    const prop=getPropertyKey(row);
     if(!byProp[prop])byProp[prop]=[];
     byProp[prop].push(row);
     
@@ -1627,7 +1656,7 @@ html+="</div>";
 
 html+="</div>";
 
-html+="<div class='property-title'><span class='property-icon'>🏠</span>"+prop.toUpperCase()+"</div>";
+html+="<div class='property-title'><span class='property-icon'>🏠</span>"+getPropertyLabelFromBucket(p,prop).toUpperCase()+"</div>";
     
    if(type==="draft"){
   html+="<div class='summary-grid'>";
@@ -1907,7 +1936,7 @@ if(propertySettings[prop] && propertySettings[prop][m]) muni.push(m);
 const reportAmount=payoutTotal-taxTotal;
 
 taxHtml+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'>";
-taxHtml+="<span>"+prop+" - REPORT/TAX COLLECTED ("+muni.join(", ")+")</span>";
+taxHtml+="<span>"+getPropertyLabelFromBucket(p,prop)+" - REPORT/TAX COLLECTED ("+muni.join(", ")+")</span>";
 taxHtml+="<span>"+money(reportAmount)+" ("+money(taxTotal)+")</span>";
 taxHtml+="</div>";
 
