@@ -107,7 +107,7 @@
     },
     "ALL PROPERTIES": {
       "email": "",
-      "percent": 0.00,
+      "percent": 0,
       "salesFeePercent": 5,
       "type": "payout",
       "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=b7a2056fa26f50386646cdb70fed37a2b3ace2ff3e329837a14c7f49baa65f66be1c89221558f4eab64374a81fbdcb83ed11614c622cf7f5f5bedbf7525daa14",
@@ -176,7 +176,8 @@
     "GC - 601A": {},
     "MB - 469C": {
       "SC": true,
-      "HC": true
+      "HC": true,
+      "MB": false
     },
     "MB - 4631/301": {
       "SC": true,
@@ -191,12 +192,34 @@
       "SSB": true,
       "HC": true
     },
-    "NMB - 214-2S": {},
-    "MB - 4679/204": {},
-    "MB - 2131": {},
-    "MB - 1552": {},
-    "GCSSB - 113B-13N": {},
-    "GC - 1463": {}
+    "NMB - 214-2S": {
+      "SC": true,
+      "NMB": true,
+      "HC": true
+    },
+    "MB - 4679/204": {
+      "SC": true,
+      "MB": true,
+      "HC": true
+    },
+    "MB - 2131": {
+      "SC": true,
+      "MB": true,
+      "HC": true
+    },
+    "MB - 1552": {
+      "SC": true,
+      "MB": true,
+      "HC": true
+    },
+    "GCSSB - 113B-13N": {
+      "SC": true,
+      "SSB": true,
+      "HC": true
+    },
+    "GC - 1463": {
+      "SC": true
+    }
   },
   "expenses": []
 }
