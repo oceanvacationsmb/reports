@@ -109,7 +109,7 @@
       "email": "",
       "percent": 0.0012,
       "salesFeePercent": 5,
-      "type": "draft",
+      "type": "payout",
       "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=b7a2056fa26f50386646cdb70fed37a2b3ace2ff3e329837a14c7f49baa65f66be1c89221558f4eab64374a81fbdcb83ed11614c622cf7f5f5bedbf7525daa14",
       "recurringCharges": []
     }
@@ -191,7 +191,12 @@
       "SSB": true,
       "HC": true
     },
-    "NMB - 214-2S": {}
+    "NMB - 214-2S": {},
+    "MB - 4679/204": {},
+    "MB - 2131": {},
+    "MB - 1552": {},
+    "GCSSB - 113B-13N": {},
+    "GC - 1463": {}
   },
   "expenses": []
 }
