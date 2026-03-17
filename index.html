@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>Ocean Vacations - Reservation Report</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <style>
@@ -163,7 +162,7 @@ box-shadow:none
 <div id="appControls" style="display:none">
 <div class="section"><label class="label">MONTH</label><select id="monthSelect"></select></div>
 <div class="section"><label class="label">YEAR</label><select id="yearSelect"></select></div>
-<div class="section"><label class="label">UPLOAD CSV</label><input type="file" id="csvFile" accept=".csv"></div>
+<div class="section"><label class="label">UPLOAD PDF (OPTIONAL)</label><input type="file" id="supportPdf" accept=".pdf,application/pdf"></div>
 <button class="btn btn-primary" onclick="generateStatement()">GENERATE REPORT</button>
 <button class="btn btn-success" onclick="openAddExpense()" style="font-size:13px;font-weight:bold">ADD EXPENSE</button>
 <button class="btn btn-success" onclick="generateSummary()">SUMMARY REPORT</button>
@@ -277,6 +276,7 @@ let gitHubData={},OWNERS={},vendors=[],expenses=[],csvData=[],propertySettings={
 let sessionExpenses=[];
 const municipalities=["SC","MB","NMB","SSB","HC"];
 const defaultGuestyUrl="https://report.guesty.com/apps/reservations?apiKey=d6ab951850fef54399e2206f36f4e79fb1b425a8e5c891076036b11f50da8870613a226021487307c8c5f51eae997a08dd7e112d013ef683728ad1d9220ee0b7";
+let guestyPreloadByOwner={};
 
 function num(v){return parseFloat((v||"0").toString().replace(/[$,]/g,""))||0;}
 function money(v){
@@ -894,7 +894,80 @@ function onOwnerChange(){
   toggleOwnerMode();
   if(currentOwner){
     showOwnerLandingInfo();
+    preloadGuestyData(currentOwner);
   }
+}
+
+function mapGuestyReservation(r){
+  const invoiceItems = (r["money.invoiceItems"] && r["money.invoiceItems"].children) || [];
+
+  let cityTax=0,stateTax=0,countyTax=0,occupancyTax=0;
+  invoiceItems.forEach(item=>{
+    const name=((item.title||"")+" "+(item.name||"")).toLowerCase();
+    const val=num(item.value);
+    if(name.includes("state")) stateTax+=val;
+    else if(name.includes("county") || name.includes("horry")) countyTax+=val;
+    else if(name.includes("city") || name.includes("north myrtle") || name.includes("surfside") || name.includes("mb")) cityTax+=val;
+    else if(name.includes("occupancy") || name.includes("accommodation") || name.includes("tourism")) occupancyTax+=val;
+  });
+
+  return {
+    "CHECK-IN DATE": (r.checkInDate && r.checkInDate.value) || "",
+    "CHECK-OUT DATE": (r.checkOutDate && r.checkOutDate.value) || "",
+    "LISTING'S NICKNAME": (r["listing.nickname"] && r["listing.nickname"].children) || "",
+    "PROPERTY ADDRESS": (r["listing.address.full"] && r["listing.address.full"].children) || (r["listing.address"] && r["listing.address"].children) || "",
+    "TOTAL PAYOUT": (r["money.hostPayout"] && r["money.hostPayout"].value) || 0,
+    "ACCOMMODATION FARE": (r["money.fareAccommodation"] && r["money.fareAccommodation"].value) || 0,
+    "CLEANING FARE": (r["money.fareCleaning"] && r["money.fareCleaning"].value) || 0,
+    "PLATFORM": (r["integration.platform"] && r["integration.platform"].children) || "",
+    "SOURCE": (r["integration.source"] && r["integration.source"].children) || "",
+    "CONFIRMATION CODE": (r.confirmationCode && r.confirmationCode.children) || "",
+    "STATUS": (r.status && r.status.children) || "",
+    "MARKUP": (r["money.invoiceItems.MAR"] && r["money.invoiceItems.MAR"].value) || 0,
+    "CHANNEL COMMISSION": (r["money.hostServiceFee"] && r["money.hostServiceFee"].value) || 0,
+    "TAXES": (r["money.totalTaxes"] && r["money.totalTaxes"].value) || 0,
+    "CITY TAX": cityTax,
+    "STATE TAX": stateTax,
+    "COUNTY TAX": countyTax,
+    "OCCUPANCY TAX": occupancyTax
+  };
+}
+
+function fetchGuestyRowsForOwner(ownerName){
+  return new Promise((resolve,reject)=>{
+    if(!ownerName || !OWNERS[ownerName]) return reject(new Error("Owner not selected"));
+
+    const owner=OWNERS[ownerName]||{};
+    const guestyUrl=(owner.guestyReportUrl||defaultGuestyUrl).trim();
+    const apiKey=(guestyUrl.split("apiKey=")[1]||"").split("&")[0];
+    if(!apiKey) return reject(new Error("Missing apiKey in Guesty URL"));
+
+    const reportUrl="https://report.guesty.com/api/shared-reservations-reports?timezone=America/New_York&skip=0&limit=1000";
+    fetch(reportUrl,{
+      headers:{
+        "accept":"*/*",
+        "authorization":apiKey,
+        "content-type":"application/json"
+      }
+    })
+    .then(r=>{
+      if(!r.ok) throw new Error("Guesty fetch failed: "+r.status);
+      return r.json();
+    })
+    .then(payload=>{
+      const rows=Array.isArray(payload)?payload:(payload.results||payload.data||[]);
+      const mapped=rows.map(mapGuestyReservation);
+      resolve(mapped);
+    })
+    .catch(reject);
+  });
+}
+
+function preloadGuestyData(ownerName){
+  if(!ownerName || guestyPreloadByOwner[ownerName]) return;
+  fetchGuestyRowsForOwner(ownerName)
+    .then(mapped=>{ guestyPreloadByOwner[ownerName]=mapped; })
+    .catch(()=>{});
 }
 
 function toggleOwnerMode(){
@@ -929,8 +1002,8 @@ function showOwnerLandingInfo(){
   html+="<div style='padding:12px;border:1px solid #d7e4ea;border-radius:10px;background:#fff'><div style='font-size:11px;color:#60727b;text-transform:uppercase;font-weight:bold'>Sales Commission</div><div style='margin-top:4px;font-weight:bold'>"+num(o.salesFeePercent).toFixed(2)+"%</div></div>";
   html+="</div>";
   html+="<div style='margin-top:16px;padding:12px;border:1px solid #d7e4ea;border-radius:10px;background:#fff'>";
-  html+="<div style='font-size:11px;color:#60727b;text-transform:uppercase;font-weight:bold;margin-bottom:6px'>Guesty URL</div>";
-  html+="<a href='"+guestyUrl+"' target='_blank' style='color:#0d5c4b;font-weight:bold;word-break:break-all'>"+guestyUrl+"</a>";
+  html+="<div style='font-size:11px;color:#60727b;text-transform:uppercase;font-weight:bold;margin-bottom:8px'>Guesty</div>";
+  html+="<a href='"+guestyUrl+"' target='_blank' style='display:inline-block;padding:10px 16px;background:#0d5c4b;color:#fff;border-radius:8px;text-decoration:none;font-weight:bold'>GO TO GUESTY</a>";
   html+="</div>";
   html+="</div>";
 
@@ -1009,7 +1082,7 @@ function openTax(){
   const allProps=Object.keys(propertySettings);
   
   if(allProps.length===0){
-    html="<p style='color:#aaa;text-align:center;padding:20px'>Upload a CSV first to create properties, then configure tax settings.</p>";
+    html="<p style='color:#aaa;text-align:center;padding:20px'>Generate from Guesty link first to create properties, then configure tax settings.</p>";
   }else{
     allProps.sort().forEach(prop=>{
       const o=propertySettings[prop]||{};
@@ -1333,16 +1406,23 @@ function setupDropbox(){
 }
 
 function generateStatement(){
-  const file=document.getElementById("csvFile").files[0];
-  if(!file||!currentOwner)return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    csvData=Papa.parse(e.target.result,{header:true,skipEmptyLines:true}).data;
+  if(!currentOwner) return;
+
+  const ready = guestyPreloadByOwner[currentOwner]
+    ? Promise.resolve(guestyPreloadByOwner[currentOwner])
+    : fetchGuestyRowsForOwner(currentOwner);
+
+  ready
+  .then(mapped=>{
+    csvData=mapped;
+    guestyPreloadByOwner[currentOwner]=mapped;
     updateHeaderDates();
     processData();
     displayStatement();
-  };
-  reader.readAsText(file);
+  })
+  .catch(err=>{
+    alert("Failed to load data from Guesty link: "+err.message);
+  });
 }
 
 function updateHeaderDates(){
