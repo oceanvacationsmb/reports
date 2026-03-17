@@ -469,32 +469,50 @@ toDate = y + "-12-31";
     html+="<div style='text-align:center;font-size:16px;font-weight:bold;margin-bottom:20px'>"+(selectedProperty==="all"?"ALL PROPERTIES":selectedProperty)+"</div>";
 
     if(type==="gri"){
-      html+="<table><tr><th>CODE</th><th>CHECK-IN/OUT</th><th>PAYOUT</th></tr>";
+      const griRows=[];
       filtered.forEach(r=>{
         const payout=num(r["TOTAL PAYOUT"]);
         if(!payout) return;
         totalPayout+=payout;
+        griRows.push(r);
+      });
+
+      html+="<div class='summary-grid'><div class='summary-card'><div class='summary-label'>PAYOUT</div><div class='summary-value'>"+money(totalPayout)+"</div></div></div>";
+      html+="<table><tr><th>CODE</th><th>CHECK-IN/OUT</th><th>PAYOUT</th></tr>";
+      griRows.forEach(r=>{
+        const payout=num(r["TOTAL PAYOUT"]);
         const code=(r["CONFIRMATION CODE"]||"").toString().substring(0,8).toUpperCase();
         const stay=(r["CHECK-IN DATE"]||"")+" - "+(r["CHECK-OUT DATE"]||"");
         html+="<tr><td>"+code+"</td><td>"+stay+"</td><td>"+money(payout)+"</td></tr>";
       });
       html+="<tr><th colspan='2'>TOTAL</th><th>"+money(totalPayout)+"</th></tr></table>";
-      html+="<div class='summary-grid'><div class='summary-card'><div class='summary-label'>PAYOUT</div><div class='summary-value'>"+money(totalPayout)+"</div></div></div>";
     }else{
-      html+="<table><tr><th>CODE</th><th>CHECK-IN/OUT</th><th>PAYOUT</th><th>ACCOMMODATION</th><th>CLEANING</th><th>PMC</th></tr>";
+      const byProperty={};
       filtered.forEach(r=>{
         const payout=num(r["TOTAL PAYOUT"]);
         if(!payout) return;
         const cleaning=num(r["CLEANING FARE"]);
         const acc=payout-cleaning;
         const pmc=acc*ownerPercent;
-        totalPayout+=payout; totalAcc+=acc; totalCleaning+=cleaning; totalPMC+=pmc;
-        const code=(r["CONFIRMATION CODE"]||"").toString().substring(0,8).toUpperCase();
-        const stay=(r["CHECK-IN DATE"]||"")+" - "+(r["CHECK-OUT DATE"]||"");
-        html+="<tr><td>"+code+"</td><td>"+stay+"</td><td>"+money(payout)+"</td><td>"+money(acc)+"</td><td>"+money(cleaning)+"</td><td>"+money(pmc)+"</td></tr>";
+        const prop=(r["LISTING'S NICKNAME"]||"UNKNOWN").toString();
+        if(!byProperty[prop]) byProperty[prop]={payout:0,acc:0,cleaning:0,pmc:0};
+        byProperty[prop].payout+=payout;
+        byProperty[prop].acc+=acc;
+        byProperty[prop].cleaning+=cleaning;
+        byProperty[prop].pmc+=pmc;
+        totalPayout+=payout;
+        totalAcc+=acc;
+        totalCleaning+=cleaning;
+        totalPMC+=pmc;
       });
-      html+="<tr><th colspan='2'>TOTAL</th><th>"+money(totalPayout)+"</th><th>"+money(totalAcc)+"</th><th>"+money(totalCleaning)+"</th><th>"+money(totalPMC)+"</th></tr></table>";
+
       html+="<div class='summary-grid'><div class='summary-card'><div class='summary-label'>PAYOUT</div><div class='summary-value'>"+money(totalPayout)+"</div></div><div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(totalAcc)+"</div></div><div class='summary-card'><div class='summary-label'>CLEANING</div><div class='summary-value'>"+money(totalCleaning)+"</div></div><div class='summary-card'><div class='summary-label'>PMC ("+(ownerPercent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(totalPMC)+"</div></div></div>";
+      html+="<table><tr><th>PROPERTY</th><th>PAYOUT</th><th>ACCOMMODATION</th><th>CLEANING</th><th>PMC</th></tr>";
+      Object.keys(byProperty).sort().forEach(prop=>{
+        const p=byProperty[prop];
+        html+="<tr><td>"+prop+"</td><td>"+money(p.payout)+"</td><td>"+money(p.acc)+"</td><td>"+money(p.cleaning)+"</td><td>"+money(p.pmc)+"</td></tr>";
+      });
+      html+="<tr><th>TOTAL</th><th>"+money(totalPayout)+"</th><th>"+money(totalAcc)+"</th><th>"+money(totalCleaning)+"</th><th>"+money(totalPMC)+"</th></tr></table>";
     }
 
     html+="</div>";
