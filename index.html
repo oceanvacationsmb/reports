@@ -176,6 +176,24 @@ box-shadow:none
 </select>
 </div>
 <button class="btn btn-info" onclick="runQuickReport()">REPORT</button>
+<div id="incomeSidebarControls" class="section" style="display:none;border-top:1px solid rgba(255,255,255,.2);padding-top:12px;margin-top:10px">
+<label class="label">INCOME/GRI TYPE</label>
+<select id="incomeType" onchange="incomeTypeChanged()">
+<option value="full">RESERVATION REPORT</option>
+<option value="gri">GRI REPORT</option>
+</select>
+<label class="label">PROPERTY</label>
+<select id="incomeProperty"></select>
+<label class="label">RANGE</label>
+<select id="dateMode" onchange="updateDateOptions()">
+<option value="dates">BETWEEN DATES</option>
+<option value="month">SPECIFIC MONTH</option>
+<option value="year">CURRENT YEAR</option>
+<option value="lastyear">LAST YEAR</option>
+</select>
+<div id="dateOptions" style="margin-top:8px"></div>
+<button class="btn btn-primary" onclick="runIncomeReport()">RUN REPORT</button>
+</div>
 <div class="settings-header">SETTINGS</div>
 <button class="btn btn-info" onclick="openOwners()" style="font-size:11px">OWNER SETTINGS</button>
 <button class="btn btn-info" onclick="openTax()" style="font-size:11px">TAX SETTINGS </button>
@@ -331,42 +349,31 @@ if(!csvData || csvData.length===0){
   }
 
   document.getElementById("reportTitle").textContent = "INCOME REPORT";
+  populateIncomePropertyOptions();
+  document.getElementById("incomeSidebarControls").style.display="";
+  updateDateOptions();
+  document.getElementById("mainContent").innerHTML = "<div class='property-section'><div style='font-size:13px;color:#666'>Use the filters in the left sidebar, then click RUN REPORT.</div></div>";
+}
 
-  let html = "";
- let totalGross = 0;
+function populateIncomePropertyOptions(){
+  const propSel=document.getElementById("incomeProperty");
+  if(!propSel) return;
+  const current=propSel.value;
+  const propSet={};
 
-  html += "<div class='property-section'>";
+  (csvData||[]).forEach(r=>{
+    const p=(r["LISTING'S NICKNAME"]||"").trim();
+    if(p) propSet[p]=true;
+  });
 
-html += "<div style='margin-bottom:15px;border-bottom:1px solid #ccc;padding-bottom:10px'>";
-html += "<label style='font-weight:bold;margin-right:5px'>REPORT TYPE</label>";
-html += "<select id='incomeType' style='width:150px' onchange='incomeTypeChanged()'>";
-html += "<option value='full'>RESERVATION REPORT</option>";
-html += "<option value='gri'>GRI REPORT</option>";
-html += "</select>";
+  propSel.innerHTML="<option value='all'>ALL PROPERTIES</option>";
+  Object.keys(propSet).sort().forEach(p=>{
+    propSel.innerHTML+="<option value='"+p+"'>"+p+"</option>";
+  });
 
-html += "<label style='font-weight:bold;margin-right:5px'>PROPERTY</label>";
-html += "<select id='incomeProperty' style='width:200px'>";
-
-html += "<option value='all'>ALL PROPERTIES</option>";
-
-Object.keys(propertyTotals).forEach(p=>{
-html += "<option value='"+p+"'>"+p+"</option>";
-});
-
-html += "</select>";
-
-html += "<label style='font-weight:bold;margin-right:5px'>RANGE</label>";
-html += "<select id='dateMode' style='width:180px' onchange='updateDateOptions()'>";
-html += "<option value='dates'>BETWEEN DATES</option>";
-html += "<option value='month'>SPECIFIC MONTH</option>";
-html += "<option value='year'>CURRENT YEAR</option>";
-html += "<option value='lastyear'>LAST YEAR</option>";
-html += "</select>";
- html += "<button onclick='runIncomeReport()' style='padding:6px 14px;background:#000;color:#fff;border:none;border-radius:4px;font-weight:bold'>RUN REPORT</button>";
-
-html += "</div>";
-html += "<div id='dateOptions' style='margin-top:8px'></div>";
-  document.getElementById("mainContent").innerHTML = html;
+  if(current && propSel.querySelector("option[value='"+current.replace(/'/g,"\\'")+"']")){
+    propSel.value=current;
+  }
 }
 
 function runQuickReport(){
@@ -375,19 +382,16 @@ function runQuickReport(){
 
   if(selected === "income" || selected === "gri"){
     showIncomeReport();
-    if(selected === "gri"){
-      setTimeout(function(){
-        const incomeType = document.getElementById("incomeType");
-        if(incomeType){
-          incomeType.value = "gri";
-          incomeTypeChanged();
-        }
-      },10);
+    const incomeType = document.getElementById("incomeType");
+    if(incomeType){
+      incomeType.value = selected === "gri" ? "gri" : "full";
+      incomeTypeChanged();
     }
     return;
   }
 
   if(selected === "1099"){
+    document.getElementById("incomeSidebarControls").style.display="none";
     show1099();
   }
 }
@@ -2105,6 +2109,7 @@ document.getElementById("invoiceHeader").style.display="none";
 
 const type = document.getElementById("incomeType").value;
 const prop = document.getElementById("incomeProperty");
+if(!prop) return;
 
 if(type === "gri"){
 
@@ -2126,6 +2131,7 @@ prop.insertAdjacentHTML("afterbegin","<option value='all'>ALL PROPERTIES</option
 
 const mode = document.getElementById("dateMode").value;
 const box = document.getElementById("dateOptions");
+if(!box) return;
 
 let html = "";
 
