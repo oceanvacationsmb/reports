@@ -12,21 +12,42 @@
       "percent": 0.1,
       "salesFeePercent": 5,
       "type": "payout",
-      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=05b79c86c4688c3409154f48ac9fde1fc59cc31c03126566cc8bfc55813fa89e01619ee48fd16a30476eb01ef6cb77ad9dbeca35b7ca188678462e8278c65022"
+      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=05b79c86c4688c3409154f48ac9fde1fc59cc31c03126566cc8bfc55813fa89e01619ee48fd16a30476eb01ef6cb77ad9dbeca35b7ca188678462e8278c65022",
+      "recurringCharges": []
     },
     "1463 - NICOLE": {
       "email": "",
       "percent": 0.12,
       "salesFeePercent": 5,
       "type": "payout",
-      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=1a58fc1af3815f9023a08e09c590a05f3f3d1c73dbc3ab2e19985ecfe0003aa87acc7e264983e31d5b10a98cf4fd9b4789de3cb864daf2031e42aae6266c92f5"
+      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=1a58fc1af3815f9023a08e09c590a05f3f3d1c73dbc3ab2e19985ecfe0003aa87acc7e264983e31d5b10a98cf4fd9b4789de3cb864daf2031e42aae6266c92f5",
+      "recurringCharges": [
+        {
+          "label": "Pest control",
+          "amount": 45
+        }
+      ]
     },
     "113-15 - MAT": {
       "email": "",
       "percent": 0.12,
       "salesFeePercent": 5,
       "type": "payout",
-      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=bbbab438244300805daaf5485d3b516cbeee616fba7e640fc3b80d0b648c01d13e3f70a2bde2abaf9deb3b661aabf1c17453fd4e6d799f380cfd059df66cf01e"
+      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=bbbab438244300805daaf5485d3b516cbeee616fba7e640fc3b80d0b648c01d13e3f70a2bde2abaf9deb3b661aabf1c17453fd4e6d799f380cfd059df66cf01e",
+      "recurringCharges": [
+        {
+          "label": "Pool cleaning",
+          "amount": 250
+        },
+        {
+          "label": "Pest control",
+          "amount": 45
+        },
+        {
+          "label": "Landscaping",
+          "amount": 90
+        }
+      ]
     },
     "113-13 - CARL": {
       "email": "",
@@ -54,7 +75,21 @@
       "percent": 0.12,
       "salesFeePercent": 10,
       "type": "payout",
-      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=0542d3c012e0c4bb62fe31f35ba940d1e7ee42da5c24e73cedc34d7fd794e256804ae48b3386d18beb91471e751355ca50ebef2512b865d769ea84debeba8ec7"
+      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=0542d3c012e0c4bb62fe31f35ba940d1e7ee42da5c24e73cedc34d7fd794e256804ae48b3386d18beb91471e751355ca50ebef2512b865d769ea84debeba8ec7",
+      "recurringCharges": [
+        {
+          "label": "Pool cleaning",
+          "amount": 250
+        },
+        {
+          "label": "Pest control",
+          "amount": 45
+        },
+        {
+          "label": "Landscaping",
+          "amount": 90
+        }
+      ]
     },
     "469C - ASSAF": {
       "email": "adahabani@gmail.com",
@@ -68,21 +103,47 @@
       "percent": 0.15,
       "salesFeePercent": 5,
       "type": "payout",
-      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=9512389c04f387d631c31f5eb901ae89d56d646ebe156166da68e78502c1c64d6a8bab54753942cc5be2ab33ce8523e5902e9ddfd24285efb4786c2de32225d6"
+      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=9512389c04f387d631c31f5eb901ae89d56d646ebe156166da68e78502c1c64d6a8bab54753942cc5be2ab33ce8523e5902e9ddfd24285efb4786c2de32225d6",
+      "recurringCharges": [
+        {
+          "label": "Pest control",
+          "amount": 45
+        }
+      ]
     },
     "214 - GTI GROUP TAL": {
       "email": "zilkerinvestments@gmail.com",
       "percent": 0.12,
       "salesFeePercent": 10,
       "type": "payout",
-      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=796af50d38fbbedbcec1df5bdd790355a574f67e21a823ba64f9a26cda86cc4d6d7c71552d7c02889a32557ed6185d44de44820881f74e128d66dacd57a70017"
+      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=796af50d38fbbedbcec1df5bdd790355a574f67e21a823ba64f9a26cda86cc4d6d7c71552d7c02889a32557ed6185d44de44820881f74e128d66dacd57a70017",
+      "recurringCharges": [
+        {
+          "label": "Pool cleaning",
+          "amount": 250
+        },
+        {
+          "label": "Pest control",
+          "amount": 45
+        },
+        {
+          "label": "Landscaping",
+          "amount": 90
+        }
+      ]
     },
     "2131 - GSD INVESTMENTS": {
       "email": "office@rodriguezlc.com",
       "percent": 0.15,
       "salesFeePercent": 5,
       "type": "payout",
-      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=e30ca84498f8e9ef64c9ff7ed2f0b40312a0e1df2a2e07044a86518a1233cd332d79595d24282bab03cf63c1d96b5237ba9ca14d35fd450c952b5f36f03eb5a1"
+      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=e30ca84498f8e9ef64c9ff7ed2f0b40312a0e1df2a2e07044a86518a1233cd332d79595d24282bab03cf63c1d96b5237ba9ca14d35fd450c952b5f36f03eb5a1",
+      "recurringCharges": [
+        {
+          "label": "Pest control",
+          "amount": 45
+        }
+      ]
     },
     "4679/204 - MORENA": {
       "email": "",
@@ -103,7 +164,21 @@
       "percent": 0.15,
       "salesFeePercent": 5,
       "type": "payout",
-      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=386c28f3e370968e7efe7e756ef8315d2eb420606a662909377be671d9e966c0271af42d1a8a61d5621646d6d5a2f59bc8e621743bd7fc4c5994d695b4c870e8"
+      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=386c28f3e370968e7efe7e756ef8315d2eb420606a662909377be671d9e966c0271af42d1a8a61d5621646d6d5a2f59bc8e621743bd7fc4c5994d695b4c870e8",
+      "recurringCharges": [
+        {
+          "label": "Pool cleaning",
+          "amount": 250
+        },
+        {
+          "label": "Pest control",
+          "amount": 70
+        },
+        {
+          "label": "Landscaping",
+          "amount": 90
+        }
+      ]
     },
     "ALL PROPERTIES": {
       "email": "",
@@ -219,7 +294,9 @@
     },
     "GC - 1463": {
       "SC": true
-    }
+    },
+    "NMB - 508/1-33S": {},
+    "NMB - 508/2-33S": {}
   },
   "expenses": []
 }
