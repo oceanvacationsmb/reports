@@ -201,13 +201,12 @@ select,input,.btn{font-size:12px}
 <div class="settings-header">REPORTS</div>
 <div class="section">
 <label class="label">REPORT TYPE</label>
-<select id="quickReportType">
+<select id="quickReportType" onchange="runQuickReport()">
 <option value="income">INCOME REPORT</option>
 <option value="gri">GRI REPORT</option>
 <option value="1099">1099</option>
 </select>
 </div>
-<button class="btn btn-info" onclick="runQuickReport()">REPORTS</button>
 <div id="incomeSidebarControls" class="section" style="display:none;border-top:1px solid rgba(255,255,255,.2);padding-top:12px;margin-top:10px">
 <label class="label">PROPERTY</label>
 <select id="incomeProperty"></select>
