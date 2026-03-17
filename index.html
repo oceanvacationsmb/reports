@@ -601,14 +601,23 @@ function applyLoadedData(data){
 }
 
 function loadLocalFallback(){
-  return fetch("data.json",{cache:"no-store"})
-  .then(r=>{
-    if(!r.ok) throw new Error("Local data.json not found");
-    return r.json();
-  })
-  .then(data=>{
-    applyLoadedData(data);
-  });
+  const tryData=fetch("data.json",{cache:"no-store"})
+    .then(r=>{
+      if(!r.ok) throw new Error("Local data.json not found");
+      return r.json();
+    });
+
+  const tryBackup=fetch("BACKUP%20DATA.JSON",{cache:"no-store"})
+    .then(r=>{
+      if(!r.ok) throw new Error("Backup data not found");
+      return r.json();
+    });
+
+  return tryData
+    .catch(()=>tryBackup)
+    .then(data=>{
+      applyLoadedData(data);
+    });
 }
 
 function loadData(){
@@ -619,32 +628,49 @@ function loadData(){
     updateTokenStatus();
   };
 
-  if(!githubToken){
-    loadLocalFallback()
-    .then(finalize)
-    .catch(()=>finalize());
-    return;
-  }
+  // Always hydrate from local files first so owner selector works even when GitHub data is empty/stale.
+  loadLocalFallback()
+  .catch(()=>{})
+  .then(()=>{
+    if(!githubToken){
+      finalize();
+      return;
+    }
 
-  fetch(getGitHubAPI(),{
-    headers:{"Authorization":"token "+githubToken}
-  })
-  .then(r=>{
-    if(!r.ok)throw new Error(r.status);
-    return r.json();
-  })
-  .then(fileData=>{
-    const contentB64=fileData.content.replace(/\n/g,"");
-    const contentDecoded=atob(contentB64.replace(/\n/g,""));
-    const data=JSON.parse(contentDecoded);
-    applyLoadedData(data);
-    finalize();
-  })
-  .catch(()=>{
-    loadLocalFallback()
-    .then(finalize)
-    .catch(()=>finalize());
+    fetch(getGitHubAPI(),{
+      headers:{"Authorization":"token "+githubToken}
+    })
+    .then(r=>{
+      if(!r.ok)throw new Error(r.status);
+      return r.json();
+    })
+    .then(fileData=>{
+      const contentB64=(fileData.content||"").replace(/\n/g,"");
+      const contentDecoded=atob(contentB64);
+      const data=JSON.parse(contentDecoded);
+      const ghOwners=(data&&data.owners)||{};
+
+      if(Object.keys(ghOwners).length>0){
+        applyLoadedData(data);
+      }
+      finalize();
+    })
+    .catch(()=>{
+      finalize();
+    });
   });
+}
+
+function showOwnerSelectionPrompt(){
+  document.getElementById("invoiceHeader").style.display="none";
+  document.getElementById("reportTitle").style.display="";
+  document.getElementById("ownerTitle").style.display="none";
+  document.getElementById("ownerDetails").style.display="none";
+  document.getElementById("periodDate").style.display="none";
+  document.getElementById("reportTitle").textContent="OCEAN VACATIONS ACCOUNTING SYSTEM";
+
+  const count=Object.keys(OWNERS||{}).length;
+  document.getElementById("mainContent").innerHTML="<div style='max-width:760px;margin:20px auto;padding:24px;border:1px solid #d4e1e7;border-radius:12px;background:#f8fcfd'><div style='font-size:20px;font-weight:bold;margin-bottom:12px;color:#173540'>SELECT OWNER</div><div style='color:#40535c'>Choose an owner from the left sidebar to load their dashboard and reports.</div><div style='margin-top:10px;font-weight:bold'>Owners available: "+count+"</div></div>";
 }
 
 function init(){
@@ -656,7 +682,22 @@ function init(){
   }
   updateVendorDropdown();
   document.getElementById("mainContent").innerHTML="";
+
+  const ownerSelect=document.getElementById("ownerSelect");
+  if(currentOwner!=="__ALL__" && currentOwner && !OWNERS[currentOwner]){
+    currentOwner="";
+  }
+  ownerSelect.value=currentOwner;
   toggleOwnerMode();
+
+  if(currentOwner==="__ALL__"){
+    showAllOwnersLandingInfo();
+  }else if(OWNERS[currentOwner]){
+    showOwnerLandingInfo();
+    preloadGuestyData(currentOwner);
+  }else{
+    showOwnerSelectionPrompt();
+  }
 }
 
 function buildOwners(){
@@ -700,6 +741,8 @@ function onOwnerChange(){
       showOwnerLandingInfo();
       preloadGuestyData(currentOwner);
     }
+  }else{
+    showOwnerSelectionPrompt();
   }
 }
 
@@ -811,15 +854,16 @@ function preloadGuestyData(ownerName){
 function toggleOwnerMode(){
   const hasOwner=!!currentOwner;
   document.getElementById("appControls").style.display=hasOwner?"":"none";
-  document.getElementById("mainPanel").style.display=hasOwner?"":"none";
+  document.getElementById("mainPanel").style.display="";
 }
 
 function showOwnerLandingInfo(){
   if(!currentOwner || !OWNERS[currentOwner]) return;
 
   const o=OWNERS[currentOwner];
-  const pmcPercent=getEffectivePmcPercent(t);
-  document.getElementById("ownerDetails").innerHTML="<div class='owner-detail-item'>TYPE: "+t.type.toUpperCase()+"</div><div class='owner-detail-item'>PMC %: "+(pmcPercent*100).toFixed(2)+"%</div>";
+  const pmcPercent=getEffectivePmcPercent(o);
+  const guestyUrl=getOwnerGuestyUrl(currentOwner,false);
+  document.getElementById("ownerDetails").innerHTML="<div class='owner-detail-item'>TYPE: "+(o.type||"payout").toUpperCase()+"</div><div class='owner-detail-item'>PMC %: "+(pmcPercent*100).toFixed(2)+"%</div>";
 
   document.getElementById("invoiceHeader").style.display="none";
   document.getElementById("reportTitle").style.display="";
@@ -829,7 +873,7 @@ function showOwnerLandingInfo(){
 
   document.getElementById("reportTitle").textContent="OWNER OVERVIEW";
   document.getElementById("ownerTitle").textContent=currentOwner.toUpperCase();
-  document.getElementById("ownerDetails").innerHTML="<div class='owner-detail-item'>TYPE: "+(o.type||"payout").toUpperCase()+"</div><div class='owner-detail-item'>PERCENTAGE: "+((num(o.percent)*100).toFixed(2))+"%</div><div class='owner-detail-item'>SALES COMMISSION: "+(num(o.salesFeePercent).toFixed(2))+"%</div>";
+  document.getElementById("ownerDetails").innerHTML="<div class='owner-detail-item'>TYPE: "+(o.type||"payout").toUpperCase()+"</div><div class='owner-detail-item'>PMC %: "+(pmcPercent*100).toFixed(2)+"%</div><div class='owner-detail-item'>SALES COMMISSION: "+(num(o.salesFeePercent).toFixed(2))+"%</div>";
 
   let html="";
   html+="<div style='max-width:760px;margin:10px auto 0 auto;padding:24px;border:1px solid #d4e1e7;border-radius:12px;background:#f8fcfd'>";
