@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ocean Vacations - Reservation Report</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
@@ -12,6 +13,8 @@ body{
 font-family:"Avenir Next","Segoe UI",Arial,sans-serif;
 background:linear-gradient(150deg,#f3f7f8 0%,#edf3f5 100%);
 color:#112026;
+min-height:100vh;
+overflow-x:hidden;
 }
 .sidebar{
 width:300px;
@@ -121,6 +124,7 @@ margin:20px 0;
 .expense-item{background:#555;padding:10px;margin:5px 0;border-radius:3px;border-left:4px solid #28a745;display:flex;justify-content:space-between;align-items:center}
 .expense-item-text{color:#fff;font-size:11px}
 .expense-item-delete{background:#dc3545;color:#fff;border:none;padding:5px 10px;border-radius:3px;cursor:pointer;font-size:9px;font-weight:bold}
+#mainContent{width:100%}
 @media print{
 .sidebar,
 .back-btn,
@@ -143,9 +147,30 @@ box-shadow:none
 }
 
 @media (max-width: 960px){
-.sidebar{position:relative;width:100%;height:auto}
-.main{margin-left:0;width:100%;padding:14px}
-.report-title{font-size:24px}
+.sidebar{position:relative;width:100%;height:auto;padding:16px}
+.main{margin-left:0;width:100%;padding:12px}
+.page{padding:14px;border-radius:12px}
+.report-title{font-size:24px;line-height:1.2}
+.owner-name{font-size:22px}
+.owner-details{font-size:12px;margin-bottom:24px}
+.owner-detail-item{display:block;margin:6px 0}
+.invoice-header{flex-direction:column;gap:14px;align-items:flex-start}
+.action-buttons button{width:100%}
+.summary-grid{grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+#mainContent{overflow-x:auto}
+table{min-width:760px}
+}
+
+@media (max-width: 640px){
+.sidebar h3{font-size:15px;margin-bottom:14px;padding-bottom:10px}
+.label{font-size:10px}
+select,input,.btn{font-size:12px}
+.btn{padding:10px}
+.modal{width:96%;padding:18px;max-height:92vh}
+.modal-title{font-size:16px}
+.modal-actions{flex-direction:column}
+.property-section{padding:12px}
+.report-title{font-size:20px}
 }
   
   @media print{
