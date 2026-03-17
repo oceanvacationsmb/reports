@@ -293,7 +293,8 @@
       "HC": true
     },
     "GC - 1463": {
-      "SC": true
+      "SC": true,
+      "GTC": true,
     },
     "NMB - 508/1-33S": {},
     "NMB - 508/2-33S": {}
