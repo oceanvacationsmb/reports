@@ -213,9 +213,9 @@ select,input,.btn{font-size:12px}
 <select id="incomeProperty"></select>
 <label class="label">RANGE</label>
 <select id="dateMode" onchange="updateDateOptions()">
+<option value="year" selected>CURRENT YEAR</option>
 <option value="dates">BETWEEN DATES</option>
 <option value="month">SPECIFIC MONTH</option>
-<option value="year">CURRENT YEAR</option>
 <option value="lastyear">LAST YEAR</option>
 </select>
 <div id="dateOptions" style="margin-top:8px"></div>
@@ -406,6 +406,7 @@ document.getElementById("periodDate").style.display="none";
   document.getElementById("reportTitle").textContent = "INCOME REPORT";
   populateIncomePropertyOptions();
   document.getElementById("incomeSidebarControls").style.display="";
+  document.getElementById("dateMode").value="year";
   incomeTypeChanged();
   updateDateOptions();
   document.getElementById("mainContent").innerHTML = "<div class='property-section'><div style='font-size:13px;color:#666'>Use the filters in the left sidebar, then click RUN REPORT.</div></div>";
@@ -776,6 +777,7 @@ function onOwnerChange(){
       showOwnerLandingInfo();
       preloadGuestyData(currentOwner);
       generateStatement(true);
+      runQuickReport();
     }
   }else{
     showOwnerSelectionPrompt();
