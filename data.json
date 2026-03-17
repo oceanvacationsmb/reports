@@ -37,27 +37,15 @@
       "recurringCharges": [
         {
           "label": "Pool cleaning",
-          "amount": 0
-        },
-        {
-          "label": "$250",
-          "amount": 0
+          "amount": 250
         },
         {
           "label": "Pest control",
-          "amount": 0
-        },
-        {
-          "label": "$45",
-          "amount": 0
+          "amount": 45
         },
         {
           "label": "Landscaping",
-          "amount": 0
-        },
-        {
-          "label": "$90",
-          "amount": 0
+          "amount": 90
         }
       ]
     },
