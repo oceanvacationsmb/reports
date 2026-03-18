@@ -200,6 +200,8 @@ select,input,.btn{font-size:12px}
 <button id="generateStatementBtn" class="btn btn-primary" onclick="generateStatement()">GENERATE REPORT</button>
 <button id="addExpenseBtnSidebar" class="btn btn-success" onclick="openAddExpense()" style="font-size:13px;font-weight:bold">ADD EXPENSE</button>
 <button id="summaryBtn" class="btn btn-success" onclick="generateSummary()">SUMMARY REPORT</button>
+<button id="emailClientBtn" class="btn btn-success" onclick="openEmailClient()">EMAIL CLIENT</button>
+<button id="savedReportsBtn" class="btn btn-primary" onclick="showHistory()">SAVED REPORTS</button>
 <div id="reportsHeader" class="settings-header">REPORTS</div>
 <div id="reportTypeSection" class="section">
 <label class="label">REPORT TYPE</label>
@@ -296,6 +298,23 @@ select,input,.btn{font-size:12px}
 </div>
 </div>
 
+<div id="emailModal" class="modal">
+<div>
+<div class="modal-title">EMAIL CLIENT</div>
+<div class="modal-field"><label class="modal-label">TO</label><input type="email" id="emailTo" class="modal-input" placeholder="owner@email.com"></div>
+<div class="modal-field"><label class="modal-label">SUBJECT</label><input type="text" id="emailSubject" class="modal-input"></div>
+<div class="modal-field"><label class="modal-label">MESSAGE</label><textarea id="emailMessage" class="modal-input" style="min-height:130px;resize:vertical"></textarea></div>
+<div class="modal-field"><label class="modal-label">REPORT LINK</label><input type="text" id="emailLink" class="modal-input" readonly placeholder="Click GENERATE LINK"></div>
+<div id="emailStatus" style="font-size:11px;color:#a9bdc5;min-height:18px"></div>
+<div class="modal-actions">
+<button class="btn-save" onclick="generateEmailReportLink()">GENERATE LINK</button>
+<button class="btn-add" onclick="copyEmailLink()">COPY LINK</button>
+<button class="btn-save" onclick="sendEmailClient()">SEND</button>
+<button class="btn-cancel" onclick="closeAll()">CLOSE</button>
+</div>
+</div>
+</div>
+
 <div id="expenseModal" class="modal">
 <div>
 <div class="modal-title">ADD EXPENSE</div>
@@ -346,6 +365,8 @@ function getGitHubAPI(){
 
 let gitHubData={},OWNERS={},USERS={},vendors=[],expenses=[],csvData=[],propertySettings={},currentOwner="",masterTotals={},propertyTotals={},taxByProperty={},githubToken="";
 let sessionExpenses=[];
+let savedReports=[];
+let pendingEmailSnapshotId="";
 const municipalities=["SC","MB","NMB","SSB","HC","GTC"];
 const defaultGuestyUrl="https://report.guesty.com/apps/reservations?apiKey=d6ab951850fef54399e2206f36f4e79fb1b425a8e5c891076036b11f50da8870613a226021487307c8c5f51eae997a08dd7e112d013ef683728ad1d9220ee0b7";
 let guestyPreloadByOwner={};
@@ -474,6 +495,8 @@ function applyAccessControls(){
   const generateStatementBtn=document.getElementById("generateStatementBtn");
   const addExpenseBtnSidebar=document.getElementById("addExpenseBtnSidebar");
   const summaryBtn=document.getElementById("summaryBtn");
+  const emailClientBtn=document.getElementById("emailClientBtn");
+  const savedReportsBtn=document.getElementById("savedReportsBtn");
   const reportsHeader=document.getElementById("reportsHeader");
   const reportTypeSection=document.getElementById("reportTypeSection");
   const settingsHeader=document.getElementById("settingsHeader");
@@ -510,6 +533,8 @@ function applyAccessControls(){
       generateStatementBtn.style.display="none";
       addExpenseBtnSidebar.style.display="none";
       summaryBtn.style.display="none";
+      emailClientBtn.style.display="none";
+      savedReportsBtn.style.display="";
       reportsHeader.style.display="";
       reportTypeSection.style.display="none";
       document.getElementById("incomeSidebarControls").style.display="";
@@ -519,6 +544,8 @@ function applyAccessControls(){
       generateStatementBtn.style.display="";
       addExpenseBtnSidebar.style.display="none";
       summaryBtn.style.display="none";
+      emailClientBtn.style.display="none";
+      savedReportsBtn.style.display="";
       reportsHeader.style.display="none";
       reportTypeSection.style.display="none";
       document.getElementById("incomeSidebarControls").style.display="none";
@@ -534,6 +561,8 @@ function applyAccessControls(){
   generateStatementBtn.style.display="";
   addExpenseBtnSidebar.style.display="";
   summaryBtn.style.display="";
+  emailClientBtn.style.display="";
+  savedReportsBtn.style.display="";
   reportsHeader.style.display="";
   reportTypeSection.style.display="";
   settingsHeader.style.display="";
@@ -713,6 +742,7 @@ toDate = y + "-12-31";
   }
 
   getRows.then(rows=>{
+    const ownerPortal=isOwnerPortalUser();
     const propertyNameByKey={};
     const propertyAddressByKey={};
     (rows||[]).forEach(r=>{
@@ -795,23 +825,281 @@ toDate = y + "-12-31";
     }
 
     html+="</div>";
-    document.getElementById("mainContent").innerHTML="<div class='action-buttons'><button class='copy-link-btn' onclick='downloadIncomePDF()'>DOWNLOAD PDF</button></div><div id='incomeReportResult'>"+html+"</div>";
+    let actionHtml="<div class='action-buttons'><button class='copy-link-btn' onclick='downloadIncomePDF()'>DOWNLOAD PDF</button>";
+    if(!ownerPortal){
+      actionHtml+="<button class='copy-link-btn' onclick='saveCurrentReportSnapshot()'>SAVE SNAPSHOT</button><button class='copy-link-btn' onclick='openEmailClient()'>EMAIL CLIENT</button>";
+    }
+    actionHtml+="</div>";
+    document.getElementById("mainContent").innerHTML=actionHtml+"<div id='incomeReportResult'>"+html+"</div>";
   }).catch(err=>{
     alert("Failed to run report: "+err.message);
   });
 }
+function getCurrentReportKey(){
+  if(currentView==="gri") return "gri";
+  if(currentView==="income") return "income";
+  if(currentView==="statement") return "statement";
+  if(currentView==="summary") return "summary";
+  return "";
+}
+
+function getCurrentPeriodLabel(){
+  const monthNames=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const month=parseInt(document.getElementById("monthSelect").value||"0",10);
+  const year=parseInt(document.getElementById("yearSelect").value||"0",10);
+  if(month>=1 && month<=12 && year){
+    return monthNames[month-1]+" "+year;
+  }
+  return new Date().toLocaleDateString();
+}
+
+function getPayoutProcessingDateLabel(){
+  const month=parseInt(document.getElementById("monthSelect").value||"0",10);
+  const year=parseInt(document.getElementById("yearSelect").value||"0",10);
+  if(!(month>=1 && month<=12 && year)) return "the 5th of next month";
+  let nextMonth=month+1;
+  let nextYear=year;
+  if(nextMonth>12){
+    nextMonth=1;
+    nextYear++;
+  }
+  const monthNames=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  return monthNames[nextMonth-1]+" 5, "+nextYear;
+}
+
+function getCurrentReportTitle(){
+  const key=getCurrentReportKey();
+  if(key==="gri") return "GRI Report";
+  if(key==="income") return "Income Report";
+  if(key==="summary") return "Summary Report";
+  return "Statement";
+}
+
+function getCurrentReportHtml(){
+  const main=document.getElementById("mainContent");
+  if(!main) return "";
+  const clone=main.cloneNode(true);
+  clone.querySelectorAll(".action-buttons").forEach(el=>el.remove());
+  return clone.innerHTML;
+}
+
+function buildSavedReportLink(reportId){
+  const base=window.location.href.split("#")[0];
+  return base+"#saved-report="+encodeURIComponent(reportId);
+}
+
+function canSnapshotCurrentView(){
+  const key=getCurrentReportKey();
+  return key==="statement" || key==="income" || key==="gri" || key==="summary";
+}
+
+function createReportSnapshot(done){
+  if(!canSnapshotCurrentView()){
+    alert("Generate a report first (Statement, Income, GRI or Summary)");
+    return;
+  }
+  if(!githubToken){
+    alert("GitHub token required to save a shareable report link. Click GITHUB SETUP first.");
+    return;
+  }
+
+  const html=getCurrentReportHtml();
+  if(!html || !html.trim()){
+    alert("No report content found to save");
+    return;
+  }
+
+  const reportId="rpt_"+Date.now();
+  const ownerEmail=(OWNERS[currentOwner] && OWNERS[currentOwner].email) ? OWNERS[currentOwner].email : "";
+  const snapshot={
+    id:reportId,
+    createdAt:new Date().toISOString(),
+    owner:currentOwner||"",
+    reportKey:getCurrentReportKey(),
+    reportTitle:getCurrentReportTitle(),
+    period:getCurrentPeriodLabel(),
+    email:ownerEmail,
+    html:html,
+    createdBy:isOwnerPortalUser() ? (currentUserSession.username||"owner") : "admin"
+  };
+
+  savedReports.unshift(snapshot);
+  if(savedReports.length>500){
+    savedReports=savedReports.slice(0,500);
+  }
+
+  saveToGitHub("saved reports",()=>{
+    if(typeof done==="function") done(snapshot);
+  });
+}
+
+function saveCurrentReportSnapshot(){
+  createReportSnapshot(snapshot=>{
+    alert("Saved report snapshot: "+snapshot.id);
+  });
+}
+
+function formatEmailTemplate(reportTitle,periodLabel,payoutDate,link){
+  return "Hi,\n\nHere is your "+reportTitle+" for "+periodLabel+".\nThe payout amount will be processed on "+payoutDate+".\n\nReport link:\n"+link+"\n\nThank you,\nOcean Vacations";
+}
+
+function openEmailClient(reportId){
+  if(isOwnerPortalUser()){
+    alert("Email sending is available in admin mode only");
+    return;
+  }
+  if(!reportId && !canSnapshotCurrentView()){
+    alert("Generate a report first, then open EMAIL CLIENT");
+    return;
+  }
+  let snapshot=null;
+  if(reportId){
+    snapshot=(savedReports||[]).find(r=>r.id===reportId) || null;
+  }
+
+  const reportTitle=snapshot ? snapshot.reportTitle : getCurrentReportTitle();
+  const periodLabel=snapshot ? snapshot.period : getCurrentPeriodLabel();
+  const ownerName=snapshot ? snapshot.owner : currentOwner;
+  const ownerEmail=snapshot ? snapshot.email : ((OWNERS[ownerName]&&OWNERS[ownerName].email)?OWNERS[ownerName].email:"");
+
+  document.getElementById("emailTo").value=ownerEmail||"";
+  document.getElementById("emailSubject").value="Ocean Vacations - "+reportTitle+" - "+periodLabel;
+  document.getElementById("emailLink").value=snapshot ? buildSavedReportLink(snapshot.id) : "";
+  document.getElementById("emailStatus").textContent=snapshot?"Link ready. You can edit and send.":"Click GENERATE LINK to create a shareable report URL.";
+
+  const payoutDate=getPayoutProcessingDateLabel();
+  const prefilledLink=document.getElementById("emailLink").value || "[link will be generated]";
+  document.getElementById("emailMessage").value=formatEmailTemplate(reportTitle,periodLabel,payoutDate,prefilledLink);
+
+  pendingEmailSnapshotId=snapshot ? snapshot.id : "";
+  openModal("emailModal");
+}
+
+function generateEmailReportLink(){
+  document.getElementById("emailStatus").textContent="Generating report link...";
+  createReportSnapshot(snapshot=>{
+    const link=buildSavedReportLink(snapshot.id);
+    pendingEmailSnapshotId=snapshot.id;
+    document.getElementById("emailLink").value=link;
+
+    const reportTitle=snapshot.reportTitle||getCurrentReportTitle();
+    const periodLabel=snapshot.period||getCurrentPeriodLabel();
+    const payoutDate=getPayoutProcessingDateLabel();
+    document.getElementById("emailMessage").value=formatEmailTemplate(reportTitle,periodLabel,payoutDate,link);
+    document.getElementById("emailStatus").textContent="Link created and message preloaded.";
+  });
+}
+
+function copyEmailLink(){
+  const link=(document.getElementById("emailLink").value||"").trim();
+  if(!link) return alert("Generate a link first");
+  navigator.clipboard.writeText(link).then(()=>{
+    document.getElementById("emailStatus").textContent="Link copied to clipboard.";
+  }).catch(()=>{
+    document.getElementById("emailStatus").textContent="Could not copy automatically. Please copy manually.";
+  });
+}
+
+function sendEmailClient(){
+  const to=(document.getElementById("emailTo").value||"").trim();
+  const subject=(document.getElementById("emailSubject").value||"").trim();
+  const message=(document.getElementById("emailMessage").value||"").trim();
+  if(!to) return alert("Recipient email is required");
+  if(!subject) return alert("Subject is required");
+  if(!message) return alert("Message is required");
+  const mailto="mailto:"+encodeURIComponent(to)+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(message);
+  window.location.href=mailto;
+}
+
+function openSavedReport(reportId){
+  const report=(savedReports||[]).find(r=>r.id===reportId);
+  if(!report){
+    alert("Saved report not found");
+    return;
+  }
+  if(isOwnerPortalUser() && report.owner!==currentUserSession.owner){
+    alert("Not allowed");
+    return;
+  }
+
+  currentView="saved-report";
+  document.getElementById("invoiceHeader").style.display="none";
+  document.getElementById("reportTitle").style.display="";
+  document.getElementById("ownerTitle").style.display="";
+  document.getElementById("ownerDetails").style.display="none";
+  document.getElementById("periodDate").style.display="none";
+  document.getElementById("reportTitle").textContent=report.reportTitle+" (SAVED)";
+  document.getElementById("ownerTitle").textContent=(report.owner||"REPORT").toUpperCase();
+
+  let html="<div class='action-buttons'><button class='back-btn' onclick='showHistory()'>BACK</button>";
+  if(!isOwnerPortalUser()){
+    html+="<button class='copy-link-btn' onclick='openEmailClient(\""+report.id+"\")'>EMAIL CLIENT</button>";
+  }
+  html+="<button class='copy-link-btn' onclick='copySavedReportLink(\""+report.id+"\")'>COPY LINK</button></div>";
+  html+="<div style='font-size:12px;color:#667;padding:0 4px 10px 4px'>Saved: "+new Date(report.createdAt).toLocaleString()+" | Period: "+(report.period||"-")+"</div>";
+  html+=report.html||"";
+  document.getElementById("mainContent").innerHTML=html;
+  location.hash="saved-report="+encodeURIComponent(report.id);
+}
+
+function copySavedReportLink(reportId){
+  const link=buildSavedReportLink(reportId);
+  navigator.clipboard.writeText(link).then(()=>{
+    alert("Link copied");
+  }).catch(()=>{
+    alert("Could not copy automatically. Link: "+link);
+  });
+}
+
 function showHistory(){
+  currentView="history";
+  document.getElementById("invoiceHeader").style.display="none";
+  document.getElementById("reportTitle").style.display="";
+  document.getElementById("ownerTitle").style.display="none";
+  document.getElementById("ownerDetails").style.display="none";
+  document.getElementById("periodDate").style.display="none";
+  document.getElementById("reportTitle").textContent="SAVED REPORTS";
 
-  document.getElementById("reportTitle").textContent = "HISTORY";
+  const ownerFilter=isOwnerPortalUser() ? currentUserSession.owner : "";
+  const rows=(savedReports||[])
+    .filter(r=>!ownerFilter || r.owner===ownerFilter)
+    .sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
 
-  let html = "<div class='property-section'>";
-  html += "<div style='font-weight:bold;margin-bottom:10px'>History</div>";
-  html += "<div style='color:#666;font-size:12px'>";
-  html += "History will display saved monthly reports in future.";
-  html += "</div>";
-  html += "</div>";
+  let html="<div class='property-section'>";
+  html+="<div style='font-size:13px;color:#566; margin-bottom:10px'>"+(ownerFilter?"Showing your saved reports":"Showing all saved reports")+"</div>";
+  if(rows.length===0){
+    html+="<div style='padding:12px;border:1px solid #d8e4ea;border-radius:8px;background:#fff'>No saved reports yet.</div>";
+  }else{
+    html+="<table><tr><th>DATE</th><th>OWNER</th><th>REPORT</th><th>PERIOD</th><th>ACTIONS</th></tr>";
+    rows.forEach(r=>{
+      html+="<tr>";
+      html+="<td>"+new Date(r.createdAt).toLocaleString()+"</td>";
+      html+="<td>"+(r.owner||"-")+"</td>";
+      html+="<td>"+(r.reportTitle||r.reportKey||"Report")+"</td>";
+      html+="<td>"+(r.period||"-")+"</td>";
+      html+="<td><button class='btn btn-small btn-primary' onclick='openSavedReport(\""+r.id+"\")'>OPEN</button> <button class='btn btn-small btn-success' onclick='copySavedReportLink(\""+r.id+"\")'>COPY LINK</button>";
+      if(!isOwnerPortalUser()){
+        html+=" <button class='btn btn-small btn-info' onclick='openEmailClient(\""+r.id+"\")'>EMAIL</button>";
+      }
+      html+="</td>";
+      html+="</tr>";
+    });
+    html+="</table>";
+  }
+  html+="</div>";
+  document.getElementById("mainContent").innerHTML=html;
+}
 
-  document.getElementById("mainContent").innerHTML = html;
+function loadSavedReportFromHash(){
+  const hash=(window.location.hash||"").replace(/^#/,'');
+  if(!hash) return;
+  if(hash.indexOf("saved-report=")!==0) return;
+  const id=decodeURIComponent(hash.substring("saved-report=".length));
+  if(!id) return;
+  const exists=(savedReports||[]).some(r=>r.id===id);
+  if(exists){
+    openSavedReport(id);
+  }
 }
 
 function show1099(){
@@ -854,6 +1142,7 @@ function applyLoadedData(data){
   vendors=(data&&data.vendors)||[];
   expenses=(data&&data.expenses)||[];
   propertySettings=(data&&data.properties)||{};
+  savedReports=(data&&data.savedReports)||[];
 }
 
 function loadLocalFallback(){
@@ -975,6 +1264,8 @@ function init(){
   }else{
     showOwnerSelectionPrompt();
   }
+
+  loadSavedReportFromHash();
 }
 
 function buildOwners(){
@@ -1498,7 +1789,7 @@ function saveToGitHub(type,callback){
     return;
   }
   
-  const data=JSON.stringify({owners:OWNERS,users:USERS,vendors:vendors,properties:propertySettings,expenses:expenses},null,2);
+  const data=JSON.stringify({owners:OWNERS,users:USERS,vendors:vendors,properties:propertySettings,expenses:expenses,savedReports:savedReports},null,2);
   const content=btoa(unescape(encodeURIComponent(data)));
   
   function attemptSave(retryCount=0){
@@ -1918,7 +2209,11 @@ const nonRecurringExpenses=masterTotals.expenses-recurringTotal;
 const ownerPortal=isOwnerPortalUser();
  
   const type=t.type;
-  let html="<div class='action-buttons'><button class='copy-link-btn' onclick='downloadPDF()'>📄 DOWNLOAD PDF</button></div>";
+  let html="<div class='action-buttons'><button class='copy-link-btn' onclick='downloadPDF()'>📄 DOWNLOAD PDF</button>";
+  if(!ownerPortal){
+    html+="<button class='copy-link-btn' onclick='saveCurrentReportSnapshot()'>SAVE SNAPSHOT</button><button class='copy-link-btn' onclick='openEmailClient()'>EMAIL CLIENT</button>";
+  }
+  html+="</div>";
 
 html+="<div style='max-width:750px;margin:25px auto;padding:20px;border:2px solid #000;background:#fff;border-radius:5px'>";
 html+="<div style='font-size:18px;font-weight:bold;text-align:center;margin-bottom:15px'>SUMMARY</div>";
@@ -2289,7 +2584,7 @@ document.getElementById("periodDate").style.display="none";
   const recurringTotal=masterTotals.recurring||0;
   const nonRecurringExpenses=masterTotals.expenses-recurringTotal;
   
-  let html="<div class='action-buttons'><button class='back-btn' onclick='generateStatement()'>← BACK</button><button class='print-btn' onclick='window.print()'>🖨️ PRINT</button></div>";
+  let html="<div class='action-buttons'><button class='back-btn' onclick='generateStatement()'>← BACK</button><button class='print-btn' onclick='window.print()'>🖨️ PRINT</button><button class='copy-link-btn' onclick='saveCurrentReportSnapshot()'>SAVE SNAPSHOT</button><button class='copy-link-btn' onclick='openEmailClient()'>EMAIL CLIENT</button></div>";
   html += "<div style='text-align:center;margin:20px 0'>";
 
   html += "<div style='font-size:22px;font-weight:bold'>"+currentOwner.toUpperCase()+"</div>";
@@ -2451,7 +2746,7 @@ async function generateAllOwnersSummary(){
   currentOwner=savedOwner;
   csvData=savedCsv;
 
-  let html="<div class='action-buttons'><button class='copy-link-btn' onclick='downloadPDF()'>DOWNLOAD PDF</button></div>";
+  let html="<div class='action-buttons'><button class='copy-link-btn' onclick='downloadPDF()'>DOWNLOAD PDF</button><button class='copy-link-btn' onclick='saveCurrentReportSnapshot()'>SAVE SNAPSHOT</button><button class='copy-link-btn' onclick='openEmailClient()'>EMAIL CLIENT</button></div>";
   html+="<div class='property-section'>";
   html+="<div class='summary-title'>ALL OWNERS TAX REPORT</div>";
   html+="<table>";
@@ -2598,6 +2893,11 @@ if(incomeYear) incomeYear.value=String(new Date().getFullYear());
 }
 
 }
+
+window.addEventListener("hashchange",function(){
+  loadSavedReportFromHash();
+});
+
 loadData();
  
  function deleteExpenseLocal(id){
