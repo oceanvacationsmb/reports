@@ -185,7 +185,7 @@
       "percent": 0,
       "salesFeePercent": 5,
       "type": "payout",
-      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=40fb2b4c729d99d0328d7f98b4a2a2d2b2e89c2dc635f5f055a35e75641ba8299056cb3b25c65c44edd014f23d17c64eeb34d0ed04deb0105e44436c5ea23811",
+      "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=b7a2056fa26f50386646cdb70fed37a2b3ace2ff3e329837a14c7f49baa65f66be1c89221558f4eab64374a81fbdcb83ed11614c622cf7f5f5bedbf7525daa14",
       "recurringCharges": []
     }
   },
