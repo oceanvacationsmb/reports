@@ -189,16 +189,19 @@ select,input,.btn{font-size:12px}
 <body>
 <div class="sidebar">
 <h3>OCEAN VACATIONS INC.</h3>
+<div id="userSessionStatus" style="font-size:11px;color:#c7d7dd;margin-bottom:10px">MODE: ADMIN</div>
+<button id="ownerLoginBtn" class="btn btn-success" onclick="openLoginModal()" style="font-size:11px">OWNER LOGIN</button>
+<button id="ownerLogoutBtn" class="btn btn-danger" onclick="logoutUser()" style="font-size:11px;display:none">LOGOUT</button>
 <div id="tokenStatus" class="token-status token-inactive">LOADING...</div>
-<div class="section"><label class="label">SELECT OWNER</label><select id="ownerSelect" onchange="onOwnerChange()"><option value="">-- SELECT --</option></select></div>
+<div class="section" id="ownerSelectSection"><label class="label">SELECT OWNER</label><select id="ownerSelect" onchange="onOwnerChange()"><option value="">-- SELECT --</option></select></div>
 <div id="appControls" style="display:none">
 <div class="section"><label class="label">MONTH</label><select id="monthSelect" onchange="onPeriodChange()"></select></div>
 <div class="section"><label class="label">YEAR</label><select id="yearSelect" onchange="onPeriodChange()"></select></div>
-<button class="btn btn-primary" onclick="generateStatement()">GENERATE REPORT</button>
-<button class="btn btn-success" onclick="openAddExpense()" style="font-size:13px;font-weight:bold">ADD EXPENSE</button>
-<button class="btn btn-success" onclick="generateSummary()">SUMMARY REPORT</button>
-<div class="settings-header">REPORTS</div>
-<div class="section">
+<button id="generateStatementBtn" class="btn btn-primary" onclick="generateStatement()">GENERATE REPORT</button>
+<button id="addExpenseBtnSidebar" class="btn btn-success" onclick="openAddExpense()" style="font-size:13px;font-weight:bold">ADD EXPENSE</button>
+<button id="summaryBtn" class="btn btn-success" onclick="generateSummary()">SUMMARY REPORT</button>
+<div id="reportsHeader" class="settings-header">REPORTS</div>
+<div id="reportTypeSection" class="section">
 <label class="label">REPORT TYPE</label>
 <select id="quickReportType" onchange="runQuickReport()">
 <option value="income">INCOME REPORT</option>
@@ -219,13 +222,14 @@ select,input,.btn{font-size:12px}
 <div id="dateOptions" style="margin-top:8px"></div>
 <button class="btn btn-primary" onclick="runIncomeReport()">RUN REPORT</button>
 </div>
-<div class="settings-header">SETTINGS</div>
-<button class="btn btn-info" onclick="openOwners()" style="font-size:11px">OWNER SETTINGS</button>
-<button class="btn btn-info" onclick="openTax()" style="font-size:11px">TAX SETTINGS </button>
-<button class="btn btn-info" onclick="openVendorSettings()" style="font-size:11px">VENDORS</button>
+<div id="settingsHeader" class="settings-header">SETTINGS</div>
+<button id="ownerSettingsBtn" class="btn btn-info" onclick="openOwners()" style="font-size:11px">OWNER SETTINGS</button>
+<button id="taxSettingsBtn" class="btn btn-info" onclick="openTax()" style="font-size:11px">TAX SETTINGS </button>
+<button id="vendorSettingsBtn" class="btn btn-info" onclick="openVendorSettings()" style="font-size:11px">VENDORS</button>
+<button id="userSettingsBtn" class="btn btn-info" onclick="openUsers()" style="font-size:11px">USER SETTINGS</button>
 <hr style="border:1px solid #555;margin:20px 0">
-<button class="btn btn-warning" onclick="setupToken()" style="font-size:11px">GITHUB SETUP</button>
-<button class="btn btn-warning" onclick="setupDropbox()" style="font-size:11px">DROPBOX SETUP</button>
+<button id="githubSetupBtn" class="btn btn-warning" onclick="setupToken()" style="font-size:11px">GITHUB SETUP</button>
+<button id="dropboxSetupBtn" class="btn btn-warning" onclick="setupDropbox()" style="font-size:11px">DROPBOX SETUP</button>
 </div>
 </div>
 
@@ -266,6 +270,29 @@ select,input,.btn{font-size:12px}
 <button class="btn btn-success" onclick="addNewVendor()" style="width:100%;margin-bottom:20px">ADD VENDOR</button>
 <div id="vendorSettingsList" style="max-height:350px;overflow-y:auto;margin-bottom:20px"></div>
 <div class="modal-actions"><button class="btn-save" onclick="saveVendorData()">SAVE ALL</button><button class="btn-cancel" onclick="closeAll()">CLOSE</button></div>
+</div>
+</div>
+
+<div id="usersModal" class="modal">
+<div>
+<div class="modal-title">USER MANAGEMENT</div>
+<div class="modal-field"><label class="modal-label">USERNAME</label><input type="text" id="newUsername" class="modal-input" placeholder="owner_username"></div>
+<div class="modal-field"><label class="modal-label">PASSWORD</label><input type="password" id="newUserPassword" class="modal-input" placeholder="Password"></div>
+<div class="modal-field"><label class="modal-label">OWNER</label><select id="newUserOwner" class="modal-input"></select></div>
+<div class="modal-field"><label class="modal-label">DISPLAY NAME (OPTIONAL)</label><input type="text" id="newUserDisplayName" class="modal-input" placeholder="Owner Full Name"></div>
+<button class="btn btn-success" onclick="addPortalUser()" style="width:100%;margin-bottom:20px">ADD USER</button>
+<div id="usersList" style="max-height:350px;overflow-y:auto;margin-bottom:20px"></div>
+<div class="modal-actions"><button class="btn-save" onclick="saveUserData()">SAVE ALL</button><button class="btn-cancel" onclick="closeAll()">CLOSE</button></div>
+</div>
+</div>
+
+<div id="loginModal" class="modal">
+<div>
+<div class="modal-title">OWNER LOGIN</div>
+<div class="modal-field"><label class="modal-label">USERNAME</label><input type="text" id="loginUsername" class="modal-input" placeholder="Username"></div>
+<div class="modal-field"><label class="modal-label">PASSWORD</label><input type="password" id="loginPassword" class="modal-input" placeholder="Password"></div>
+<div id="loginError" style="font-size:11px;color:#ffb3b3;min-height:18px"></div>
+<div class="modal-actions"><button class="btn-save" onclick="submitLogin()">LOGIN</button><button class="btn-cancel" onclick="closeAll()">CANCEL</button></div>
 </div>
 </div>
 
@@ -317,13 +344,14 @@ function getGitHubAPI(){
   return "https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json";
 }
 
-let gitHubData={},OWNERS={},vendors=[],expenses=[],csvData=[],propertySettings={},currentOwner="",masterTotals={},propertyTotals={},taxByProperty={},githubToken="";
+let gitHubData={},OWNERS={},USERS={},vendors=[],expenses=[],csvData=[],propertySettings={},currentOwner="",masterTotals={},propertyTotals={},taxByProperty={},githubToken="";
 let sessionExpenses=[];
 const municipalities=["SC","MB","NMB","SSB","HC","GTC"];
 const defaultGuestyUrl="https://report.guesty.com/apps/reservations?apiKey=d6ab951850fef54399e2206f36f4e79fb1b425a8e5c891076036b11f50da8870613a226021487307c8c5f51eae997a08dd7e112d013ef683728ad1d9220ee0b7";
 let guestyPreloadByOwner={};
 let currentReportMode="income";
 let currentView="landing";
+let currentUserSession=null;
 
 function num(v){return parseFloat((v||"0").toString().replace(/[$,]/g,""))||0;}
 function money(v){
@@ -390,6 +418,134 @@ function getMunicipalityLabel(propertyName){
   return selected.length?selected.join(", "):"NOT SET";
 }
 
+function isOwnerPortalUser(){
+  return !!(currentUserSession && currentUserSession.username);
+}
+
+function getOwnerPortalType(){
+  if(!isOwnerPortalUser()) return "";
+  const ownerName=currentUserSession.owner;
+  const owner=OWNERS[ownerName]||{};
+  return (owner.type||"payout").toLowerCase();
+}
+
+function getUserStorageKey(){
+  return "owner_portal_user";
+}
+
+function restoreUserSession(){
+  const username=(localStorage.getItem(getUserStorageKey())||"").trim();
+  if(!username) return;
+  if(!USERS[username]){
+    localStorage.removeItem(getUserStorageKey());
+    return;
+  }
+  currentUserSession={
+    username:username,
+    owner:USERS[username].owner,
+    displayName:USERS[username].displayName||username
+  };
+}
+
+function setUserSession(username){
+  if(!USERS[username]) return;
+  currentUserSession={
+    username:username,
+    owner:USERS[username].owner,
+    displayName:USERS[username].displayName||username
+  };
+  localStorage.setItem(getUserStorageKey(),username);
+}
+
+function clearUserSession(){
+  currentUserSession=null;
+  localStorage.removeItem(getUserStorageKey());
+}
+
+function applyAccessControls(){
+  const ownerPortal=isOwnerPortalUser();
+  const portalType=getOwnerPortalType();
+
+  const userSessionStatus=document.getElementById("userSessionStatus");
+  const ownerLoginBtn=document.getElementById("ownerLoginBtn");
+  const ownerLogoutBtn=document.getElementById("ownerLogoutBtn");
+  const ownerSelect=document.getElementById("ownerSelect");
+
+  const generateStatementBtn=document.getElementById("generateStatementBtn");
+  const addExpenseBtnSidebar=document.getElementById("addExpenseBtnSidebar");
+  const summaryBtn=document.getElementById("summaryBtn");
+  const reportsHeader=document.getElementById("reportsHeader");
+  const reportTypeSection=document.getElementById("reportTypeSection");
+  const settingsHeader=document.getElementById("settingsHeader");
+  const ownerSettingsBtn=document.getElementById("ownerSettingsBtn");
+  const taxSettingsBtn=document.getElementById("taxSettingsBtn");
+  const vendorSettingsBtn=document.getElementById("vendorSettingsBtn");
+  const userSettingsBtn=document.getElementById("userSettingsBtn");
+  const githubSetupBtn=document.getElementById("githubSetupBtn");
+  const dropboxSetupBtn=document.getElementById("dropboxSetupBtn");
+  const tokenStatus=document.getElementById("tokenStatus");
+
+  if(ownerPortal){
+    const ownerName=currentUserSession.owner;
+    if(OWNERS[ownerName]){
+      currentOwner=ownerName;
+      ownerSelect.value=ownerName;
+    }
+
+    ownerSelect.disabled=true;
+    ownerLoginBtn.style.display="none";
+    ownerLogoutBtn.style.display="";
+    userSessionStatus.textContent="MODE: OWNER PORTAL - "+(currentUserSession.displayName||currentUserSession.username).toUpperCase();
+
+    ownerSettingsBtn.style.display="none";
+    taxSettingsBtn.style.display="none";
+    vendorSettingsBtn.style.display="none";
+    userSettingsBtn.style.display="none";
+    githubSetupBtn.style.display="none";
+    dropboxSetupBtn.style.display="none";
+    settingsHeader.style.display="none";
+    tokenStatus.style.display="none";
+
+    if(portalType==="draft"){
+      generateStatementBtn.style.display="none";
+      addExpenseBtnSidebar.style.display="none";
+      summaryBtn.style.display="none";
+      reportsHeader.style.display="";
+      reportTypeSection.style.display="none";
+      document.getElementById("incomeSidebarControls").style.display="";
+      currentReportMode="income";
+      document.getElementById("quickReportType").value="income";
+    }else{
+      generateStatementBtn.style.display="";
+      addExpenseBtnSidebar.style.display="none";
+      summaryBtn.style.display="none";
+      reportsHeader.style.display="none";
+      reportTypeSection.style.display="none";
+      document.getElementById("incomeSidebarControls").style.display="none";
+    }
+    return;
+  }
+
+  ownerSelect.disabled=false;
+  ownerLoginBtn.style.display="";
+  ownerLogoutBtn.style.display="none";
+  userSessionStatus.textContent="MODE: ADMIN";
+
+  generateStatementBtn.style.display="";
+  addExpenseBtnSidebar.style.display="";
+  summaryBtn.style.display="";
+  reportsHeader.style.display="";
+  reportTypeSection.style.display="";
+  settingsHeader.style.display="";
+  ownerSettingsBtn.style.display="";
+  taxSettingsBtn.style.display="";
+  vendorSettingsBtn.style.display="";
+  userSettingsBtn.style.display="";
+  githubSetupBtn.style.display="";
+  dropboxSetupBtn.style.display="";
+  tokenStatus.style.display="";
+}
+
 function recurringToText(list){
   if(!Array.isArray(list) || list.length===0) return "";
   return list.map(item=>{
@@ -438,6 +594,10 @@ function updateTokenStatus(){
   }
 }
 function showIncomeReport(){
+if(isOwnerPortalUser() && getOwnerPortalType()!=="draft"){
+  generateStatement(true);
+  return;
+}
 currentView="income";
 document.getElementById("invoiceHeader").style.display="none";
 document.getElementById("reportTitle").style.display="none";
@@ -476,6 +636,11 @@ function populateIncomePropertyOptions(){
 }
 
 function runQuickReport(){
+  if(isOwnerPortalUser() && getOwnerPortalType()!=="draft"){
+    generateStatement(true);
+    return;
+  }
+
   const typeSelect = document.getElementById("quickReportType");
   const selected = typeSelect ? typeSelect.value : "income";
   currentReportMode=selected;
@@ -685,6 +850,7 @@ html += "</div>";
 function applyLoadedData(data){
   gitHubData=data||{};
   OWNERS=(data&&data.owners)||{};
+  USERS=(data&&data.users)||{};
   vendors=(data&&data.vendors)||[];
   expenses=(data&&data.expenses)||[];
   propertySettings=(data&&data.properties)||{};
@@ -765,6 +931,16 @@ function showOwnerSelectionPrompt(){
 }
 
 function init(){
+  restoreUserSession();
+
+  if(isOwnerPortalUser() && !OWNERS[currentUserSession.owner]){
+    clearUserSession();
+  }
+
+  if(isOwnerPortalUser()){
+    currentOwner=currentUserSession.owner;
+  }
+
   buildOwners();
   const sel=document.getElementById("monthSelect");
   if(!sel.innerHTML){
@@ -780,12 +956,22 @@ function init(){
   }
   ownerSelect.value=currentOwner;
   toggleOwnerMode();
+  applyAccessControls();
 
   if(currentOwner==="__ALL__"){
     showAllOwnersLandingInfo();
   }else if(OWNERS[currentOwner]){
     showOwnerLandingInfo();
     preloadGuestyData(currentOwner);
+    if(isOwnerPortalUser()){
+      if(getOwnerPortalType()==="draft"){
+        currentReportMode="income";
+        document.getElementById("quickReportType").value="income";
+        showIncomeReport();
+      }else{
+        generateStatement(true);
+      }
+    }
   }else{
     showOwnerSelectionPrompt();
   }
@@ -795,7 +981,9 @@ function buildOwners(){
   const sel=document.getElementById("ownerSelect");
   const current=sel.value;
   sel.innerHTML='<option value="">-- SELECT --</option>';
-  sel.innerHTML+="<option value='__ALL__'>ALL OWNERS</option>";
+  if(!isOwnerPortalUser()){
+    sel.innerHTML+="<option value='__ALL__'>ALL OWNERS</option>";
+  }
   Object.keys(OWNERS).sort().forEach(name=>{
     sel.innerHTML+="<option>"+name+"</option>";
   });
@@ -823,6 +1011,12 @@ function buildYears(){
 }
 
 function onOwnerChange(){
+  if(isOwnerPortalUser()){
+    const forcedOwner=currentUserSession.owner;
+    currentOwner=forcedOwner;
+    document.getElementById("ownerSelect").value=forcedOwner;
+    return;
+  }
   currentOwner=document.getElementById("ownerSelect").value;
   toggleOwnerMode();
   if(currentOwner){
@@ -1028,6 +1222,7 @@ function showOwnerLandingInfo(){
 }
 
 function openOwners(){
+  if(isOwnerPortalUser()) return alert("Not allowed in owner portal mode");
   const list=document.getElementById("ownersList");
   let html="";
   Object.keys(OWNERS).sort().forEach(name=>{
@@ -1103,6 +1298,7 @@ function saveOwnerData(){
 }
 
 function openTax(){
+  if(isOwnerPortalUser()) return alert("Not allowed in owner portal mode");
   const content=document.getElementById("taxContent");
   let html="";
   const allProps=Object.keys(propertySettings);
@@ -1142,6 +1338,7 @@ function saveTaxData(){
 }
 
 function openVendorSettings(){
+  if(isOwnerPortalUser()) return alert("Not allowed in owner portal mode");
   const list=document.getElementById("vendorSettingsList");
   let html="";
   
@@ -1192,13 +1389,116 @@ function saveVendorData(){
   });
 }
 
+function openUsers(){
+  if(isOwnerPortalUser()) return alert("Not allowed in owner portal mode");
+
+  const ownerSelect=document.getElementById("newUserOwner");
+  ownerSelect.innerHTML="<option value=''>-- SELECT OWNER --</option>";
+  Object.keys(OWNERS).sort().forEach(name=>{
+    if(name==="ALL PROPERTIES") return;
+    ownerSelect.innerHTML+="<option value='"+name+"'>"+name+"</option>";
+  });
+
+  const usersList=document.getElementById("usersList");
+  let html="";
+  Object.keys(USERS).sort().forEach(username=>{
+    const user=USERS[username]||{};
+    html+="<div style='background:#555;padding:12px;margin:8px 0;border-radius:3px'>";
+    html+="<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:8px'><div style='color:#fff;font-weight:bold'>"+username+"</div><button class='btn btn-danger btn-small' onclick=\"deletePortalUser('"+username.replace(/'/g,"\\'")+"')\">DELETE</button></div>";
+    html+="<label class='modal-label'>OWNER</label>";
+    html+="<select class='modal-input' onchange=\"USERS['"+username.replace(/'/g,"\\'")+"'].owner=this.value\">";
+    Object.keys(OWNERS).sort().forEach(ownerName=>{
+      if(ownerName==="ALL PROPERTIES") return;
+      const selected=(user.owner===ownerName)?"selected":"";
+      html+="<option value='"+ownerName+"' "+selected+">"+ownerName+"</option>";
+    });
+    html+="</select>";
+    html+="<label class='modal-label'>DISPLAY NAME</label>";
+    html+="<input class='modal-input' value='"+((user.displayName||"").replace(/'/g,"&#39;"))+"' onchange=\"USERS['"+username.replace(/'/g,"\\'")+"'].displayName=this.value\">";
+    html+="<label class='modal-label'>PASSWORD</label>";
+    html+="<input type='password' class='modal-input' value='"+((user.password||"").replace(/'/g,"&#39;"))+"' onchange=\"USERS['"+username.replace(/'/g,"\\'")+"'].password=this.value\">";
+    html+="</div>";
+  });
+  usersList.innerHTML=html || "<div style='color:#aaa;text-align:center;padding:12px'>No users added yet.</div>";
+  openModal("usersModal");
+}
+
+function addPortalUser(){
+  if(isOwnerPortalUser()) return alert("Not allowed in owner portal mode");
+  const username=(document.getElementById("newUsername").value||"").trim().toLowerCase();
+  const password=(document.getElementById("newUserPassword").value||"").trim();
+  const owner=(document.getElementById("newUserOwner").value||"").trim();
+  const displayName=(document.getElementById("newUserDisplayName").value||"").trim();
+
+  if(!username || !password || !owner) return alert("Username, password and owner are required");
+  if(USERS[username]) return alert("Username already exists");
+  USERS[username]={password:password,owner:owner,displayName:displayName};
+
+  document.getElementById("newUsername").value="";
+  document.getElementById("newUserPassword").value="";
+  document.getElementById("newUserOwner").value="";
+  document.getElementById("newUserDisplayName").value="";
+  openUsers();
+}
+
+function deletePortalUser(username){
+  if(isOwnerPortalUser()) return alert("Not allowed in owner portal mode");
+  if(!confirm("Delete user "+username+"?")) return;
+  delete USERS[username];
+  if(currentUserSession && currentUserSession.username===username){
+    clearUserSession();
+    applyAccessControls();
+  }
+  openUsers();
+}
+
+function saveUserData(){
+  if(isOwnerPortalUser()) return alert("Not allowed in owner portal mode");
+  if(!githubToken)return alert("GitHub token not set. Click GitHub Setup first.");
+  saveToGitHub("users",()=>{
+    closeAll();
+    init();
+  });
+}
+
+function openLoginModal(){
+  if(Object.keys(USERS).length===0){
+    alert("No owner users configured yet. Add users in USER SETTINGS.");
+    return;
+  }
+  document.getElementById("loginUsername").value="";
+  document.getElementById("loginPassword").value="";
+  document.getElementById("loginError").textContent="";
+  openModal("loginModal");
+}
+
+function submitLogin(){
+  const username=(document.getElementById("loginUsername").value||"").trim().toLowerCase();
+  const password=(document.getElementById("loginPassword").value||"").trim();
+  const loginError=document.getElementById("loginError");
+
+  if(!USERS[username] || (USERS[username].password||"")!==password){
+    loginError.textContent="Invalid username or password";
+    return;
+  }
+
+  setUserSession(username);
+  closeAll();
+  init();
+}
+
+function logoutUser(){
+  clearUserSession();
+  init();
+}
+
 function saveToGitHub(type,callback){
   if(!githubToken){
     alert("❌ No token");
     return;
   }
   
-  const data=JSON.stringify({owners:OWNERS,vendors:vendors,properties:propertySettings,expenses:expenses},null,2);
+  const data=JSON.stringify({owners:OWNERS,users:USERS,vendors:vendors,properties:propertySettings,expenses:expenses},null,2);
   const content=btoa(unescape(encodeURIComponent(data)));
   
   function attemptSave(retryCount=0){
@@ -1275,6 +1575,7 @@ function getExpensePropertyOptions(){
 }
 
 function openAddExpense(){
+  if(isOwnerPortalUser()) return alert("Not allowed in owner portal mode");
   if(!currentOwner)return alert("Select owner first");
 
   sessionExpenses=[];
@@ -1419,6 +1720,7 @@ function doneAddingExpenses(){
 }
 
 function setupToken(){
+  if(isOwnerPortalUser()) return alert("Not allowed in owner portal mode");
   const token=prompt("PASTE YOUR GITHUB TOKEN");
   if(!token)return;
   
@@ -1445,6 +1747,7 @@ function setupToken(){
 }
 
 function setupDropbox(){
+  if(isOwnerPortalUser()) return alert("Not allowed in owner portal mode");
   const token=prompt("DROPBOX TOKEN:");
   if(token)localStorage.setItem("dropbox_token",token.trim());
 }
@@ -1612,6 +1915,7 @@ const pmcPercent=getEffectivePmcPercent(t);
 const recurringCharges=getRecurringChargesForOwner(currentOwner);
 const recurringTotal=(masterTotals.recurring||0);
 const nonRecurringExpenses=masterTotals.expenses-recurringTotal;
+const ownerPortal=isOwnerPortalUser();
  
   const type=t.type;
   let html="<div class='action-buttons'><button class='copy-link-btn' onclick='downloadPDF()'>📄 DOWNLOAD PDF</button></div>";
@@ -1633,15 +1937,17 @@ html+="<div style='display:flex;justify-content:space-between;padding:10px 0;fon
 
 html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
 html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>PMC</span><span>"+money(masterTotals.pmc)+"</span></div>";
+if(!ownerPortal){
 html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>EXPENSES</span><span>"+money(nonRecurringExpenses)+"</span></div>";
 html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>RECURRING CHARGES</span><span>"+money(recurringTotal)+"</span></div>";
+}
 html+="<div style='display:flex;justify-content:space-between;padding:10px 0;font-weight:bold'><span>OWNER PAYOUT</span><span>"+money(masterTotals.owner)+"</span></div>";
 
 }
 
 html+="</div>";
 
-if(type!=="draft" && recurringCharges.length>0){
+if(type!=="draft" && recurringCharges.length>0 && !ownerPortal){
 
 html+="<div class='property-section' style='page-break-before:always'>";
 html+="<div class='invoice-header'>";
@@ -1676,7 +1982,7 @@ const ownerExpenses = expenses.filter(e =>
 e.owner === currentOwner && e.property === "OWNER"
 );
 
-if(ownerExpenses.length>0){
+if(ownerExpenses.length>0 && !ownerPortal){
 
 html+="<div class='property-section' style='page-break-before:always'>";
 html+="<div class='invoice-header'>";
@@ -1803,7 +2109,9 @@ html+="<div class='property-title'><span class='property-icon'>🏠</span>"+getP
       html+="<div class='summary-grid'>";
       html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
       html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
+      if(!ownerPortal){
       html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
+      }
       html+="</div>";
       html+="<div style='text-align:center;font-size:22px;font-weight:bold;margin:25px 0'>OWNER PAYOUT: "+money(r)+"</div>";
     }
@@ -1811,7 +2119,7 @@ html+="<div class='property-title'><span class='property-icon'>🏠</span>"+getP
     html+="<div style='margin-top:15px'><div class='section-title'>RESERVATIONS</div><table style='margin-top:10px'>";
    if(type==="draft"){
 
-html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>GROSS PAYOUT</th><th>ACCOMMODATION</th><th>PMC</th><th>CLEANING</th><th>WEBSITE/VRBO FEE</th><th>AMOUNT DUE</th><th class='no-print'>ACTION</th></tr>";
+html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>GROSS PAYOUT</th><th>ACCOMMODATION</th><th>PMC</th><th>CLEANING</th><th>WEBSITE/VRBO FEE</th><th>AMOUNT DUE</th>"+(ownerPortal?"":"<th class='no-print'>ACTION</th>")+"</tr>";
     
 p.reservations.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"])).forEach((row,i)=>{
  
@@ -1852,7 +2160,9 @@ html+="<td>"+money(pm)+"</td>";
 html+="<td class='clean' data-val='"+c+"'>"+money(c)+"</td>";
 html+="<td class='web' data-val='"+w+"'>"+money(w)+"</td>";
 html+="<td>"+money(pm+c+w)+"</td>";
+if(!ownerPortal){
 html+="<td class='no-print'><button class='editRow'>Edit</button></td>";
+}
 html+="</tr>";
 });
 
@@ -1883,7 +2193,7 @@ html+="</tr>";
 
 html+="</table></div>";
 
-if(exp.length>0){
+if(exp.length>0 && !ownerPortal){
   html+="<div style='margin-top:15px'><div class='section-title'>EXPENSES</div><table style='margin-top:10px'>";
   html+="<tr><th>TYPE</th><th>VENDOR</th><th>AMOUNT</th><th class='no-print'>ACTION</th></tr>";
   exp.forEach(e=>{
@@ -1950,6 +2260,14 @@ document.getElementById("mainContent").innerHTML=html;
 }
 
 async function generateSummary(){
+if(isOwnerPortalUser()){
+  if(getOwnerPortalType()==="draft"){
+    showIncomeReport();
+  }else{
+    generateStatement(true);
+  }
+  return;
+}
 currentView="summary";
 
 if(currentOwner==="__ALL__"){
@@ -2072,6 +2390,10 @@ document.getElementById("mainContent").innerHTML=html;
 }
 
 async function generateAllOwnersSummary(){
+  if(isOwnerPortalUser()){
+    generateStatement(true);
+    return;
+  }
   currentView="summary-all";
   document.getElementById("invoiceHeader").style.display="none";
   document.getElementById("reportTitle").style.display="none";
