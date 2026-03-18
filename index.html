@@ -192,9 +192,8 @@ select,input,.btn{font-size:12px}
 <div id="tokenStatus" class="token-status token-inactive">LOADING...</div>
 <div class="section"><label class="label">SELECT OWNER</label><select id="ownerSelect" onchange="onOwnerChange()"><option value="">-- SELECT --</option></select></div>
 <div id="appControls" style="display:none">
-<div class="section"><label class="label">MONTH</label><select id="monthSelect"></select></div>
-<div class="section"><label class="label">YEAR</label><select id="yearSelect"></select></div>
-<div class="section"><label class="label">UPLOAD PDF (OPTIONAL)</label><input type="file" id="supportPdf" accept=".pdf,application/pdf"></div>
+<div class="section"><label class="label">MONTH</label><select id="monthSelect" onchange="onPeriodChange()"></select></div>
+<div class="section"><label class="label">YEAR</label><select id="yearSelect" onchange="onPeriodChange()"></select></div>
 <button class="btn btn-primary" onclick="generateStatement()">GENERATE REPORT</button>
 <button class="btn btn-success" onclick="openAddExpense()" style="font-size:13px;font-weight:bold">ADD EXPENSE</button>
 <button class="btn btn-success" onclick="generateSummary()">SUMMARY REPORT</button>
@@ -209,9 +208,9 @@ select,input,.btn{font-size:12px}
 </div>
 <div id="incomeSidebarControls" class="section" style="display:none;border-top:1px solid rgba(255,255,255,.2);padding-top:12px;margin-top:10px">
 <label class="label">PROPERTY</label>
-<select id="incomeProperty"></select>
+<select id="incomeProperty" onchange="runIncomeReport()"></select>
 <label class="label">RANGE</label>
-<select id="dateMode" onchange="updateDateOptions()">
+<select id="dateMode" onchange="updateDateOptions();runIncomeReport()">
 <option value="year" selected>CURRENT YEAR</option>
 <option value="dates">BETWEEN DATES</option>
 <option value="month">SPECIFIC MONTH</option>
@@ -275,7 +274,7 @@ select,input,.btn{font-size:12px}
 <div class="modal-title">ADD EXPENSE</div>
 <div id="expenseCheckmark" class="success-checkmark" style="display:none">✓</div>
 <div id="expenseFormContent">
-<div class="modal-field"><label class="modal-label">TYPE</label><select id="expenseType" class="modal-input"><option>MAINTENANCE</option><option>REPAIR</option><option>PURCHASE</option><option>SUPPLIES</option><option>SERVICE</option><option>POOL CLEANING</option><option>PEST CONTROL</option><option>CREDIT</option><option>ADJUSTMENT</option></select></div>
+<div class="modal-field"><label class="modal-label">TYPE</label><select id="expenseType" class="modal-input"><option>MAINTENANCE</option><option>REPAIR</option><option>PURCHASE</option><option>SUPPLIES</option><option>SERVICE</option><option>POOL CLEANING</option><option>PEST CONTROL</option><option>CREDIT</option><option>ADJUSTMENT</option><option>OWNERS STAY FEE</option><option>CLEANING</option><option>SETUP</option></select></div>
 <div class="modal-field"><label class="modal-label">PROPERTY</label><select id="expenseProperty" class="modal-input"></select></div>
 <div class="modal-field"><label class="modal-label">VENDOR</label><select id="expenseVendor" class="modal-input"></select></div>
 <div class="modal-field"><label class="modal-label">AMOUNT</label><input type="number" id="expenseAmount" class="modal-input" placeholder="0.00" step="0.01"></div>
@@ -324,6 +323,7 @@ const municipalities=["SC","MB","NMB","SSB","HC","GTC"];
 const defaultGuestyUrl="https://report.guesty.com/apps/reservations?apiKey=d6ab951850fef54399e2206f36f4e79fb1b425a8e5c891076036b11f50da8870613a226021487307c8c5f51eae997a08dd7e112d013ef683728ad1d9220ee0b7";
 let guestyPreloadByOwner={};
 let currentReportMode="income";
+let currentView="landing";
 
 function num(v){return parseFloat((v||"0").toString().replace(/[$,]/g,""))||0;}
 function money(v){
@@ -343,9 +343,51 @@ function getPropertyLabel(row,fallback){
   return address || nickname || (fallback||"Unknown");
 }
 
+function getPropertyName(row,fallback){
+  const nickname=(row && row["LISTING'S NICKNAME"] ? row["LISTING'S NICKNAME"] : "").toString().trim();
+  const address=(row && row["PROPERTY ADDRESS"] ? row["PROPERTY ADDRESS"] : "").toString().trim();
+  return nickname || (fallback||"") || address || "Unknown";
+}
+
+function getPropertyAddress(row,fallback){
+  const address=(row && row["PROPERTY ADDRESS"] ? row["PROPERTY ADDRESS"] : "").toString().trim();
+  const nickname=(row && row["LISTING'S NICKNAME"] ? row["LISTING'S NICKNAME"] : "").toString().trim();
+  return address || (fallback||"") || nickname || "Unknown";
+}
+
 function getPropertyLabelFromBucket(bucket,fallback){
   const first=bucket && Array.isArray(bucket.reservations) && bucket.reservations.length ? bucket.reservations[0] : null;
   return getPropertyLabel(first,fallback);
+}
+
+function getPropertyNameFromBucket(bucket,fallback){
+  const first=bucket && Array.isArray(bucket.reservations) && bucket.reservations.length ? bucket.reservations[0] : null;
+  return getPropertyName(first,fallback);
+}
+
+function getRowCode(row){
+  return ((row && row["CONFIRMATION CODE"]) || "").toString().trim().toUpperCase();
+}
+
+function getAccommodationValue(row,isDraft){
+  const payout=num(row && row["TOTAL PAYOUT"]);
+  const cleaningField=(row && row["MANUAL CLEANING FARE"]!==undefined && row["MANUAL CLEANING FARE"]!==null)
+    ? row["MANUAL CLEANING FARE"]
+    : (row ? row["CLEANING FARE"] : 0);
+  const cleaning=num(cleaningField);
+  const taxes=isDraft?getRowTaxTotal(row):0;
+  const manualAcc=(row && row["MANUAL ACCOMMODATION"]!==undefined && row["MANUAL ACCOMMODATION"]!==null && row["MANUAL ACCOMMODATION"]!=="")
+    ? num(row["MANUAL ACCOMMODATION"])
+    : null;
+  return manualAcc===null ? (payout-cleaning-taxes) : manualAcc;
+}
+
+function getMunicipalityLabel(propertyName){
+  const selected=[];
+  municipalities.forEach(m=>{
+    if(propertySettings[propertyName] && propertySettings[propertyName][m]) selected.push(m);
+  });
+  return selected.length?selected.join(", "):"NOT SET";
 }
 
 function recurringToText(list){
@@ -396,6 +438,7 @@ function updateTokenStatus(){
   }
 }
 function showIncomeReport(){
+currentView="income";
 document.getElementById("invoiceHeader").style.display="none";
 document.getElementById("reportTitle").style.display="none";
 document.getElementById("ownerTitle").style.display="none";
@@ -408,7 +451,7 @@ document.getElementById("periodDate").style.display="none";
   document.getElementById("dateMode").value="year";
   incomeTypeChanged();
   updateDateOptions();
-  document.getElementById("mainContent").innerHTML = "<div class='property-section'><div style='font-size:13px;color:#666'>Use the filters in the left sidebar, then click RUN REPORT.</div></div>";
+  runIncomeReport();
 }
 
 function populateIncomePropertyOptions(){
@@ -419,7 +462,7 @@ function populateIncomePropertyOptions(){
 
   (csvData||[]).forEach(r=>{
     const key=getPropertyKey(r);
-    if(key) propSet[key]=getPropertyLabel(r,key);
+    if(key) propSet[key]=getPropertyName(r,key);
   });
 
   propSel.innerHTML="<option value='all'>ALL PROPERTIES</option>";
@@ -449,6 +492,7 @@ function runQuickReport(){
 }
 
 function runIncomeReport(){
+  currentView = currentReportMode === "gri" ? "gri" : "income";
 
   const type = currentReportMode === "gri" ? "gri" : "full";
   const selectedProperty = document.getElementById("incomeProperty").value;
@@ -504,10 +548,12 @@ toDate = y + "-12-31";
   }
 
   getRows.then(rows=>{
-    const propertyLabelByKey={};
+    const propertyNameByKey={};
+    const propertyAddressByKey={};
     (rows||[]).forEach(r=>{
       const key=getPropertyKey(r);
-      if(!propertyLabelByKey[key]) propertyLabelByKey[key]=getPropertyLabel(r,key);
+      if(!propertyNameByKey[key]) propertyNameByKey[key]=getPropertyName(r,key);
+      if(!propertyAddressByKey[key]) propertyAddressByKey[key]=getPropertyAddress(r,key);
     });
 
     const filtered=(rows||[]).filter(r=>{
@@ -518,15 +564,23 @@ toDate = y + "-12-31";
       return true;
     });
 
-    const selectedPropertyLabel=selectedProperty==="all"
+    const selectedPropertyName=selectedProperty==="all"
       ? "ALL PROPERTIES"
-      : (propertyLabelByKey[selectedProperty] || selectedProperty);
+      : (propertyNameByKey[selectedProperty] || selectedProperty);
+    const selectedPropertyAddress=selectedProperty==="all"
+      ? "ALL PROPERTIES"
+      : (propertyAddressByKey[selectedProperty] || selectedProperty);
 
     let totalPayout=0,totalAcc=0,totalCleaning=0,totalPMC=0;
     let html="";
     html+="<div class='property-section'>";
     html+="<div class='invoice-header'><div class='company-info'><div class='company-name'>OCEAN VACATIONS INC.</div><div>www.oceanvacationsmb.com</div><div>oceanvacationsmb@gmail.com</div><div>843-222-6516</div></div><div class='right-header'><div class='statement-date'><strong>REPORT DATE: "+new Date().toLocaleDateString()+"</strong></div><div class='period-date'><strong>"+periodText+"</strong></div></div></div>";
-    html+="<div style='text-align:center;font-size:16px;font-weight:bold;margin-bottom:20px'>"+selectedPropertyLabel+"</div>";
+    html+="<div style='border-top:2px solid #19343f;margin:8px 0 14px 0'></div>";
+    if(type==="gri" && selectedProperty!=="all"){
+      html+="<div style='text-align:center;font-size:16px;font-weight:bold;margin-bottom:20px'>"+selectedPropertyAddress+"</div>";
+    }else{
+      html+="<div style='text-align:center;font-size:16px;font-weight:bold;margin-bottom:20px'>"+selectedPropertyName+"</div>";
+    }
 
     if(type==="gri"){
       const griRows=[];
@@ -538,26 +592,24 @@ toDate = y + "-12-31";
       });
 
       html+="<div class='summary-grid'><div class='summary-card'><div class='summary-label'>GROSS PAYOUT</div><div class='summary-value'>"+money(totalPayout)+"</div></div></div>";
-      html+="<table><tr><th>CODE</th><th>PROPERTY ADDRESS</th><th>CHECK-IN/OUT</th><th>GROSS PAYOUT</th></tr>";
+      html+="<table><tr><th>CODE</th><th>CHECK-IN/OUT</th><th>GROSS PAYOUT</th></tr>";
       griRows.forEach(r=>{
         const payout=num(r["TOTAL PAYOUT"]);
-        const code=(r["CONFIRMATION CODE"]||"").toString().substring(0,8).toUpperCase();
-        const address=getPropertyLabel(r,"-");
+        const code=getRowCode(r);
         const stay=(r["CHECK-IN DATE"]||"")+" - "+(r["CHECK-OUT DATE"]||"");
-        html+="<tr><td>"+code+"</td><td>"+address+"</td><td>"+stay+"</td><td>"+money(payout)+"</td></tr>";
+        html+="<tr><td>"+code+"</td><td>"+stay+"</td><td>"+money(payout)+"</td></tr>";
       });
-      html+="<tr><th colspan='3'>TOTAL</th><th>"+money(totalPayout)+"</th></tr></table>";
+      html+="<tr><th colspan='2'>TOTAL</th><th>"+money(totalPayout)+"</th></tr></table>";
     }else{
       const byProperty={};
       filtered.forEach(r=>{
         const payout=num(r["TOTAL PAYOUT"]);
-        if(!payout) return;
         const cleaning=num(r["CLEANING FARE"]);
-        const taxes=isDraftOwner?getRowTaxTotal(r):0;
-        const acc=payout-cleaning-taxes;
+        if(!payout && !cleaning) return;
+        const acc=getAccommodationValue(r,isDraftOwner);
         const pmc=acc*ownerPercent;
         const prop=getPropertyKey(r);
-        if(!byProperty[prop]) byProperty[prop]={label:getPropertyLabel(r,prop),payout:0,acc:0,cleaning:0,pmc:0};
+        if(!byProperty[prop]) byProperty[prop]={label:getPropertyName(r,prop),payout:0,acc:0,cleaning:0,pmc:0};
         byProperty[prop].payout+=payout;
         byProperty[prop].acc+=acc;
         byProperty[prop].cleaning+=cleaning;
@@ -598,6 +650,7 @@ function showHistory(){
 }
 
 function show1099(){
+  currentView="1099";
   if(!currentOwner){
     alert("Select owner first");
     return;
@@ -611,7 +664,7 @@ function show1099(){
   document.getElementById("reportTitle").textContent = "1099 REPORT";
 
   let html = "<div class='summary-title'>1099 SUMMARY</div>";
- let reportProperty = selectedProperty === "all" ? "ALL PROPERTIES" : selectedProperty;
+ let reportProperty = currentOwner || "CURRENT OWNER";
 
 html += "<div style='margin-bottom:15px;font-size:11px;color:#666'>";
 html += "<strong>PROPERTY:</strong> "+reportProperty+"<br>";
@@ -699,6 +752,7 @@ function loadData(){
 }
 
 function showOwnerSelectionPrompt(){
+  currentView="landing";
   document.getElementById("invoiceHeader").style.display="none";
   document.getElementById("reportTitle").style.display="";
   document.getElementById("ownerTitle").style.display="none";
@@ -785,7 +839,39 @@ function onOwnerChange(){
   }
 }
 
+function onPeriodChange(){
+  if(!currentOwner) return;
+
+  if(currentOwner==="__ALL__"){
+    if(currentView==="summary-all"){
+      generateAllOwnersSummary();
+    }
+    return;
+  }
+
+  updateHeaderDates();
+  processData();
+
+  if(currentView==="summary"){
+    generateSummary();
+    return;
+  }
+
+  if(currentView==="income" || currentView==="gri"){
+    runIncomeReport();
+    return;
+  }
+
+  if(currentView==="1099"){
+    show1099();
+    return;
+  }
+
+  displayStatement();
+}
+
 function showAllOwnersLandingInfo(){
+  currentView="all-owners-landing";
   document.getElementById("invoiceHeader").style.display="none";
   document.getElementById("reportTitle").style.display="";
   document.getElementById("ownerTitle").style.display="";
@@ -906,6 +992,7 @@ function toggleOwnerMode(){
 
 function showOwnerLandingInfo(){
   if(!currentOwner || !OWNERS[currentOwner]) return;
+  currentView="owner-landing";
 
   const o=OWNERS[currentOwner];
   const pmcPercent=getEffectivePmcPercent(o);
@@ -1168,9 +1255,27 @@ function updateVendorDropdown(){
   });
 }
 
+function getExpensePropertyOptions(){
+  const optionMap={};
+
+  (csvData||[]).forEach(row=>{
+    const key=getPropertyKey(row);
+    if(!key) return;
+    optionMap[key]=getPropertyName(row,key);
+  });
+
+  Object.keys(propertySettings||{}).forEach(prop=>{
+    if(!optionMap[prop]) optionMap[prop]=prop;
+  });
+
+  return Object.keys(optionMap).sort().map(key=>({
+    value:key,
+    label:optionMap[key]
+  }));
+}
+
 function openAddExpense(){
   if(!currentOwner)return alert("Select owner first");
-  if(Object.keys(propertyTotals).length===0)return alert("Generate statement first");
 
   sessionExpenses=[];
   document.getElementById("expenseCheckmark").style.display="none";
@@ -1183,8 +1288,8 @@ function openAddExpense(){
 
   prop.innerHTML+="<option value='OWNER'>OWNER: "+currentOwner+"</option>";
 
-  Object.keys(propertyTotals).forEach(p=>{
-    prop.innerHTML+="<option value='"+p+"'>PROPERTY: "+p+"</option>";
+  getExpensePropertyOptions().forEach(p=>{
+    prop.innerHTML+="<option value='"+p.value+"'>PROPERTY: "+p.label+"</option>";
   });
 
   document.getElementById("expenseType").value="MAINTENANCE";
@@ -1427,24 +1532,30 @@ masterTotals.owner -= ownerExpTotal + recurringTotal;
     let gross=0,acc=0,clean=0,pmc=0,websiteFee=0,totalTax=0;
     byProp[prop].forEach(row=>{
       const g = num(row["TOTAL PAYOUT"]);
-const c = (row["STATUS"]||"").toLowerCase().includes("cancel") ? 0 : num(row["CLEANING FARE"]);
-const taxForDraft=isDraft?getRowTaxTotal(row):0;
-let a = g - c - taxForDraft;
+const c = num((row["MANUAL CLEANING FARE"]!==undefined && row["MANUAL CLEANING FARE"]!==null) ? row["MANUAL CLEANING FARE"] : row["CLEANING FARE"]);
+let a = getAccommodationValue(row,isDraft);
 const p = a * pmcPercent;
      
       let w=0;
-if(t.type==="draft" && g>0){
+if(t.type==="draft"){
+  const manualWebsiteFee=(row["MANUAL WEBSITE FEE"]!==undefined && row["MANUAL WEBSITE FEE"]!==null && row["MANUAL WEBSITE FEE"]!=="")
+    ? num(row["MANUAL WEBSITE FEE"])
+    : null;
   const platform=(row["PLATFORM"]||"").toLowerCase();
   const source=(row["SOURCE"]||"").toLowerCase();
 
-if(source.includes("website")){
-  const markup = num(row["MARKUP"]);
-  const base = g + markup;
-  w = (base * 0.01) + 0.30;
-}
+  if(manualWebsiteFee!==null){
+    w=manualWebsiteFee;
+  }else{
+    if(source.includes("website")){
+      const markup = num(row["MARKUP"]);
+      const base = g + markup;
+      w = (base * 0.01) + 0.30;
+    }
 
-  if(platform.includes("homeaway")){
-  w = num(row["CHANNEL COMMISSION"]);
+    if(platform.includes("homeaway")){
+      w = num(row["CHANNEL COMMISSION"]);
+    }
   }
 }
       gross+=g;
@@ -1452,7 +1563,7 @@ if(source.includes("website")){
       clean+=c;
       pmc+=p;
       websiteFee+=w;
-      if(t.type==="payout"){
+      if((t.type||"").toLowerCase()!=="draft"){
         const tax=getRowTaxTotal(row);
         totalTax+=tax;
         if(tax>0){
@@ -1489,6 +1600,7 @@ if(source.includes("website")){
   
 
 function displayStatement(){
+currentView="statement";
 document.querySelectorAll(".invoice-header").forEach(el=>el.style.display="none");
 document.getElementById("reportTitle").style.display="";
 document.getElementById("ownerTitle").style.display="";
@@ -1704,39 +1816,41 @@ html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>GROSS PAYOUT</th><th>A
 p.reservations.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"])).forEach((row,i)=>{
  
 const g = num(row["TOTAL PAYOUT"]);
-const c = (row["STATUS"]||"").toLowerCase().includes("cancel") ? 0 : num(row["CLEANING FARE"]);
-const draftTax=getRowTaxTotal(row);
-let a = g - c - draftTax;
+const c = num((row["MANUAL CLEANING FARE"]!==undefined && row["MANUAL CLEANING FARE"]!==null) ? row["MANUAL CLEANING FARE"] : row["CLEANING FARE"]);
+let a = getAccommodationValue(row,true);
 const pm = a * pmcPercent;
 
 let w=0;
 const platform=(row["PLATFORM"]||"").toLowerCase();
 const source=(row["SOURCE"]||"").toLowerCase();
+const manualWebsiteFee=(row["MANUAL WEBSITE FEE"]!==undefined && row["MANUAL WEBSITE FEE"]!==null && row["MANUAL WEBSITE FEE"]!=="") ? num(row["MANUAL WEBSITE FEE"]) : null;
 
-if(source.includes("website")){
-  const markup=num(row["MARKUP"]);
-  const base=g+markup;
-  w=(base*0.01)+0.30;
-}
+if(manualWebsiteFee!==null){
+  w=manualWebsiteFee;
+}else{
+  if(source.includes("website")){
+    const markup=num(row["MARKUP"]);
+    const base=g+markup;
+    w=(base*0.01)+0.30;
+  }
 
-if(platform.includes("homeaway")){
-  w=num(row["CHANNEL COMMISSION"]);
+  if(platform.includes("homeaway")){
+    w=num(row["CHANNEL COMMISSION"]);
+  }
 }
 
 const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
 const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
 
-if(g===0)return;
-
 html+="<tr data-prop='"+prop+"' data-row='"+i+"'>";
-html+="<td>"+row["CONFIRMATION CODE"].substring(0,8).toUpperCase()+"</td>";
+html+="<td>"+getRowCode(row)+"</td>";
 html+="<td>"+checkin+"-"+checkout+"</td>";
 html+="<td>"+((source=="website" ? "Website" : source=="manual_direct" ? "Website Old" : source=="manual_vrbo" || source=="vrbo_manual" ? "VRBO OLD" : row["PLATFORM"]) + ((row["STATUS"]||"").toLowerCase().includes("cancel") ? " Cancelled" : ""))+"</td>";
 html+="<td>"+money(g)+"</td>";
 html+="<td class='acc' data-val='"+a+"'>"+money(a)+"</td>";
 html+="<td>"+money(pm)+"</td>";
 html+="<td class='clean' data-val='"+c+"'>"+money(c)+"</td>";
-html+="<td>"+money(w)+"</td>";
+html+="<td class='web' data-val='"+w+"'>"+money(w)+"</td>";
 html+="<td>"+money(pm+c+w)+"</td>";
 html+="<td class='no-print'><button class='editRow'>Edit</button></td>";
 html+="</tr>";
@@ -1744,11 +1858,11 @@ html+="</tr>";
 
 }else{
 
-html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>ACCOMMODATION</th><th>PMC</th><th>EXPENSES</th><th>OWNER PAYOUT</th></tr>";
+html+="<tr><th>CODE</th><th>STAY</th><th>ACCOMMODATION</th><th>PMC</th><th>OWNER PAYOUT</th></tr>";
      
 p.reservations.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"])).forEach(row=>{
 
-let a=num(row["ACCOMMODATION FARE"])-num(row["MARKUP"]);
+let a=getAccommodationValue(row,false);
 const pm=a*pmcPercent;
 const owner=a-pm;
 if(owner<=0) return;
@@ -1756,12 +1870,10 @@ const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join
 const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
 
 html+="<tr>";
-html+="<td>"+row["CONFIRMATION CODE"].substring(0,8).toUpperCase()+"</td>";
+html+="<td>"+getRowCode(row)+"</td>";
 html+="<td>"+checkin+"-"+checkout+"</td>";
-html+="<td>"+row["PLATFORM"]+"</td>";
 html+="<td>"+money(a)+"</td>";
 html+="<td>"+money(pm)+"</td>";
-html+="<td>"+money(0)+"</td>";
 html+="<td>"+money(owner)+"</td>";
 html+="</tr>";
 
@@ -1838,6 +1950,7 @@ document.getElementById("mainContent").innerHTML=html;
 }
 
 async function generateSummary(){
+currentView="summary";
 
 if(currentOwner==="__ALL__"){
   await generateAllOwnersSummary();
@@ -1913,60 +2026,34 @@ if(type==="draft"){
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>COMMISSION FEE ("+t.salesFeePercent+"%)</span><span>"+money(salesFee)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:12px;border-top:1px solid #ddd;font-weight:bold'><span>COMMISSION DUE</span><span>"+money(salesFee)+"</span></div></div></div>";
 
-let taxHtml="";
-let anyTax=false;
+let taxRows="";
+let hasTaxRows=false;
 
-Object.keys(propertyTotals).forEach(prop=>{
+Object.keys(propertyTotals).sort().forEach(prop=>{
+const p=propertyTotals[prop]||{};
+const taxTotal=num(p.tax);
+const amountToReport=num(p.gross)-taxTotal;
+if(taxTotal<=0) return;
 
-const p=propertyTotals[prop];
-
-let taxTotal=0;
-let payoutTotal=0;
-
-p.reservations.forEach(row=>{
-
-const tax=getRowTaxTotal(row);
-
-if(tax>0){
-
-anyTax=true;
-
-const payout=num(row["TOTAL PAYOUT"]);
-
-taxTotal+=tax;
-payoutTotal+=payout;
-
-}
-
+hasTaxRows=true;
+taxRows+="<tr>";
+taxRows+="<td>"+getPropertyNameFromBucket(p,prop)+"</td>";
+taxRows+="<td>"+getMunicipalityLabel(prop)+"</td>";
+taxRows+="<td>"+money(amountToReport)+"</td>";
+taxRows+="<td>"+money(taxTotal)+"</td>";
+taxRows+="</tr>";
 });
 
-if(taxTotal>0){
-
-let muni=[];
-municipalities.forEach(m=>{
-if(propertySettings[prop] && propertySettings[prop][m]) muni.push(m);
-});
-if(muni.length===0) muni=["NOT SET"];
-
-const reportAmount=payoutTotal-taxTotal;
-
-taxHtml+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'>";
-taxHtml+="<span>"+getPropertyLabelFromBucket(p,prop)+" - REPORT/TAX COLLECTED ("+muni.join(", ")+")</span>";
-taxHtml+="<span>"+money(reportAmount)+" ("+money(taxTotal)+")</span>";
-taxHtml+="</div>";
-
-}
-
-});
-
-if(!anyTax){
-taxHtml="<div style='padding:10px;text-align:center'>NO TAXES COLLECTED FOR THIS PERIOD REPORT $0</div>";
+if(!hasTaxRows){
+taxRows="<tr><td colspan='4' style='text-align:center'>NO TAXES COLLECTED FOR THIS PERIOD</td></tr>";
 }
 
 html+="<div style='margin:20px auto;padding:15px;border:1px solid #ddd;background:#fff;border-radius:5px;text-align:center'>";
 html+="<div style='font-size:14px;font-weight:bold;color:#000;margin-bottom:10px;text-transform:uppercase'>📊 REPORT TAXES</div>";
 html+="<div style='text-align:left;color:#000'>";
-html+=taxHtml;
+html+="<table style='margin-top:6px'><tr><th>PROPERTY NAME</th><th>REPORT TAX TO</th><th>AMOUNT TO REPORT</th><th>TOTAL TAX</th></tr>";
+html+=taxRows;
+html+="</table>";
 html+="</div></div>";
 
 html+="<div style='margin:20px auto;padding:15px;border:1px solid #ddd;background:#fff;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#000;margin-bottom:10px;text-transform:uppercase'>🏦 TRANSFER EXPENSES FROM TRUST TO OPERATION ACCOUNT</div><div style='text-align:left;color:#000'>";
@@ -1985,6 +2072,7 @@ document.getElementById("mainContent").innerHTML=html;
 }
 
 async function generateAllOwnersSummary(){
+  currentView="summary-all";
   document.getElementById("invoiceHeader").style.display="none";
   document.getElementById("reportTitle").style.display="none";
   document.getElementById("ownerTitle").style.display="none";
@@ -2004,34 +2092,37 @@ async function generateAllOwnersSummary(){
   for(const name of ownerNames){
     try{
       const ownerObj=OWNERS[name]||{};
-      const ownerType=(ownerObj.type||"payout").toUpperCase();
       const data=await fetchGuestyRowsForOwner(name,true).catch(()=>fetchGuestyRowsForOwner(name,false));
 
       currentOwner=name;
       csvData=data;
       processData();
 
-      let taxesReport=0;
-      Object.keys(propertyTotals).forEach(prop=>{
+      let ownerTaxRows=0;
+      Object.keys(propertyTotals).sort().forEach(prop=>{
         const p=propertyTotals[prop]||{};
-        taxesReport += (num(p.gross)-num(p.tax));
+        const taxTotal=num(p.tax);
+        if(taxTotal<=0) return;
+        ownerTaxRows++;
+        rows.push({
+          owner:name,
+          property:getPropertyNameFromBucket(p,prop),
+          reportTo:getMunicipalityLabel(prop),
+          amountToReport:num(p.gross)-taxTotal,
+          totalTax:taxTotal
+        });
       });
-
-      rows.push({
-        name:name,
-        type:ownerType,
-        pmcPercent:(getEffectivePmcPercent(ownerObj)*100).toFixed(2)+"%",
-        payout:masterTotals.gross,
-        accommodation:masterTotals.acc,
-        cleaning:masterTotals.clean,
-        pmc:masterTotals.pmc,
-        taxesCollected:masterTotals.totalTaxCollected,
-        taxesToReport:taxesReport,
-        ownerPayout:masterTotals.owner,
-        amountDue:masterTotals.draft
-      });
+      if(ownerTaxRows===0){
+        rows.push({
+          owner:name,
+          property:"-",
+          reportTo:"NOT SET",
+          amountToReport:0,
+          totalTax:0
+        });
+      }
     }catch(e){
-      rows.push({name:name,error:e.message||"Failed loading Guesty data"});
+      rows.push({owner:name,error:e.message||"Failed loading Guesty data"});
     }
   }
 
@@ -2040,17 +2131,16 @@ async function generateAllOwnersSummary(){
 
   let html="<div class='action-buttons'><button class='copy-link-btn' onclick='downloadPDF()'>DOWNLOAD PDF</button></div>";
   html+="<div class='property-section'>";
-  html+="<div class='summary-title'>ALL OWNERS SUMMARY</div>";
+  html+="<div class='summary-title'>ALL OWNERS TAX REPORT</div>";
   html+="<table>";
-  html+="<tr><th>OWNER</th><th>TYPE</th><th>PMC %</th><th>GROSS PAYOUT</th><th>ACCOMMODATION</th><th>CLEANING</th><th>PMC</th><th>TAXES COLLECTED</th><th>REPORT/TAX COLLECTED</th><th>NET</th></tr>";
+  html+="<tr><th>OWNER</th><th>PROPERTY NAME</th><th>REPORT TAX TO</th><th>AMOUNT TO REPORT</th><th>TOTAL TAX</th></tr>";
 
   rows.forEach(r=>{
     if(r.error){
-      html+="<tr><td>"+r.name+"</td><td colspan='9' style='color:#b22222'>"+r.error+"</td></tr>";
+      html+="<tr><td>"+r.owner+"</td><td colspan='4' style='color:#b22222'>"+r.error+"</td></tr>";
       return;
     }
-    const net=(r.type==="DRAFT")?r.amountDue:r.ownerPayout;
-    html+="<tr><td>"+r.name+"</td><td>"+r.type+"</td><td>"+r.pmcPercent+"</td><td>"+money(r.payout)+"</td><td>"+money(r.accommodation)+"</td><td>"+money(r.cleaning)+"</td><td>"+money(r.pmc)+"</td><td>"+money(r.taxesCollected)+"</td><td>"+money(r.taxesToReport)+" ("+money(r.taxesCollected)+")</td><td>"+money(net)+"</td></tr>";
+    html+="<tr><td>"+r.owner+"</td><td>"+r.property+"</td><td>"+r.reportTo+"</td><td>"+money(r.amountToReport)+"</td><td>"+money(r.totalTax)+"</td></tr>";
   });
 
   html+="</table></div>";
@@ -2151,17 +2241,17 @@ let html = "";
 if(mode === "dates"){
 
 html += "<label style='font-weight:bold'>FROM</label>";
-html += "<input type='date' id='incomeFrom' style='margin-left:10px;margin-right:20px;width:160px'>";
+html += "<input type='date' id='incomeFrom' onchange='runIncomeReport()' style='margin-left:10px;margin-right:20px;width:160px'>";
 
 html += "<label style='font-weight:bold'>TO</label>";
-html += "<input type='date' id='incomeTo' style='margin-left:10px;width:160px'>";
+html += "<input type='date' id='incomeTo' onchange='runIncomeReport()' style='margin-left:10px;width:160px'>";
 
 }
 
 if(mode === "month"){
 
 html += "<label style='font-weight:bold'>MONTH</label>";
-html += "<select id='incomeMonth' style='margin-left:10px;margin-right:20px;width:150px'>";
+html += "<select id='incomeMonth' onchange='runIncomeReport()' style='margin-left:10px;margin-right:20px;width:150px'>";
 
 const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
 
@@ -2172,11 +2262,18 @@ html += "<option value='"+(i+1)+"'>"+m+"</option>";
 html += "</select>";
 
 html += "<label style='font-weight:bold'>YEAR</label>";
-html += "<input type='number' id='incomeYear' value='"+new Date().getFullYear()+"' style='margin-left:10px;width:100px'>";
+html += "<input type='number' id='incomeYear' value='"+new Date().getFullYear()+"' onchange='runIncomeReport()' style='margin-left:10px;width:100px'>";
 
 }
 
 box.innerHTML = html;
+
+if(mode === "month"){
+const incomeMonth=document.getElementById("incomeMonth");
+const incomeYear=document.getElementById("incomeYear");
+if(incomeMonth) incomeMonth.value=String(new Date().getMonth()+1);
+if(incomeYear) incomeYear.value=String(new Date().getFullYear());
+}
 
 }
 loadData();
@@ -2211,12 +2308,17 @@ const row = e.target.closest("tr");
 
 const acc = row.querySelector(".acc");
 const clean = row.querySelector(".clean");
+const web = row.querySelector(".web");
 
 const accVal = acc.dataset.val;
 const cleanVal = clean.dataset.val;
+const webVal = web ? web.dataset.val : "0";
 
 acc.innerHTML = "<input class='accInput' type='number' value='"+accVal+"' style='width:90px'>";
 clean.innerHTML = "<input class='cleanInput' type='number' value='"+cleanVal+"' style='width:90px'>";
+if(web){
+web.innerHTML = "<input class='webInput' type='number' value='"+webVal+"' style='width:90px'>";
+}
 
 e.target.innerText="Save";
 e.target.classList.remove("editRow");
@@ -2230,32 +2332,39 @@ const row = e.target.closest("tr");
 
 const accInput = row.querySelector(".accInput");
 const cleanInput = row.querySelector(".cleanInput");
+const webInput = row.querySelector(".webInput");
 
 const acc = row.querySelector(".acc");
 const clean = row.querySelector(".clean");
+const web = row.querySelector(".web");
 
 const accVal = Number(accInput.value)||0;
 const cleanVal = Number(cleanInput.value)||0;
+const webVal = webInput ? (Number(webInput.value)||0) : 0;
 
- if(accVal < 0 || cleanVal < 0) return;
+ if(cleanVal < 0 || webVal < 0) return;
 
 const prop = row.dataset.prop;
 const index = parseInt(row.dataset.row);
 
 const r = propertyTotals[prop].reservations[index];
 
-const oldAcc = num(r["TOTAL PAYOUT"]) - num(r["CLEANING FARE"]);
-const oldClean = num(r["CLEANING FARE"]);
-
-r["CLEANING FARE"] = cleanVal;
+r["MANUAL ACCOMMODATION"] = accVal;
+r["MANUAL CLEANING FARE"] = cleanVal;
+if(web){
+r["MANUAL WEBSITE FEE"] = webVal;
+}
 acc.dataset.val = accVal;
 clean.dataset.val = cleanVal;
- 
-propertyTotals[prop].acc += (accVal - oldAcc);
-propertyTotals[prop].clean += (cleanVal - oldClean);
+if(web){
+web.dataset.val = webVal;
+}
 
 acc.innerHTML="$"+accVal.toFixed(2);
 clean.innerHTML="$"+cleanVal.toFixed(2);
+if(web){
+web.innerHTML="$"+webVal.toFixed(2);
+}
 row.style.background="#fff8cc";
 
 e.target.innerText="Edit";
