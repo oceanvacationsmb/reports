@@ -68,7 +68,7 @@ break-inside:avoid;
 th,td{border:1px solid #d9e3e8;padding:7px;text-align:left}
 th{background:#eef4f7;color:#183742;font-weight:bold;text-transform:uppercase}
 tr:nth-child(even){background:#f9fbfc}
-.action-buttons{display:flex;gap:10px;margin:20px 0;justify-content:center;flex-wrap:wrap}
+.action-buttons{display:flex;gap:8px;margin:16px 0;justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}
 .action-buttons button{padding:10px 20px;font-size:12px;cursor:pointer;border:none;border-radius:3px;color:#fff;font-weight:bold;text-transform:uppercase}
 .back-btn{background:#666}
 .print-btn{background:#e74c3c}
@@ -112,7 +112,7 @@ margin:20px 0;
 .btn-save{background:#0066cc}
 .modal-overlay{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.7)}
 .modal-overlay.show{display:block}
-.copy-link-btn{background:#0066cc;color:#fff;padding:10px 15px;border:none;border-radius:3px;cursor:pointer;font-weight:bold;margin:10px 0;width:100%;text-transform:uppercase}
+.copy-link-btn{background:#0066cc;color:#fff;padding:8px 12px;border:none;border-radius:6px;cursor:pointer;font-weight:bold;margin:0;width:auto;text-transform:uppercase;font-size:11px;white-space:nowrap}
 .section-title{font-size:12px;font-weight:bold;text-transform:uppercase;margin-top:20px;margin-bottom:10px;color:#000}
 .btn-small{padding:5px 10px;font-size:9px;width:auto;margin:0;display:inline-block;text-transform:uppercase}
 .settings-header{color:#d2e0e5;margin:20px 0 10px 0;font-size:12px;font-weight:bold;text-transform:uppercase;border-top:1px solid rgba(255,255,255,.2);padding-top:15px;letter-spacing:.05em}
@@ -197,7 +197,7 @@ select,input,.btn{font-size:12px}
 <div id="appControls" style="display:none">
 <div class="section"><label class="label">MONTH</label><select id="monthSelect" onchange="onPeriodChange()"></select></div>
 <div class="section"><label class="label">YEAR</label><select id="yearSelect" onchange="onPeriodChange()"></select></div>
-<button id="generateStatementBtn" class="btn btn-primary" onclick="generateStatement()">GENERATE REPORT</button>
+<button id="generateStatementBtn" class="btn btn-primary" onclick="generateStatement()">RUN STATEMENT</button>
 <button id="addExpenseBtnSidebar" class="btn btn-success" onclick="openAddExpense()" style="font-size:13px;font-weight:bold">ADD EXPENSE</button>
 <button id="summaryBtn" class="btn btn-success" onclick="generateSummary()">SUMMARY REPORT</button>
 <button id="emailClientBtn" class="btn btn-success" onclick="openEmailClient()">EMAIL CLIENT</button>
@@ -280,6 +280,7 @@ select,input,.btn{font-size:12px}
 <div class="modal-title">USER MANAGEMENT</div>
 <div class="modal-field"><label class="modal-label">USERNAME</label><input type="text" id="newUsername" class="modal-input" placeholder="owner_username"></div>
 <div class="modal-field"><label class="modal-label">PASSWORD</label><input type="password" id="newUserPassword" class="modal-input" placeholder="Password"></div>
+<div class="modal-field"><label class="modal-label">ROLE</label><select id="newUserRole" class="modal-input" onchange="onNewUserRoleChange()"><option value="owner">OWNER</option><option value="admin">ADMIN</option></select></div>
 <div class="modal-field"><label class="modal-label">OWNER</label><select id="newUserOwner" class="modal-input"></select></div>
 <div class="modal-field"><label class="modal-label">DISPLAY NAME (OPTIONAL)</label><input type="text" id="newUserDisplayName" class="modal-input" placeholder="Owner Full Name"></div>
 <button class="btn btn-success" onclick="addPortalUser()" style="width:100%;margin-bottom:20px">ADD USER</button>
@@ -291,6 +292,7 @@ select,input,.btn{font-size:12px}
 <div id="loginModal" class="modal">
 <div>
 <div class="modal-title">OWNER LOGIN</div>
+<div class="modal-field"><label class="modal-label">ROLE</label><select id="loginRole" class="modal-input"><option value="owner">OWNER</option><option value="admin">ADMIN</option></select></div>
 <div class="modal-field"><label class="modal-label">USERNAME</label><input type="text" id="loginUsername" class="modal-input" placeholder="Username"></div>
 <div class="modal-field"><label class="modal-label">PASSWORD</label><input type="password" id="loginPassword" class="modal-input" placeholder="Password"></div>
 <div id="loginError" style="font-size:11px;color:#ffb3b3;min-height:18px"></div>
@@ -365,6 +367,7 @@ function getGitHubAPI(){
 
 let gitHubData={},OWNERS={},USERS={},vendors=[],expenses=[],csvData=[],propertySettings={},currentOwner="",masterTotals={},propertyTotals={},taxByProperty={},githubToken="";
 let sessionExpenses=[];
+let editingExpenseId=null;
 let savedReports=[];
 let pendingEmailSnapshotId="";
 const municipalities=["SC","MB","NMB","SSB","HC","GTC"];
@@ -420,15 +423,32 @@ function getRowCode(row){
 
 function getAccommodationValue(row,isDraft){
   const payout=num(row && row["TOTAL PAYOUT"]);
-  const cleaningField=(row && row["MANUAL CLEANING FARE"]!==undefined && row["MANUAL CLEANING FARE"]!==null)
-    ? row["MANUAL CLEANING FARE"]
-    : (row ? row["CLEANING FARE"] : 0);
-  const cleaning=num(cleaningField);
-  const taxes=isDraft?getRowTaxTotal(row):0;
+  const cleaning=getCleaningValue(row);
+  const taxes=getRowTaxTotal(row);
   const manualAcc=(row && row["MANUAL ACCOMMODATION"]!==undefined && row["MANUAL ACCOMMODATION"]!==null && row["MANUAL ACCOMMODATION"]!=="")
     ? num(row["MANUAL ACCOMMODATION"])
     : null;
-  return manualAcc===null ? (payout-cleaning-taxes) : manualAcc;
+  if(manualAcc!==null) return manualAcc;
+
+  const lengthDiscount=num(row && row["LENGTH DISCOUNT"]);
+  const resolutionCenter=num(row && row["AIRBNB RESOLUTION CENTER"]);
+  if(isDraft){
+    return payout-cleaning-taxes-resolutionCenter+lengthDiscount;
+  }
+
+  const accFare=num(row && row["ACCOMMODATION FARE"]);
+  const markup=num(row && row["MARKUP"]);
+  if(accFare!==0 || markup!==0 || lengthDiscount!==0){
+    return accFare-markup+lengthDiscount;
+  }
+  return payout-cleaning;
+}
+
+function getCleaningValue(row){
+  const hasManual=row && row["MANUAL CLEANING FARE"]!==undefined && row["MANUAL CLEANING FARE"]!==null;
+  if(hasManual) return num(row["MANUAL CLEANING FARE"]);
+  const isCancelled=((row && row["STATUS"])||"").toString().toLowerCase().includes("cancel");
+  return isCancelled ? 0 : num(row && row["CLEANING FARE"]);
 }
 
 function getMunicipalityLabel(propertyName){
@@ -440,7 +460,11 @@ function getMunicipalityLabel(propertyName){
 }
 
 function isOwnerPortalUser(){
-  return !!(currentUserSession && currentUserSession.username);
+  return !!(currentUserSession && currentUserSession.username && (currentUserSession.role||"owner")==="owner");
+}
+
+function isAdminUser(){
+  return !!(currentUserSession && currentUserSession.username && (currentUserSession.role||"")==="admin");
 }
 
 function getOwnerPortalType(){
@@ -464,7 +488,8 @@ function restoreUserSession(){
   currentUserSession={
     username:username,
     owner:USERS[username].owner,
-    displayName:USERS[username].displayName||username
+    displayName:USERS[username].displayName||username,
+    role:(USERS[username].role||"owner").toLowerCase()
   };
 }
 
@@ -473,7 +498,8 @@ function setUserSession(username){
   currentUserSession={
     username:username,
     owner:USERS[username].owner,
-    displayName:USERS[username].displayName||username
+    displayName:USERS[username].displayName||username,
+    role:(USERS[username].role||"owner").toLowerCase()
   };
   localStorage.setItem(getUserStorageKey(),username);
 }
@@ -485,6 +511,7 @@ function clearUserSession(){
 
 function applyAccessControls(){
   const ownerPortal=isOwnerPortalUser();
+  const adminPortal=isAdminUser();
   const portalType=getOwnerPortalType();
 
   const userSessionStatus=document.getElementById("userSessionStatus");
@@ -553,15 +580,37 @@ function applyAccessControls(){
     return;
   }
 
+  if(!adminPortal){
+    ownerSelect.disabled=true;
+    ownerLoginBtn.style.display="";
+    ownerLogoutBtn.style.display="none";
+    userSessionStatus.textContent="MODE: LOGIN REQUIRED";
+
+    document.getElementById("appControls").style.display="none";
+    settingsHeader.style.display="none";
+    ownerSettingsBtn.style.display="none";
+    taxSettingsBtn.style.display="none";
+    vendorSettingsBtn.style.display="none";
+    userSettingsBtn.style.display="none";
+    githubSetupBtn.style.display="none";
+    dropboxSetupBtn.style.display="none";
+    tokenStatus.style.display="none";
+    emailClientBtn.style.display="none";
+    savedReportsBtn.style.display="none";
+    reportsHeader.style.display="none";
+    reportTypeSection.style.display="none";
+    return;
+  }
+
   ownerSelect.disabled=false;
   ownerLoginBtn.style.display="";
   ownerLogoutBtn.style.display="none";
-  userSessionStatus.textContent="MODE: ADMIN";
+  userSessionStatus.textContent="MODE: ADMIN - "+(currentUserSession.displayName||currentUserSession.username||"ADMIN").toUpperCase();
 
   generateStatementBtn.style.display="";
   addExpenseBtnSidebar.style.display="";
   summaryBtn.style.display="";
-  emailClientBtn.style.display="";
+  emailClientBtn.style.display="none";
   savedReportsBtn.style.display="";
   reportsHeader.style.display="";
   reportTypeSection.style.display="";
@@ -827,7 +876,7 @@ toDate = y + "-12-31";
     html+="</div>";
     let actionHtml="<div class='action-buttons'><button class='copy-link-btn' onclick='downloadIncomePDF()'>DOWNLOAD PDF</button>";
     if(!ownerPortal){
-      actionHtml+="<button class='copy-link-btn' onclick='saveCurrentReportSnapshot()'>SAVE SNAPSHOT</button><button class='copy-link-btn' onclick='openEmailClient()'>EMAIL CLIENT</button>";
+      actionHtml+="<button class='copy-link-btn' onclick='saveCurrentReportSnapshot()'>SAVE REPORT</button>";
     }
     actionHtml+="</div>";
     document.getElementById("mainContent").innerHTML=actionHtml+"<div id='incomeReportResult'>"+html+"</div>";
@@ -948,8 +997,8 @@ function openEmailClient(reportId){
     alert("Email sending is available in admin mode only");
     return;
   }
-  if(!reportId && !canSnapshotCurrentView()){
-    alert("Generate a report first, then open EMAIL CLIENT");
+  if(!reportId && currentView!=="statement"){
+    alert("EMAIL CLIENT is available from STATEMENT page or SAVED REPORTS");
     return;
   }
   let snapshot=null;
@@ -1035,7 +1084,8 @@ function openSavedReport(reportId){
   if(!isOwnerPortalUser()){
     html+="<button class='copy-link-btn' onclick='openEmailClient(\""+report.id+"\")'>EMAIL CLIENT</button>";
   }
-  html+="<button class='copy-link-btn' onclick='copySavedReportLink(\""+report.id+"\")'>COPY LINK</button></div>";
+  html+="<button class='copy-link-btn' onclick='copySavedReportLink(\""+report.id+"\")'>COPY LINK</button>";
+  html+="<button class='btn btn-danger' onclick='deleteSavedReport(\""+report.id+"\")'>DELETE</button></div>";
   html+="<div style='font-size:12px;color:#667;padding:0 4px 10px 4px'>Saved: "+new Date(report.createdAt).toLocaleString()+" | Period: "+(report.period||"-")+"</div>";
   html+=report.html||"";
   document.getElementById("mainContent").innerHTML=html;
@@ -1051,6 +1101,23 @@ function copySavedReportLink(reportId){
   });
 }
 
+function deleteSavedReport(reportId){
+  const report=(savedReports||[]).find(r=>r.id===reportId);
+  if(!report) return alert("Saved report not found");
+  if(isOwnerPortalUser() && report.owner!==currentUserSession.owner){
+    return alert("Not allowed");
+  }
+  if(!confirm("Delete this saved report?")) return;
+  savedReports=(savedReports||[]).filter(r=>r.id!==reportId);
+  if(!githubToken){
+    showHistory();
+    return;
+  }
+  saveToGitHub("saved reports",()=>{
+    showHistory();
+  });
+}
+
 function showHistory(){
   currentView="history";
   document.getElementById("invoiceHeader").style.display="none";
@@ -1060,7 +1127,7 @@ function showHistory(){
   document.getElementById("periodDate").style.display="none";
   document.getElementById("reportTitle").textContent="SAVED REPORTS";
 
-  const ownerFilter=isOwnerPortalUser() ? currentUserSession.owner : "";
+  const ownerFilter=isOwnerPortalUser() ? currentUserSession.owner : ((currentOwner && currentOwner!=="__ALL__") ? currentOwner : "");
   const rows=(savedReports||[])
     .filter(r=>!ownerFilter || r.owner===ownerFilter)
     .sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
@@ -1077,7 +1144,7 @@ function showHistory(){
       html+="<td>"+(r.owner||"-")+"</td>";
       html+="<td>"+(r.reportTitle||r.reportKey||"Report")+"</td>";
       html+="<td>"+(r.period||"-")+"</td>";
-      html+="<td><button class='btn btn-small btn-primary' onclick='openSavedReport(\""+r.id+"\")'>OPEN</button> <button class='btn btn-small btn-success' onclick='copySavedReportLink(\""+r.id+"\")'>COPY LINK</button>";
+      html+="<td><button class='btn btn-small btn-primary' onclick='openSavedReport(\""+r.id+"\")'>OPEN</button> <button class='btn btn-small btn-success' onclick='copySavedReportLink(\""+r.id+"\")'>COPY LINK</button> <button class='btn btn-small btn-danger' onclick='deleteSavedReport(\""+r.id+"\")'>DELETE</button>";
       if(!isOwnerPortalUser()){
         html+=" <button class='btn btn-small btn-info' onclick='openEmailClient(\""+r.id+"\")'>EMAIL</button>";
       }
@@ -1216,11 +1283,18 @@ function showOwnerSelectionPrompt(){
   document.getElementById("reportTitle").textContent="OCEAN VACATIONS ACCOUNTING SYSTEM";
 
   const count=Object.keys(OWNERS||{}).length;
-  document.getElementById("mainContent").innerHTML="<div style='max-width:760px;margin:20px auto;padding:24px;border:1px solid #d4e1e7;border-radius:12px;background:#f8fcfd'><div style='font-size:20px;font-weight:bold;margin-bottom:12px;color:#173540'>SELECT OWNER</div><div style='color:#40535c'>Choose an owner from the left sidebar to load their dashboard and reports.</div><div style='margin-top:10px;font-weight:bold'>Owners available: "+count+"</div></div>";
+  const requiresLogin=!currentUserSession;
+  document.getElementById("mainContent").innerHTML="<div style='max-width:760px;margin:20px auto;padding:24px;border:1px solid #d4e1e7;border-radius:12px;background:#f8fcfd'><div style='font-size:20px;font-weight:bold;margin-bottom:12px;color:#173540'>"+(requiresLogin?"LOGIN REQUIRED":"SELECT OWNER")+"</div><div style='color:#40535c'>"+(requiresLogin?"Please login to continue. Use OWNER for owner portal or ADMIN for full access.":"Choose an owner from the left sidebar to load their dashboard and reports.")+"</div><div style='margin-top:10px;font-weight:bold'>Owners available: "+count+"</div></div>";
 }
 
 function init(){
   restoreUserSession();
+
+  Object.keys(USERS||{}).forEach(username=>{
+    if(!USERS[username].role){
+      USERS[username].role="owner";
+    }
+  });
 
   if(isOwnerPortalUser() && !OWNERS[currentUserSession.owner]){
     clearUserSession();
@@ -1246,6 +1320,13 @@ function init(){
   ownerSelect.value=currentOwner;
   toggleOwnerMode();
   applyAccessControls();
+
+  if(!currentUserSession){
+    showOwnerSelectionPrompt();
+    openLoginModal(true);
+    loadSavedReportFromHash();
+    return;
+  }
 
   if(currentOwner==="__ALL__"){
     showAllOwnersLandingInfo();
@@ -1309,6 +1390,7 @@ function onOwnerChange(){
     return;
   }
   currentOwner=document.getElementById("ownerSelect").value;
+  csvData=[];
   toggleOwnerMode();
   if(currentOwner){
     if(currentOwner==="__ALL__"){
@@ -1383,6 +1465,7 @@ function mapGuestyReservation(r){
   const invoiceItems = (r["money.invoiceItems"] && r["money.invoiceItems"].children) || [];
 
   let cityTax=0,stateTax=0,countyTax=0,occupancyTax=0,gtcTax=0;
+  let lengthDiscount=0,resolutionCenter=0,linensFee=0,communityFee=0;
   invoiceItems.forEach(item=>{
     const name=((item.title||"")+" "+(item.name||"")).toLowerCase();
     const val=num(item.value);
@@ -1391,6 +1474,10 @@ function mapGuestyReservation(r){
     else if(name.includes("city") || name.includes("north myrtle") || name.includes("surfside") || name.includes("mb")) cityTax+=val;
     else if(name.includes("gtc")) gtcTax+=val;
     else if(name.includes("occupancy") || name.includes("accommodation") || name.includes("tourism")) occupancyTax+=val;
+    else if(name.includes("length") && name.includes("discount")) lengthDiscount+=val;
+    else if(name.includes("resolution")) resolutionCenter+=val;
+    else if(name.includes("linen")) linensFee+=val;
+    else if(name.includes("community")) communityFee+=val;
   });
 
   return {
@@ -1407,6 +1494,10 @@ function mapGuestyReservation(r){
     "STATUS": (r.status && r.status.children) || "",
     "MARKUP": (r["money.invoiceItems.MAR"] && r["money.invoiceItems.MAR"].value) || 0,
     "CHANNEL COMMISSION": (r["money.hostServiceFee"] && r["money.hostServiceFee"].value) || 0,
+    "LENGTH DISCOUNT": lengthDiscount,
+    "AIRBNB RESOLUTION CENTER": resolutionCenter,
+    "LINENS FEE": linensFee,
+    "COMMUNITY FEE": communityFee,
     "TAXES": (r["money.totalTaxes"] && r["money.totalTaxes"].value) || 0,
     "CITY TAX": cityTax,
     "STATE TAX": stateTax,
@@ -1694,10 +1785,16 @@ function openUsers(){
   let html="";
   Object.keys(USERS).sort().forEach(username=>{
     const user=USERS[username]||{};
+    const role=(user.role||"owner").toLowerCase();
     html+="<div style='background:#555;padding:12px;margin:8px 0;border-radius:3px'>";
     html+="<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:8px'><div style='color:#fff;font-weight:bold'>"+username+"</div><button class='btn btn-danger btn-small' onclick=\"deletePortalUser('"+username.replace(/'/g,"\\'")+"')\">DELETE</button></div>";
+    html+="<label class='modal-label'>ROLE</label>";
+    html+="<select class='modal-input' onchange=\"USERS['"+username.replace(/'/g,"\\'")+"'].role=this.value\">";
+    html+="<option value='owner' "+(role==="owner"?"selected":"")+">OWNER</option>";
+    html+="<option value='admin' "+(role==="admin"?"selected":"")+">ADMIN</option>";
+    html+="</select>";
     html+="<label class='modal-label'>OWNER</label>";
-    html+="<select class='modal-input' onchange=\"USERS['"+username.replace(/'/g,"\\'")+"'].owner=this.value\">";
+    html+="<select class='modal-input' "+(role==="admin"?"disabled":"")+" onchange=\"USERS['"+username.replace(/'/g,"\\'")+"'].owner=this.value\">";
     Object.keys(OWNERS).sort().forEach(ownerName=>{
       if(ownerName==="ALL PROPERTIES") return;
       const selected=(user.owner===ownerName)?"selected":"";
@@ -1711,22 +1808,32 @@ function openUsers(){
     html+="</div>";
   });
   usersList.innerHTML=html || "<div style='color:#aaa;text-align:center;padding:12px'>No users added yet.</div>";
+  document.getElementById("newUserRole").value="owner";
+  onNewUserRoleChange();
   openModal("usersModal");
+}
+
+function onNewUserRoleChange(){
+  const role=(document.getElementById("newUserRole").value||"owner").toLowerCase();
+  document.getElementById("newUserOwner").disabled=(role==="admin");
 }
 
 function addPortalUser(){
   if(isOwnerPortalUser()) return alert("Not allowed in owner portal mode");
   const username=(document.getElementById("newUsername").value||"").trim().toLowerCase();
   const password=(document.getElementById("newUserPassword").value||"").trim();
+  const role=(document.getElementById("newUserRole").value||"owner").trim().toLowerCase();
   const owner=(document.getElementById("newUserOwner").value||"").trim();
   const displayName=(document.getElementById("newUserDisplayName").value||"").trim();
 
-  if(!username || !password || !owner) return alert("Username, password and owner are required");
+  if(!username || !password) return alert("Username and password are required");
+  if(role==="owner" && !owner) return alert("Owner is required for owner role");
   if(USERS[username]) return alert("Username already exists");
-  USERS[username]={password:password,owner:owner,displayName:displayName};
+  USERS[username]={password:password,owner:role==="owner"?owner:"",displayName:displayName,role:role};
 
   document.getElementById("newUsername").value="";
   document.getElementById("newUserPassword").value="";
+  document.getElementById("newUserRole").value="owner";
   document.getElementById("newUserOwner").value="";
   document.getElementById("newUserDisplayName").value="";
   openUsers();
@@ -1752,11 +1859,15 @@ function saveUserData(){
   });
 }
 
-function openLoginModal(){
+function openLoginModal(force){
   if(Object.keys(USERS).length===0){
     alert("No owner users configured yet. Add users in USER SETTINGS.");
     return;
   }
+  if(force){
+    document.getElementById("modalOverlay").classList.add("show");
+  }
+  document.getElementById("loginRole").value="owner";
   document.getElementById("loginUsername").value="";
   document.getElementById("loginPassword").value="";
   document.getElementById("loginError").textContent="";
@@ -1764,12 +1875,20 @@ function openLoginModal(){
 }
 
 function submitLogin(){
+  const loginRole=(document.getElementById("loginRole").value||"owner").toLowerCase();
   const username=(document.getElementById("loginUsername").value||"").trim().toLowerCase();
   const password=(document.getElementById("loginPassword").value||"").trim();
   const loginError=document.getElementById("loginError");
 
-  if(!USERS[username] || (USERS[username].password||"")!==password){
+  const user=USERS[username]||null;
+  if(!user || (user.password||"")!==password){
     loginError.textContent="Invalid username or password";
+    return;
+  }
+
+  const userRole=(user.role||"owner").toLowerCase();
+  if(userRole!==loginRole){
+    loginError.textContent="This account is not configured for "+loginRole.toUpperCase()+" login";
     return;
   }
 
@@ -1846,17 +1965,13 @@ function updateVendorDropdown(){
   });
 }
 
-function getExpensePropertyOptions(){
+function getExpensePropertyOptions(rows){
   const optionMap={};
 
-  (csvData||[]).forEach(row=>{
+  (rows||[]).forEach(row=>{
     const key=getPropertyKey(row);
     if(!key) return;
     optionMap[key]=getPropertyName(row,key);
-  });
-
-  Object.keys(propertySettings||{}).forEach(prop=>{
-    if(!optionMap[prop]) optionMap[prop]=prop;
   });
 
   return Object.keys(optionMap).sort().map(key=>({
@@ -1870,27 +1985,60 @@ function openAddExpense(){
   if(!currentOwner)return alert("Select owner first");
 
   sessionExpenses=[];
+  editingExpenseId=null;
   document.getElementById("expenseCheckmark").style.display="none";
   document.getElementById("expenseFormContent").style.display="block";
   document.getElementById("expenseListDisplay").style.display="none";
 
   const prop=document.getElementById("expenseProperty");
 
-  prop.innerHTML="<option>-- SELECT --</option>";
+  const fillProps=(rows)=>{
+    prop.innerHTML="<option>-- SELECT --</option>";
+    prop.innerHTML+="<option value='OWNER'>OWNER: "+currentOwner+"</option>";
+    getExpensePropertyOptions(rows).forEach(p=>{
+      prop.innerHTML+="<option value='"+p.value+"'>PROPERTY: "+p.label+"</option>";
+    });
+  };
 
-  prop.innerHTML+="<option value='OWNER'>OWNER: "+currentOwner+"</option>";
-
-  getExpensePropertyOptions().forEach(p=>{
-    prop.innerHTML+="<option value='"+p.value+"'>PROPERTY: "+p.label+"</option>";
-  });
+  if(Array.isArray(csvData) && csvData.length){
+    fillProps(csvData);
+  }else if(guestyPreloadByOwner[currentOwner] && Array.isArray(guestyPreloadByOwner[currentOwner])){
+    fillProps(guestyPreloadByOwner[currentOwner]);
+  }else{
+    fetchGuestyRowsForOwner(currentOwner,false)
+      .then(rows=>{
+        csvData=rows;
+        guestyPreloadByOwner[currentOwner]=rows;
+        fillProps(rows);
+      })
+      .catch(()=>{
+        fillProps([]);
+      });
+  }
 
   document.getElementById("expenseType").value="MAINTENANCE";
   document.getElementById("expenseProperty").value="";
   document.getElementById("expenseVendor").value="";
   document.getElementById("expenseAmount").value="";
   document.getElementById("expenseNotes").value="";
+  document.getElementById("addExpenseBtn").textContent="ADD EXPENSE";
 
   openModal("expenseModal");
+}
+
+function openEditExpense(expenseId){
+  const expense=(expenses||[]).find(e=>e.id===expenseId);
+  if(!expense) return alert("Expense not found");
+  if(expense.owner!==currentOwner) return alert("Not allowed");
+
+  openAddExpense();
+  editingExpenseId=expenseId;
+  document.getElementById("expenseType").value=expense.type||"MAINTENANCE";
+  document.getElementById("expenseProperty").value=expense.property||"";
+  document.getElementById("expenseVendor").value=expense.vendor||"";
+  document.getElementById("expenseAmount").value=num(expense.amount);
+  document.getElementById("expenseNotes").value=expense.notes||"";
+  document.getElementById("addExpenseBtn").textContent="UPDATE EXPENSE";
 }
 
 function submitExpense(){
@@ -1904,6 +2052,43 @@ propertyValue = "OWNER";
   const vendor=document.getElementById("expenseVendor").value;
   const amount=parseFloat(document.getElementById("expenseAmount").value);
   if(!currentOwner||!prop||!vendor||!amount)return alert("Fill all fields");
+
+  const notes=document.getElementById("expenseNotes").value;
+
+  if(editingExpenseId!==null){
+    const idx=(expenses||[]).findIndex(e=>e.id===editingExpenseId);
+    if(idx<0) return alert("Expense not found");
+    const existing=expenses[idx];
+    const fileEdit=document.getElementById("expenseInvoice").files[0];
+    const finalizeUpdate=(invoiceValue)=>{
+      expenses[idx]={
+        id:existing.id,
+        owner:currentOwner,
+        type:type,
+        property:prop,
+        vendor:vendor,
+        amount:amount,
+        notes:notes,
+        invoice:invoiceValue
+      };
+      editingExpenseId=null;
+      document.getElementById("addExpenseBtn").textContent="ADD EXPENSE";
+      document.getElementById("expenseInvoice").value="";
+      document.getElementById("expenseAmount").value="";
+      document.getElementById("expenseNotes").value="";
+      alert("Expense updated");
+    };
+    if(fileEdit){
+      const editReader=new FileReader();
+      editReader.onload=function(ev){
+        finalizeUpdate(ev.target.result);
+      };
+      editReader.readAsDataURL(fileEdit);
+    }else{
+      finalizeUpdate(existing.invoice||null);
+    }
+    return;
+  }
   
   const expenseId=Date.now();
 const file=document.getElementById("expenseInvoice").files[0];
@@ -1922,7 +2107,7 @@ if(file){
       property:prop,
       vendor:vendor,
       amount:amount,
-      notes:document.getElementById("expenseNotes").value,
+      notes:notes,
       invoice:invoiceData
     });
     const btn=document.getElementById("addExpenseBtn");
@@ -1946,7 +2131,7 @@ expenses.push({
   property:prop,
   vendor:vendor,
   amount:amount,
-  notes:document.getElementById("expenseNotes").value,
+  notes:notes,
   invoice:null
 });
   const btn=document.getElementById("addExpenseBtn");
@@ -2126,7 +2311,7 @@ masterTotals.owner -= ownerExpTotal + recurringTotal;
     let gross=0,acc=0,clean=0,pmc=0,websiteFee=0,totalTax=0;
     byProp[prop].forEach(row=>{
       const g = num(row["TOTAL PAYOUT"]);
-const c = num((row["MANUAL CLEANING FARE"]!==undefined && row["MANUAL CLEANING FARE"]!==null) ? row["MANUAL CLEANING FARE"] : row["CLEANING FARE"]);
+const c = getCleaningValue(row);
 let a = getAccommodationValue(row,isDraft);
 const p = a * pmcPercent;
      
@@ -2211,7 +2396,7 @@ const ownerPortal=isOwnerPortalUser();
   const type=t.type;
   let html="<div class='action-buttons'><button class='copy-link-btn' onclick='downloadPDF()'>📄 DOWNLOAD PDF</button>";
   if(!ownerPortal){
-    html+="<button class='copy-link-btn' onclick='saveCurrentReportSnapshot()'>SAVE SNAPSHOT</button><button class='copy-link-btn' onclick='openEmailClient()'>EMAIL CLIENT</button>";
+    html+="<button class='copy-link-btn' onclick='saveCurrentReportSnapshot()'>SAVE REPORT</button><button class='copy-link-btn' onclick='openEmailClient()'>EMAIL CLIENT</button>";
   }
   html+="</div>";
 
@@ -2241,6 +2426,32 @@ html+="<div style='display:flex;justify-content:space-between;padding:10px 0;fon
 }
 
 html+="</div>";
+
+if(ownerPortal){
+  const ownerRows=[];
+  Object.keys(propertyTotals).forEach(prop=>{
+    const p=propertyTotals[prop]||{};
+    (p.reservations||[]).forEach(row=>ownerRows.push(row));
+  });
+
+  ownerRows.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"]));
+  html+="<div class='property-section'>";
+  html+="<div class='section-title'>RESERVATIONS</div>";
+  html+="<table><tr><th>RESERVATION CODE</th><th>PLATFORM</th><th>DATES</th><th>ACCOMMODATION</th><th>PMC</th><th>NET PAYOUT (AFTER PMC)</th></tr>";
+  ownerRows.forEach(row=>{
+    const acc=getAccommodationValue(row,(type==="draft"));
+    const pm=acc*pmcPercent;
+    const net=acc-pm;
+    const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
+    const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
+    const source=(row["SOURCE"]||"").toLowerCase();
+    const platform=((source==="website" ? "Website" : source==="manual_direct" ? "Website Old" : source==="manual_vrbo" || source==="vrbo_manual" ? "VRBO OLD" : row["PLATFORM"]) + (((row["STATUS"]||"").toLowerCase().includes("cancel") && num(row["TOTAL PAYOUT"])>0) ? " Cancelled" : ""));
+    html+="<tr><td>"+getRowCode(row)+"</td><td>"+platform+"</td><td>"+checkin+"-"+checkout+"</td><td>"+money(acc)+"</td><td>"+money(pm)+"</td><td>"+money(net)+"</td></tr>";
+  });
+  html+="</table></div>";
+  document.getElementById("mainContent").innerHTML=html;
+  return;
+}
 
 if(type!=="draft" && recurringCharges.length>0 && !ownerPortal){
 
@@ -2307,7 +2518,7 @@ html+="<td>"+e.type+"</td>";
 html+="<td>"+e.vendor+"</td>";
 html+="<td>"+(e.notes||"")+"</td>";
 html+="<td>"+money(e.amount)+"</td>";
-html+="<td class='no-print'><button class='btn btn-danger btn-small' onclick='deleteExpenseLocal("+e.id+")'>DELETE</button></td>";
+html+="<td class='no-print'><button class='btn btn-info btn-small' onclick='openEditExpense("+e.id+")'>EDIT</button> <button class='btn btn-danger btn-small' onclick='deleteExpenseLocal("+e.id+")'>DELETE</button></td>";
 html+="</tr>";
 });
 
@@ -2388,7 +2599,7 @@ html+="</div>";
 
 html+="</div>";
 
-html+="<div class='property-title'><span class='property-icon'>🏠</span>"+getPropertyLabelFromBucket(p,prop).toUpperCase()+"</div>";
+html+="<div class='property-title'><span class='property-icon'>🏠</span>"+getPropertyNameFromBucket(p,prop).toUpperCase()+"</div>";
     
    if(type==="draft"){
   html+="<div class='summary-grid'>";
@@ -2419,7 +2630,7 @@ html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>GROSS PAYOUT</th><th>A
 p.reservations.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"])).forEach((row,i)=>{
  
 const g = num(row["TOTAL PAYOUT"]);
-const c = num((row["MANUAL CLEANING FARE"]!==undefined && row["MANUAL CLEANING FARE"]!==null) ? row["MANUAL CLEANING FARE"] : row["CLEANING FARE"]);
+const c = getCleaningValue(row);
 let a = getAccommodationValue(row,true);
 const pm = a * pmcPercent;
 
@@ -2463,7 +2674,7 @@ html+="</tr>";
 
 }else{
 
-html+="<tr><th>CODE</th><th>STAY</th><th>ACCOMMODATION</th><th>PMC</th><th>OWNER PAYOUT</th></tr>";
+html+="<tr><th>CODE</th><th>STAY</th><th>ACCOMMODATION</th><th>PMC</th><th>OWNER PAYOUT</th>"+(ownerPortal?"":"<th class='no-print'>ACTION</th>")+"</tr>";
      
 p.reservations.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"])).forEach(row=>{
 
@@ -2477,9 +2688,12 @@ const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).j
 html+="<tr>";
 html+="<td>"+getRowCode(row)+"</td>";
 html+="<td>"+checkin+"-"+checkout+"</td>";
-html+="<td>"+money(a)+"</td>";
+html+="<td class='acc' data-val='"+a+"'>"+money(a)+"</td>";
 html+="<td>"+money(pm)+"</td>";
 html+="<td>"+money(owner)+"</td>";
+if(!ownerPortal){
+html+="<td class='no-print'><button class='editRow'>Edit</button></td>";
+}
 html+="</tr>";
 
 });
@@ -2490,14 +2704,15 @@ html+="</table></div>";
 
 if(exp.length>0 && !ownerPortal){
   html+="<div style='margin-top:15px'><div class='section-title'>EXPENSES</div><table style='margin-top:10px'>";
-  html+="<tr><th>TYPE</th><th>VENDOR</th><th>AMOUNT</th><th class='no-print'>ACTION</th></tr>";
+  html+="<tr><th>TYPE</th><th>VENDOR</th><th>NOTES</th><th>AMOUNT</th><th class='no-print'>ACTION</th></tr>";
   exp.forEach(e=>{
 
 html+="<tr>";
 html+="<td>"+e.type+"</td>";
 html+="<td>"+e.vendor+"</td>";
+html+="<td>"+(e.notes||"")+"</td>";
 html+="<td>"+money(e.amount)+"</td>";
-html+="<td class='no-print'><button class='btn btn-danger btn-small' onclick='deleteExpenseLocal("+e.id+")'>DELETE</button></td>";
+html+="<td class='no-print'><button class='btn btn-info btn-small' onclick='openEditExpense("+e.id+")'>EDIT</button> <button class='btn btn-danger btn-small' onclick='deleteExpenseLocal("+e.id+")'>DELETE</button></td>";
 html+="</tr>";
 
 });
@@ -2584,7 +2799,7 @@ document.getElementById("periodDate").style.display="none";
   const recurringTotal=masterTotals.recurring||0;
   const nonRecurringExpenses=masterTotals.expenses-recurringTotal;
   
-  let html="<div class='action-buttons'><button class='back-btn' onclick='generateStatement()'>← BACK</button><button class='print-btn' onclick='window.print()'>🖨️ PRINT</button><button class='copy-link-btn' onclick='saveCurrentReportSnapshot()'>SAVE SNAPSHOT</button><button class='copy-link-btn' onclick='openEmailClient()'>EMAIL CLIENT</button></div>";
+  let html="<div class='action-buttons'><button class='back-btn' onclick='generateStatement()'>← BACK</button><button class='print-btn' onclick='window.print()'>🖨️ PRINT</button><button class='copy-link-btn' onclick='saveCurrentReportSnapshot()'>SAVE REPORT</button></div>";
   html += "<div style='text-align:center;margin:20px 0'>";
 
   html += "<div style='font-size:22px;font-weight:bold'>"+currentOwner.toUpperCase()+"</div>";
@@ -2746,7 +2961,7 @@ async function generateAllOwnersSummary(){
   currentOwner=savedOwner;
   csvData=savedCsv;
 
-  let html="<div class='action-buttons'><button class='copy-link-btn' onclick='downloadPDF()'>DOWNLOAD PDF</button><button class='copy-link-btn' onclick='saveCurrentReportSnapshot()'>SAVE SNAPSHOT</button><button class='copy-link-btn' onclick='openEmailClient()'>EMAIL CLIENT</button></div>";
+  let html="<div class='action-buttons'><button class='copy-link-btn' onclick='downloadPDF()'>DOWNLOAD PDF</button><button class='copy-link-btn' onclick='saveCurrentReportSnapshot()'>SAVE REPORT</button></div>";
   html+="<div class='property-section'>";
   html+="<div class='summary-title'>ALL OWNERS TAX REPORT</div>";
   html+="<table>";
@@ -2933,11 +3148,13 @@ const clean = row.querySelector(".clean");
 const web = row.querySelector(".web");
 
 const accVal = acc.dataset.val;
-const cleanVal = clean.dataset.val;
+const cleanVal = clean ? clean.dataset.val : "0";
 const webVal = web ? web.dataset.val : "0";
 
 acc.innerHTML = "<input class='accInput' type='number' value='"+accVal+"' style='width:90px'>";
+if(clean){
 clean.innerHTML = "<input class='cleanInput' type='number' value='"+cleanVal+"' style='width:90px'>";
+}
 if(web){
 web.innerHTML = "<input class='webInput' type='number' value='"+webVal+"' style='width:90px'>";
 }
@@ -2961,10 +3178,10 @@ const clean = row.querySelector(".clean");
 const web = row.querySelector(".web");
 
 const accVal = Number(accInput.value)||0;
-const cleanVal = Number(cleanInput.value)||0;
+const cleanVal = cleanInput ? (Number(cleanInput.value)||0) : 0;
 const webVal = webInput ? (Number(webInput.value)||0) : 0;
 
- if(cleanVal < 0 || webVal < 0) return;
+ if(accVal < 0 || cleanVal < 0 || webVal < 0) return;
 
 const prop = row.dataset.prop;
 const index = parseInt(row.dataset.row);
@@ -2972,18 +3189,24 @@ const index = parseInt(row.dataset.row);
 const r = propertyTotals[prop].reservations[index];
 
 r["MANUAL ACCOMMODATION"] = accVal;
+if(clean){
 r["MANUAL CLEANING FARE"] = cleanVal;
+}
 if(web){
 r["MANUAL WEBSITE FEE"] = webVal;
 }
 acc.dataset.val = accVal;
+if(clean){
 clean.dataset.val = cleanVal;
+}
 if(web){
 web.dataset.val = webVal;
 }
 
 acc.innerHTML="$"+accVal.toFixed(2);
+if(clean){
 clean.innerHTML="$"+cleanVal.toFixed(2);
+}
 if(web){
 web.innerHTML="$"+webVal.toFixed(2);
 }
