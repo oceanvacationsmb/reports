@@ -513,6 +513,7 @@ function applyAccessControls(){
   const ownerPortal=isOwnerPortalUser();
   const adminPortal=isAdminUser();
   const portalType=getOwnerPortalType();
+  const hasConfiguredUsers=Object.keys(USERS||{}).length>0;
 
   const userSessionStatus=document.getElementById("userSessionStatus");
   const ownerLoginBtn=document.getElementById("ownerLoginBtn");
@@ -534,6 +535,31 @@ function applyAccessControls(){
   const githubSetupBtn=document.getElementById("githubSetupBtn");
   const dropboxSetupBtn=document.getElementById("dropboxSetupBtn");
   const tokenStatus=document.getElementById("tokenStatus");
+
+  if(!hasConfiguredUsers){
+    ownerSelect.disabled=false;
+    ownerLoginBtn.style.display="";
+    ownerLogoutBtn.style.display="none";
+    userSessionStatus.textContent="MODE: INITIAL SETUP";
+
+    document.getElementById("appControls").style.display="";
+    generateStatementBtn.style.display="";
+    addExpenseBtnSidebar.style.display="";
+    summaryBtn.style.display="";
+    emailClientBtn.style.display="none";
+    savedReportsBtn.style.display="";
+    reportsHeader.style.display="";
+    reportTypeSection.style.display="";
+    settingsHeader.style.display="";
+    ownerSettingsBtn.style.display="";
+    taxSettingsBtn.style.display="";
+    vendorSettingsBtn.style.display="";
+    userSettingsBtn.style.display="";
+    githubSetupBtn.style.display="";
+    dropboxSetupBtn.style.display="";
+    tokenStatus.style.display="";
+    return;
+  }
 
   if(ownerPortal){
     const ownerName=currentUserSession.owner;
@@ -1283,8 +1309,13 @@ function showOwnerSelectionPrompt(){
   document.getElementById("reportTitle").textContent="OCEAN VACATIONS ACCOUNTING SYSTEM";
 
   const count=Object.keys(OWNERS||{}).length;
-  const requiresLogin=!currentUserSession;
-  document.getElementById("mainContent").innerHTML="<div style='max-width:760px;margin:20px auto;padding:24px;border:1px solid #d4e1e7;border-radius:12px;background:#f8fcfd'><div style='font-size:20px;font-weight:bold;margin-bottom:12px;color:#173540'>"+(requiresLogin?"LOGIN REQUIRED":"SELECT OWNER")+"</div><div style='color:#40535c'>"+(requiresLogin?"Please login to continue. Use OWNER for owner portal or ADMIN for full access.":"Choose an owner from the left sidebar to load their dashboard and reports.")+"</div><div style='margin-top:10px;font-weight:bold'>Owners available: "+count+"</div></div>";
+  const hasConfiguredUsers=Object.keys(USERS||{}).length>0;
+  const requiresLogin=!currentUserSession && hasConfiguredUsers;
+  const promptTitle=hasConfiguredUsers ? (requiresLogin?"LOGIN REQUIRED":"SELECT OWNER") : "INITIAL SETUP";
+  const promptMessage=hasConfiguredUsers
+    ? (requiresLogin?"Please login to continue. Use OWNER for owner portal or ADMIN for full access.":"Choose an owner from the left sidebar to load their dashboard and reports.")
+    : "No users are configured yet. Open USER SETTINGS from the sidebar and create an ADMIN user first.";
+  document.getElementById("mainContent").innerHTML="<div style='max-width:760px;margin:20px auto;padding:24px;border:1px solid #d4e1e7;border-radius:12px;background:#f8fcfd'><div style='font-size:20px;font-weight:bold;margin-bottom:12px;color:#173540'>"+promptTitle+"</div><div style='color:#40535c'>"+promptMessage+"</div><div style='margin-top:10px;font-weight:bold'>Owners available: "+count+"</div></div>";
 }
 
 function init(){
@@ -1323,7 +1354,9 @@ function init(){
 
   if(!currentUserSession){
     showOwnerSelectionPrompt();
-    openLoginModal(true);
+    if(Object.keys(USERS||{}).length>0){
+      openLoginModal(true);
+    }
     loadSavedReportFromHash();
     return;
   }
@@ -1861,7 +1894,7 @@ function saveUserData(){
 
 function openLoginModal(force){
   if(Object.keys(USERS).length===0){
-    alert("No owner users configured yet. Add users in USER SETTINGS.");
+    alert("No users configured yet. Open USER SETTINGS and create an ADMIN user first.");
     return;
   }
   if(force){
