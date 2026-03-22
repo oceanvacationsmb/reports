@@ -190,7 +190,7 @@ select,input,.btn{font-size:12px}
 <div class="sidebar">
 <h3>OCEAN VACATIONS INC.</h3>
 <div id="userSessionStatus" style="font-size:11px;color:#c7d7dd;margin-bottom:10px">MODE: ADMIN</div>
-<button id="ownerLoginBtn" class="btn btn-success" onclick="openLoginModal()" style="font-size:11px">OWNER LOGIN</button>
+<button id="ownerLoginBtn" class="btn btn-success" onclick="openLoginModal()" style="font-size:11px;display:none">OWNER LOGIN</button>
 <button id="ownerLogoutBtn" class="btn btn-danger" onclick="logoutUser()" style="font-size:11px;display:none">LOGOUT</button>
 <div id="tokenStatus" class="token-status token-inactive">LOADING...</div>
 <div class="section" id="ownerSelectSection"><label class="label">SELECT OWNER</label><select id="ownerSelect" onchange="onOwnerChange()"><option value="">-- SELECT --</option></select></div>
@@ -376,6 +376,7 @@ let guestyPreloadByOwner={};
 let currentReportMode="income";
 let currentView="landing";
 let currentUserSession=null;
+const LOGIN_DISABLED=true;
 
 function num(v){return parseFloat((v||"0").toString().replace(/[$,]/g,""))||0;}
 function money(v){
@@ -421,9 +422,30 @@ function getRowCode(row){
   return ((row && row["CONFIRMATION CODE"]) || "").toString().trim().toUpperCase();
 }
 
+function getGrossPayoutValue(row){
+  const manual=(row && row["MANUAL TOTAL PAYOUT"]!==undefined && row["MANUAL TOTAL PAYOUT"]!==null && row["MANUAL TOTAL PAYOUT"]!=="")
+    ? num(row["MANUAL TOTAL PAYOUT"])
+    : null;
+  if(manual!==null) return manual;
+  return num(row && row["TOTAL PAYOUT"]);
+}
+
+function getDisplayPlatform(row){
+  const sourceRaw=((row && row["SOURCE"])||"").toString().trim();
+  const source=sourceRaw.toUpperCase();
+  const platformRaw=((row && row["PLATFORM"])||"").toString().trim();
+  const platform=platformRaw.toLowerCase();
+
+  if(platform.includes("airbnb")) return "Airbnb";
+  if(source==="VEBO_DIRECT" || source==="VRBO_DIRECT" || source==="MANUAL_VRBO" || source==="VRBO_MANUAL") return "VRBO OLD";
+  if(source==="MANUAL_DIRECT") return "Website OLD";
+  if(source.includes("WEBSITE")) return "Website";
+  if(platform.includes("vrbo") || platform.includes("homeaway")) return "VRBO";
+  return platformRaw || sourceRaw || "Unknown";
+}
+
 function getAccommodationValue(row,isDraft){
-  const payout=num(row && row["TOTAL PAYOUT"]);
-  const cleaning=getCleaningValue(row);
+  const payout=getGrossPayoutValue(row);
   const taxes=getRowTaxTotal(row);
   const manualAcc=(row && row["MANUAL ACCOMMODATION"]!==undefined && row["MANUAL ACCOMMODATION"]!==null && row["MANUAL ACCOMMODATION"]!=="")
     ? num(row["MANUAL ACCOMMODATION"])
@@ -433,7 +455,8 @@ function getAccommodationValue(row,isDraft){
   const lengthDiscount=num(row && row["LENGTH DISCOUNT"]);
   const resolutionCenter=num(row && row["AIRBNB RESOLUTION CENTER"]);
   if(isDraft){
-    return payout-cleaning-taxes-resolutionCenter+lengthDiscount;
+    const markup=num(row && row["MARKUP"]);
+    return payout-markup-taxes-lengthDiscount-resolutionCenter;
   }
 
   const accFare=num(row && row["ACCOMMODATION FARE"]);
@@ -536,9 +559,34 @@ function applyAccessControls(){
   const dropboxSetupBtn=document.getElementById("dropboxSetupBtn");
   const tokenStatus=document.getElementById("tokenStatus");
 
+  if(LOGIN_DISABLED){
+    ownerSelect.disabled=false;
+    ownerLoginBtn.style.display="none";
+    ownerLogoutBtn.style.display="none";
+    userSessionStatus.textContent="MODE: ADMIN (LOGIN DISABLED)";
+
+    document.getElementById("appControls").style.display=currentOwner?"":"none";
+    generateStatementBtn.style.display="";
+    addExpenseBtnSidebar.style.display="";
+    summaryBtn.style.display="";
+    emailClientBtn.style.display="none";
+    savedReportsBtn.style.display="";
+    reportsHeader.style.display="";
+    reportTypeSection.style.display="";
+    settingsHeader.style.display="";
+    ownerSettingsBtn.style.display="";
+    taxSettingsBtn.style.display="";
+    vendorSettingsBtn.style.display="";
+    userSettingsBtn.style.display="";
+    githubSetupBtn.style.display="";
+    dropboxSetupBtn.style.display="";
+    tokenStatus.style.display="";
+    return;
+  }
+
   if(!hasConfiguredUsers){
     ownerSelect.disabled=false;
-    ownerLoginBtn.style.display="";
+    ownerLoginBtn.style.display="none";
     ownerLogoutBtn.style.display="none";
     userSessionStatus.textContent="MODE: INITIAL SETUP";
 
@@ -846,8 +894,10 @@ toDate = y + "-12-31";
     html+="<div class='property-section'>";
     html+="<div class='invoice-header'><div class='company-info'><div class='company-name'>OCEAN VACATIONS INC.</div><div>www.oceanvacationsmb.com</div><div>oceanvacationsmb@gmail.com</div><div>843-222-6516</div></div><div class='right-header'><div class='statement-date'><strong>REPORT DATE: "+new Date().toLocaleDateString()+"</strong></div><div class='period-date'><strong>"+periodText+"</strong></div></div></div>";
     html+="<div style='border-top:2px solid #19343f;margin:8px 0 14px 0'></div>";
-    if(type==="gri" && selectedProperty!=="all"){
-      html+="<div style='text-align:center;font-size:16px;font-weight:bold;margin-bottom:20px'>"+selectedPropertyAddress+"</div>";
+    if(type==="gri"){
+      const headerAddress=(selectedProperty==="all") ? "ALL PROPERTIES" : selectedPropertyAddress;
+      html+="<div style='text-align:center;font-size:16px;font-weight:bold'>"+currentOwner.toUpperCase()+"</div>";
+      html+="<div style='text-align:center;font-size:14px;font-weight:bold;margin-bottom:20px'>"+headerAddress+"</div>";
     }else{
       html+="<div style='text-align:center;font-size:16px;font-weight:bold;margin-bottom:20px'>"+selectedPropertyName+"</div>";
     }
@@ -855,7 +905,7 @@ toDate = y + "-12-31";
     if(type==="gri"){
       const griRows=[];
       filtered.forEach(r=>{
-        const payout=num(r["TOTAL PAYOUT"]);
+        const payout=getGrossPayoutValue(r);
         if(!payout) return;
         totalPayout+=payout;
         griRows.push(r);
@@ -864,7 +914,7 @@ toDate = y + "-12-31";
       html+="<div class='summary-grid'><div class='summary-card'><div class='summary-label'>GROSS PAYOUT</div><div class='summary-value'>"+money(totalPayout)+"</div></div></div>";
       html+="<table><tr><th>CODE</th><th>CHECK-IN/OUT</th><th>GROSS PAYOUT</th></tr>";
       griRows.forEach(r=>{
-        const payout=num(r["TOTAL PAYOUT"]);
+        const payout=getGrossPayoutValue(r);
         const code=getRowCode(r);
         const stay=(r["CHECK-IN DATE"]||"")+" - "+(r["CHECK-OUT DATE"]||"");
         html+="<tr><td>"+code+"</td><td>"+stay+"</td><td>"+money(payout)+"</td></tr>";
@@ -873,8 +923,8 @@ toDate = y + "-12-31";
     }else{
       const byProperty={};
       filtered.forEach(r=>{
-        const payout=num(r["TOTAL PAYOUT"]);
-        const cleaning=num(r["CLEANING FARE"]);
+        const payout=getGrossPayoutValue(r);
+        const cleaning=getCleaningValue(r);
         if(!payout && !cleaning) return;
         const acc=getAccommodationValue(r,isDraftOwner);
         const pmc=acc*ownerPercent;
@@ -890,8 +940,8 @@ toDate = y + "-12-31";
         totalPMC+=pmc;
       });
 
-      html+="<div class='summary-grid'><div class='summary-card'><div class='summary-label'>GROSS PAYOUT</div><div class='summary-value'>"+money(totalPayout)+"</div></div><div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(totalAcc)+"</div></div><div class='summary-card'><div class='summary-label'>CLEANING</div><div class='summary-value'>"+money(totalCleaning)+"</div></div><div class='summary-card'><div class='summary-label'>PMC ("+(ownerPercent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(totalPMC)+"</div></div></div>";
-      html+="<table><tr><th>PROPERTY</th><th>GROSS PAYOUT</th><th>ACCOMMODATION</th><th>CLEANING</th><th>PMC</th></tr>";
+      html+="<div class='summary-grid'><div class='summary-card'><div class='summary-label'>GROSS PAYOUT</div><div class='summary-value'>"+money(totalPayout)+"</div></div><div class='summary-card'><div class='summary-label'>NET ACCOMMODATION</div><div class='summary-value'>"+money(totalAcc)+"</div></div><div class='summary-card'><div class='summary-label'>CLEANING</div><div class='summary-value'>"+money(totalCleaning)+"</div></div><div class='summary-card'><div class='summary-label'>PMC ("+(ownerPercent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(totalPMC)+"</div></div></div>";
+      html+="<table><tr><th>PROPERTY</th><th>GROSS PAYOUT</th><th>NET ACCOMMODATION</th><th>CLEANING</th><th>PMC</th></tr>";
       Object.keys(byProperty).sort().forEach(prop=>{
         const p=byProperty[prop];
         html+="<tr><td>"+p.label+"</td><td>"+money(p.payout)+"</td><td>"+money(p.acc)+"</td><td>"+money(p.cleaning)+"</td><td>"+money(p.pmc)+"</td></tr>";
@@ -1218,7 +1268,7 @@ html += "<strong>PERIOD:</strong> "+document.getElementById("periodDate").innerT
 html += "</div>";
   html += "<div class='summary-grid'>";
 
-  html += "<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>" + money(masterTotals.acc) + "</div></div>";
+  html += "<div class='summary-card'><div class='summary-label'>NET ACCOMMODATION</div><div class='summary-value'>" + money(masterTotals.acc) + "</div></div>";
   html += "<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>" + money(masterTotals.pmc) + "</div></div>";
   html += "<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>" + money(masterTotals.expenses) + "</div></div>";
   html += "<div class='summary-card'<div class='summary-label' >NET TO OWNER</div><div class='summary-value'>" + money(masterTotals.owner) + "</div></div>";
@@ -1310,7 +1360,7 @@ function showOwnerSelectionPrompt(){
 
   const count=Object.keys(OWNERS||{}).length;
   const hasConfiguredUsers=Object.keys(USERS||{}).length>0;
-  const requiresLogin=!currentUserSession && hasConfiguredUsers;
+  const requiresLogin=!currentUserSession && hasConfiguredUsers && !LOGIN_DISABLED;
   const promptTitle=hasConfiguredUsers ? (requiresLogin?"LOGIN REQUIRED":"SELECT OWNER") : "INITIAL SETUP";
   const promptMessage=hasConfiguredUsers
     ? (requiresLogin?"Please login to continue. Use OWNER for owner portal or ADMIN for full access.":"Choose an owner from the left sidebar to load their dashboard and reports.")
@@ -1352,7 +1402,7 @@ function init(){
   toggleOwnerMode();
   applyAccessControls();
 
-  if(!currentUserSession){
+  if(!currentUserSession && !LOGIN_DISABLED){
     showOwnerSelectionPrompt();
     if(Object.keys(USERS||{}).length>0){
       openLoginModal(true);
@@ -1429,10 +1479,17 @@ function onOwnerChange(){
     if(currentOwner==="__ALL__"){
       showAllOwnersLandingInfo();
     }else{
+      const previousView=currentView;
       showOwnerLandingInfo();
       preloadGuestyData(currentOwner);
-      generateStatement(true);
-      runQuickReport();
+      if(previousView==="income" || previousView==="gri"){
+        runQuickReport();
+      }else if(previousView==="1099"){
+        generateStatement(true);
+        show1099();
+      }else{
+        generateStatement(true);
+      }
     }
   }else{
     showOwnerSelectionPrompt();
@@ -2343,7 +2400,7 @@ masterTotals.owner -= ownerExpTotal + recurringTotal;
   Object.keys(byProp).forEach(prop=>{
     let gross=0,acc=0,clean=0,pmc=0,websiteFee=0,totalTax=0;
     byProp[prop].forEach(row=>{
-      const g = num(row["TOTAL PAYOUT"]);
+      const g = getGrossPayoutValue(row);
 const c = getCleaningValue(row);
 let a = getAccommodationValue(row,isDraft);
 const p = a * pmcPercent;
@@ -2439,7 +2496,7 @@ html+="<div style='font-size:18px;font-weight:bold;text-align:center;margin-bott
 if(type==="draft"){
 
 html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>GROSS PAYOUT</span><span>"+money(masterTotals.gross)+"</span></div>";
-html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>NET ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
 html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>CLEANING FEE</span><span>"+money(masterTotals.clean)+"</span></div>";
 html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>WEBSITE / VRBO FEE</span><span>"+money(masterTotals.websiteFee)+"</span></div>";
 html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>EXPENSES</span><span>"+money(nonRecurringExpenses)+"</span></div>";
@@ -2448,7 +2505,7 @@ html+="<div style='display:flex;justify-content:space-between;padding:10px 0;fon
 
 }else{
 
-html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>NET ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
 html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>PMC</span><span>"+money(masterTotals.pmc)+"</span></div>";
 if(!ownerPortal){
 html+="<div style='display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ddd'><span>EXPENSES</span><span>"+money(nonRecurringExpenses)+"</span></div>";
@@ -2470,15 +2527,14 @@ if(ownerPortal){
   ownerRows.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"]));
   html+="<div class='property-section'>";
   html+="<div class='section-title'>RESERVATIONS</div>";
-  html+="<table><tr><th>RESERVATION CODE</th><th>PLATFORM</th><th>DATES</th><th>ACCOMMODATION</th><th>PMC</th><th>NET PAYOUT (AFTER PMC)</th></tr>";
+  html+="<table><tr><th>RESERVATION CODE</th><th>PLATFORM</th><th>DATES</th><th>NET ACCOMMODATION</th><th>PMC</th><th>NET PAYOUT (AFTER PMC)</th></tr>";
   ownerRows.forEach(row=>{
     const acc=getAccommodationValue(row,(type==="draft"));
     const pm=acc*pmcPercent;
     const net=acc-pm;
     const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
     const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
-    const source=(row["SOURCE"]||"").toLowerCase();
-    const platform=((source==="website" ? "Website" : source==="manual_direct" ? "Website Old" : source==="manual_vrbo" || source==="vrbo_manual" ? "VRBO OLD" : row["PLATFORM"]) + (((row["STATUS"]||"").toLowerCase().includes("cancel") && num(row["TOTAL PAYOUT"])>0) ? " Cancelled" : ""));
+    const platform=(getDisplayPlatform(row) + (((row["STATUS"]||"").toLowerCase().includes("cancel") && getGrossPayoutValue(row)>0) ? " Cancelled" : ""));
     html+="<tr><td>"+getRowCode(row)+"</td><td>"+platform+"</td><td>"+checkin+"-"+checkout+"</td><td>"+money(acc)+"</td><td>"+money(pm)+"</td><td>"+money(net)+"</td></tr>";
   });
   html+="</table></div>";
@@ -2637,7 +2693,7 @@ html+="<div class='property-title'><span class='property-icon'>🏠</span>"+getP
    if(type==="draft"){
   html+="<div class='summary-grid'>";
   html+="<div class='summary-card'><div class='summary-label'>GROSS PAYOUT</div><div class='summary-value'>"+money(p.gross)+"</div></div>";
-  html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
+  html+="<div class='summary-card'><div class='summary-label'>NET ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
   html+="<div class='summary-card'><div class='summary-label'>CLEANING FEE</div><div class='summary-value'>"+money(p.clean)+"</div></div>";
   html+="<div class='summary-card'><div class='summary-label'>WEBSITE/VRBO FEE</div><div class='summary-value'>"+money(p.websiteFee)+"</div></div>";
   html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
@@ -2646,7 +2702,7 @@ html+="<div class='property-title'><span class='property-icon'>🏠</span>"+getP
   html+="<div style='text-align:center;font-size:22px;font-weight:bold;margin:25px 0'>AMOUNT DUE: "+money(r)+"</div>";
     }else{
       html+="<div class='summary-grid'>";
-      html+="<div class='summary-card'><div class='summary-label'>ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
+      html+="<div class='summary-card'><div class='summary-label'>NET ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
       html+="<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
       if(!ownerPortal){
       html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
@@ -2658,11 +2714,11 @@ html+="<div class='property-title'><span class='property-icon'>🏠</span>"+getP
     html+="<div style='margin-top:15px'><div class='section-title'>RESERVATIONS</div><table style='margin-top:10px'>";
    if(type==="draft"){
 
-html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>GROSS PAYOUT</th><th>ACCOMMODATION</th><th>PMC</th><th>CLEANING</th><th>WEBSITE/VRBO FEE</th><th>AMOUNT DUE</th>"+(ownerPortal?"":"<th class='no-print'>ACTION</th>")+"</tr>";
+html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>GROSS PAYOUT</th><th>NET ACCOMMODATION</th><th>PMC</th><th>CLEANING</th><th>WEBSITE/VRBO FEE</th><th>AMOUNT DUE</th>"+(ownerPortal?"":"<th class='no-print'>ACTION</th>")+"</tr>";
     
 p.reservations.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"])).forEach((row,i)=>{
  
-const g = num(row["TOTAL PAYOUT"]);
+const g = getGrossPayoutValue(row);
 const c = getCleaningValue(row);
 let a = getAccommodationValue(row,true);
 const pm = a * pmcPercent;
@@ -2692,13 +2748,13 @@ const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).j
 html+="<tr data-prop='"+prop+"' data-row='"+i+"'>";
 html+="<td>"+getRowCode(row)+"</td>";
 html+="<td>"+checkin+"-"+checkout+"</td>";
-html+="<td>"+((source=="website" ? "Website" : source=="manual_direct" ? "Website Old" : source=="manual_vrbo" || source=="vrbo_manual" ? "VRBO OLD" : row["PLATFORM"]) + ((row["STATUS"]||"").toLowerCase().includes("cancel") ? " Cancelled" : ""))+"</td>";
-html+="<td>"+money(g)+"</td>";
+html+="<td>"+(getDisplayPlatform(row) + ((row["STATUS"]||"").toLowerCase().includes("cancel") ? " Cancelled" : ""))+"</td>";
+html+="<td class='gross' data-val='"+g+"'>"+money(g)+"</td>";
 html+="<td class='acc' data-val='"+a+"'>"+money(a)+"</td>";
 html+="<td>"+money(pm)+"</td>";
 html+="<td class='clean' data-val='"+c+"'>"+money(c)+"</td>";
 html+="<td class='web' data-val='"+w+"'>"+money(w)+"</td>";
-html+="<td>"+money(pm+c+w)+"</td>";
+html+="<td class='due'>"+money(pm+c+w)+"</td>";
 if(!ownerPortal){
 html+="<td class='no-print'><button class='editRow'>Edit</button></td>";
 }
@@ -2707,7 +2763,7 @@ html+="</tr>";
 
 }else{
 
-html+="<tr><th>CODE</th><th>STAY</th><th>ACCOMMODATION</th><th>PMC</th><th>OWNER PAYOUT</th>"+(ownerPortal?"":"<th class='no-print'>ACTION</th>")+"</tr>";
+html+="<tr><th>CODE</th><th>STAY</th><th>GROSS PAYOUT</th><th>NET ACCOMMODATION</th><th>PMC</th><th>OWNER PAYOUT</th>"+(ownerPortal?"":"<th class='no-print'>ACTION</th>")+"</tr>";
      
 p.reservations.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"])).forEach(row=>{
 
@@ -2715,12 +2771,14 @@ let a=getAccommodationValue(row,false);
 const pm=a*pmcPercent;
 const owner=a-pm;
 if(owner<=0) return;
+const g=getGrossPayoutValue(row);
 const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
 const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
 
-html+="<tr>";
+html+="<tr data-prop='"+prop+"' data-row='"+p.reservations.indexOf(row)+"'>";
 html+="<td>"+getRowCode(row)+"</td>";
 html+="<td>"+checkin+"-"+checkout+"</td>";
+html+="<td class='gross' data-val='"+g+"'>"+money(g)+"</td>";
 html+="<td class='acc' data-val='"+a+"'>"+money(a)+"</td>";
 html+="<td>"+money(pm)+"</td>";
 html+="<td>"+money(owner)+"</td>";
@@ -2855,7 +2913,7 @@ document.getElementById("periodDate").style.display="none";
   
 if(type==="draft"){
     html+="<div style='margin:20px auto;padding:15px;border:1px solid #ddd;background:#fff;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#000;margin-bottom:10px;text-transform:uppercase'>💰 DRAFT BREAKDOWN</div><div style='text-align:left;color:#000'>";
-    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>NET ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>CLEANING FEE</span><span>"+money(masterTotals.clean)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>WEBSITE/VRBO FEE</span><span>"+money(masterTotals.websiteFee)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>EXPENSES</span><span>"+money(nonRecurringExpenses)+"</span></div>";
@@ -2863,26 +2921,27 @@ if(type==="draft"){
     html+="<div style='display:flex;justify-content:space-between;padding:12px;border-top:1px solid #ddd;font-weight:bold'><span>AMOUNT DUE</span><span>"+money(masterTotals.draft)+"</span></div></div></div>";
 
     html+="<div style='margin:20px auto;padding:15px;border:1px solid #ddd;background:#fff;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#000;margin-bottom:10px;text-transform:uppercase'>💳 SALES COMMISSION DUE</div><div style='text-align:left;color:#000'>";
-    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>NET ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>PMC COLLECTED</span><span>"+money(masterTotals.pmc)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>COMMISSION FEE ("+t.salesFeePercent+"%)</span><span>"+money(salesFee)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:12px;border-top:1px solid #ddd;font-weight:bold'><span>COMMISSION DUE</span><span>"+money(salesFee)+"</span></div></div></div>";
 
     html+="<div style='margin:20px auto;padding:15px;border:1px solid #ddd;background:#fff;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#000;margin-bottom:10px;text-transform:uppercase'>🏦 TRANSFER PMC FROM OPERATION ACCOUNT TO PMC ACCOUNT</div><div style='text-align:left;color:#000'>";
-    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>TOTAL ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>TOTAL NET ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:12px;border-top:1px solid #ddd;font-weight:bold'><span>PMC ("+(pmcPercent*100).toFixed(2)+"%)</span><span>"+money(masterTotals.pmc)+"</span></div></div></div>";
 
 }else{
 
     html+="<div style='margin:20px auto;padding:15px;border:1px solid #ddd;background:#fff;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#000;margin-bottom:10px;text-transform:uppercase'>💰 PAYOUT SUMMARY</div><div style='text-align:left;color:#000'>";
-    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>TOTAL ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>TOTAL NET ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>MINUS PMC</span><span>-"+money(masterTotals.pmc)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>MINUS EXPENSES</span><span>-"+money(nonRecurringExpenses)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>MINUS RECURRING CHARGES</span><span>-"+money(recurringTotal)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>TOTAL TAXES COLLECTED</span><span>"+money(masterTotals.totalTaxCollected)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:12px;border-top:1px solid #ddd;font-weight:bold'><span>OWNER PAYOUT</span><span>"+money(masterTotals.owner)+"</span></div></div></div>";
 
     html+="<div style='margin:20px auto;padding:15px;border:1px solid #ddd;background:#fff;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#000;margin-bottom:10px;text-transform:uppercase'>💳 SALES COMMISSION</div><div style='text-align:left;color:#000'>";
-    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>NET ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>PMC COLLECTED</span><span>"+money(masterTotals.pmc)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>COMMISSION FEE ("+t.salesFeePercent+"%)</span><span>"+money(salesFee)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:12px;border-top:1px solid #ddd;font-weight:bold'><span>COMMISSION DUE</span><span>"+money(salesFee)+"</span></div></div></div>";
@@ -2924,7 +2983,7 @@ html+="<div style='display:flex;justify-content:space-between;padding:8px 0;bord
 html+="<div style='display:flex;justify-content:space-between;padding:12px;border-top:1px solid #ddd;font-weight:bold'><span>TOTAL TRANSFER</span><span>"+money(masterTotals.clean + masterTotals.expenses + masterTotals.totalTaxCollected)+"</span></div></div></div>";
   
     html+="<div style='margin:20px auto;padding:15px;border:1px solid #ddd;background:#fff;border-radius:5px;text-align:center'><div style='font-size:14px;font-weight:bold;color:#000;margin-bottom:10px;text-transform:uppercase'>🏦 TRANSFER PMC FROM TRUST TO PMC ACCOUNT</div><div style='text-align:left;color:#000'>";
-    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>TOTAL ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
+    html+="<div style='display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd'><span>TOTAL NET ACCOMMODATION</span><span>"+money(masterTotals.acc)+"</span></div>";
     html+="<div style='display:flex;justify-content:space-between;padding:12px;border-top:1px solid #ddd;font-weight:bold'><span>PMC ("+(pmcPercent*100).toFixed(2)+"%)</span><span>"+money(masterTotals.pmc)+"</span></div></div></div>";
 
 }
@@ -3179,10 +3238,16 @@ const row = e.target.closest("tr");
 const acc = row.querySelector(".acc");
 const clean = row.querySelector(".clean");
 const web = row.querySelector(".web");
+const gross = row.querySelector(".gross");
 
 const accVal = acc.dataset.val;
 const cleanVal = clean ? clean.dataset.val : "0";
 const webVal = web ? web.dataset.val : "0";
+const grossVal = gross ? gross.dataset.val : "0";
+
+if(gross){
+gross.innerHTML = "<input class='grossInput' type='number' value='"+grossVal+"' style='width:90px'>";
+}
 
 acc.innerHTML = "<input class='accInput' type='number' value='"+accVal+"' style='width:90px'>";
 if(clean){
@@ -3205,21 +3270,30 @@ const row = e.target.closest("tr");
 const accInput = row.querySelector(".accInput");
 const cleanInput = row.querySelector(".cleanInput");
 const webInput = row.querySelector(".webInput");
+const grossInput = row.querySelector(".grossInput");
 
 const acc = row.querySelector(".acc");
 const clean = row.querySelector(".clean");
 const web = row.querySelector(".web");
+const gross = row.querySelector(".gross");
+const due = row.querySelector(".due");
 
 const accVal = Number(accInput.value)||0;
 const cleanVal = cleanInput ? (Number(cleanInput.value)||0) : 0;
 const webVal = webInput ? (Number(webInput.value)||0) : 0;
+const grossVal = grossInput ? (Number(grossInput.value)||0) : 0;
 
- if(accVal < 0 || cleanVal < 0 || webVal < 0) return;
+ if(accVal < 0 || cleanVal < 0 || webVal < 0 || grossVal < 0) return;
 
 const prop = row.dataset.prop;
 const index = parseInt(row.dataset.row);
+if(!prop || Number.isNaN(index) || !propertyTotals[prop] || !propertyTotals[prop].reservations[index]) return;
 
 const r = propertyTotals[prop].reservations[index];
+
+if(gross){
+  r["MANUAL TOTAL PAYOUT"] = grossVal;
+}
 
 r["MANUAL ACCOMMODATION"] = accVal;
 if(clean){
@@ -3235,6 +3309,9 @@ clean.dataset.val = cleanVal;
 if(web){
 web.dataset.val = webVal;
 }
+if(gross){
+gross.dataset.val = grossVal;
+}
 
 acc.innerHTML="$"+accVal.toFixed(2);
 if(clean){
@@ -3242,6 +3319,12 @@ clean.innerHTML="$"+cleanVal.toFixed(2);
 }
 if(web){
 web.innerHTML="$"+webVal.toFixed(2);
+}
+if(gross){
+gross.innerHTML="$"+grossVal.toFixed(2);
+}
+if(due){
+due.innerHTML=money((accVal * getEffectivePmcPercent(OWNERS[currentOwner])) + cleanVal + webVal);
 }
 row.style.background="#fff8cc";
 
@@ -3251,6 +3334,9 @@ e.target.classList.add("editRow");
 
 processData();
 displayStatement();
+if(githubToken){
+saveToGitHub("manual reservation edits");
+}
 
 }
 
