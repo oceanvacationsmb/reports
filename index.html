@@ -430,6 +430,16 @@ function getGrossPayoutValue(row){
   return num(row && row["TOTAL PAYOUT"]);
 }
 
+function isFinanciallyValidRow(row){
+  const gross=getGrossPayoutValue(row);
+  const manualNet=(row && row["MANUAL ACCOMMODATION"]!==undefined && row["MANUAL ACCOMMODATION"]!==null && row["MANUAL ACCOMMODATION"]!=="")
+    ? num(row["MANUAL ACCOMMODATION"])
+    : null;
+  const netAccommodation=manualNet!==null ? manualNet : num(row && row["NET ACCOMMODATION"]);
+  const accommodationFare=num(row && row["ACCOMMODATION FARE"]);
+  return gross>0 || netAccommodation>0 || accommodationFare>0;
+}
+
 function getDisplayPlatform(row){
   const sourceRaw=((row && row["SOURCE"])||"").toString().trim();
   const source=sourceRaw.toUpperCase();
@@ -905,8 +915,8 @@ toDate = y + "-12-31";
     if(type==="gri"){
       const griRows=[];
       filtered.forEach(r=>{
+        if(!isFinanciallyValidRow(r)) return;
         const payout=getGrossPayoutValue(r);
-        if(!payout) return;
         totalPayout+=payout;
         griRows.push(r);
       });
@@ -923,9 +933,9 @@ toDate = y + "-12-31";
     }else{
       const byProperty={};
       filtered.forEach(r=>{
+        if(!isFinanciallyValidRow(r)) return;
         const payout=getGrossPayoutValue(r);
         const cleaning=getCleaningValue(r);
-        if(!payout && !cleaning) return;
         const acc=getAccommodationValue(r,isDraftOwner);
         const pmc=acc*ownerPercent;
         const prop=getPropertyKey(r);
