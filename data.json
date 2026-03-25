@@ -497,6 +497,16 @@
       "amount": 1235.52,
       "notes": "TRANSFEREED TO OWNER ON MARCH 5TH 2026",
       "invoice": null
+    },
+    {
+      "id": 1774459571606,
+      "owner": "GHO REVOCABLE TRUST",
+      "type": "ADJUSTMENT",
+      "property": "MB - 209/5112",
+      "vendor": "ADJUEMENT",
+      "amount": 5178.22,
+      "notes": "OWNER PAYMENT MARCH 3RD - 5178.22",
+      "invoice": null
     }
   ],
   "savedReports": [
