@@ -487,6 +487,16 @@
       "amount": 100,
       "notes": "HOA 2 WRISTBANDS",
       "invoice": null
+    },
+    {
+      "id": 1774458860235,
+      "owner": "469C - ASSAF",
+      "type": "ADJUSTMENT",
+      "property": "MB - 469C",
+      "vendor": "ADJUEMENT",
+      "amount": -1235.52,
+      "notes": "TRANSFEREED TO OWNER ON MARCH 5TH 2026",
+      "invoice": null
     }
   ],
   "savedReports": [
