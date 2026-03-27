@@ -1096,7 +1096,7 @@ function escapeHtmlAttr(v){
 function renderInvoiceCanvases(root){
   const scope=root||document;
   const canvases=Array.from(scope.querySelectorAll("canvas.invoice-pdf-canvas[data-invoice]"));
-  canvases.forEach(canvas=>{
+  const jobs=canvases.map(canvas=>{
     if(canvas.dataset.rendered==="1") return;
     const encoded=canvas.getAttribute("data-invoice")||"";
     if(!encoded) return;
@@ -1108,7 +1108,7 @@ function renderInvoiceCanvases(root){
     }
     if(!invoiceSrc.startsWith("data:application/pdf")) return;
 
-    pdfjsLib.getDocument(invoiceSrc).promise.then(pdf=>pdf.getPage(1)).then(page=>{
+    return pdfjsLib.getDocument(invoiceSrc).promise.then(pdf=>pdf.getPage(1)).then(page=>{
       const baseViewport=page.getViewport({scale:1});
       const maxWidth=(canvas.parentElement && canvas.parentElement.clientWidth) ? canvas.parentElement.clientWidth : 800;
       const scale=Math.max(1,Math.min(2,maxWidth/baseViewport.width));
@@ -1123,6 +1123,21 @@ function renderInvoiceCanvases(root){
       canvas.dataset.rendered="1";
     }).catch(()=>{});
   });
+  return Promise.allSettled(jobs.filter(Boolean));
+}
+
+function waitForImages(root){
+  if(!root) return Promise.resolve();
+  const images=Array.from(root.querySelectorAll("img"));
+  const jobs=images.map(img=>{
+    if(img.complete) return Promise.resolve();
+    return new Promise(resolve=>{
+      const done=()=>resolve();
+      img.addEventListener("load",done,{once:true});
+      img.addEventListener("error",done,{once:true});
+    });
+  });
+  return Promise.allSettled(jobs);
 }
 
 function buildSavedReportLink(reportId){
@@ -1280,14 +1295,14 @@ function openSavedReport(reportId){
   html+="<button class='copy-link-btn' onclick='downloadLoadedSavedReportPdf(\""+report.id+"\")'>DOWNLOAD PDF</button>";
   html+="<button class='copy-link-btn' onclick='copySavedReportLink(\""+report.id+"\")'>COPY LINK</button>";
   html+="<button class='btn btn-danger' onclick='deleteSavedReport(\""+report.id+"\")'>DELETE</button></div>";
-  html+="<div style='font-size:12px;color:#667;padding:0 4px 10px 4px'>Saved: "+new Date(report.createdAt).toLocaleString()+" | Period: "+(report.period||"-")+"</div>";
+  html+="<div class='no-export' style='font-size:12px;color:#667;padding:0 4px 10px 4px'>Saved: "+new Date(report.createdAt).toLocaleString()+" | Period: "+(report.period||"-")+"</div>";
   html+=sanitizeSavedReportHtml(report);
   document.getElementById("mainContent").innerHTML=html;
   renderInvoiceCanvases(document.getElementById("mainContent"));
   location.hash="saved-report="+encodeURIComponent(report.id);
 }
 
-function downloadLoadedSavedReportPdf(reportId){
+async function downloadLoadedSavedReportPdf(reportId){
   const report=(savedReports||[]).find(r=>r.id===reportId);
   if(!report){
     alert("Saved report not found");
@@ -1301,11 +1316,20 @@ function downloadLoadedSavedReportPdf(reportId){
     return;
   }
 
+  await renderInvoiceCanvases(liveMain);
+  await waitForImages(liveMain);
+
   const exportContent=liveContent.cloneNode(true);
-  exportContent.querySelectorAll(".action-buttons,.no-print,.btn-danger").forEach(el=>el.remove());
+  exportContent.querySelectorAll(".action-buttons,.no-print,.btn-danger,.no-export").forEach(el=>el.remove());
+
+  const titleEl=exportContent.querySelector("#reportTitle");
+  if(titleEl && titleEl.textContent){
+    titleEl.textContent=titleEl.textContent.replace(/\s*\(SAVED\)\s*/g,"").trim();
+  }
 
   const exportMain=exportContent.querySelector("#mainContent");
   replaceCloneCanvasesWithImages(liveMain,exportMain||exportContent);
+  await waitForImages(exportContent);
 
   const host=document.createElement("div");
   host.style.position="fixed";
