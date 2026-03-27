@@ -2866,7 +2866,7 @@ html+="</tr>";
 
 }else{
 
-html+="<tr><th>CODE</th><th>STAY</th><th>GROSS PAYOUT</th><th>NET ACCOMMODATION</th><th>PMC</th><th>OWNER PAYOUT</th>"+(ownerPortal?"":"<th class='no-print'>ACTION</th>")+"</tr>";
+html+="<tr><th>CODE</th><th>STAY</th><th>NET ACCOMMODATION</th><th>PMC</th><th>OWNER PAYOUT</th>"+(ownerPortal?"":"<th class='no-print'>ACTION</th>")+"</tr>";
      
 p.reservations.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"])).forEach(row=>{
 
@@ -2881,7 +2881,6 @@ const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).j
 html+="<tr data-prop='"+prop+"' data-row='"+p.reservations.indexOf(row)+"'>";
 html+="<td>"+getRowCode(row)+"</td>";
 html+="<td>"+checkin+"-"+checkout+"</td>";
-html+="<td class='gross' data-val='"+g+"'>"+money(g)+"</td>";
 html+="<td class='acc' data-val='"+a+"'>"+money(a)+"</td>";
 html+="<td>"+money(pm)+"</td>";
 html+="<td>"+money(owner)+"</td>";
