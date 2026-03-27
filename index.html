@@ -99,7 +99,8 @@ margin:20px 0;
 .summary-card{background:#fff;color:#000;border:1px solid #d4e1e7;border-radius:10px;padding:18px;text-align:center;}
 .summary-label{font-size:10px;color:#000;font-weight:bold;text-transform:uppercase}
 .summary-value{font-size:14px;font-weight:bold;color:#000;margin-top:6px}
-.invoice-attachment{display:block;width:100%;max-width:100%;height:auto;margin:8px auto;page-break-inside:avoid;break-inside:avoid;object-fit:contain}
+.invoice-attachment-wrap{display:block;text-align:center;page-break-inside:avoid;break-inside:avoid;margin:8px 0}
+.invoice-attachment{display:block;max-width:100%;width:auto;height:auto;max-height:10in;margin:0 auto;page-break-inside:avoid;break-inside:avoid;object-fit:contain}
 .modal{display:none;position:fixed;z-index:1001;left:50%;top:50%;transform:translate(-50%,-50%);width:90%;max-width:560px;background:#263942;color:#fff;border-radius:12px;padding:30px;box-shadow:0 12px 28px rgba(0,0,0,0.35);max-height:90vh;overflow-y:auto}
 .modal.show{display:block}
 .modal-title{font-size:20px;font-weight:bold;margin-bottom:20px;text-transform:uppercase;text-align:center;border-bottom:2px solid #fff;padding-bottom:15px}
@@ -1086,6 +1087,9 @@ function getCurrentReportHtml(){
   if(!main) return "";
   const clone=main.cloneNode(true);
   clone.querySelectorAll(".action-buttons,.no-print").forEach(el=>el.remove());
+  clone.querySelectorAll("canvas.invoice-pdf-canvas").forEach(canvas=>{
+    canvas.removeAttribute("data-rendered");
+  });
   return clone.innerHTML;
 }
 
@@ -2811,7 +2815,7 @@ html+="<div style='text-align:center'>";
  
  ownerInvoices.forEach(e=>{
 
-html+="<div style='text-align:center'>";
+html+="<div class='invoice-attachment-wrap'>";
   if(e.invoice.startsWith("data:application/pdf")){
 html+="<canvas class='invoice-attachment invoice-pdf-canvas' data-invoice='"+escapeHtmlAttr(encodeURIComponent(e.invoice))+"'></canvas>";
 
@@ -2979,7 +2983,7 @@ if(invoices.length>0){
 html+="<div style='text-align:center'>";
  invoices.forEach(e=>{
 
-html+="<div style='text-align:center'>";
+html+="<div class='invoice-attachment-wrap'>";
  if(e.invoice.startsWith("data:application/pdf")){
 
 html+="<canvas class='invoice-attachment invoice-pdf-canvas' data-invoice='"+escapeHtmlAttr(encodeURIComponent(e.invoice))+"'></canvas>";
