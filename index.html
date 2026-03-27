@@ -99,6 +99,7 @@ margin:20px 0;
 .summary-card{background:#fff;color:#000;border:1px solid #d4e1e7;border-radius:10px;padding:18px;text-align:center;}
 .summary-label{font-size:10px;color:#000;font-weight:bold;text-transform:uppercase}
 .summary-value{font-size:14px;font-weight:bold;color:#000;margin-top:6px}
+.invoice-attachment{display:block;width:100%;max-width:100%;height:auto;margin:8px auto;page-break-inside:avoid;break-inside:avoid;object-fit:contain}
 .modal{display:none;position:fixed;z-index:1001;left:50%;top:50%;transform:translate(-50%,-50%);width:90%;max-width:560px;background:#263942;color:#fff;border-radius:12px;padding:30px;box-shadow:0 12px 28px rgba(0,0,0,0.35);max-height:90vh;overflow-y:auto}
 .modal.show{display:block}
 .modal-title{font-size:20px;font-weight:bold;margin-bottom:20px;text-transform:uppercase;text-align:center;border-bottom:2px solid #fff;padding-bottom:15px}
@@ -474,6 +475,7 @@ function getAccommodationValue(row,isDraft){
   if(accFare!==0 || markup!==0 || lengthDiscount!==0){
     return accFare-markup+lengthDiscount;
   }
+  const cleaning=getCleaningValue(row);
   return payout-cleaning;
 }
 
@@ -1045,8 +1047,43 @@ function getCurrentReportHtml(){
   if(!main) return "";
   const clone=main.cloneNode(true);
   clone.querySelectorAll(".action-buttons").forEach(el=>el.remove());
-  replaceCloneCanvasesWithImages(main,clone);
   return clone.innerHTML;
+}
+
+function escapeHtmlAttr(v){
+  return String(v||"").replace(/&/g,"&amp;").replace(/'/g,"&#39;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function renderInvoiceCanvases(root){
+  const scope=root||document;
+  const canvases=Array.from(scope.querySelectorAll("canvas.invoice-pdf-canvas[data-invoice]"));
+  canvases.forEach(canvas=>{
+    if(canvas.dataset.rendered==="1") return;
+    const encoded=canvas.getAttribute("data-invoice")||"";
+    if(!encoded) return;
+    let invoiceSrc="";
+    try{
+      invoiceSrc=decodeURIComponent(encoded);
+    }catch(_){
+      invoiceSrc=encoded;
+    }
+    if(!invoiceSrc.startsWith("data:application/pdf")) return;
+
+    pdfjsLib.getDocument(invoiceSrc).promise.then(pdf=>pdf.getPage(1)).then(page=>{
+      const baseViewport=page.getViewport({scale:1});
+      const maxWidth=(canvas.parentElement && canvas.parentElement.clientWidth) ? canvas.parentElement.clientWidth : 800;
+      const scale=Math.max(1,Math.min(2,maxWidth/baseViewport.width));
+      const viewport=page.getViewport({scale:scale});
+      canvas.height=viewport.height;
+      canvas.width=viewport.width;
+      canvas.style.width="100%";
+      canvas.style.height="auto";
+      canvas.classList.add("invoice-attachment");
+      return page.render({canvasContext:canvas.getContext("2d"),viewport:viewport}).promise;
+    }).then(()=>{
+      canvas.dataset.rendered="1";
+    }).catch(()=>{});
+  });
 }
 
 function buildSavedReportLink(reportId){
@@ -1207,6 +1244,7 @@ function openSavedReport(reportId){
   html+="<div style='font-size:12px;color:#667;padding:0 4px 10px 4px'>Saved: "+new Date(report.createdAt).toLocaleString()+" | Period: "+(report.period||"-")+"</div>";
   html+=report.html||"";
   document.getElementById("mainContent").innerHTML=html;
+  renderInvoiceCanvases(document.getElementById("mainContent"));
   location.hash="saved-report="+encodeURIComponent(report.id);
 }
 
@@ -2712,35 +2750,11 @@ html+="<div style='text-align:center'>";
 
 html+="<div style='text-align:center'>";
   if(e.invoice.startsWith("data:application/pdf")){
-html+="<canvas id='pdf-"+e.id+"' style='max-width:100%;page-break-inside:avoid'></canvas>";
-   setTimeout(function(){
-
-pdfjsLib.getDocument(e.invoice).promise.then(function(pdf){
-
-pdf.getPage(1).then(function(page){
-
-const canvas=document.getElementById("pdf-"+e.id);
-const context=canvas.getContext("2d");
-
-const viewport=page.getViewport({scale:2});
-
-canvas.height=viewport.height;
-canvas.width=viewport.width;
-
-page.render({
-canvasContext:context,
-viewport:viewport
-});
-
-});
-
-});
-
-},100);
+html+="<canvas class='invoice-attachment invoice-pdf-canvas' data-invoice='"+escapeHtmlAttr(encodeURIComponent(e.invoice))+"'></canvas>";
 
 }else{
 
-html+="<img src='"+e.invoice+"' style='max-width:100%'>";
+html+="<img class='invoice-attachment' src='"+e.invoice+"'>";
 }
 
 html+="</div>";
@@ -2906,34 +2920,10 @@ html+="<div style='text-align:center'>";
 html+="<div style='text-align:center'>";
  if(e.invoice.startsWith("data:application/pdf")){
 
-html+="<canvas id='pdf-"+e.id+"' style='max-width:100%;page-break-inside:avoid'></canvas>";
-setTimeout(function(){
-
-pdfjsLib.getDocument(e.invoice).promise.then(function(pdf){
-
-pdf.getPage(1).then(function(page){
-
-const canvas=document.getElementById("pdf-"+e.id);
-const context=canvas.getContext("2d");
-
-const viewport=page.getViewport({scale:2});
-
-canvas.height=viewport.height;
-canvas.width=viewport.width;
-
-page.render({
-canvasContext:context,
-viewport:viewport
-});
-
-});
-
-});
-
-},100);
+html+="<canvas class='invoice-attachment invoice-pdf-canvas' data-invoice='"+escapeHtmlAttr(encodeURIComponent(e.invoice))+"'></canvas>";
 
 }else{
-html+="<img src='"+e.invoice+"' style='max-width:100%'>";}
+html+="<img class='invoice-attachment' src='"+e.invoice+"'>";}
 
 html+="</div>";
 
@@ -2947,6 +2937,7 @@ html+="</div>";
 html+="</div>";
 });
 document.getElementById("mainContent").innerHTML=html;
+renderInvoiceCanvases(document.getElementById("mainContent"));
 }
 
 async function generateSummary(){
@@ -3205,7 +3196,7 @@ margin:0.3,
 filename:currentOwner+"-statement.pdf",
 image:{type:'jpeg',quality:1},
 html2canvas:{scale:2,useCORS:true},
-pagebreak:{mode:['css','legacy']},
+pagebreak:{mode:['css','legacy'],avoid:['img','canvas','.invoice-attachment']},
 jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
 };
   
