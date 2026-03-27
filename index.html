@@ -1042,11 +1042,50 @@ function slugifyFilePart(v){
     .replace(/^-|-$/g,"") || "report";
 }
 
+function removeTableColumnByHeaderText(table,headerText){
+  if(!table) return;
+  const firstRow=table.querySelector("tr");
+  if(!firstRow) return;
+  const headers=Array.from(firstRow.children||[]);
+  const target=(headerText||"").toString().trim().toUpperCase();
+  const colIndex=headers.findIndex(cell=>((cell.textContent||"").trim().toUpperCase()===target));
+  if(colIndex<0) return;
+  Array.from(table.querySelectorAll("tr")).forEach(row=>{
+    const cells=Array.from(row.children||[]);
+    if(cells[colIndex]) cells[colIndex].remove();
+  });
+}
+
+function sanitizeSavedReportHtml(report){
+  const html=(report && report.html ? report.html : "");
+  if(!html) return html;
+
+  const wrapper=document.createElement("div");
+  wrapper.innerHTML=html;
+
+  wrapper.querySelectorAll(".no-print").forEach(el=>el.remove());
+
+  const ownerName=(report && report.owner ? report.owner : "");
+  const owner=OWNERS[ownerName]||{};
+  const ownerType=(owner.type||"payout").toLowerCase();
+  const isPayoutLike=ownerType!=="draft";
+  if(isPayoutLike){
+    wrapper.querySelectorAll("table").forEach(table=>{
+      removeTableColumnByHeaderText(table,"GROSS PAYOUT");
+      removeTableColumnByHeaderText(table,"CLEANING");
+      removeTableColumnByHeaderText(table,"CLEANING FEE");
+      removeTableColumnByHeaderText(table,"ACTION");
+    });
+  }
+
+  return wrapper.innerHTML;
+}
+
 function getCurrentReportHtml(){
   const main=document.getElementById("mainContent");
   if(!main) return "";
   const clone=main.cloneNode(true);
-  clone.querySelectorAll(".action-buttons").forEach(el=>el.remove());
+  clone.querySelectorAll(".action-buttons,.no-print").forEach(el=>el.remove());
   return clone.innerHTML;
 }
 
@@ -1242,7 +1281,7 @@ function openSavedReport(reportId){
   html+="<button class='copy-link-btn' onclick='copySavedReportLink(\""+report.id+"\")'>COPY LINK</button>";
   html+="<button class='btn btn-danger' onclick='deleteSavedReport(\""+report.id+"\")'>DELETE</button></div>";
   html+="<div style='font-size:12px;color:#667;padding:0 4px 10px 4px'>Saved: "+new Date(report.createdAt).toLocaleString()+" | Period: "+(report.period||"-")+"</div>";
-  html+=report.html||"";
+  html+=sanitizeSavedReportHtml(report);
   document.getElementById("mainContent").innerHTML=html;
   renderInvoiceCanvases(document.getElementById("mainContent"));
   location.hash="saved-report="+encodeURIComponent(report.id);
