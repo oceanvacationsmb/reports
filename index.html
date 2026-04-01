@@ -4,8 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ocean Vacations - Reservation Report</title>
+<link rel="icon" href="data:,">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script>
+if(window.pdfjsLib && window.pdfjsLib.GlobalWorkerOptions){
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+}
+</script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 
@@ -1830,18 +1836,38 @@ function showAllOwnersLandingInfo(){
 }
 
 function mapGuestyReservation(r){
+  const guestyValue=(field)=>{
+    const raw=r ? r[field] : null;
+    if(raw===undefined || raw===null) return 0;
+    if(typeof raw==="number" || typeof raw==="string") return num(raw);
+    if(typeof raw==="object") return num(raw.value);
+    return 0;
+  };
+
   const invoiceItems = (r["money.invoiceItems"] && r["money.invoiceItems"].children) || [];
 
   let cityTax=0,stateTax=0,countyTax=0,occupancyTax=0,gtcTax=0;
   let lengthDiscount=0,resolutionCenter=0,linensFee=0,communityFee=0,feeCreditCard=0;
   invoiceItems.forEach(item=>{
-    const name=((item.title||"")+" "+(item.name||"")+" "+(item.description||"")+" "+(item.type||"")).toLowerCase();
+    const rawName=((item.title||"")+" "+(item.name||"")+" "+(item.description||"")).toLowerCase();
+    const itemType=(item.type||"").toString().toLowerCase();
+    const name=(rawName+" "+itemType).trim();
     const val=num(item.value);
-    if(name.includes("state") && name.includes("tax")) stateTax+=val;
-    else if((name.includes("county") || name.includes("horry")) && name.includes("tax")) countyTax+=val;
-    else if((name.includes("city") || name.includes("north myrtle") || name.includes("surfside") || /\bmb\b/.test(name)) && name.includes("tax")) cityTax+=val;
-    else if(name.includes("gtc")) gtcTax+=val;
-    else if(name.includes("occupancy") || name.includes("accommodation") || name.includes("tourism")) occupancyTax+=val;
+    const isTaxLike=
+      itemType.includes("tax") ||
+      name.includes(" tax") ||
+      name.includes("tax ") ||
+      name.includes("occupancy") ||
+      name.includes("accommodation") ||
+      name.includes("tourism") ||
+      name.includes("sales tax") ||
+      name.includes("lodging");
+
+    if(isTaxLike && name.includes("state")) stateTax+=val;
+    else if(isTaxLike && (name.includes("county") || name.includes("horry"))) countyTax+=val;
+    else if(isTaxLike && (name.includes("city") || name.includes("north myrtle") || name.includes("myrtle beach") || name.includes("surfside"))) cityTax+=val;
+    else if(isTaxLike && name.includes("gtc")) gtcTax+=val;
+    else if(isTaxLike && (name.includes("occupancy") || name.includes("accommodation") || name.includes("tourism") || name.includes("lodging"))) occupancyTax+=val;
     else if(name.includes("length") && name.includes("discount")) lengthDiscount+=val;
     else if(name.includes("resolution")) resolutionCenter+=val;
     else if(name.includes("credit") && name.includes("card")) feeCreditCard+=val;
@@ -1849,26 +1875,35 @@ function mapGuestyReservation(r){
     else if(name.includes("community")) communityFee+=val;
   });
 
+  // Some Guesty shared reports expose taxes as top-level fields instead of invoiceItems.children.
+  cityTax=Math.max(cityTax,guestyValue("money.invoiceItems.CITY_TAX"),guestyValue("taxCity"));
+  stateTax=Math.max(stateTax,guestyValue("money.invoiceItems.STATE_TAX"),guestyValue("taxState"));
+  countyTax=Math.max(countyTax,guestyValue("money.invoiceItems.COUNTY_TAX"),guestyValue("taxCounty"));
+  occupancyTax=Math.max(occupancyTax,guestyValue("money.invoiceItems.OCCUPANCY_TAX"),guestyValue("taxOccupancy"));
+  gtcTax=Math.max(gtcTax,guestyValue("money.invoiceItems.GTC_TAX"),guestyValue("taxGtc"));
+  feeCreditCard=Math.max(feeCreditCard,guestyValue("feeCreditCard"),guestyValue("FEE CREDIT CARD"));
+
   return {
     "CHECK-IN DATE": (r.checkInDate && r.checkInDate.value) || "",
     "CHECK-OUT DATE": (r.checkOutDate && r.checkOutDate.value) || "",
     "LISTING'S NICKNAME": (r["listing.nickname"] && r["listing.nickname"].children) || "",
     "PROPERTY ADDRESS": (r["listing.address.full"] && r["listing.address.full"].children) || (r["listing.address"] && r["listing.address"].children) || "",
-    "TOTAL PAYOUT": (r["money.hostPayout"] && r["money.hostPayout"].value) || 0,
-    "ACCOMMODATION FARE": (r["money.fareAccommodation"] && r["money.fareAccommodation"].value) || 0,
-    "CLEANING FARE": (r["money.fareCleaning"] && r["money.fareCleaning"].value) || 0,
+    "TOTAL PAYOUT": guestyValue("money.hostPayout"),
+    "ACCOMMODATION FARE": guestyValue("money.fareAccommodation"),
+    "CLEANING FARE": guestyValue("money.fareCleaning"),
     "PLATFORM": (r["integration.platform"] && r["integration.platform"].children) || "",
     "SOURCE": (r["integration.source"] && r["integration.source"].children) || "",
     "CONFIRMATION CODE": normalizeReservationCode((r.confirmationCode && r.confirmationCode.children) || ""),
     "STATUS": (r.status && r.status.children) || "",
-    "MARKUP": (r["money.invoiceItems.MAR"] && r["money.invoiceItems.MAR"].value) || 0,
-    "CHANNEL COMMISSION": (r["money.hostServiceFee"] && r["money.hostServiceFee"].value) || 0,
+    "MARKUP": guestyValue("money.invoiceItems.MAR"),
+    "CHANNEL COMMISSION": guestyValue("money.hostServiceFee"),
     "FEE CREDIT CARD": feeCreditCard,
     "LENGTH DISCOUNT": lengthDiscount,
     "AIRBNB RESOLUTION CENTER": resolutionCenter,
     "LINENS FEE": linensFee,
     "COMMUNITY FEE": communityFee,
-    "TAXES": (r["money.totalTaxes"] && r["money.totalTaxes"].value) || 0,
+    "INVOICE ITEMS RAW": invoiceItems,
+    "TAXES": guestyValue("money.totalTaxes"),
     "CITY TAX": cityTax,
     "STATE TAX": stateTax,
     "COUNTY TAX": countyTax,
@@ -1877,15 +1912,48 @@ function mapGuestyReservation(r){
   };
 }
 
+function getInvoiceItemsTaxTotal(row){
+  const raw=row && row["INVOICE ITEMS RAW"];
+  let items=[];
+  if(Array.isArray(raw)){
+    items=raw;
+  }else if(typeof raw==="string" && raw.trim()){
+    try{ items=JSON.parse(raw); }catch(_){ items=[]; }
+  }
+  if(!Array.isArray(items) || !items.length) return 0;
+
+  return items.reduce((sum,item)=>{
+    const title=(item && item.title ? item.title : "").toString().toLowerCase();
+    const name=(item && item.name ? item.name : "").toString().toLowerCase();
+    const description=(item && item.description ? item.description : "").toString().toLowerCase();
+    const type=(item && item.type ? item.type : "").toString().toLowerCase();
+    const label=(title+" "+name+" "+description+" "+type).trim();
+    const val=num(item && item.value);
+
+    const isTaxLike=
+      type.includes("tax") ||
+      label.includes(" tax") ||
+      label.includes("tax ") ||
+      label.includes("occupancy") ||
+      label.includes("tourism") ||
+      label.includes("lodging") ||
+      label.includes("accommodation tax");
+
+    if(!isTaxLike) return sum;
+    return sum+Math.max(0,val);
+  },0);
+}
+
 function getRowTaxTotal(row){
+  const detailedKeys=[
+    "CITY TAX","STATE TAX","COUNTY TAX","OCCUPANCY TAX","GTC TAX",
+    "CITY TAXES","STATE TAXES","COUNTY TAXES","OCCUPANCY TAXES","GTC TAXES",
+    "ACCOMMODATION TAX","TOURISM TAX","LODGING TAX"
+  ];
   const taxesCombined=num(row["TAXES"]);
-  const detailedTaxesCombined=
-    num(row["CITY TAX"]) +
-    num(row["STATE TAX"]) +
-    num(row["COUNTY TAX"]) +
-    num(row["OCCUPANCY TAX"]) +
-    num(row["GTC TAX"]);
-  return Math.max(0,taxesCombined,detailedTaxesCombined);
+  const detailedTaxesCombined=detailedKeys.reduce((sum,key)=>sum+num(row && row[key]),0);
+  const invoiceItemsTaxCombined=getInvoiceItemsTaxTotal(row);
+  return Math.max(0,taxesCombined,detailedTaxesCombined,invoiceItemsTaxCombined);
 }
 
 function getOwnerGuestyUrl(ownerName,useAllProperties){
@@ -2606,9 +2674,11 @@ function setupDropbox(){
 function generateStatement(silent){
   if(!currentOwner) return;
 
-  const ready = guestyPreloadByOwner[currentOwner]
-    ? Promise.resolve(guestyPreloadByOwner[currentOwner])
-    : fetchGuestyRowsForOwner(currentOwner);
+  const ready = fetchGuestyRowsForOwner(currentOwner)
+    .catch(()=>{
+      if(guestyPreloadByOwner[currentOwner]) return guestyPreloadByOwner[currentOwner];
+      throw new Error("No cached Guesty data available");
+    });
 
   ready
   .then(mapped=>{

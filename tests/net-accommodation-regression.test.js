@@ -68,14 +68,29 @@ function getAirbnbResolutionCenterValue(row){
 }
 
 function getRowTaxTotal(row){
+  const detailedKeys = [
+    "CITY TAX", "STATE TAX", "COUNTY TAX", "OCCUPANCY TAX", "GTC TAX",
+    "CITY TAXES", "STATE TAXES", "COUNTY TAXES", "OCCUPANCY TAXES", "GTC TAXES",
+    "ACCOMMODATION TAX", "TOURISM TAX", "LODGING TAX"
+  ];
   const taxesCombined = num(row["TAXES"]);
-  const detailedTaxesCombined =
-    num(row["CITY TAX"]) +
-    num(row["STATE TAX"]) +
-    num(row["COUNTY TAX"]) +
-    num(row["OCCUPANCY TAX"]) +
-    num(row["GTC TAX"]);
-  return Math.max(0, taxesCombined, detailedTaxesCombined);
+  const detailedTaxesCombined = detailedKeys.reduce((sum, key) => sum + num(row[key]), 0);
+  const items = Array.isArray(row["INVOICE ITEMS RAW"]) ? row["INVOICE ITEMS RAW"] : [];
+  const invoiceItemsTaxCombined = items.reduce((sum, item) => {
+    const label = [item.title || "", item.name || "", item.description || "", item.type || ""].join(" ").toLowerCase();
+    const type = (item.type || "").toLowerCase();
+    const isTaxLike =
+      type.includes("tax") ||
+      label.includes(" tax") ||
+      label.includes("tax ") ||
+      label.includes("occupancy") ||
+      label.includes("tourism") ||
+      label.includes("lodging") ||
+      label.includes("accommodation tax");
+    if(!isTaxLike) return sum;
+    return sum + Math.max(0, num(item.value));
+  }, 0);
+  return Math.max(0, taxesCombined, detailedTaxesCombined, invoiceItemsTaxCombined);
 }
 
 function getDraftAccommodationValue(row){
@@ -152,6 +167,43 @@ function run(){
   const total = round2(byCode["HMQ4SPTED3"] + byCode["HA-QPH3JMF"]);
   assert.strictEqual(total, 3470.93);
   assert.notStrictEqual(total, 3807.65);
+
+  const altTaxShape = {
+    "TAXES": 0,
+    "CITY TAXES": 42.09,
+    "STATE TAXES": 196.42,
+    "COUNTY TAXES": 42.09,
+    "LODGING TAX": 56.12
+  };
+  assert.strictEqual(round2(getRowTaxTotal(altTaxShape)), 336.72);
+
+  const invoiceOnlyTaxShape = {
+    "TAXES": 0,
+    "CITY TAX": 0,
+    "STATE TAX": 0,
+    "COUNTY TAX": 0,
+    "OCCUPANCY TAX": 0,
+    "GTC TAX": 0,
+    "INVOICE ITEMS RAW": [
+      { title: "State Tax", type: "tax", value: 196.42 },
+      { title: "County Tax", type: "tax", value: 42.09 },
+      { title: "City Tax", type: "tax", value: 42.09 },
+      { title: "Occupancy", type: "tax", value: 56.12 }
+    ]
+  };
+  assert.strictEqual(round2(getRowTaxTotal(invoiceOnlyTaxShape)), 336.72);
+
+  const topLevelCardFeeRow = {
+    "TOTAL PAYOUT": 1000,
+    "CLEANING FARE": 0,
+    "TAXES": 0,
+    "LENGTH DISCOUNT": 0,
+    "PLATFORM": "airbnb",
+    "SOURCE": "airbnb",
+    "feeCreditCard": 220.52,
+    "AIRBNB RESOLUTION CENTER": 0
+  };
+  assert.strictEqual(round2(getDraftAccommodationValue(topLevelCardFeeRow)), 779.48);
 
   console.log("PASS net-accommodation regression");
   console.log(JSON.stringify({
