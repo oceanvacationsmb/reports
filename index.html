@@ -462,43 +462,102 @@ function getAccommodationValue(row,isDraft){
     : null;
   if(manualAcc!==null) return manualAcc;
 
-  const grossPayout=getGrossPayoutValue(row);
-  const draftCleaning=getCleaningValue(row);
+  if(isDraft){
+    const grossPayout=getGrossPayoutValue(row);
+    const draftCleaning=getCleaningValue(row);
+    const taxes=getRowTaxTotal(row);
+    const lengthOfStayDiscount=getLengthOfStayDiscountValue(row);
+    const vrboWebsiteFee=getWebsiteVrboFeeValue(row,{forPayout:false});
+    const feeCreditCard=getFeeCreditCardValue(row);
+    const airbnbResolutionCenter=getAirbnbResolutionCenterValue(row);
+    const draftNetAccommodation=
+      grossPayout -
+      draftCleaning -
+      taxes +
+      lengthOfStayDiscount -
+      vrboWebsiteFee -
+      feeCreditCard -
+      airbnbResolutionCenter;
+    return Math.max(0,draftNetAccommodation);
+  }
+
+  const payoutRegular=getPayoutRegularNetAccommodation(row);
+  const totalPayout=getTotalPayoutValue(row);
+  const cleaning=getCleaningValue(row);
   const taxes=getRowTaxTotal(row);
-  const lengthOfStayDiscount=num(row && row["LENGTH DISCOUNT"]);
-  const vrboWebsiteFee=getWebsiteVrboFeeValue(row);
-  const feeCreditCard=num(row && row["MARKUP"]);
-  const airbnbResolutionCenter=num(row && row["AIRBNB RESOLUTION CENTER"]);
+  const vrboWebsiteFee=getWebsiteVrboFeeValue(row,{forPayout:true});
+  const feeCreditCard=getFeeCreditCardValue(row);
+  const payoutFeeLoad=cleaning+taxes+vrboWebsiteFee+feeCreditCard;
+  const shouldUseFallback=(totalPayout-payoutRegular)<payoutFeeLoad;
 
-  const netAccommodation=
-    grossPayout -
-    draftCleaning -
-    taxes +
-    lengthOfStayDiscount -
-    vrboWebsiteFee -
-    feeCreditCard -
-    airbnbResolutionCenter;
+  if(shouldUseFallback){
+    return Math.max(0,totalPayout-cleaning-taxes-vrboWebsiteFee-feeCreditCard);
+  }
 
-  return Math.max(0,netAccommodation);
+  return payoutRegular;
 }
 
-function getWebsiteVrboFeeValue(row){
+function getTotalPayoutValue(row){
+  return getGrossPayoutValue(row);
+}
+
+function getMarkupValue(row){
+  return num(row && row["MARKUP"]);
+}
+
+function getLengthOfStayDiscountValue(row){
+  return num(row && row["LENGTH DISCOUNT"]);
+}
+
+function getAirbnbResolutionCenterValue(row){
+  return num(row && row["AIRBNB RESOLUTION CENTER"]);
+}
+
+function getFeeCreditCardValue(row){
+  const candidateKeys=[
+    "MANUAL FEE CREDIT CARD",
+    "FEE CREDIT CARD",
+    "CREDIT CARD FEE",
+    "CREDIT CARD PROCESSING FEE",
+    "FEE_CREDIT_CARD",
+    "feeCreditCard"
+  ];
+  for(const key of candidateKeys){
+    if(row && row[key]!==undefined && row[key]!==null && row[key]!==""){
+      return num(row[key]);
+    }
+  }
+  return 0;
+}
+
+function getPayoutRegularNetAccommodation(row){
+  const accommodation=num(row && row["ACCOMMODATION FARE"]);
+  const markup=getMarkupValue(row);
+  const lengthOfStayDiscount=getLengthOfStayDiscountValue(row);
+  return accommodation-markup+lengthOfStayDiscount;
+}
+
+function getWebsiteVrboFeeValue(row,options){
+  const opts=options||{};
+  const forPayout=!!opts.forPayout;
   const source=((row && row["SOURCE"])||"").toString().toLowerCase();
   const platform=((row && row["PLATFORM"])||"").toString().toLowerCase();
   const grossPayout=getGrossPayoutValue(row);
+
+  const manualWebsiteFee=(row && row["MANUAL WEBSITE FEE"]!==undefined && row["MANUAL WEBSITE FEE"]!==null && row["MANUAL WEBSITE FEE"]!=="")
+    ? num(row["MANUAL WEBSITE FEE"])
+    : null;
+  if(manualWebsiteFee!==null) return manualWebsiteFee;
 
   if(source.includes("website")){
     return (grossPayout * 0.01) + 0.30;
   }
 
-  if(platform.includes("homeaway")){
+  if(!forPayout && platform.includes("homeaway")){
     return num(row && row["CHANNEL COMMISSION"]);
   }
 
-  const manualWebsiteFee=(row && row["MANUAL WEBSITE FEE"]!==undefined && row["MANUAL WEBSITE FEE"]!==null && row["MANUAL WEBSITE FEE"]!=="")
-    ? num(row["MANUAL WEBSITE FEE"])
-    : null;
-  return manualWebsiteFee!==null ? manualWebsiteFee : 0;
+  return 0;
 }
 
 function getCleaningValue(row){
@@ -1770,7 +1829,7 @@ function mapGuestyReservation(r){
   const invoiceItems = (r["money.invoiceItems"] && r["money.invoiceItems"].children) || [];
 
   let cityTax=0,stateTax=0,countyTax=0,occupancyTax=0,gtcTax=0;
-  let lengthDiscount=0,resolutionCenter=0,linensFee=0,communityFee=0;
+  let lengthDiscount=0,resolutionCenter=0,linensFee=0,communityFee=0,feeCreditCard=0;
   invoiceItems.forEach(item=>{
     const name=((item.title||"")+" "+(item.name||"")).toLowerCase();
     const val=num(item.value);
@@ -1781,6 +1840,7 @@ function mapGuestyReservation(r){
     else if(name.includes("occupancy") || name.includes("accommodation") || name.includes("tourism")) occupancyTax+=val;
     else if(name.includes("length") && name.includes("discount")) lengthDiscount+=val;
     else if(name.includes("resolution")) resolutionCenter+=val;
+    else if(name.includes("credit") && name.includes("card")) feeCreditCard+=val;
     else if(name.includes("linen")) linensFee+=val;
     else if(name.includes("community")) communityFee+=val;
   });
@@ -1799,6 +1859,7 @@ function mapGuestyReservation(r){
     "STATUS": (r.status && r.status.children) || "",
     "MARKUP": (r["money.invoiceItems.MAR"] && r["money.invoiceItems.MAR"].value) || 0,
     "CHANNEL COMMISSION": (r["money.hostServiceFee"] && r["money.hostServiceFee"].value) || 0,
+    "FEE CREDIT CARD": feeCreditCard,
     "LENGTH DISCOUNT": lengthDiscount,
     "AIRBNB RESOLUTION CENTER": resolutionCenter,
     "LINENS FEE": linensFee,
