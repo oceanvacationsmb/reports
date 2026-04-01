@@ -457,27 +457,48 @@ function getDisplayPlatform(row){
 }
 
 function getAccommodationValue(row,isDraft){
-  const payout=getGrossPayoutValue(row);
-  const taxes=getRowTaxTotal(row);
   const manualAcc=(row && row["MANUAL ACCOMMODATION"]!==undefined && row["MANUAL ACCOMMODATION"]!==null && row["MANUAL ACCOMMODATION"]!=="")
     ? num(row["MANUAL ACCOMMODATION"])
     : null;
   if(manualAcc!==null) return manualAcc;
 
-  const lengthDiscount=num(row && row["LENGTH DISCOUNT"]);
-  const resolutionCenter=num(row && row["AIRBNB RESOLUTION CENTER"]);
-  if(isDraft){
-    const markup=num(row && row["MARKUP"]);
-    return payout-markup-taxes-lengthDiscount-resolutionCenter;
+  const grossPayout=getGrossPayoutValue(row);
+  const draftCleaning=getCleaningValue(row);
+  const taxes=getRowTaxTotal(row);
+  const lengthOfStayDiscount=num(row && row["LENGTH DISCOUNT"]);
+  const vrboWebsiteFee=getWebsiteVrboFeeValue(row);
+  const feeCreditCard=num(row && row["MARKUP"]);
+  const airbnbResolutionCenter=num(row && row["AIRBNB RESOLUTION CENTER"]);
+
+  const netAccommodation=
+    grossPayout -
+    draftCleaning -
+    taxes +
+    lengthOfStayDiscount -
+    vrboWebsiteFee -
+    feeCreditCard -
+    airbnbResolutionCenter;
+
+  return Math.max(0,netAccommodation);
+}
+
+function getWebsiteVrboFeeValue(row){
+  const source=((row && row["SOURCE"])||"").toString().toLowerCase();
+  const platform=((row && row["PLATFORM"])||"").toString().toLowerCase();
+  const grossPayout=getGrossPayoutValue(row);
+
+  if(source.includes("website")){
+    return (grossPayout * 0.01) + 0.30;
   }
 
-  const accFare=num(row && row["ACCOMMODATION FARE"]);
-  const markup=num(row && row["MARKUP"]);
-  if(accFare!==0 || markup!==0 || lengthDiscount!==0){
-    return accFare-markup+lengthDiscount;
+  if(platform.includes("homeaway")){
+    return num(row && row["CHANNEL COMMISSION"]);
   }
-  const cleaning=getCleaningValue(row);
-  return payout-cleaning;
+
+  const manualWebsiteFee=(row && row["MANUAL WEBSITE FEE"]!==undefined && row["MANUAL WEBSITE FEE"]!==null && row["MANUAL WEBSITE FEE"]!=="")
+    ? num(row["MANUAL WEBSITE FEE"])
+    : null;
+  return manualWebsiteFee!==null ? manualWebsiteFee : 0;
 }
 
 function getCleaningValue(row){
@@ -2601,25 +2622,7 @@ const p = a * pmcPercent;
      
       let w=0;
 if(t.type==="draft"){
-  const manualWebsiteFee=(row["MANUAL WEBSITE FEE"]!==undefined && row["MANUAL WEBSITE FEE"]!==null && row["MANUAL WEBSITE FEE"]!=="")
-    ? num(row["MANUAL WEBSITE FEE"])
-    : null;
-  const platform=(row["PLATFORM"]||"").toLowerCase();
-  const source=(row["SOURCE"]||"").toLowerCase();
-
-  if(manualWebsiteFee!==null){
-    w=manualWebsiteFee;
-  }else{
-    if(source.includes("website")){
-      const markup = num(row["MARKUP"]);
-      const base = g + markup;
-      w = (base * 0.01) + 0.30;
-    }
-
-    if(platform.includes("homeaway")){
-      w = num(row["CHANNEL COMMISSION"]);
-    }
-  }
+  w=getWebsiteVrboFeeValue(row);
 }
       gross+=g;
       acc+=a;
@@ -2893,24 +2896,7 @@ const c = getCleaningValue(row);
 let a = getAccommodationValue(row,true);
 const pm = a * pmcPercent;
 
-let w=0;
-const platform=(row["PLATFORM"]||"").toLowerCase();
-const source=(row["SOURCE"]||"").toLowerCase();
-const manualWebsiteFee=(row["MANUAL WEBSITE FEE"]!==undefined && row["MANUAL WEBSITE FEE"]!==null && row["MANUAL WEBSITE FEE"]!=="") ? num(row["MANUAL WEBSITE FEE"]) : null;
-
-if(manualWebsiteFee!==null){
-  w=manualWebsiteFee;
-}else{
-  if(source.includes("website")){
-    const markup=num(row["MARKUP"]);
-    const base=g+markup;
-    w=(base*0.01)+0.30;
-  }
-
-  if(platform.includes("homeaway")){
-    w=num(row["CHANNEL COMMISSION"]);
-  }
-}
+const w=getWebsiteVrboFeeValue(row);
 
 const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
 const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
