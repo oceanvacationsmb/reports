@@ -424,6 +424,10 @@ function getRowCode(row){
   return ((row && row["CONFIRMATION CODE"]) || "").toString().trim().toUpperCase();
 }
 
+function normalizeReservationCode(value){
+  return (value||"").toString().trim().toUpperCase();
+}
+
 function getGrossPayoutValue(row){
   const manual=(row && row["MANUAL TOTAL PAYOUT"]!==undefined && row["MANUAL TOTAL PAYOUT"]!==null && row["MANUAL TOTAL PAYOUT"]!=="")
     ? num(row["MANUAL TOTAL PAYOUT"])
@@ -1831,11 +1835,11 @@ function mapGuestyReservation(r){
   let cityTax=0,stateTax=0,countyTax=0,occupancyTax=0,gtcTax=0;
   let lengthDiscount=0,resolutionCenter=0,linensFee=0,communityFee=0,feeCreditCard=0;
   invoiceItems.forEach(item=>{
-    const name=((item.title||"")+" "+(item.name||"")).toLowerCase();
+    const name=((item.title||"")+" "+(item.name||"")+" "+(item.description||"")+" "+(item.type||"")).toLowerCase();
     const val=num(item.value);
-    if(name.includes("state")) stateTax+=val;
-    else if(name.includes("county") || name.includes("horry")) countyTax+=val;
-    else if(name.includes("city") || name.includes("north myrtle") || name.includes("surfside") || name.includes("mb")) cityTax+=val;
+    if(name.includes("state") && name.includes("tax")) stateTax+=val;
+    else if((name.includes("county") || name.includes("horry")) && name.includes("tax")) countyTax+=val;
+    else if((name.includes("city") || name.includes("north myrtle") || name.includes("surfside") || /\bmb\b/.test(name)) && name.includes("tax")) cityTax+=val;
     else if(name.includes("gtc")) gtcTax+=val;
     else if(name.includes("occupancy") || name.includes("accommodation") || name.includes("tourism")) occupancyTax+=val;
     else if(name.includes("length") && name.includes("discount")) lengthDiscount+=val;
@@ -1855,7 +1859,7 @@ function mapGuestyReservation(r){
     "CLEANING FARE": (r["money.fareCleaning"] && r["money.fareCleaning"].value) || 0,
     "PLATFORM": (r["integration.platform"] && r["integration.platform"].children) || "",
     "SOURCE": (r["integration.source"] && r["integration.source"].children) || "",
-    "CONFIRMATION CODE": (r.confirmationCode && r.confirmationCode.children) || "",
+    "CONFIRMATION CODE": normalizeReservationCode((r.confirmationCode && r.confirmationCode.children) || ""),
     "STATUS": (r.status && r.status.children) || "",
     "MARKUP": (r["money.invoiceItems.MAR"] && r["money.invoiceItems.MAR"].value) || 0,
     "CHANNEL COMMISSION": (r["money.hostServiceFee"] && r["money.hostServiceFee"].value) || 0,
@@ -1874,9 +1878,14 @@ function mapGuestyReservation(r){
 }
 
 function getRowTaxTotal(row){
-  const detailed=num(row["CITY TAX"]) + num(row["STATE TAX"]) + num(row["COUNTY TAX"]) + num(row["OCCUPANCY TAX"]) + num(row["GTC TAX"]);
-  if(detailed>0) return detailed;
-  return num(row["TAXES"]);
+  const taxesCombined=num(row["TAXES"]);
+  const detailedTaxesCombined=
+    num(row["CITY TAX"]) +
+    num(row["STATE TAX"]) +
+    num(row["COUNTY TAX"]) +
+    num(row["OCCUPANCY TAX"]) +
+    num(row["GTC TAX"]);
+  return Math.max(0,taxesCombined,detailedTaxesCombined);
 }
 
 function getOwnerGuestyUrl(ownerName,useAllProperties){
