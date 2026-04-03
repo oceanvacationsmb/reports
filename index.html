@@ -470,7 +470,13 @@ function getAccommodationValue(row,isDraft){
   const manualAcc=(row && row["MANUAL ACCOMMODATION"]!==undefined && row["MANUAL ACCOMMODATION"]!==null && row["MANUAL ACCOMMODATION"]!=="")
     ? num(row["MANUAL ACCOMMODATION"])
     : null;
-  if(manualAcc!==null) return manualAcc;
+  if(manualAcc!==null){
+    if(isDraft && isManualSourceRow(row)){
+      const manualFee=getWebsiteVrboFeeValue(row,{forPayout:false});
+      return Math.max(0,manualAcc-manualFee);
+    }
+    return manualAcc;
+  }
 
   if(isDraft){
     const grossPayout=getGrossPayoutValue(row);
@@ -550,9 +556,15 @@ function getPayoutRegularNetAccommodation(row){
 function getWebsiteVrboFeeValue(row,options){
   const opts=options||{};
   const forPayout=!!opts.forPayout;
-  const source=((row && row["SOURCE"])||"").toString().toLowerCase();
+  const source=((row && row["SOURCE"])||"").toString().trim().toLowerCase();
   const platform=((row && row["PLATFORM"])||"").toString().toLowerCase();
   const grossPayout=getGrossPayoutValue(row);
+  const preCancellationHostPayout=getPreCancellationHostPayoutValue(row);
+
+  if(isManualSourceRow(row)){
+    const manualFeeBase=preCancellationHostPayout>0 ? preCancellationHostPayout : grossPayout;
+    return (manualFeeBase * 0.01) + 0.30;
+  }
 
   const manualWebsiteFee=(row && row["MANUAL WEBSITE FEE"]!==undefined && row["MANUAL WEBSITE FEE"]!==null && row["MANUAL WEBSITE FEE"]!=="")
     ? num(row["MANUAL WEBSITE FEE"])
@@ -568,6 +580,43 @@ function getWebsiteVrboFeeValue(row,options){
   }
 
   return 0;
+}
+
+function isManualSourceRow(row){
+  const source=((row && row["SOURCE"])||"").toString().trim().toLowerCase();
+  const platform=((row && row["PLATFORM"])||"").toString().trim().toLowerCase();
+  return source==="manual" || platform==="manual";
+}
+
+function getNestedValue(obj,path){
+  if(!obj || !path) return undefined;
+  const keys=path.split(".");
+  let cur=obj;
+  for(const key of keys){
+    if(cur===undefined || cur===null || typeof cur!=="object" || !(key in cur)) return undefined;
+    cur=cur[key];
+  }
+  return cur;
+}
+
+function extractGuestyMoneyValue(raw){
+  if(raw===undefined || raw===null || raw==="") return 0;
+  if(typeof raw==="number" || typeof raw==="string") return num(raw);
+  if(typeof raw==="object"){
+    if(raw.value!==undefined && raw.value!==null) return num(raw.value);
+    if(raw.children!==undefined && raw.children!==null) return num(raw.children);
+  }
+  return 0;
+}
+
+function getPreCancellationHostPayoutValue(row){
+  return Math.max(
+    num(row && row["PRE CANCELLATION HOST PAYOUT"]),
+    num(row && row["preCancelationMoney.hostPayout"]),
+    num(row && row["preCancellationMoney.hostPayout"]),
+    num(row && row["money.preCancelationMoney.hostPayout"]),
+    num(row && row["money.preCancellationMoney.hostPayout"])
+  );
 }
 
 function getCleaningValue(row){
@@ -1838,10 +1887,8 @@ function showAllOwnersLandingInfo(){
 function mapGuestyReservation(r){
   const guestyValue=(field)=>{
     const raw=r ? r[field] : null;
-    if(raw===undefined || raw===null) return 0;
-    if(typeof raw==="number" || typeof raw==="string") return num(raw);
-    if(typeof raw==="object") return num(raw.value);
-    return 0;
+    if(raw!==undefined && raw!==null) return extractGuestyMoneyValue(raw);
+    return extractGuestyMoneyValue(getNestedValue(r,field));
   };
 
   const invoiceItems = (r["money.invoiceItems"] && r["money.invoiceItems"].children) || [];
@@ -1882,6 +1929,12 @@ function mapGuestyReservation(r){
   occupancyTax=Math.max(occupancyTax,guestyValue("money.invoiceItems.OCCUPANCY_TAX"),guestyValue("taxOccupancy"));
   gtcTax=Math.max(gtcTax,guestyValue("money.invoiceItems.GTC_TAX"),guestyValue("taxGtc"));
   feeCreditCard=Math.max(feeCreditCard,guestyValue("feeCreditCard"),guestyValue("FEE CREDIT CARD"));
+  const preCancellationHostPayout=Math.max(
+    guestyValue("preCancelationMoney.hostPayout"),
+    guestyValue("preCancellationMoney.hostPayout"),
+    guestyValue("money.preCancelationMoney.hostPayout"),
+    guestyValue("money.preCancellationMoney.hostPayout")
+  );
 
   return {
     "CHECK-IN DATE": (r.checkInDate && r.checkInDate.value) || "",
@@ -1897,6 +1950,7 @@ function mapGuestyReservation(r){
     "STATUS": (r.status && r.status.children) || "",
     "MARKUP": guestyValue("money.invoiceItems.MAR"),
     "CHANNEL COMMISSION": guestyValue("money.hostServiceFee"),
+    "PRE CANCELLATION HOST PAYOUT": preCancellationHostPayout,
     "FEE CREDIT CARD": feeCreditCard,
     "LENGTH DISCOUNT": lengthDiscount,
     "AIRBNB RESOLUTION CENTER": resolutionCenter,

@@ -29,9 +29,15 @@ function getLengthOfStayDiscountValue(row){
 }
 
 function getWebsiteVrboFeeValue(row){
-  const source = ((row && row["SOURCE"]) || "").toString().toLowerCase();
-  const platform = ((row && row["PLATFORM"]) || "").toString().toLowerCase();
+  const source = ((row && row["SOURCE"]) || "").toString().trim().toLowerCase();
+  const platform = ((row && row["PLATFORM"]) || "").toString().trim().toLowerCase();
   const grossPayout = getGrossPayoutValue(row);
+  const preCancellationHostPayout = num(row && row["PRE CANCELLATION HOST PAYOUT"]);
+
+  if(source === "manual" || platform === "manual"){
+    const manualFeeBase = preCancellationHostPayout > 0 ? preCancellationHostPayout : grossPayout;
+    return manualFeeBase * 0.01 + 0.3;
+  }
 
   if(source.includes("website")){
     return grossPayout * 0.01 + 0.3;
@@ -94,6 +100,20 @@ function getRowTaxTotal(row){
 }
 
 function getDraftAccommodationValue(row){
+  const source = ((row && row["SOURCE"]) || "").toString().trim().toLowerCase();
+  const platform = ((row && row["PLATFORM"]) || "").toString().trim().toLowerCase();
+  const manualAcc =
+    row && row["MANUAL ACCOMMODATION"] !== undefined && row["MANUAL ACCOMMODATION"] !== null && row["MANUAL ACCOMMODATION"] !== ""
+      ? num(row["MANUAL ACCOMMODATION"])
+      : null;
+
+  if(manualAcc !== null){
+    if(source === "manual" || platform === "manual"){
+      return Math.max(0, manualAcc - getWebsiteVrboFeeValue(row));
+    }
+    return manualAcc;
+  }
+
   const grossPayout = getGrossPayoutValue(row);
   const draftCleaning = getCleaningValue(row);
   const taxes = getRowTaxTotal(row);
@@ -204,6 +224,25 @@ function run(){
     "AIRBNB RESOLUTION CENTER": 0
   };
   assert.strictEqual(round2(getDraftAccommodationValue(topLevelCardFeeRow)), 779.48);
+
+  const manualSourceRow = {
+    "TOTAL PAYOUT": 3130.26,
+    "PRE CANCELLATION HOST PAYOUT": 30622,
+    "CLEANING FARE": 100,
+    "TAXES": 0,
+    "LENGTH DISCOUNT": 0,
+    "PLATFORM": "manual",
+    "SOURCE": "",
+    "FEE CREDIT CARD": 0,
+    "AIRBNB RESOLUTION CENTER": 0
+  };
+  assert.strictEqual(round2(getWebsiteVrboFeeValue(manualSourceRow)), 306.52);
+
+  const manualSourceWithManualAcc = {
+    ...manualSourceRow,
+    "MANUAL ACCOMMODATION": 2192
+  };
+  assert.strictEqual(round2(getDraftAccommodationValue(manualSourceWithManualAcc)), 1885.48);
 
   console.log("PASS net-accommodation regression");
   console.log(JSON.stringify({
