@@ -214,6 +214,7 @@ select,input,.btn{font-size:12px}
 <div id="reportTypeSection" class="section">
 <label class="label">REPORT TYPE</label>
 <select id="quickReportType" onchange="runQuickReport()">
+<option value="" selected>PLEASE CHOOSE REPORT</option>
 <option value="income">INCOME REPORT</option>
 <option value="gri">GRI REPORT</option>
 <option value="1099">1099</option>
@@ -246,7 +247,7 @@ select,input,.btn{font-size:12px}
 
 <div id="modalOverlay" class="modal-overlay" onclick="closeAll()"></div>
 
-<div id="ownerModal" class="modal">
+<div id="ownerModal" class="modal" style="max-width:980px;width:96%">
 <div>
 <div class="modal-title">OWNER MANAGEMENT</div>
 <div class="modal-field"><label class="modal-label">OWNER NAME</label><input type="text" id="ownerName" class="modal-input" placeholder="Owner Name"></div>
@@ -256,6 +257,7 @@ select,input,.btn{font-size:12px}
 <div class="modal-field"><label class="modal-label">TYPE</label><select id="ownerType" class="modal-input"><option value="draft">DRAFT</option><option value="payout">PAYOUT</option><option value="split">SPLIT</option></select></div>
 <div class="modal-field"><label class="modal-label">SPLIT OWNER % (ONLY FOR SPLIT TYPE)</label><input type="number" id="ownerSplitPercent" class="modal-input" placeholder="50" step="0.01"></div>
 <div class="modal-field"><label class="modal-label">RECURRING CHARGES (ONE PER LINE: NAME|AMOUNT)</label><textarea id="ownerRecurring" class="modal-input" style="min-height:90px;resize:vertical" placeholder="Example: HOA fee|175&#10;Internet|89.99"></textarea></div>
+<div class="modal-field"><label class="modal-label">MONTHLY / DATE DEFAULTS</label><div class="modal-input" style="min-height:56px;display:flex;align-items:center;color:#b8c9cf">Add owner first, then use the owner cards below to manage monthly and date defaults with dropdowns/calendar (no typing needed).</div></div>
 <div class="modal-field"><label class="modal-label">GUESTY REPORT URL (DEFAULT/SINGLE)</label><input type="text" id="ownerGuestyUrl" class="modal-input" placeholder="https://guesty.com/..."></div>
 <div class="modal-field"><label class="modal-label">GUESTY REPORT URL (ALL PROPERTIES)</label><input type="text" id="ownerGuestyAllUrl" class="modal-input" placeholder="https://guesty.com/...apiKey=..."></div>
 <button class="btn btn-success" onclick="addOwner()" style="width:100%;margin-bottom:20px">ADD OWNER</button>
@@ -930,9 +932,221 @@ function recurringFromText(text){
   }).filter(item=>item.amount!==0 || item.label);
 }
 
-function getRecurringChargesForOwner(ownerName){
+function monthRecurringToText(list){
+  if(!Array.isArray(list) || list.length===0) return "";
+  return list.map(item=>{
+    const month=Math.max(1,Math.min(12,parseInt(item && item.month,10)||1));
+    const label=(item && item.label ? item.label : "Recurring").toString().trim();
+    const amount=num(item && item.amount);
+    return String(month).padStart(2,"0")+"|"+label+"|"+amount.toFixed(2);
+  }).join("\n");
+}
+
+function parseMonthToken(value){
+  const token=(value||"").toString().trim().toUpperCase();
+  if(!token) return 0;
+  const asNumber=parseInt(token,10);
+  if(asNumber>=1 && asNumber<=12) return asNumber;
+  const names={JAN:1,FEB:2,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,OCT:10,NOV:11,DEC:12};
+  return names[token]||0;
+}
+
+function monthRecurringFromText(text){
+  if(!text || !text.trim()) return [];
+  return text.split("\n").map(line=>line.trim()).filter(Boolean).map(line=>{
+    const parts=line.split("|");
+    const month=parseMonthToken(parts[0]);
+    const label=(parts[1]||"Recurring").trim();
+    const amount=num(parts[2]||0);
+    return {month:month,label:label,amount:amount};
+  }).filter(item=>item.month>=1 && item.month<=12 && (item.amount!==0 || item.label));
+}
+
+function dateRecurringToText(list){
+  if(!Array.isArray(list) || list.length===0) return "";
+  return list.map(item=>{
+    const month=Math.max(1,Math.min(12,parseInt(item && item.month,10)||1));
+    const day=Math.max(1,Math.min(31,parseInt(item && item.day,10)||1));
+    const label=(item && item.label ? item.label : "Recurring").toString().trim();
+    const amount=num(item && item.amount);
+    return String(month).padStart(2,"0")+"-"+String(day).padStart(2,"0")+"|"+label+"|"+amount.toFixed(2);
+  }).join("\n");
+}
+
+function dateRecurringFromText(text){
+  if(!text || !text.trim()) return [];
+  return text.split("\n").map(line=>line.trim()).filter(Boolean).map(line=>{
+    const parts=line.split("|");
+    const dateToken=(parts[0]||"").trim();
+    const dateParts=dateToken.split("-");
+    const month=parseMonthToken(dateParts[0]);
+    const day=parseInt((dateParts[1]||""),10)||0;
+    const label=(parts[1]||"Recurring").trim();
+    const amount=num(parts[2]||0);
+    return {month:month,day:day,label:label,amount:amount};
+  }).filter(item=>item.month>=1 && item.month<=12 && item.day>=1 && item.day<=31 && (item.amount!==0 || item.label));
+}
+
+function ensureOwnerRecurringRuleArrays(ownerName){
   const owner=OWNERS[ownerName]||{};
-  return Array.isArray(owner.recurringCharges)?owner.recurringCharges:[];
+  if(!Array.isArray(owner.monthlyRecurringCharges)) owner.monthlyRecurringCharges=[];
+  if(!Array.isArray(owner.specificDateRecurringCharges)) owner.specificDateRecurringCharges=[];
+  if(!Array.isArray(owner.dateRangeRecurringCharges)) owner.dateRangeRecurringCharges=[];
+  OWNERS[ownerName]=owner;
+  return owner;
+}
+
+function toIsoDate(year,month,day){
+  return String(year).padStart(4,"0")+"-"+String(month).padStart(2,"0")+"-"+String(day).padStart(2,"0");
+}
+
+function getMonthEndDay(year,month){
+  return new Date(year,month,0).getDate();
+}
+
+function parseIsoDate(value){
+  const token=(value||"").toString().trim();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(token)) return null;
+  const d=new Date(token+"T00:00:00");
+  if(Number.isNaN(d.getTime())) return null;
+  return d;
+}
+
+function getCurrentStatementMonthYear(){
+  const month=parseInt(document.getElementById("monthSelect").value,10)||1;
+  const year=parseInt(document.getElementById("yearSelect").value,10)||new Date().getFullYear();
+  return {month:month,year:year};
+}
+
+function getMonthLabel(month){
+  const names=["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+  return names[Math.max(1,Math.min(12,month))-1]||"JAN";
+}
+
+function buildMonthSelectOptions(selectedMonth){
+  let html="";
+  for(let m=1;m<=12;m++){
+    html+="<option value='"+m+"' "+(m===selectedMonth?"selected":"")+">"+getMonthLabel(m)+"</option>";
+  }
+  return html;
+}
+
+function toDateInputValue(month,day){
+  const mm=String(Math.max(1,Math.min(12,month||1))).padStart(2,"0");
+  const dd=String(Math.max(1,Math.min(31,day||1))).padStart(2,"0");
+  return "2000-"+mm+"-"+dd;
+}
+
+function addOwnerMonthlyRecurringRule(ownerName){
+  const owner=ensureOwnerRecurringRuleArrays(ownerName);
+  const currentMonth=parseInt(document.getElementById("monthSelect").value,10)||1;
+  owner.monthlyRecurringCharges.push({month:currentMonth,label:"Recurring",amount:0});
+  openOwners();
+}
+
+function updateOwnerMonthlyRecurringRule(ownerName,index,field,value){
+  const owner=ensureOwnerRecurringRuleArrays(ownerName);
+  const item=owner.monthlyRecurringCharges[index];
+  if(!item) return;
+  if(field==="month") item.month=parseMonthToken(value)||1;
+  if(field==="label") item.label=(value||"").toString();
+  if(field==="amount") item.amount=num(value);
+}
+
+function deleteOwnerMonthlyRecurringRule(ownerName,index){
+  const owner=ensureOwnerRecurringRuleArrays(ownerName);
+  if(index<0 || index>=owner.monthlyRecurringCharges.length) return;
+  owner.monthlyRecurringCharges.splice(index,1);
+  openOwners();
+}
+
+function addOwnerSpecificDateRecurringRule(ownerName){
+  const owner=ensureOwnerRecurringRuleArrays(ownerName);
+  const currentMonth=parseInt(document.getElementById("monthSelect").value,10)||1;
+  owner.specificDateRecurringCharges.push({month:currentMonth,day:1,label:"Recurring",amount:0});
+  openOwners();
+}
+
+function addOwnerDateRangeRecurringRule(ownerName){
+  const owner=ensureOwnerRecurringRuleArrays(ownerName);
+  const cur=getCurrentStatementMonthYear();
+  const startDate=toIsoDate(cur.year,cur.month,1);
+  const endDate=toIsoDate(cur.year,cur.month,getMonthEndDay(cur.year,cur.month));
+  owner.dateRangeRecurringCharges.push({startDate:startDate,endDate:endDate,label:"Recurring",amount:0});
+  openOwners();
+}
+
+function updateOwnerDateRangeRecurringRule(ownerName,index,field,value){
+  const owner=ensureOwnerRecurringRuleArrays(ownerName);
+  const item=owner.dateRangeRecurringCharges[index];
+  if(!item) return;
+  if(field==="startDate") item.startDate=(value||"").toString();
+  if(field==="endDate") item.endDate=(value||"").toString();
+  if(field==="label") item.label=(value||"").toString();
+  if(field==="amount") item.amount=num(value);
+}
+
+function deleteOwnerDateRangeRecurringRule(ownerName,index){
+  const owner=ensureOwnerRecurringRuleArrays(ownerName);
+  if(index<0 || index>=owner.dateRangeRecurringCharges.length) return;
+  owner.dateRangeRecurringCharges.splice(index,1);
+  openOwners();
+}
+
+function updateOwnerSpecificDateRecurringRule(ownerName,index,field,value){
+  const owner=ensureOwnerRecurringRuleArrays(ownerName);
+  const item=owner.specificDateRecurringCharges[index];
+  if(!item) return;
+  if(field==="date"){
+    const parts=(value||"").split("-");
+    const month=parseInt(parts[1],10)||1;
+    const day=parseInt(parts[2],10)||1;
+    item.month=Math.max(1,Math.min(12,month));
+    item.day=Math.max(1,Math.min(31,day));
+  }
+  if(field==="label") item.label=(value||"").toString();
+  if(field==="amount") item.amount=num(value);
+}
+
+function deleteOwnerSpecificDateRecurringRule(ownerName,index){
+  const owner=ensureOwnerRecurringRuleArrays(ownerName);
+  if(index<0 || index>=owner.specificDateRecurringCharges.length) return;
+  owner.specificDateRecurringCharges.splice(index,1);
+  openOwners();
+}
+
+function getRecurringChargesForOwner(ownerName,options){
+  const owner=OWNERS[ownerName]||{};
+  const opts=options||{};
+  const selectedMonth=(parseInt(opts.month,10)||parseInt(document.getElementById("monthSelect").value,10)||0);
+  const selectedYear=(parseInt(opts.year,10)||parseInt(document.getElementById("yearSelect").value,10)||new Date().getFullYear());
+  const base=Array.isArray(owner.recurringCharges)?owner.recurringCharges:[];
+  const byMonth=Array.isArray(owner.monthlyRecurringCharges)?owner.monthlyRecurringCharges:[];
+  const byDate=Array.isArray(owner.specificDateRecurringCharges)?owner.specificDateRecurringCharges:[];
+  const byRange=Array.isArray(owner.dateRangeRecurringCharges)?owner.dateRangeRecurringCharges:[];
+
+  const periodStart=new Date(selectedYear,selectedMonth-1,1);
+  const periodEnd=new Date(selectedYear,selectedMonth,getMonthEndDay(selectedYear,selectedMonth));
+
+  const normalizedBase=base.map(item=>({label:(item.label||"Recurring").toString(),amount:num(item.amount)}));
+  const monthCharges=byMonth
+    .filter(item=>parseInt(item && item.month,10)===selectedMonth)
+    .map(item=>({label:(item.label||"Recurring").toString(),amount:num(item.amount)}));
+  const dateCharges=byDate
+    .filter(item=>parseInt(item && item.month,10)===selectedMonth)
+    .map(item=>({label:(item.label||"Recurring").toString(),amount:num(item.amount)}));
+  const rangeCharges=byRange
+    .filter(item=>{
+      const start=parseIsoDate(item && item.startDate);
+      const end=parseIsoDate(item && item.endDate);
+      if(!start || !end) return false;
+      const normalizedStart=start<=end ? start : end;
+      const normalizedEnd=start<=end ? end : start;
+      return normalizedStart<=periodEnd && normalizedEnd>=periodStart;
+    })
+    .map(item=>({label:(item.label||"Recurring").toString(),amount:num(item.amount)}));
+
+  return normalizedBase.concat(monthCharges,dateCharges,rangeCharges).filter(item=>item.label || item.amount!==0);
 }
 
 function getEffectivePmcPercent(owner){
@@ -1006,8 +1220,16 @@ function runQuickReport(){
     return;
   }
 
+  if(!currentOwner || currentOwner==="__ALL__"){
+    return;
+  }
+
   const typeSelect = document.getElementById("quickReportType");
-  const selected = typeSelect ? typeSelect.value : "income";
+  const selected = typeSelect ? typeSelect.value : "";
+  if(!selected){
+    showOwnerLandingInfo();
+    return;
+  }
   currentReportMode=selected;
 
   if(selected === "income" || selected === "gri"){
@@ -1017,7 +1239,7 @@ function runQuickReport(){
 
   if(selected === "1099"){
     document.getElementById("incomeSidebarControls").style.display="none";
-    show1099();
+    loadOwnerDataAndProcess(true,()=>show1099());
   }
 }
 
@@ -1084,7 +1306,7 @@ toDate = y + "-12-31";
     (rows||[]).forEach(r=>{
       const key=getPropertyKey(r);
       if(!propertyNameByKey[key]) propertyNameByKey[key]=getPropertyName(r,key);
-      if(!propertyAddressByKey[key]) propertyAddressByKey[key]=getPropertyAddress(r,key);
+      if(!propertyAddressByKey[key]) propertyAddressByKey[key]=getPropertyAddress(r,"");
     });
 
     const filtered=(rows||[]).filter(r=>{
@@ -1099,8 +1321,8 @@ toDate = y + "-12-31";
       ? "ALL PROPERTIES"
       : (propertyNameByKey[selectedProperty] || selectedProperty);
     const selectedPropertyAddress=selectedProperty==="all"
-      ? "ALL PROPERTIES"
-      : (propertyAddressByKey[selectedProperty] || selectedProperty);
+      ? ""
+      : (propertyAddressByKey[selectedProperty] || "UNKNOWN ADDRESS");
 
     let totalPayout=0,totalAcc=0,totalCleaning=0,totalPMC=0;
     let html="";
@@ -1108,9 +1330,9 @@ toDate = y + "-12-31";
     html+="<div class='invoice-header'><div class='company-info'><div class='company-name'>OCEAN VACATIONS INC.</div><div>www.oceanvacationsmb.com</div><div>oceanvacationsmb@gmail.com</div><div>843-222-6516</div></div><div class='right-header'><div class='statement-date'><strong>REPORT DATE: "+new Date().toLocaleDateString()+"</strong></div><div class='period-date'><strong>"+periodText+"</strong></div></div></div>";
     html+="<div style='border-top:2px solid #19343f;margin:8px 0 14px 0'></div>";
     if(type==="gri"){
-      const headerAddress=(selectedProperty==="all") ? "ALL PROPERTIES" : selectedPropertyAddress;
-      html+="<div style='text-align:center;font-size:16px;font-weight:bold'>"+currentOwner.toUpperCase()+"</div>";
-      html+="<div style='text-align:center;font-size:14px;font-weight:bold;margin-bottom:20px'>"+headerAddress+"</div>";
+      if(selectedProperty!=="all"){
+        html+="<div style='text-align:center;font-size:14px;font-weight:bold;margin-bottom:20px'>"+selectedPropertyAddress+"</div>";
+      }
     }else{
       html+="<div style='text-align:center;font-size:16px;font-weight:bold;margin-bottom:20px'>"+selectedPropertyName+"</div>";
     }
@@ -1125,14 +1347,15 @@ toDate = y + "-12-31";
       });
 
       html+="<div class='summary-grid'><div class='summary-card'><div class='summary-label'>GROSS PAYOUT</div><div class='summary-value'>"+money(totalPayout)+"</div></div></div>";
-      html+="<table><tr><th>CODE</th><th>CHECK-IN/OUT</th><th>GROSS PAYOUT</th></tr>";
+      html+="<table><tr><th>PROPERTY ADDRESS</th><th>CODE</th><th>CHECK-IN/OUT</th><th>GROSS PAYOUT</th></tr>";
       griRows.forEach(r=>{
         const payout=getGrossPayoutValue(r);
         const code=getRowCode(r);
         const stay=(r["CHECK-IN DATE"]||"")+" - "+(r["CHECK-OUT DATE"]||"");
-        html+="<tr><td>"+code+"</td><td>"+stay+"</td><td>"+money(payout)+"</td></tr>";
+        const address=((r["PROPERTY ADDRESS"]||"")+"").trim() || "UNKNOWN ADDRESS";
+        html+="<tr><td>"+address+"</td><td>"+code+"</td><td>"+stay+"</td><td>"+money(payout)+"</td></tr>";
       });
-      html+="<tr><th colspan='2'>TOTAL</th><th>"+money(totalPayout)+"</th></tr></table>";
+      html+="<tr><th colspan='3'>TOTAL</th><th>"+money(totalPayout)+"</th></tr></table>";
     }else{
       const byProperty={};
       filtered.forEach(r=>{
@@ -1875,17 +2098,8 @@ function onOwnerChange(){
     if(currentOwner==="__ALL__"){
       showAllOwnersLandingInfo();
     }else{
-      const previousView=currentView;
       showOwnerLandingInfo();
       preloadGuestyData(currentOwner);
-      if(previousView==="income" || previousView==="gri"){
-        runQuickReport();
-      }else if(previousView==="1099"){
-        generateStatement(true);
-        show1099();
-      }else{
-        generateStatement(true);
-      }
     }
   }else{
     showOwnerSelectionPrompt();
@@ -1905,6 +2119,11 @@ function onPeriodChange(){
   updateHeaderDates();
   processData();
 
+  if(currentView==="owner-landing"){
+    showOwnerLandingInfo();
+    return;
+  }
+
   if(currentView==="summary"){
     generateSummary();
     return;
@@ -1916,11 +2135,16 @@ function onPeriodChange(){
   }
 
   if(currentView==="1099"){
-    show1099();
+    loadOwnerDataAndProcess(true,()=>show1099());
     return;
   }
 
-  displayStatement();
+  if(currentView==="statement"){
+    displayStatement();
+    return;
+  }
+
+  showOwnerLandingInfo();
 }
 
 function showAllOwnersLandingInfo(){
@@ -1952,6 +2176,18 @@ function mapGuestyReservation(r){
     const raw=r ? r[field] : null;
     if(raw!==undefined && raw!==null) return extractGuestyMoneyValue(raw);
     return extractGuestyMoneyValue(getNestedValue(r,field));
+  };
+
+  const guestyText=(field)=>{
+    const direct=r ? r[field] : undefined;
+    const raw=(direct!==undefined && direct!==null) ? direct : getNestedValue(r,field);
+    if(raw===undefined || raw===null) return "";
+    if(typeof raw==="string" || typeof raw==="number") return String(raw).trim();
+    if(typeof raw==="object"){
+      if(raw.children!==undefined && raw.children!==null) return String(raw.children).trim();
+      if(raw.value!==undefined && raw.value!==null) return String(raw.value).trim();
+    }
+    return "";
   };
 
   const invoiceItems = (r["money.invoiceItems"] && r["money.invoiceItems"].children) || [];
@@ -1999,11 +2235,19 @@ function mapGuestyReservation(r){
     guestyValue("money.preCancellationMoney.hostPayout")
   );
 
+  const propertyAddress=
+    guestyText("listing.address.full") ||
+    guestyText("listing.address") ||
+    guestyText("customFields.68e44b138e7b460011d90661") ||
+    guestyText("customFields.68e44b138e7b460011d90661.value") ||
+    guestyText("customFields.68e44b138e7b460011d90661.children") ||
+    "";
+
   return {
     "CHECK-IN DATE": (r.checkInDate && r.checkInDate.value) || "",
     "CHECK-OUT DATE": (r.checkOutDate && r.checkOutDate.value) || "",
     "LISTING'S NICKNAME": (r["listing.nickname"] && r["listing.nickname"].children) || "",
-    "PROPERTY ADDRESS": (r["listing.address.full"] && r["listing.address.full"].children) || (r["listing.address"] && r["listing.address"].children) || "",
+    "PROPERTY ADDRESS": propertyAddress,
     "TOTAL PAYOUT": guestyValue("money.hostPayout"),
     "ACCOMMODATION FARE": guestyValue("money.fareAccommodation"),
     "CLEANING FARE": guestyValue("money.fareCleaning"),
@@ -2170,6 +2414,10 @@ function openOwners(){
   Object.keys(OWNERS).sort().forEach(name=>{
     const o=OWNERS[name];
     const recurringText=recurringToText(o.recurringCharges||[]).replace(/'/g,"&#39;");
+    const monthlyRules=Array.isArray(o.monthlyRecurringCharges)?o.monthlyRecurringCharges:[];
+    const dateRules=Array.isArray(o.specificDateRecurringCharges)?o.specificDateRecurringCharges:[];
+    const rangeRules=Array.isArray(o.dateRangeRecurringCharges)?o.dateRangeRecurringCharges:[];
+    const escapedName=name.replace(/'/g,"\\'");
     html+="<div style='background:#555;padding:15px;margin:10px 0;border-radius:3px'>";
     html+="<div style='font-weight:bold;color:#fff;margin-bottom:10px'>"+name+"</div>";
     html+="<label class='modal-label'>EMAIL</label>";
@@ -2182,6 +2430,71 @@ function openOwners(){
     html+="<input type='number' step='0.01' value='"+((num(o.splitOwnerPercent)||50)) +"' onchange=\"OWNERS['"+name+"'].splitOwnerPercent=this.value\" class='modal-input'>";
     html+="<label class='modal-label'>RECURRING CHARGES (ONE PER LINE: NAME|AMOUNT)</label>";
     html+="<textarea onchange=\"OWNERS['"+name+"'].recurringCharges=recurringFromText(this.value)\" class='modal-input' style='min-height:88px;resize:vertical'>"+recurringText+"</textarea>";
+    html+="<label class='modal-label'>MONTHLY DEFAULT RECURRING</label>";
+    html+="<div style='border:1px solid #666;border-radius:8px;padding:10px;background:#4c4c4c;margin-bottom:10px'>";
+    html+="<button class='btn btn-success btn-small' onclick=\"addOwnerMonthlyRecurringRule('"+escapedName+"')\">ADD MONTHLY RULE</button>";
+    if(monthlyRules.length===0){
+      html+="<div style='margin-top:8px;color:#c3d0d6;font-size:11px'>No monthly default rules yet.</div>";
+    }else{
+      monthlyRules.forEach((rule,idx)=>{
+        const monthVal=Math.max(1,Math.min(12,parseInt(rule && rule.month,10)||1));
+        const labelVal=escapeHtmlAttr((rule && rule.label)||"Recurring");
+        const amountVal=num(rule && rule.amount);
+        html+="<div style='margin-top:8px;padding:8px;border:1px solid #666;border-radius:6px;background:#4a4a4a'>";
+        html+="<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;align-items:center'>";
+        html+="<select class='modal-input' onchange=\"updateOwnerMonthlyRecurringRule('"+escapedName+"',"+idx+",'month',this.value)\">"+buildMonthSelectOptions(monthVal)+"</select>";
+        html+="<input type='text' class='modal-input' value='"+labelVal+"' placeholder='Charge name' onchange=\"updateOwnerMonthlyRecurringRule('"+escapedName+"',"+idx+",'label',this.value)\">";
+        html+="<input type='number' step='0.01' class='modal-input' value='"+amountVal+"' placeholder='Amount' onchange=\"updateOwnerMonthlyRecurringRule('"+escapedName+"',"+idx+",'amount',this.value)\">";
+        html+="</div>";
+        html+="<div style='display:flex;justify-content:flex-end;margin-top:8px'><button class='btn btn-danger btn-small' onclick=\"deleteOwnerMonthlyRecurringRule('"+escapedName+"',"+idx+")\">DELETE</button></div>";
+        html+="</div>";
+      });
+    }
+    html+="</div>";
+    html+="<label class='modal-label'>SPECIFIC DATE RECURRING</label>";
+    html+="<div style='border:1px solid #666;border-radius:8px;padding:10px;background:#4c4c4c;margin-bottom:10px'>";
+    html+="<button class='btn btn-success btn-small' onclick=\"addOwnerSpecificDateRecurringRule('"+escapedName+"')\">ADD DATE RULE</button>";
+    if(dateRules.length===0){
+      html+="<div style='margin-top:8px;color:#c3d0d6;font-size:11px'>No specific date rules yet.</div>";
+    }else{
+      dateRules.forEach((rule,idx)=>{
+        const labelVal=escapeHtmlAttr((rule && rule.label)||"Recurring");
+        const amountVal=num(rule && rule.amount);
+        const dateValue=toDateInputValue(parseInt(rule && rule.month,10)||1,parseInt(rule && rule.day,10)||1);
+        html+="<div style='margin-top:8px;padding:8px;border:1px solid #666;border-radius:6px;background:#4a4a4a'>";
+        html+="<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;align-items:center'>";
+        html+="<input type='date' class='modal-input' value='"+dateValue+"' onchange=\"updateOwnerSpecificDateRecurringRule('"+escapedName+"',"+idx+",'date',this.value)\">";
+        html+="<input type='text' class='modal-input' value='"+labelVal+"' placeholder='Charge name' onchange=\"updateOwnerSpecificDateRecurringRule('"+escapedName+"',"+idx+",'label',this.value)\">";
+        html+="<input type='number' step='0.01' class='modal-input' value='"+amountVal+"' placeholder='Amount' onchange=\"updateOwnerSpecificDateRecurringRule('"+escapedName+"',"+idx+",'amount',this.value)\">";
+        html+="</div>";
+        html+="<div style='display:flex;justify-content:flex-end;margin-top:8px'><button class='btn btn-danger btn-small' onclick=\"deleteOwnerSpecificDateRecurringRule('"+escapedName+"',"+idx+")\">DELETE</button></div>";
+        html+="</div>";
+      });
+    }
+    html+="</div>";
+    html+="<label class='modal-label'>DATE RANGE RECURRING (EASIEST OPTION)</label>";
+    html+="<div style='border:1px solid #666;border-radius:8px;padding:10px;background:#4c4c4c;margin-bottom:10px'>";
+    html+="<button class='btn btn-success btn-small' onclick=\"addOwnerDateRangeRecurringRule('"+escapedName+"')\">ADD RANGE RULE</button>";
+    if(rangeRules.length===0){
+      html+="<div style='margin-top:8px;color:#c3d0d6;font-size:11px'>No date-range rules yet.</div>";
+    }else{
+      rangeRules.forEach((rule,idx)=>{
+        const startVal=escapeHtmlAttr((rule && rule.startDate)||"");
+        const endVal=escapeHtmlAttr((rule && rule.endDate)||"");
+        const labelVal=escapeHtmlAttr((rule && rule.label)||"Recurring");
+        const amountVal=num(rule && rule.amount);
+        html+="<div style='margin-top:8px;padding:8px;border:1px solid #666;border-radius:6px;background:#4a4a4a'>";
+        html+="<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;align-items:center'>";
+        html+="<input type='date' class='modal-input' value='"+startVal+"' onchange=\"updateOwnerDateRangeRecurringRule('"+escapedName+"',"+idx+",'startDate',this.value)\">";
+        html+="<input type='date' class='modal-input' value='"+endVal+"' onchange=\"updateOwnerDateRangeRecurringRule('"+escapedName+"',"+idx+",'endDate',this.value)\">";
+        html+="<input type='text' class='modal-input' value='"+labelVal+"' placeholder='Charge name' onchange=\"updateOwnerDateRangeRecurringRule('"+escapedName+"',"+idx+",'label',this.value)\">";
+        html+="<input type='number' step='0.01' class='modal-input' value='"+amountVal+"' placeholder='Amount' onchange=\"updateOwnerDateRangeRecurringRule('"+escapedName+"',"+idx+",'amount',this.value)\">";
+        html+="</div>";
+        html+="<div style='display:flex;justify-content:flex-end;margin-top:8px'><button class='btn btn-danger btn-small' onclick=\"deleteOwnerDateRangeRecurringRule('"+escapedName+"',"+idx+")\">DELETE</button></div>";
+        html+="</div>";
+      });
+    }
+    html+="</div>";
     html+="<label class='modal-label'>TYPE</label>";
     html+="<select onchange=\"OWNERS['"+name+"'].type=this.value\" class='modal-input'>";
     html+="<option value='draft' "+(o.type==='draft'?'selected':'')+">DRAFT</option>";
@@ -2207,10 +2520,13 @@ function addOwner(){
   const type=document.getElementById("ownerType").value;
   const splitOwnerPercent=parseFloat(document.getElementById("ownerSplitPercent").value)||50;
   const recurringCharges=recurringFromText(document.getElementById("ownerRecurring").value||"");
+  const monthlyRecurringCharges=[];
+  const specificDateRecurringCharges=[];
+  const dateRangeRecurringCharges=[];
   const guestyUrl=document.getElementById("ownerGuestyUrl").value.trim();
   const guestyAllUrl=document.getElementById("ownerGuestyAllUrl").value.trim();
   if(!name)return alert("Enter owner name");
-  OWNERS[name]={email:email,percent:comm/100,salesFeePercent:sales,type:type,splitOwnerPercent:splitOwnerPercent,guestyReportUrl:guestyUrl,guestyAllPropertiesUrl:guestyAllUrl,recurringCharges:recurringCharges};
+  OWNERS[name]={email:email,percent:comm/100,salesFeePercent:sales,type:type,splitOwnerPercent:splitOwnerPercent,guestyReportUrl:guestyUrl,guestyAllPropertiesUrl:guestyAllUrl,recurringCharges:recurringCharges,monthlyRecurringCharges:monthlyRecurringCharges,specificDateRecurringCharges:specificDateRecurringCharges,dateRangeRecurringCharges:dateRangeRecurringCharges};
   document.getElementById("ownerName").value="";
   document.getElementById("ownerEmail").value="";
   document.getElementById("ownerComm").value="";
@@ -2233,9 +2549,15 @@ function deleteOwner(name){
 function saveOwnerData(){
   if(!githubToken)return alert("GitHub token not set. Click GitHub Setup first.");
   const savedOwner=currentOwner;
+  const savedMonth=document.getElementById("monthSelect").value;
+  const savedYear=document.getElementById("yearSelect").value;
   saveToGitHub("owner settings",()=>{
+    closeAll();
     currentOwner=savedOwner;
     document.getElementById("ownerSelect").value=savedOwner;
+    document.getElementById("monthSelect").value=savedMonth;
+    document.getElementById("yearSelect").value=savedYear;
+    init();
   });
 }
 
@@ -2588,6 +2910,8 @@ function saveToGitHub(type,callback){
       .catch(e=>{
         if(retryCount<3){
           setTimeout(()=>attemptSave(retryCount+1), 2000);
+        }else{
+          alert("❌ Save failed. Please try again.");
         }
       });
   }
@@ -2949,6 +3273,10 @@ function setupDropbox(){
 }
 
 function generateStatement(silent){
+  loadOwnerDataAndProcess(silent,()=>displayStatement());
+}
+
+function loadOwnerDataAndProcess(silent,onSuccess){
   if(!currentOwner) return;
 
   const ready = fetchGuestyRowsForOwner(currentOwner)
@@ -2963,7 +3291,7 @@ function generateStatement(silent){
     guestyPreloadByOwner[currentOwner]=mapped;
     updateHeaderDates();
     processData();
-    displayStatement();
+      if(typeof onSuccess==="function") onSuccess();
   })
   .catch(err=>{
     if(!silent){
@@ -3003,7 +3331,7 @@ function processData(){
   const ownerExpTotal = expenses
 .filter(e => e.owner === currentOwner && e.property === "OWNER")
 .reduce((sum,e)=>sum+e.amount,0);
-  const recurringCharges=isDraft?[]:getRecurringChargesForOwner(currentOwner);
+  const recurringCharges=isDraft?[]:getRecurringChargesForOwner(currentOwner,{month:month,year:year});
   const recurringTotal=recurringCharges.reduce((sum,item)=>sum+num(item.amount),0);
   taxByProperty={};
   let byProp={};
@@ -3092,7 +3420,7 @@ document.getElementById("periodDate").style.display="";
 
 const t=OWNERS[currentOwner];
 const pmcPercent=getEffectivePmcPercent(t);
-const recurringCharges=getRecurringChargesForOwner(currentOwner);
+const recurringCharges=getRecurringChargesForOwner(currentOwner,{month:parseInt(document.getElementById("monthSelect").value,10),year:parseInt(document.getElementById("yearSelect").value,10)});
 const recurringTotal=(masterTotals.recurring||0);
 const nonRecurringExpenses=masterTotals.expenses-recurringTotal;
 const ownerPortal=isOwnerPortalUser();
@@ -3143,6 +3471,7 @@ if(ownerPortal){
   html+="<div class='section-title'>RESERVATIONS</div>";
   html+="<table><tr><th>RESERVATION CODE</th><th>PLATFORM</th><th>DATES</th><th>NET ACCOMMODATION</th><th>PMC</th><th>NET PAYOUT (AFTER PMC)</th></tr>";
   ownerRows.forEach(row=>{
+    if(getGrossPayoutValue(row)===0) return;
     const acc=getAccommodationValue(row,(type==="draft"));
     const pm=acc*pmcPercent;
     const net=acc-pm;
@@ -3153,6 +3482,7 @@ if(ownerPortal){
   });
   html+="</table></div>";
   document.getElementById("mainContent").innerHTML=html;
+  requestAnimationFrame(restoreScrollPosition);
   return;
 }
 
@@ -3312,8 +3642,9 @@ html+="<div class='property-title'><span class='property-icon'>🏠</span>"+getP
 html+="<tr><th>CODE</th><th>STAY</th><th>PLATFORM</th><th>GROSS PAYOUT</th><th>NET ACCOMMODATION</th><th>PMC</th><th>CLEANING</th><th>WEBSITE/VRBO FEE</th><th>AMOUNT DUE</th>"+(ownerPortal?"":"<th class='no-print'>ACTION</th>")+"</tr>";
     
 p.reservations.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"])).forEach((row,i)=>{
- 
+
 const g = getGrossPayoutValue(row);
+if(g===0) return;
 const c = getCleaningValue(row);
 let a = getAccommodationValue(row,true);
 const pm = a * pmcPercent;
@@ -3345,11 +3676,12 @@ html+="<tr><th>CODE</th><th>STAY</th><th>NET ACCOMMODATION</th><th>PMC</th><th>O
      
 p.reservations.sort((a,b)=>new Date(a["CHECK-IN DATE"])-new Date(b["CHECK-IN DATE"])).forEach(row=>{
 
+const g=getGrossPayoutValue(row);
+if(g===0) return;
 let a=getAccommodationValue(row,false);
 const pm=a*pmcPercent;
 const owner=a-pm;
 if(owner<=0) return;
-const g=getGrossPayoutValue(row);
 const checkin=row["CHECK-IN DATE"]?row["CHECK-IN DATE"].split("-").slice(1).join("/"):"";
 const checkout=row["CHECK-OUT DATE"]?row["CHECK-OUT DATE"].split("-").slice(1).join("/"):"";
 
@@ -3412,6 +3744,7 @@ html+="</div>";
 });
 document.getElementById("mainContent").innerHTML=html;
 renderInvoiceCanvases(document.getElementById("mainContent"));
+requestAnimationFrame(restoreScrollPosition);
 }
 
 async function generateSummary(){
@@ -3895,7 +4228,16 @@ saveToGitHub("manual reservation edits");
 }
 
 });
-  
+
+window.addEventListener("scroll", function(){
+  sessionStorage.setItem("scrollY", window.scrollY);
+}, {passive:true});
+
+function restoreScrollPosition(){
+  const y = parseInt(sessionStorage.getItem("scrollY"))||0;
+  if(y) window.scrollTo(0, y);
+}
+
 </script>
 </body>
 </html>
