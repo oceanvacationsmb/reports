@@ -222,6 +222,7 @@ select,input,.btn{font-size:12px}
 <option value="gri">GRI REPORT</option>
 <option value="1099">1099</option>
 </select>
+<button class="btn btn-primary" onclick="runQuickReport()">RUN REPORT</button>
 </div>
 <div id="incomeSidebarControls" class="section" style="display:none;border-top:1px solid rgba(255,255,255,.2);padding-top:12px;margin-top:10px">
 <label class="label">PROPERTY</label>
@@ -461,6 +462,7 @@ let guestyPreloadByOwner={};
 let currentReportMode="income";
 let currentView="landing";
 let currentUserSession=null;
+let report1099RangeMode="month";
 const LOGIN_DISABLED=true;
 
 function num(v){return parseFloat((v||"0").toString().replace(/[$,]/g,""))||0;}
@@ -2219,30 +2221,95 @@ function show1099(){
     return;
   }
 
-  if(!masterTotals || !masterTotals.acc){
+  if(!csvData || !csvData.length){
     alert("Generate statement first");
     return;
   }
 
   document.getElementById("reportTitle").textContent = "1099 REPORT";
 
-  let html = "<div class='summary-title'>1099 SUMMARY</div>";
- let reportProperty = currentOwner || "CURRENT OWNER";
+  const owner=OWNERS[currentOwner]||{};
+  const ownerPercent=getEffectivePmcPercent(owner)||0;
+  const isDraftOwner=((owner.type||"").toLowerCase()==="draft");
+  const selectedMonth=parseInt(document.getElementById("monthSelect").value,10)||1;
+  const selectedYear=parseInt(document.getElementById("yearSelect").value,10)||new Date().getFullYear();
+  const fullYear=(report1099RangeMode==="year");
 
-html += "<div style='margin-bottom:15px;font-size:11px;color:#666'>";
-html += "<strong>PROPERTY:</strong> "+reportProperty+"<br>";
-html += "<strong>PERIOD:</strong> "+document.getElementById("periodDate").innerText;
-html += "</div>";
+  let totalAcc=0;
+  let totalPmc=0;
+  (csvData||[]).forEach(row=>{
+    const checkIn=(row && row["CHECK-IN DATE"] ? row["CHECK-IN DATE"] : "").toString();
+    if(!checkIn) return;
+    const parts=checkIn.split("-");
+    const y=parseInt(parts[0],10);
+    const m=parseInt(parts[1],10);
+    if(!y || !m) return;
+    if(y!==selectedYear) return;
+    if(!fullYear && m!==selectedMonth) return;
+
+    const g=getGrossPayoutValue(row);
+    if(g===0) return;
+    const a=getAccommodationValue(row,isDraftOwner);
+    const pm=a*ownerPercent;
+    totalAcc+=a;
+    totalPmc+=pm;
+  });
+
+  let nonRecurringExpenses=0;
+  (expenses||[]).forEach(e=>{
+    if(!e || e.owner!==currentOwner) return;
+    const p=getExpensePeriod(e);
+    if(p.year===null || p.month===null) return;
+    if(p.year!==selectedYear) return;
+    if(!fullYear && p.month!==selectedMonth) return;
+    nonRecurringExpenses+=num(e.amount);
+  });
+
+  let recurringExpenses=0;
+  if(fullYear){
+    for(let m=1;m<=12;m++){
+      recurringExpenses+=getRecurringChargesForOwner(currentOwner,{month:m,year:selectedYear}).reduce((sum,item)=>sum+num(item.amount),0);
+    }
+  }else{
+    recurringExpenses=getRecurringChargesForOwner(currentOwner,{month:selectedMonth,year:selectedYear}).reduce((sum,item)=>sum+num(item.amount),0);
+  }
+
+  const totalExpenses=nonRecurringExpenses+recurringExpenses;
+  const netToOwner=totalAcc-totalPmc-totalExpenses;
+
+  let html = "<div class='summary-title'>1099 SUMMARY</div>";
+  const reportProperty=currentOwner||"CURRENT OWNER";
+
+  html += "<div class='action-buttons'>";
+  html += "<button class='copy-link-btn' onclick='set1099RangeMode(\"month\")' style='background:"+(fullYear?"#2d6b7f":"#0d5c4b")+"'>SELECTED MONTH</button>";
+  html += "<button class='copy-link-btn' onclick='set1099RangeMode(\"year\")' style='background:"+(fullYear?"#0d5c4b":"#2d6b7f")+"'>FULL YEAR</button>";
+  html += "</div>";
+
+  html += "<div style='margin-bottom:15px;font-size:11px;color:#666'>";
+  html += "<strong>PROPERTY:</strong> "+reportProperty+"<br>";
+  html += "<strong>PERIOD:</strong> "+(fullYear?String(selectedYear):document.getElementById("periodDate").innerText);
+  html += "</div>";
   html += "<div class='summary-grid'>";
 
-  html += "<div class='summary-card'><div class='summary-label'>NET ACCOMMODATION</div><div class='summary-value'>" + money(masterTotals.acc) + "</div></div>";
-  html += "<div class='summary-card'><div class='summary-label'>PMC</div><div class='summary-value'>" + money(masterTotals.pmc) + "</div></div>";
-  html += "<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>" + money(masterTotals.expenses) + "</div></div>";
-  html += "<div class='summary-card'<div class='summary-label' >NET TO OWNER</div><div class='summary-value'>" + money(masterTotals.owner) + "</div></div>";
+  const cards=[
+    {label:"NET ACCOMMODATION",value:money(totalAcc)},
+    {label:"PMC",value:money(totalPmc)},
+    {label:"EXPENSES",value:money(totalExpenses)},
+    {label:"NET TO OWNER",value:money(netToOwner)}
+  ];
+
+  cards.forEach(card=>{
+    html += "<div class='summary-card'><div class='summary-label'>"+card.label+"</div><div class='summary-value'>"+card.value+"</div></div>";
+  });
 
   html += "</div>";
 
   document.getElementById("mainContent").innerHTML = html;
+}
+
+function set1099RangeMode(mode){
+  report1099RangeMode=(mode==="year")?"year":"month";
+  show1099();
 }
   
 function applyLoadedData(data){
