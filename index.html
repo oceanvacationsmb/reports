@@ -46,6 +46,7 @@ select,input{width:100%;padding:9px 10px;margin:5px 0;border:1px solid #455e67;b
 .btn-warning{background:#c17b00}
 .btn-info{background:#297e9a}
 .btn-danger{background:#c43d3d}
+.home-icon-btn{width:44px;padding:8px 0;margin:0 0 12px 0;font-size:20px;line-height:1;text-transform:none;border-radius:10px}
 .main{margin-left:300px;padding:24px;width:calc(100% - 300px)}
 .page{
 background:#fff;
@@ -198,12 +199,11 @@ select,input,.btn{font-size:12px}
 </head>
 <body>
 <div class="sidebar">
-<h3>OCEAN VACATIONS INC.</h3>
+<button id="homeBtn" class="btn btn-primary home-icon-btn" onclick="goHomeReports()" aria-label="Home" title="Home">⌂</button>
 <div id="userSessionStatus" style="display:none"></div>
-<button id="ownerLoginBtn" class="btn btn-success" onclick="openLoginModal()" style="font-size:11px;display:none">OWNER LOGIN</button>
+<div id="ownerLoginBtn" style="display:none"></div>
 <button id="ownerLogoutBtn" class="btn btn-danger" onclick="logoutUser()" style="font-size:11px;display:none">LOGOUT</button>
-<button id="homeBtn" class="btn btn-primary" onclick="goHomeReports()" style="font-size:11px">HOME</button>
-<div id="tokenStatus" class="token-status token-inactive">LOADING...</div>
+<div id="tokenStatus" style="display:none"></div>
 <div class="section" id="ownerSelectSection"><label class="label">SELECT OWNER</label><select id="ownerSelect" onchange="onOwnerChange()"><option value="">-- SELECT --</option></select></div>
 <div id="appControls" style="display:none">
 <div class="section"><label class="label">MONTH</label><select id="monthSelect" onchange="onPeriodChange()"></select></div>
@@ -254,7 +254,6 @@ select,input,.btn{font-size:12px}
 </div>
 
 <div id="modalOverlay" class="modal-overlay" onclick="closeAll()"></div>
-<div id="authBadge" style="display:none;position:fixed;top:8px;right:10px;z-index:1200;font-size:10px;color:#cde2e9;background:rgba(20,39,47,0.85);border:1px solid rgba(255,255,255,0.18);border-radius:12px;padding:3px 8px;letter-spacing:.02em">LOGGED IN</div>
 
 <div id="ownerModal" class="modal" style="max-width:980px;width:96%">
 <div>
@@ -833,12 +832,6 @@ function applyAccessControls(){
   const githubSetupBtn=document.getElementById("githubSetupBtn");
   const dropboxSetupBtn=document.getElementById("dropboxSetupBtn");
   const tokenStatus=document.getElementById("tokenStatus");
-  const authBadge=document.getElementById("authBadge");
-
-  if(authBadge){
-    authBadge.style.display=(currentUserSession && currentUserSession.username)?"":"none";
-    authBadge.textContent="LOGGED IN";
-  }
 
   if(LOGIN_DISABLED){
     ownerSelect.disabled=false;
