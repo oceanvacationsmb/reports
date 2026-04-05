@@ -109,6 +109,8 @@ margin:20px 0;
 .summary-card{background:#fff;color:#000;border:1px solid #d4e1e7;border-radius:10px;padding:18px;text-align:center;}
 .summary-label{font-size:10px;color:#000;font-weight:bold;text-transform:uppercase}
 .summary-value{font-size:14px;font-weight:bold;color:#000;margin-top:6px}
+.compact-table{margin-top:10px}
+.compact-table th,.compact-table td{padding:4px 6px}
 .invoice-attachment-wrap{display:block;text-align:center;page-break-inside:avoid;break-inside:avoid;margin:8px 0}
 .invoice-attachment{display:block;max-width:100%;width:auto;height:auto;max-height:10in;margin:0 auto;page-break-inside:avoid;break-inside:avoid;object-fit:contain}
 .modal{display:none;position:fixed;z-index:1001;left:50%;top:50%;transform:translate(-50%,-50%);width:90%;max-width:560px;background:#263942;color:#fff;border-radius:12px;padding:30px;box-shadow:0 12px 28px rgba(0,0,0,0.35);max-height:90vh;overflow-y:auto}
@@ -477,6 +479,16 @@ function num(v){return parseFloat((v||"0").toString().replace(/[$,]/g,""))||0;}
 function money(v){
   const n = parseFloat(v) || 0;
   return "$" + n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function formatDateMonthDayYear(value){
+  const raw=(value||"").toString().trim();
+  const m=raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if(!m) return raw;
+  const monthNames=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const monthIndex=Math.max(1,Math.min(12,parseInt(m[2],10)))-1;
+  const day=parseInt(m[3],10)||1;
+  return monthNames[monthIndex]+"-"+day+"-"+m[1];
 }
 
 function normalizeExpenseTypes(list){
@@ -1414,15 +1426,16 @@ toDate = y + "-12-31";
       });
 
       html+="<div class='summary-grid'><div class='summary-card'><div class='summary-label'>GROSS PAYOUT</div><div class='summary-value'>"+money(totalPayout)+"</div></div></div>";
-      html+="<table><tr><th>PROPERTY ADDRESS</th><th>CODE</th><th>CHECK-IN/OUT</th><th>GROSS PAYOUT</th></tr>";
+      html+="<table class='compact-table'><tr><th>RESERVATION CODE</th><th>CHECK-IN/OUT</th><th>GROSS PAYOUT</th></tr>";
       griRows.forEach(r=>{
         const payout=getGrossPayoutValue(r);
         const code=getRowCode(r);
-        const stay=(r["CHECK-IN DATE"]||"")+" - "+(r["CHECK-OUT DATE"]||"");
-        const address=((r["PROPERTY ADDRESS"]||"")+"").trim() || "UNKNOWN ADDRESS";
-        html+="<tr><td>"+address+"</td><td>"+code+"</td><td>"+stay+"</td><td>"+money(payout)+"</td></tr>";
+        const checkIn=formatDateMonthDayYear(r["CHECK-IN DATE"]||"");
+        const checkOut=formatDateMonthDayYear(r["CHECK-OUT DATE"]||"");
+        const stay=checkIn+" - "+checkOut;
+        html+="<tr><td>"+code+"</td><td>"+stay+"</td><td>"+money(payout)+"</td></tr>";
       });
-      html+="<tr><th colspan='3'>TOTAL</th><th>"+money(totalPayout)+"</th></tr></table>";
+      html+="<tr><th colspan='2'>TOTAL</th><th>"+money(totalPayout)+"</th></tr></table>";
     }else{
       const byProperty={};
       filtered.forEach(r=>{
