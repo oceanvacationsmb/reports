@@ -402,6 +402,50 @@ function getGitHubAPI(){
   return "https://api.github.com/repos/oceanvacationsmb/reports/contents/data.json";
 }
 
+function getGitHubContentAPI(path){
+  return "https://api.github.com/repos/oceanvacationsmb/reports/contents/"+path;
+}
+
+function toBase64FromArrayBuffer(buffer){
+  const bytes=new Uint8Array(buffer);
+  const chunkSize=0x8000;
+  let binary="";
+  for(let i=0;i<bytes.length;i+=chunkSize){
+    const chunk=bytes.subarray(i,i+chunkSize);
+    binary+=String.fromCharCode.apply(null,chunk);
+  }
+  return btoa(binary);
+}
+
+async function uploadPdfBlobToGitHub(pdfBlob,fileName){
+  if(!githubToken) throw new Error("GitHub token is required");
+  if(!pdfBlob) throw new Error("No PDF data to upload");
+  const safeName=(fileName||("statement-"+Date.now()+".pdf")).replace(/[^a-zA-Z0-9._-]+/g,"-");
+  const repoPath="shared-pdfs/"+safeName;
+  const apiUrl=getGitHubContentAPI(repoPath);
+
+  const arrayBuffer=await pdfBlob.arrayBuffer();
+  const content=toBase64FromArrayBuffer(arrayBuffer);
+
+  const putRes=await fetch(apiUrl,{
+    method:"PUT",
+    headers:{
+      "Authorization":"token "+githubToken,
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({
+      message:"Add statement PDF "+safeName,
+      content:content
+    })
+  });
+
+  if(!putRes.ok){
+    throw new Error("Upload failed: "+putRes.status);
+  }
+
+  return "https://raw.githubusercontent.com/oceanvacationsmb/reports/main/"+repoPath;
+}
+
 let gitHubData={},OWNERS={},USERS={},vendors=[],expenses=[],csvData=[],propertySettings={},currentOwner="",masterTotals={},propertyTotals={},taxByProperty={},githubToken="",expenseTypes=[];
 let sessionExpenses=[];
 let editingExpenseId=null;
@@ -409,6 +453,7 @@ let editingRecurringExpenseIndex=null;
 let editingExpenseTypeIndex=null;
 let savedReports=[];
 let pendingEmailSnapshotId="";
+let isGeneratingEmailLink=false;
 const municipalities=["SC","MB","NMB","SSB","HC","GTC"];
 const DEFAULT_EXPENSE_TYPES=["MAINTENANCE","REPAIR","PURCHASE","SUPPLIES","SERVICE","POOL CLEANING","PEST CONTROL","CREDIT","ADJUSTMENT","OWNERS STAY FEE","CLEANING","SETUP"];
 const defaultGuestyUrl="https://report.guesty.com/apps/reservations?apiKey=d6ab951850fef54399e2206f36f4e79fb1b425a8e5c891076036b11f50da8870613a226021487307c8c5f51eae997a08dd7e112d013ef683728ad1d9220ee0b7";
@@ -1606,7 +1651,11 @@ function setPdfLoadingState(isVisible,message){
   overlay.style.display=isVisible?"flex":"none";
 }
 
-async function exportElementToHighQualityPdf(sourceElement,filename){
+async function exportElementToHighQualityPdf(sourceElement,filename,options){
+  const opts=options||{};
+  const returnBlob=!!opts.returnBlob;
+  const qualityPreset=(opts.qualityPreset||"high").toLowerCase();
+  const useMedium=(qualityPreset==="medium");
   if(!sourceElement) throw new Error("Missing element for PDF export");
   const hasHtml2Canvas=typeof window.html2canvas==="function";
   const hasHtml2Pdf=typeof window.html2pdf==="function";
@@ -1622,12 +1671,13 @@ async function exportElementToHighQualityPdf(sourceElement,filename){
     // Keep download functional even if direct globals are not exposed.
     try{
       setPdfLoadingState(true,"Rendering document...");
-      return await window.html2pdf().set({
+      const fallbackScale=useMedium?1.9:2.2;
+      const worker=window.html2pdf().set({
         margin:0.3,
         filename:filename,
         image:{type:"jpeg",quality:0.96},
         html2canvas:{
-          scale:2.2,
+          scale:fallbackScale,
           useCORS:true,
           backgroundColor:"#ffffff",
           scrollX:0,
@@ -1636,7 +1686,12 @@ async function exportElementToHighQualityPdf(sourceElement,filename){
         },
         pagebreak:{mode:["css","legacy"]},
         jsPDF:{unit:"in",format:"letter",orientation:"portrait"}
-      }).from(sourceElement).save();
+      }).from(sourceElement).toPdf();
+      if(returnBlob){
+        return await worker.outputPdf("blob");
+      }
+      await worker.save();
+      return;
     }finally{
       setPdfLoadingState(false,"");
     }
@@ -1697,7 +1752,9 @@ async function exportElementToHighQualityPdf(sourceElement,filename){
     await waitForImages(clone);
     const totalHeight=Math.max(1,Math.ceil(clone.scrollHeight));
     const roughPageCount=Math.max(1,Math.ceil(totalHeight/pageSliceHeightPx));
-    const captureScale=roughPageCount>14 ? 2.1 : Math.max(2.2,Math.min(2.7,(window.devicePixelRatio||1)*1.8));
+    const captureScale=useMedium
+      ? (roughPageCount>14 ? 1.8 : 2)
+      : (roughPageCount>14 ? 2.1 : Math.max(2.2,Math.min(2.7,(window.devicePixelRatio||1)*1.8)));
     const pdf=new JsPdfCtor({unit:"in",format:"letter",orientation:"portrait",compress:true,precision:14});
 
     const protectedBlocks=[];
@@ -1776,8 +1833,14 @@ async function exportElementToHighQualityPdf(sourceElement,filename){
       canvas.height=0;
     }
 
+    if(returnBlob){
+      setPdfLoadingState(true,"Finalizing PDF...");
+      return pdf.output("blob");
+    }
+
     setPdfLoadingState(true,"Finalizing download...");
     pdf.save(filename);
+    return;
   }finally{
     stage.remove();
     setPdfLoadingState(false,"");
@@ -1841,7 +1904,7 @@ function saveCurrentReportSnapshot(){
 }
 
 function formatEmailTemplate(reportTitle,periodLabel,payoutDate,link){
-  return "Hi,\n\nHere is your "+reportTitle+" for "+periodLabel+".\nThe payout amount will be processed on "+payoutDate+".\n\nReport link:\n"+link+"\n\nThank you,\nOcean Vacations";
+  return "Hi,\nHere is your "+reportTitle+" for "+periodLabel+". The transfer will be processed on "+payoutDate+".\n\nStatement link:\n"+(link||"<>")+"\n\nThank you, Ocean Vacations";
 }
 
 function openEmailClient(reportId){
@@ -1865,30 +1928,87 @@ function openEmailClient(reportId){
 
   document.getElementById("emailTo").value=ownerEmail||"";
   document.getElementById("emailSubject").value="Ocean Vacations - "+reportTitle+" - "+periodLabel;
-  document.getElementById("emailLink").value=snapshot ? buildSavedReportLink(snapshot.id) : "";
-  document.getElementById("emailStatus").textContent=snapshot?"Link ready. You can edit and send.":"Click GENERATE LINK to create a shareable report URL.";
+  document.getElementById("emailLink").value="";
+  document.getElementById("emailStatus").textContent="Generating PDF link...";
 
   const payoutDate=getPayoutProcessingDateLabel();
-  const prefilledLink=document.getElementById("emailLink").value || "[link will be generated]";
+  const prefilledLink=document.getElementById("emailLink").value || "<>";
   document.getElementById("emailMessage").value=formatEmailTemplate(reportTitle,periodLabel,payoutDate,prefilledLink);
 
   pendingEmailSnapshotId=snapshot ? snapshot.id : "";
   openModal("emailModal");
+  setTimeout(()=>generateEmailReportLink(),50);
 }
 
 function generateEmailReportLink(){
-  document.getElementById("emailStatus").textContent="Generating report link...";
-  createReportSnapshot(snapshot=>{
-    const link=buildSavedReportLink(snapshot.id);
-    pendingEmailSnapshotId=snapshot.id;
-    document.getElementById("emailLink").value=link;
+  if(isGeneratingEmailLink) return;
+  isGeneratingEmailLink=true;
+  document.getElementById("emailStatus").textContent="Generating PDF and uploading link...";
 
-    const reportTitle=snapshot.reportTitle||getCurrentReportTitle();
-    const periodLabel=snapshot.period||getCurrentPeriodLabel();
-    const payoutDate=getPayoutProcessingDateLabel();
-    document.getElementById("emailMessage").value=formatEmailTemplate(reportTitle,periodLabel,payoutDate,link);
-    document.getElementById("emailStatus").textContent="Link created and message preloaded.";
-  });
+  const liveContent=document.getElementById("content");
+  const liveMain=document.getElementById("mainContent");
+  if(!liveContent||!liveMain){
+    alert("Nothing to export");
+    return;
+  }
+
+  const snapshot=(pendingEmailSnapshotId && (savedReports||[]).find(r=>r.id===pendingEmailSnapshotId)) || null;
+  const reportTitle=(snapshot && snapshot.reportTitle) ? snapshot.reportTitle : "Statement";
+  const periodLabel=(snapshot && snapshot.period) ? snapshot.period : getCurrentPeriodLabel();
+  const ownerName=(snapshot && snapshot.owner) ? snapshot.owner : (currentOwner||"owner");
+  const payoutDate=getPayoutProcessingDateLabel();
+
+  const invoiceHeaderEl=document.getElementById("invoiceHeader");
+  const periodDateEl=document.getElementById("periodDate");
+  const statementDateEl=document.getElementById("statementDate");
+  const prevInvoiceHeaderDisplay=invoiceHeaderEl ? invoiceHeaderEl.style.display : "";
+  const prevPeriodText=periodDateEl ? periodDateEl.textContent : "";
+  const prevStatementText=statementDateEl ? statementDateEl.textContent : "";
+
+  if(invoiceHeaderEl) invoiceHeaderEl.style.display="";
+  if(snapshot && periodDateEl) periodDateEl.textContent=snapshot.period||"";
+  if(snapshot && statementDateEl) statementDateEl.textContent="";
+
+  renderInvoiceCanvases(liveMain)
+    .then(()=>waitForImages(liveMain))
+    .then(()=>{
+      const exportContent=liveContent.cloneNode(true);
+      exportContent.querySelectorAll(".action-buttons,.no-print,.btn-danger,.no-export").forEach(el=>el.remove());
+      exportContent.style.cssText="background:#fff;box-shadow:none;border:none;border-radius:0;padding:18px";
+
+      const exportMain=exportContent.querySelector("#mainContent");
+      replaceCloneCanvasesWithImages(liveMain,exportMain||exportContent);
+      return waitForImages(exportContent).then(()=>exportContent);
+    })
+    .then(async exportContent=>{
+      const host=document.createElement("div");
+      host.style.cssText="position:fixed;top:0;left:-9999px;width:1120px;background:#fff";
+      host.appendChild(exportContent);
+      document.body.appendChild(host);
+
+      try{
+        const fileName=slugifyFilePart(ownerName)+"-"+slugifyFilePart(periodLabel||"statement")+"-"+Date.now()+".pdf";
+        const pdfBlob=await exportElementToHighQualityPdf(exportContent,fileName,{returnBlob:true,qualityPreset:"medium"});
+        const link=await uploadPdfBlobToGitHub(pdfBlob,fileName);
+
+        document.getElementById("emailLink").value=link;
+        document.getElementById("emailMessage").value=formatEmailTemplate(reportTitle,periodLabel,payoutDate,link);
+        document.getElementById("emailStatus").textContent="PDF link created and message preloaded.";
+      }finally{
+        host.remove();
+      }
+    })
+    .catch((e)=>{
+      console.error("generateEmailReportLink failed:",e);
+      document.getElementById("emailStatus").textContent="Could not generate PDF link.";
+      alert("Could not generate PDF link: "+(e&&e.message?e.message:String(e)));
+    })
+    .finally(()=>{
+      isGeneratingEmailLink=false;
+      if(periodDateEl) periodDateEl.textContent=prevPeriodText||"";
+      if(statementDateEl) statementDateEl.textContent=prevStatementText||"";
+      if(invoiceHeaderEl) invoiceHeaderEl.style.display=prevInvoiceHeaderDisplay;
+    });
 }
 
 function copyEmailLink(){
