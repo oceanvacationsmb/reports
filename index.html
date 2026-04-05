@@ -3652,7 +3652,11 @@ if(t.type==="draft"){
         const tax=getRowTaxTotal(row);
         totalTax+=tax;
         if(tax>0){
-          if(!taxByProperty[prop])taxByProperty[prop]={gross:g,tax:tax,netReportable:0};
+          if(!taxByProperty[prop])taxByProperty[prop]={gross:0,tax:0,reportableAmount:0,netReportable:0};
+          taxByProperty[prop].gross+=g;
+          taxByProperty[prop].tax+=tax;
+          // Amount to report should reflect only taxed reservations for the period.
+          taxByProperty[prop].reportableAmount+=Math.max(0,g-tax);
         }
       }
     });
@@ -4111,7 +4115,8 @@ let hasTaxRows=false;
 Object.keys(propertyTotals).sort().forEach(prop=>{
 const p=propertyTotals[prop]||{};
 const taxTotal=num(p.tax);
-const amountToReport=num(p.gross)-taxTotal;
+const taxAgg=taxByProperty[prop]||{};
+const amountToReport=num(taxAgg.reportableAmount);
 if(taxTotal<=0) return;
 
 hasTaxRows=true;
@@ -4187,11 +4192,12 @@ async function generateAllOwnersSummary(){
         const taxTotal=num(p.tax);
         if(taxTotal<=0) return;
         ownerTaxRows++;
+        const taxAgg=taxByProperty[prop]||{};
         rows.push({
           owner:name,
           property:getPropertyNameFromBucket(p,prop),
           reportTo:getMunicipalityLabel(prop),
-          amountToReport:num(p.gross)-taxTotal,
+          amountToReport:num(taxAgg.reportableAmount),
           totalTax:taxTotal
         });
       });
