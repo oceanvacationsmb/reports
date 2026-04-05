@@ -46,7 +46,8 @@ select,input{width:100%;padding:9px 10px;margin:5px 0;border:1px solid #455e67;b
 .btn-warning{background:#c17b00}
 .btn-info{background:#297e9a}
 .btn-danger{background:#c43d3d}
-.home-icon-btn{width:44px;padding:8px 0;margin:0 0 12px 0;font-size:20px;line-height:1;text-transform:none;border-radius:10px}
+.sidebar-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.home-icon-btn{width:44px;padding:8px 0;margin:0;font-size:20px;line-height:1;text-transform:none;border-radius:10px;flex:0 0 auto}
 .main{margin-left:300px;padding:24px;width:calc(100% - 300px)}
 .page{
 background:#fff;
@@ -199,11 +200,13 @@ select,input,.btn{font-size:12px}
 </head>
 <body>
 <div class="sidebar">
+<div class="sidebar-top">
 <button id="homeBtn" class="btn btn-primary home-icon-btn" onclick="goHomeReports()" aria-label="Home" title="Home">⌂</button>
+<div id="tokenStatus" class="token-status token-inactive">LOADING...</div>
+</div>
 <div id="userSessionStatus" style="display:none"></div>
 <div id="ownerLoginBtn" style="display:none"></div>
 <button id="ownerLogoutBtn" class="btn btn-danger" onclick="logoutUser()" style="font-size:11px;display:none">LOGOUT</button>
-<div id="tokenStatus" style="display:none"></div>
 <div class="section" id="ownerSelectSection"><label class="label">SELECT OWNER</label><select id="ownerSelect" onchange="onOwnerChange()"><option value="">-- SELECT --</option></select></div>
 <div id="appControls" style="display:none">
 <div class="section"><label class="label">MONTH</label><select id="monthSelect" onchange="onPeriodChange()"></select></div>
@@ -855,7 +858,7 @@ function applyAccessControls(){
     userSettingsBtn.style.display="";
     githubSetupBtn.style.display="";
     dropboxSetupBtn.style.display="";
-    tokenStatus.style.display="none";
+    tokenStatus.style.display="";
     return;
   }
 
@@ -881,7 +884,7 @@ function applyAccessControls(){
     userSettingsBtn.style.display="none";
     githubSetupBtn.style.display="";
     dropboxSetupBtn.style.display="none";
-    tokenStatus.style.display="none";
+    tokenStatus.style.display="";
     return;
   }
 
@@ -905,7 +908,7 @@ function applyAccessControls(){
     githubSetupBtn.style.display="none";
     dropboxSetupBtn.style.display="none";
     settingsHeader.style.display="none";
-    tokenStatus.style.display="none";
+    tokenStatus.style.display="";
 
     if(portalType==="draft"){
       generateStatementBtn.style.display="none";
@@ -946,7 +949,7 @@ function applyAccessControls(){
     userSettingsBtn.style.display="none";
     githubSetupBtn.style.display="none";
     dropboxSetupBtn.style.display="none";
-    tokenStatus.style.display="none";
+    tokenStatus.style.display="";
     emailClientBtn.style.display="none";
     savedReportsBtn.style.display="none";
     reportsHeader.style.display="none";
@@ -974,7 +977,7 @@ function applyAccessControls(){
   userSettingsBtn.style.display="";
   githubSetupBtn.style.display="";
   dropboxSetupBtn.style.display="";
-  tokenStatus.style.display="none";
+  tokenStatus.style.display="";
 }
 
 function recurringToText(list){
