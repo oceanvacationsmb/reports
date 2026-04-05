@@ -1333,7 +1333,7 @@ toDate = y + "-12-31";
     let html="";
     html+="<div class='property-section'>";
     html+="<div class='invoice-header'><div class='company-info'><div class='company-name'>OCEAN VACATIONS INC.</div><div>www.oceanvacationsmb.com</div><div>oceanvacationsmb@gmail.com</div><div>843-222-6516</div></div><div class='right-header'><div class='statement-date'><strong>REPORT DATE: "+new Date().toLocaleDateString()+"</strong></div><div class='period-date'><strong>"+periodText+"</strong></div></div></div>";
-    html+="<div style='border-top:2px solid #19343f;margin:8px 0 14px 0'></div>";
+    html+="<div style='margin-bottom:14px'></div>";
     if(type==="gri"){
       if(selectedProperty!=="all"){
         html+="<div style='text-align:center;font-size:14px;font-weight:bold;margin-bottom:20px'>"+selectedPropertyAddress+"</div>";
