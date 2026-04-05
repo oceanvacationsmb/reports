@@ -109,8 +109,8 @@ margin:20px 0;
 .summary-card{background:#fff;color:#000;border:1px solid #d4e1e7;border-radius:10px;padding:18px;text-align:center;}
 .summary-label{font-size:10px;color:#000;font-weight:bold;text-transform:uppercase}
 .summary-value{font-size:14px;font-weight:bold;color:#000;margin-top:6px}
-.compact-table{margin-top:10px}
-.compact-table th,.compact-table td{padding:4px 6px}
+.compact-table{width:auto;display:table;table-layout:auto;margin:10px auto 0 auto;font-size:8.5px}
+.compact-table th,.compact-table td{padding:3px 6px;white-space:nowrap}
 .invoice-attachment-wrap{display:block;text-align:center;page-break-inside:avoid;break-inside:avoid;margin:8px 0}
 .invoice-attachment{display:block;max-width:100%;width:auto;height:auto;max-height:10in;margin:0 auto;page-break-inside:avoid;break-inside:avoid;object-fit:contain}
 .modal{display:none;position:fixed;z-index:1001;left:50%;top:50%;transform:translate(-50%,-50%);width:90%;max-width:560px;background:#263942;color:#fff;border-radius:12px;padding:30px;box-shadow:0 12px 28px rgba(0,0,0,0.35);max-height:90vh;overflow-y:auto}
@@ -485,10 +485,18 @@ function formatDateMonthDayYear(value){
   const raw=(value||"").toString().trim();
   const m=raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
   if(!m) return raw;
-  const monthNames=["January","February","March","April","May","June","July","August","September","October","November","December"];
-  const monthIndex=Math.max(1,Math.min(12,parseInt(m[2],10)))-1;
-  const day=parseInt(m[3],10)||1;
-  return monthNames[monthIndex]+"-"+day+"-"+m[1];
+  const month=String(Math.max(1,Math.min(12,parseInt(m[2],10)))).padStart(2,"0");
+  const day=String(Math.max(1,Math.min(31,parseInt(m[3],10)))).padStart(2,"0");
+  return month+"-"+day+"-"+m[1];
+}
+
+function getIsoDateSortKey(value){
+  const raw=(value||"").toString().trim();
+  const m=raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if(!m) return Number.MAX_SAFE_INTEGER;
+  const month=String(Math.max(1,Math.min(12,parseInt(m[2],10)))).padStart(2,"0");
+  const day=String(Math.max(1,Math.min(31,parseInt(m[3],10)))).padStart(2,"0");
+  return parseInt(m[1]+month+day,10);
 }
 
 function normalizeExpenseTypes(list){
@@ -1423,6 +1431,12 @@ toDate = y + "-12-31";
         const payout=getGrossPayoutValue(r);
         totalPayout+=payout;
         griRows.push(r);
+      });
+
+      griRows.sort((a,b)=>{
+        const diff=getIsoDateSortKey(a["CHECK-IN DATE"])-getIsoDateSortKey(b["CHECK-IN DATE"]);
+        if(diff!==0) return diff;
+        return getRowCode(a).localeCompare(getRowCode(b));
       });
 
       html+="<div class='summary-grid'><div class='summary-card'><div class='summary-label'>GROSS PAYOUT</div><div class='summary-value'>"+money(totalPayout)+"</div></div></div>";
