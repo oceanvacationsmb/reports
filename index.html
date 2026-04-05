@@ -1773,12 +1773,14 @@ async function downloadLoadedSavedReportPdf(reportId){
   replaceCloneCanvasesWithImages(liveMain,exportMain||exportContent);
   await waitForImages(exportContent);
 
+  // White overlay on top hides the host from the user; host sits at top:0,left:0
+  // so html2canvas captures it within the viewport (avoids blank-page bug with far-offscreen elements)
   const overlay=document.createElement("div");
-  overlay.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:9998;pointer-events:none";
+  overlay.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:99999;pointer-events:none";
   document.body.appendChild(overlay);
 
   const host=document.createElement("div");
-  host.style.cssText="position:fixed;top:0;left:0;width:1200px;background:#fff;z-index:9999;pointer-events:none";
+  host.style.cssText="position:fixed;top:0;left:0;width:1200px;background:#fff;z-index:1;pointer-events:none";
   host.appendChild(exportContent);
   document.body.appendChild(host);
 
@@ -1795,17 +1797,19 @@ async function downloadLoadedSavedReportPdf(reportId){
     margin:0.3,
     filename:filename,
     image:{type:"jpeg",quality:1},
-    html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0,windowWidth:1200},
+    html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0},
     pagebreak:{mode:["css","legacy"]},
     jsPDF:{unit:"in",format:"letter",orientation:"portrait"}
   };
+
+  console.log("[PDF] exportContent dimensions:",exportContent.scrollWidth,"x",exportContent.scrollHeight);
 
   html2pdf().set(opt).from(exportContent).save().then(()=>{
     cleanup();
   }).catch((e)=>{
     cleanup();
     console.error("downloadLoadedSavedReportPdf failed:",e);
-    alert("Could not generate PDF");
+    alert("Could not generate PDF: "+(e&&e.message?e.message:String(e)));
   });
 }
 
@@ -4028,12 +4032,14 @@ async function downloadPDF(){
   replaceCloneCanvasesWithImages(liveMain,exportMain||exportContent);
   await waitForImages(exportContent);
 
+  // White overlay on top hides the host from the user; host sits at top:0,left:0
+  // so html2canvas captures it within the viewport (avoids blank-page bug with far-offscreen elements)
   const overlay=document.createElement("div");
-  overlay.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:9998;pointer-events:none";
+  overlay.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:99999;pointer-events:none";
   document.body.appendChild(overlay);
 
   const host=document.createElement("div");
-  host.style.cssText="position:fixed;top:0;left:0;width:1200px;background:#fff;z-index:9999;pointer-events:none";
+  host.style.cssText="position:fixed;top:0;left:0;width:1200px;background:#fff;z-index:1;pointer-events:none";
   host.appendChild(exportContent);
   document.body.appendChild(host);
 
@@ -4047,17 +4053,19 @@ async function downloadPDF(){
     margin:0.3,
     filename:currentOwner+"-statement.pdf",
     image:{type:"jpeg",quality:1},
-    html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0,windowWidth:1200},
+    html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0},
     pagebreak:{mode:["css","legacy"]},
     jsPDF:{unit:"in",format:"letter",orientation:"portrait"}
   };
+
+  console.log("[PDF] exportContent dimensions:",exportContent.scrollWidth,"x",exportContent.scrollHeight);
 
   html2pdf().set(opt).from(exportContent).save().then(()=>{
     cleanup();
   }).catch((e)=>{
     cleanup();
     console.error("downloadPDF failed:",e);
-    alert("Could not generate PDF");
+    alert("Could not generate PDF: "+(e&&e.message?e.message:String(e)));
   });
 
 }
