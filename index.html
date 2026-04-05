@@ -1748,6 +1748,16 @@ async function downloadLoadedSavedReportPdf(reportId){
     return;
   }
 
+  // Show the invoice header with the saved report's period so the PDF matches the live statement layout
+  const invoiceHeaderEl=document.getElementById("invoiceHeader");
+  const periodDateEl=document.getElementById("periodDate");
+  const statementDateEl=document.getElementById("statementDate");
+  const prevPeriodText=periodDateEl ? periodDateEl.textContent : "";
+  const prevStatementText=statementDateEl ? statementDateEl.textContent : "";
+  if(invoiceHeaderEl) invoiceHeaderEl.style.display="";
+  if(periodDateEl) periodDateEl.textContent=report.period||"";
+  if(statementDateEl) statementDateEl.textContent="";
+
   await renderInvoiceCanvases(liveMain);
   await waitForImages(liveMain);
 
@@ -1763,29 +1773,38 @@ async function downloadLoadedSavedReportPdf(reportId){
   replaceCloneCanvasesWithImages(liveMain,exportMain||exportContent);
   await waitForImages(exportContent);
 
+  const overlay=document.createElement("div");
+  overlay.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:9998;pointer-events:none";
+  document.body.appendChild(overlay);
+
   const host=document.createElement("div");
-  host.style.position="fixed";
-  host.style.left="-100000px";
-  host.style.top="0";
-  host.style.width="1200px";
-  host.style.background="#fff";
+  host.style.cssText="position:fixed;top:0;left:0;width:1200px;background:#fff;z-index:9999;pointer-events:none";
   host.appendChild(exportContent);
   document.body.appendChild(host);
+
+  const cleanup=()=>{
+    overlay.remove();
+    host.remove();
+    if(invoiceHeaderEl) invoiceHeaderEl.style.display="none";
+    if(periodDateEl) periodDateEl.textContent=prevPeriodText;
+    if(statementDateEl) statementDateEl.textContent=prevStatementText;
+  };
 
   const filename=slugifyFilePart(report.owner||"owner")+"-"+slugifyFilePart(report.period||"saved-report")+".pdf";
   const opt={
     margin:0.3,
     filename:filename,
     image:{type:"jpeg",quality:1},
-    html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0},
+    html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0,windowWidth:1200},
     pagebreak:{mode:["css","legacy"]},
     jsPDF:{unit:"in",format:"letter",orientation:"portrait"}
   };
 
   html2pdf().set(opt).from(exportContent).save().then(()=>{
-    host.remove();
-  }).catch(()=>{
-    host.remove();
+    cleanup();
+  }).catch((e)=>{
+    cleanup();
+    console.error("downloadLoadedSavedReportPdf failed:",e);
     alert("Could not generate PDF");
   });
 }
@@ -4009,30 +4028,35 @@ async function downloadPDF(){
   replaceCloneCanvasesWithImages(liveMain,exportMain||exportContent);
   await waitForImages(exportContent);
 
+  const overlay=document.createElement("div");
+  overlay.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:9998;pointer-events:none";
+  document.body.appendChild(overlay);
+
   const host=document.createElement("div");
-  host.style.position="fixed";
-  host.style.left="-100000px";
-  host.style.top="0";
-  host.style.width="1200px";
-  host.style.background="#fff";
+  host.style.cssText="position:fixed;top:0;left:0;width:1200px;background:#fff;z-index:9999;pointer-events:none";
   host.appendChild(exportContent);
   document.body.appendChild(host);
+
+  const cleanup=()=>{
+    overlay.remove();
+    host.remove();
+    document.getElementById("invoiceHeader").style.display="none";
+  };
 
   const opt={
     margin:0.3,
     filename:currentOwner+"-statement.pdf",
     image:{type:"jpeg",quality:1},
-    html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0},
+    html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0,windowWidth:1200},
     pagebreak:{mode:["css","legacy"]},
     jsPDF:{unit:"in",format:"letter",orientation:"portrait"}
   };
 
   html2pdf().set(opt).from(exportContent).save().then(()=>{
-    host.remove();
-    document.getElementById("invoiceHeader").style.display="none";
-  }).catch(()=>{
-    host.remove();
-    document.getElementById("invoiceHeader").style.display="none";
+    cleanup();
+  }).catch((e)=>{
+    cleanup();
+    console.error("downloadPDF failed:",e);
     alert("Could not generate PDF");
   });
 
