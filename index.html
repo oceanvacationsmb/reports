@@ -202,6 +202,7 @@ select,input,.btn{font-size:12px}
 <div id="userSessionStatus" style="display:none"></div>
 <button id="ownerLoginBtn" class="btn btn-success" onclick="openLoginModal()" style="font-size:11px;display:none">OWNER LOGIN</button>
 <button id="ownerLogoutBtn" class="btn btn-danger" onclick="logoutUser()" style="font-size:11px;display:none">LOGOUT</button>
+<button id="homeBtn" class="btn btn-primary" onclick="goHomeReports()" style="font-size:11px">HOME</button>
 <div id="tokenStatus" class="token-status token-inactive">LOADING...</div>
 <div class="section" id="ownerSelectSection"><label class="label">SELECT OWNER</label><select id="ownerSelect" onchange="onOwnerChange()"><option value="">-- SELECT --</option></select></div>
 <div id="appControls" style="display:none">
@@ -3544,6 +3545,10 @@ function setupDropbox(){
 function openAccessLink(url){
   if(!url) return;
   window.open(url,"_blank","noopener,noreferrer");
+}
+
+function goHomeReports(){
+  window.location.href="https://oceanvacationsmb.github.io/reports/";
 }
 
 function generateStatement(silent){
