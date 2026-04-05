@@ -3141,6 +3141,46 @@ function updateVendorDropdown(){
   });
 }
 
+function getSelectedStatementPeriod(){
+  const month=parseInt(document.getElementById("monthSelect").value,10)||1;
+  const year=parseInt(document.getElementById("yearSelect").value,10)||new Date().getFullYear();
+  return {month,year};
+}
+
+function getExpensePeriod(expense){
+  const explicitMonth=parseInt(expense && expense.month,10);
+  const explicitYear=parseInt(expense && expense.year,10);
+  if(explicitMonth>=1 && explicitMonth<=12 && explicitYear>=2000){
+    return {month:explicitMonth,year:explicitYear};
+  }
+
+  const createdAtTs=(expense && expense.createdAt) ? Date.parse(expense.createdAt) : NaN;
+  let fallbackTs=Number.isFinite(createdAtTs) ? createdAtTs : NaN;
+  if(!Number.isFinite(fallbackTs)){
+    const idNum=parseInt(expense && expense.id,10);
+    if(Number.isFinite(idNum) && idNum>100000000000){
+      fallbackTs=idNum;
+    }
+  }
+
+  if(Number.isFinite(fallbackTs)){
+    const d=new Date(fallbackTs);
+    return {month:d.getMonth()+1,year:d.getFullYear()};
+  }
+
+  return {month:null,year:null};
+}
+
+function getExpensesForPeriod(owner,property,month,year){
+  return (expenses||[]).filter(e=>{
+    if(!e || e.owner!==owner) return false;
+    if(property && e.property!==property) return false;
+    const period=getExpensePeriod(e);
+    if(period.month===null || period.year===null) return false;
+    return period.month===month && period.year===year;
+  });
+}
+
 function getExpensePropertyOptions(rows){
   const optionMap={};
 
@@ -3231,6 +3271,8 @@ propertyValue = "OWNER";
   if(!currentOwner||!prop||!vendor||!amount)return alert("Fill all fields");
 
   const notes=document.getElementById("expenseNotes").value;
+  const period=getSelectedStatementPeriod();
+  const createdAtIso=new Date().toISOString();
 
   if(editingExpenseId!==null){
     const idx=(expenses||[]).findIndex(e=>e.id===editingExpenseId);
@@ -3246,7 +3288,10 @@ propertyValue = "OWNER";
         vendor:vendor,
         amount:amount,
         notes:notes,
-        invoice:invoiceValue
+        invoice:invoiceValue,
+        month:period.month,
+        year:period.year,
+        createdAt:existing.createdAt||createdAtIso
       };
       editingExpenseId=null;
       document.getElementById("addExpenseBtn").textContent="ADD EXPENSE";
@@ -3285,7 +3330,10 @@ if(file){
       vendor:vendor,
       amount:amount,
       notes:notes,
-      invoice:invoiceData
+      invoice:invoiceData,
+      month:period.month,
+      year:period.year,
+      createdAt:createdAtIso
     });
     const btn=document.getElementById("addExpenseBtn");
 btn.textContent="✓ EXPENSE RECORDED";
@@ -3309,7 +3357,10 @@ expenses.push({
   vendor:vendor,
   amount:amount,
   notes:notes,
-  invoice:null
+  invoice:null,
+  month:period.month,
+  year:period.year,
+  createdAt:createdAtIso
 });
   const btn=document.getElementById("addExpenseBtn");
 btn.textContent="✓ EXPENSE RECORDED";
@@ -3542,9 +3593,8 @@ function processData(){
   const isDraft=((t.type||"").toLowerCase()==="draft");
   propertyTotals={};
   masterTotals={gross:0,acc:0,clean:0,pmc:0,expenses:0,draft:0,owner:0,websiteFee:0,totalTaxCollected:0,recurring:0};
-  const ownerExpTotal = expenses
-.filter(e => e.owner === currentOwner && e.property === "OWNER")
-.reduce((sum,e)=>sum+e.amount,0);
+  const ownerExpTotal = getExpensesForPeriod(currentOwner,"OWNER",month,year)
+    .reduce((sum,e)=>sum+num(e.amount),0);
   const recurringCharges=isDraft?[]:getRecurringChargesForOwner(currentOwner,{month:month,year:year});
   const recurringTotal=recurringCharges.reduce((sum,item)=>sum+num(item.amount),0);
   taxByProperty={};
@@ -3597,9 +3647,8 @@ if(t.type==="draft"){
         }
       }
     });
-    const exp=expenses
-.filter(e=>e.owner===currentOwner && e.property===prop)
-.reduce((sum,e)=>sum+e.amount,0);
+    const exp=getExpensesForPeriod(currentOwner,prop,month,year)
+      .reduce((sum,e)=>sum+num(e.amount),0);
 
 
 
@@ -3635,7 +3684,8 @@ document.getElementById("periodDate").style.display="";
 
 const t=OWNERS[currentOwner];
 const pmcPercent=getEffectivePmcPercent(t);
-const recurringCharges=getRecurringChargesForOwner(currentOwner,{month:parseInt(document.getElementById("monthSelect").value,10),year:parseInt(document.getElementById("yearSelect").value,10)});
+const selectedPeriod=getSelectedStatementPeriod();
+const recurringCharges=getRecurringChargesForOwner(currentOwner,{month:selectedPeriod.month,year:selectedPeriod.year});
 const recurringTotal=(masterTotals.recurring||0);
 const nonRecurringExpenses=masterTotals.expenses-recurringTotal;
 const ownerPortal=isOwnerPortalUser();
@@ -3737,9 +3787,7 @@ html+="</table>";
 html+="</div>";
 }
 
-const ownerExpenses = expenses.filter(e =>
-e.owner === currentOwner && e.property === "OWNER"
-);
+const ownerExpenses=getExpensesForPeriod(currentOwner,"OWNER",selectedPeriod.month,selectedPeriod.year);
 
 if(ownerExpenses.length>0 && !ownerPortal){
 
@@ -3810,7 +3858,7 @@ html+="</div>";
     const r = type==="draft"
   ? ((p.pmc||0) + (p.clean||0) + (p.websiteFee||0) + (p.expenses||0))
   : (p.owner||0);
-    const exp=expenses.filter(e=>e.property===prop&&e.owner===currentOwner);
+    const exp=getExpensesForPeriod(currentOwner,prop,selectedPeriod.month,selectedPeriod.year);
     html+="<div class='property-section' style='page-break-before:always'>";
    
 html+="<div class='invoice-header'>";
