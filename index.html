@@ -1453,9 +1453,9 @@ function replaceCloneCanvasesWithImages(liveRoot,cloneRoot){
     try{
       const img=document.createElement("img");
       img.src=live.toDataURL("image/png");
-      img.style.maxWidth="100%";
-      img.style.display="block";
-      img.style.pageBreakInside="avoid";
+      // page-break-before:always ensures each invoice receipt starts on a fresh page
+      // so it is never sliced in half at a page boundary
+      img.style.cssText="max-width:100%;display:block;page-break-before:always;page-break-inside:avoid";
       canvas.replaceWith(img);
     }catch(_){
       // Keep original canvas if conversion fails.
@@ -1748,58 +1748,55 @@ async function downloadLoadedSavedReportPdf(reportId){
     return;
   }
 
+  // Show invoice header with the saved report's period before cloning
+  const invoiceHeaderEl=document.getElementById("invoiceHeader");
+  const periodDateEl=document.getElementById("periodDate");
+  const statementDateEl=document.getElementById("statementDate");
+  if(invoiceHeaderEl) invoiceHeaderEl.style.display="";
+  if(periodDateEl) periodDateEl.textContent=report.period||"";
+  if(statementDateEl) statementDateEl.textContent="";
+
   await renderInvoiceCanvases(liveMain);
   await waitForImages(liveMain);
 
+  const exportContent=liveContent.cloneNode(true);
+  exportContent.querySelectorAll(".action-buttons,.no-print,.btn-danger,.no-export").forEach(el=>el.remove());
+  exportContent.style.background="#fff";
+
+  const titleEl=exportContent.querySelector("#reportTitle");
+  if(titleEl) titleEl.textContent=titleEl.textContent.replace(/\s*\(SAVED\)\s*/g,"").trim();
+
+  const exportMain=exportContent.querySelector("#mainContent");
+  replaceCloneCanvasesWithImages(liveMain,exportMain||exportContent);
+  await waitForImages(exportContent);
+
+  // Restore live DOM immediately after clone is done
+  if(invoiceHeaderEl) invoiceHeaderEl.style.display="none";
+  if(periodDateEl) periodDateEl.textContent="";
+  if(statementDateEl) statementDateEl.textContent="";
+
+  const host=document.createElement("div");
+  host.style.cssText="position:fixed;top:0;left:-9999px;width:1200px;background:#fff";
+  host.appendChild(exportContent);
+  document.body.appendChild(host);
+
   // Chrome canvas height limit ~32767px — auto-reduce scale for tall content
-  const safeScale=Math.min(2,Math.max(1,Math.floor(32000/liveContent.scrollHeight*10)/10));
+  const safeScale=Math.min(2,Math.max(1,Math.floor(32000/exportContent.scrollHeight*10)/10));
 
   const filename=slugifyFilePart(report.owner||"owner")+"-"+slugifyFilePart(report.period||"saved-report")+".pdf";
   const opt={
     margin:0.3,
     filename:filename,
     image:{type:"jpeg",quality:1},
-    html2canvas:{
-      scale:safeScale,
-      useCORS:true,
-      backgroundColor:"#ffffff",
-      scrollX:0,
-      scrollY:0,
-      onclone:function(clonedDoc){
-        // Show invoice header with the saved report's period — live page is never touched
-        const hdr=clonedDoc.getElementById("invoiceHeader");
-        if(hdr) hdr.style.display="";
-        const pd=clonedDoc.getElementById("periodDate");
-        if(pd) pd.textContent=report.period||"";
-        const sd=clonedDoc.getElementById("statementDate");
-        if(sd) sd.textContent="";
-        // Remove "(SAVED)" from title
-        const titleEl=clonedDoc.getElementById("reportTitle");
-        if(titleEl) titleEl.textContent=titleEl.textContent.replace(/\s*\(SAVED\)\s*/g,"").trim();
-        // Strip UI-only elements
-        clonedDoc.querySelectorAll(".action-buttons,.no-print,.btn-danger,.no-export").forEach(el=>el.remove());
-        // Copy live canvas pixel data into the clone as images
-        const clonedMain=clonedDoc.getElementById("mainContent");
-        if(clonedMain){
-          const liveCanvases=Array.from(liveMain.querySelectorAll("canvas"));
-          Array.from(clonedMain.querySelectorAll("canvas")).forEach((c,i)=>{
-            const live=liveCanvases[i];
-            if(!live||(live.width||0)<=0||(live.height||0)<=0) return;
-            try{
-              const img=clonedDoc.createElement("img");
-              img.src=live.toDataURL("image/png");
-              img.style.cssText="max-width:100%;display:block;page-break-inside:avoid";
-              c.replaceWith(img);
-            }catch(_){}
-          });
-        }
-      }
-    },
+    html2canvas:{scale:safeScale,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0},
     pagebreak:{mode:["css","legacy"]},
     jsPDF:{unit:"in",format:"letter",orientation:"portrait"}
   };
 
-  html2pdf().set(opt).from(liveContent).save().catch((e)=>{
+  html2pdf().set(opt).from(exportContent).save().then(()=>{
+    host.remove();
+  }).catch((e)=>{
+    host.remove();
     console.error("downloadLoadedSavedReportPdf failed:",e);
     alert("Could not generate PDF: "+(e&&e.message?e.message:String(e)));
   });
@@ -4011,50 +4008,42 @@ async function downloadPDF(){
   const liveMain=document.getElementById("mainContent");
   if(!liveContent||!liveMain) return;
 
+  document.getElementById("invoiceHeader").style.display="";
+
   await renderInvoiceCanvases(liveMain);
   await waitForImages(liveMain);
 
+  const exportContent=liveContent.cloneNode(true);
+  exportContent.querySelectorAll(".action-buttons,.no-print,.btn-danger,.no-export").forEach(el=>el.remove());
+  exportContent.style.background="#fff";
+
+  const exportMain=exportContent.querySelector("#mainContent");
+  replaceCloneCanvasesWithImages(liveMain,exportMain||exportContent);
+  await waitForImages(exportContent);
+
+  const host=document.createElement("div");
+  host.style.cssText="position:fixed;top:0;left:-9999px;width:1200px;background:#fff";
+  host.appendChild(exportContent);
+  document.body.appendChild(host);
+
   // Chrome canvas height limit ~32767px — auto-reduce scale for tall content
-  const safeScale=Math.min(2,Math.max(1,Math.floor(32000/liveContent.scrollHeight*10)/10));
+  const safeScale=Math.min(2,Math.max(1,Math.floor(32000/exportContent.scrollHeight*10)/10));
 
   const opt={
     margin:0.3,
     filename:currentOwner+"-statement.pdf",
     image:{type:"jpeg",quality:1},
-    html2canvas:{
-      scale:safeScale,
-      useCORS:true,
-      backgroundColor:"#ffffff",
-      scrollX:0,
-      scrollY:0,
-      onclone:function(clonedDoc){
-        // Show invoice header in the clone only — live page is never touched
-        const hdr=clonedDoc.getElementById("invoiceHeader");
-        if(hdr) hdr.style.display="";
-        // Strip UI-only elements
-        clonedDoc.querySelectorAll(".action-buttons,.no-print,.btn-danger,.no-export").forEach(el=>el.remove());
-        // Copy live canvas pixel data into the clone as images
-        const clonedMain=clonedDoc.getElementById("mainContent");
-        if(clonedMain){
-          const liveCanvases=Array.from(liveMain.querySelectorAll("canvas"));
-          Array.from(clonedMain.querySelectorAll("canvas")).forEach((c,i)=>{
-            const live=liveCanvases[i];
-            if(!live||(live.width||0)<=0||(live.height||0)<=0) return;
-            try{
-              const img=clonedDoc.createElement("img");
-              img.src=live.toDataURL("image/png");
-              img.style.cssText="max-width:100%;display:block;page-break-inside:avoid";
-              c.replaceWith(img);
-            }catch(_){}
-          });
-        }
-      }
-    },
+    html2canvas:{scale:safeScale,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0},
     pagebreak:{mode:["css","legacy"]},
     jsPDF:{unit:"in",format:"letter",orientation:"portrait"}
   };
 
-  html2pdf().set(opt).from(liveContent).save().catch((e)=>{
+  html2pdf().set(opt).from(exportContent).save().then(()=>{
+    host.remove();
+    document.getElementById("invoiceHeader").style.display="none";
+  }).catch((e)=>{
+    host.remove();
+    document.getElementById("invoiceHeader").style.display="none";
     console.error("downloadPDF failed:",e);
     alert("Could not generate PDF: "+(e&&e.message?e.message:String(e)));
   });
