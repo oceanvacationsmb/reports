@@ -1792,17 +1792,18 @@ async function downloadLoadedSavedReportPdf(reportId){
     if(statementDateEl) statementDateEl.textContent=prevStatementText;
   };
 
+  // Chrome canvas height limit is ~32767px. Auto-reduce scale so canvas never exceeds it.
+  const safeScale=Math.min(2,Math.max(1,Math.floor(32000/exportContent.scrollHeight*10)/10));
+
   const filename=slugifyFilePart(report.owner||"owner")+"-"+slugifyFilePart(report.period||"saved-report")+".pdf";
   const opt={
     margin:0.3,
     filename:filename,
     image:{type:"jpeg",quality:1},
-    html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0},
+    html2canvas:{scale:safeScale,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0},
     pagebreak:{mode:["css","legacy"]},
     jsPDF:{unit:"in",format:"letter",orientation:"portrait"}
   };
-
-  console.log("[PDF] exportContent dimensions:",exportContent.scrollWidth,"x",exportContent.scrollHeight);
 
   html2pdf().set(opt).from(exportContent).save().then(()=>{
     cleanup();
@@ -4049,16 +4050,17 @@ async function downloadPDF(){
     document.getElementById("invoiceHeader").style.display="none";
   };
 
+  // Chrome canvas height limit is ~32767px. Auto-reduce scale so canvas never exceeds it.
+  const safeScale=Math.min(2,Math.max(1,Math.floor(32000/exportContent.scrollHeight*10)/10));
+
   const opt={
     margin:0.3,
     filename:currentOwner+"-statement.pdf",
     image:{type:"jpeg",quality:1},
-    html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0},
+    html2canvas:{scale:safeScale,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0},
     pagebreak:{mode:["css","legacy"]},
     jsPDF:{unit:"in",format:"letter",orientation:"portrait"}
   };
-
-  console.log("[PDF] exportContent dimensions:",exportContent.scrollWidth,"x",exportContent.scrollHeight);
 
   html2pdf().set(opt).from(exportContent).save().then(()=>{
     cleanup();
