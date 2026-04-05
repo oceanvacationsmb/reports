@@ -683,9 +683,9 @@ function getPreCancellationHostPayoutValue(row){
 
 function getCleaningValue(row){
   const hasManual=row && row["MANUAL CLEANING FARE"]!==undefined && row["MANUAL CLEANING FARE"]!==null;
-  if(hasManual) return num(row["MANUAL CLEANING FARE"]);
+  if(hasManual) return Math.min(num(row["MANUAL CLEANING FARE"]),500);
   const isCancelled=((row && row["STATUS"])||"").toString().toLowerCase().includes("cancel");
-  return isCancelled ? 0 : num(row && row["CLEANING FARE"]);
+  return isCancelled ? 0 : Math.min(num(row && row["CLEANING FARE"]),500);
 }
 
 function getMunicipalityLabel(propertyName){
@@ -2227,6 +2227,7 @@ function mapGuestyReservation(r){
   });
 
   // Some Guesty shared reports expose taxes as top-level fields instead of invoiceItems.children.
+  resolutionCenter=Math.max(resolutionCenter,guestyValue("money.invoiceItems.Arc"));
   cityTax=Math.max(cityTax,guestyValue("money.invoiceItems.CITY_TAX"),guestyValue("taxCity"));
   stateTax=Math.max(stateTax,guestyValue("money.invoiceItems.STATE_TAX"),guestyValue("taxState"));
   countyTax=Math.max(countyTax,guestyValue("money.invoiceItems.COUNTY_TAX"),guestyValue("taxCounty"));
@@ -3375,7 +3376,7 @@ const p = a * pmcPercent;
 if(t.type==="draft"){
   w=getWebsiteVrboFeeValue(row);
 }
-      gross+=g;
+      gross+=g-(isDraft ? getAirbnbResolutionCenterValue(row) : 0);
       acc+=a;
       clean+=c;
       pmc+=p;
