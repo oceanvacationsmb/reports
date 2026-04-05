@@ -1904,7 +1904,18 @@ function saveCurrentReportSnapshot(){
 }
 
 function formatEmailTemplate(reportTitle,periodLabel,payoutDate,link){
-  return "Hi,\nHere is your "+reportTitle+" for "+periodLabel+". The transfer will be processed on "+payoutDate+".\n\nStatement link:\n"+(link||"<>")+"\n\nThank you, Ocean Vacations";
+  return [
+    "Hi,",
+    "",
+    "Here is your "+reportTitle+" for "+periodLabel+".",
+    "The transfer will be processed on "+payoutDate+".",
+    "",
+    "Statement Link:",
+    (link||"<>"),
+    "",
+    "Thank you,",
+    "Ocean Vacations"
+  ].join("\n");
 }
 
 function openEmailClient(reportId){
@@ -2028,7 +2039,8 @@ function sendEmailClient(){
   if(!to) return alert("Recipient email is required");
   if(!subject) return alert("Subject is required");
   if(!message) return alert("Message is required");
-  const mailto="mailto:"+encodeURIComponent(to)+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(message);
+  const normalizedMessage=message.replace(/\r?\n/g,"\r\n");
+  const mailto="mailto:"+encodeURIComponent(to)+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(normalizedMessage);
   window.location.href=mailto;
 }
 
