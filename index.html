@@ -3990,40 +3990,51 @@ html2pdf().set(opt).from(element).save();
 
 }
 
-function downloadPDF(){
- 
+async function downloadPDF(){
 
-const btn=document.querySelector(".action-buttons");
+  const liveContent=document.getElementById("content");
+  const liveMain=document.getElementById("mainContent");
+  if(!liveContent||!liveMain) return;
 
-const actionCols=document.querySelectorAll(".no-print");
-actionCols.forEach(el=>el.style.display="none");
+  document.getElementById("invoiceHeader").style.display="";
 
-document.querySelectorAll(".btn-danger").forEach(b=>b.style.display="none");
-if(btn) btn.style.display="none";
+  await renderInvoiceCanvases(liveMain);
+  await waitForImages(liveMain);
 
-document.getElementById("invoiceHeader").style.display="";
-const element=document.getElementById("content");
- element.style.background="#fff";
+  const exportContent=liveContent.cloneNode(true);
+  exportContent.querySelectorAll(".action-buttons,.no-print,.btn-danger,.no-export").forEach(el=>el.remove());
+  exportContent.style.background="#fff";
 
-const opt={
-margin:0.3,
-filename:currentOwner+"-statement.pdf",
-image:{type:'jpeg',quality:1},
-html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0},
-pagebreak:{mode:['css','legacy'],avoid:['img','canvas','.invoice-attachment']},
-jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
-};
-  
-setTimeout(function(){html2pdf().set(opt).from(element).save().then(()=>{
- 
-if(btn) btn.style.display="flex";
+  const exportMain=exportContent.querySelector("#mainContent");
+  replaceCloneCanvasesWithImages(liveMain,exportMain||exportContent);
+  await waitForImages(exportContent);
 
-actionCols.forEach(el=>el.style.display="");
+  const host=document.createElement("div");
+  host.style.position="fixed";
+  host.style.left="-100000px";
+  host.style.top="0";
+  host.style.width="1200px";
+  host.style.background="#fff";
+  host.appendChild(exportContent);
+  document.body.appendChild(host);
 
-document.querySelectorAll(".btn-danger").forEach(b=>b.style.display="inline-block");
+  const opt={
+    margin:0.3,
+    filename:currentOwner+"-statement.pdf",
+    image:{type:"jpeg",quality:1},
+    html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0},
+    pagebreak:{mode:["css","legacy"]},
+    jsPDF:{unit:"in",format:"letter",orientation:"portrait"}
+  };
 
-document.getElementById("invoiceHeader").style.display="none";
-});},800);
+  html2pdf().set(opt).from(exportContent).save().then(()=>{
+    host.remove();
+    document.getElementById("invoiceHeader").style.display="none";
+  }).catch(()=>{
+    host.remove();
+    document.getElementById("invoiceHeader").style.display="none";
+    alert("Could not generate PDF");
+  });
 
 }
 
