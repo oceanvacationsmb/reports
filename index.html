@@ -616,11 +616,16 @@ function getWebsiteVrboFeeValue(row,options){
   const source=((row && row["SOURCE"])||"").toString().trim().toLowerCase();
   const platform=((row && row["PLATFORM"])||"").toString().toLowerCase();
   const grossPayout=getGrossPayoutValue(row);
-  const preCancellationHostPayout=getPreCancellationHostPayoutValue(row);
+
+  if(source==="manual vrbo" || source==="manual airbnb" || source==="manual_vrbo" || source==="manual_direct"){
+    return 0;
+  }
 
   if(isManualSourceRow(row)){
-    const manualFeeBase=preCancellationHostPayout>0 ? preCancellationHostPayout : grossPayout;
-    return (manualFeeBase * 0.01) + 0.30;
+    if(grossPayout<=0) return 0;
+    const channelCommission=num(row && row["CHANNEL COMMISSION"]);
+    if(channelCommission>0) return 0;
+    return (grossPayout * 0.01) + 0.30;
   }
 
   const manualWebsiteFee=(row && row["MANUAL WEBSITE FEE"]!==undefined && row["MANUAL WEBSITE FEE"]!==null && row["MANUAL WEBSITE FEE"]!=="")
@@ -2251,8 +2256,8 @@ function mapGuestyReservation(r){
     "TOTAL PAYOUT": guestyValue("money.hostPayout"),
     "ACCOMMODATION FARE": guestyValue("money.fareAccommodation"),
     "CLEANING FARE": guestyValue("money.fareCleaning"),
-    "PLATFORM": (r["integration.platform"] && r["integration.platform"].children) || "",
-    "SOURCE": (r["integration.source"] && r["integration.source"].children) || "",
+    "PLATFORM": guestyText("integration.platform"),
+    "SOURCE": guestyText("source"),
     "CONFIRMATION CODE": normalizeReservationCode((r.confirmationCode && r.confirmationCode.children) || ""),
     "STATUS": (r.status && r.status.children) || "",
     "MARKUP": guestyValue("money.invoiceItems.MAR"),
@@ -3361,6 +3366,7 @@ masterTotals.owner -= ownerExpTotal + recurringTotal;
     let gross=0,acc=0,clean=0,pmc=0,websiteFee=0,totalTax=0;
     byProp[prop].forEach(row=>{
       const g = getGrossPayoutValue(row);
+      if(g===0) return;
 const c = getCleaningValue(row);
 let a = getAccommodationValue(row,isDraft);
 const p = a * pmcPercent;
