@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ocean Vacations - Reservation Report</title>
 <link rel="icon" href="data:,">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <script>
@@ -1541,9 +1543,7 @@ function renderInvoiceCanvases(root){
     if(!invoiceSrc.startsWith("data:application/pdf")) return;
 
     return pdfjsLib.getDocument(invoiceSrc).promise.then(pdf=>pdf.getPage(1)).then(page=>{
-      const baseViewport=page.getViewport({scale:1});
-      const maxWidth=(canvas.parentElement && canvas.parentElement.clientWidth) ? canvas.parentElement.clientWidth : 800;
-      const scale=Math.max(1,Math.min(2,maxWidth/baseViewport.width));
+      const scale=Math.max(2,Math.min(4,(window.devicePixelRatio||1)*2));
       const viewport=page.getViewport({scale:scale});
       canvas.height=viewport.height;
       canvas.width=viewport.width;
@@ -1570,6 +1570,213 @@ function waitForImages(root){
     });
   });
   return Promise.allSettled(jobs);
+}
+
+function nextPaint(){
+  return new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+}
+
+function setPdfLoadingState(isVisible,message){
+  let overlay=document.getElementById("pdfExportOverlay");
+  if(!overlay){
+    overlay=document.createElement("div");
+    overlay.id="pdfExportOverlay";
+    overlay.style.cssText="position:fixed;inset:0;background:rgba(7,18,24,0.55);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px";
+    const card=document.createElement("div");
+    card.style.cssText="background:#10232b;color:#fff;padding:16px 18px;border-radius:10px;min-width:280px;max-width:420px;border:1px solid rgba(255,255,255,0.18);box-shadow:0 10px 28px rgba(0,0,0,0.35)";
+    const title=document.createElement("div");
+    title.textContent="Generating PDF";
+    title.style.cssText="font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px";
+    const text=document.createElement("div");
+    text.id="pdfExportOverlayText";
+    text.style.cssText="font-size:12px;color:#d8e6eb;line-height:1.4";
+    card.appendChild(title);
+    card.appendChild(text);
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+  }
+
+  const textEl=document.getElementById("pdfExportOverlayText");
+  if(textEl) textEl.textContent=message||"Preparing high-quality export...";
+  overlay.style.display=isVisible?"flex":"none";
+}
+
+async function exportElementToHighQualityPdf(sourceElement,filename){
+  if(!sourceElement) throw new Error("Missing element for PDF export");
+  const hasHtml2Canvas=typeof window.html2canvas==="function";
+  const hasHtml2Pdf=typeof window.html2pdf==="function";
+
+  const JsPdfCtor=(window.jspdf&&window.jspdf.jsPDF) || window.jsPDF || (window.html2pdf&&window.html2pdf().get&&window.html2pdf().constructor&&window.html2pdf().constructor.jsPDF) || null;
+  if(!hasHtml2Pdf){
+    throw new Error("PDF library is unavailable");
+  }
+
+  setPdfLoadingState(true,"Preparing high-quality export...");
+
+  if(!JsPdfCtor || !hasHtml2Canvas){
+    // Keep download functional even if direct globals are not exposed.
+    try{
+      setPdfLoadingState(true,"Rendering document...");
+      return await window.html2pdf().set({
+        margin:0.3,
+        filename:filename,
+        image:{type:"jpeg",quality:0.96},
+        html2canvas:{
+          scale:2.2,
+          useCORS:true,
+          backgroundColor:"#ffffff",
+          scrollX:0,
+          scrollY:0,
+          windowWidth:1200
+        },
+        pagebreak:{mode:["css","legacy"]},
+        jsPDF:{unit:"in",format:"letter",orientation:"portrait"}
+      }).from(sourceElement).save();
+    }finally{
+      setPdfLoadingState(false,"");
+    }
+  }
+
+  const renderWidth=1120;
+  const marginIn=0.3;
+  const pageWidthIn=8.5;
+  const pageHeightIn=11;
+  const innerWidthIn=pageWidthIn-(marginIn*2);
+  const innerHeightIn=pageHeightIn-(marginIn*2);
+  const pageAspect=innerHeightIn/innerWidthIn;
+  const pageSliceHeightPx=Math.max(580,Math.floor(renderWidth*pageAspect));
+
+  const stage=document.createElement("div");
+  stage.style.cssText="position:fixed;left:-99999px;top:0;width:1120px;background:#fff;z-index:-1;pointer-events:none";
+
+  const viewport=document.createElement("div");
+  viewport.style.cssText="position:relative;width:1120px;overflow:hidden;background:#fff";
+
+  const mover=document.createElement("div");
+  mover.style.cssText="position:absolute;left:0;top:0;width:100%;background:#fff;transform:translateY(0)";
+
+  const clone=sourceElement.cloneNode(true);
+  clone.style.width="100%";
+
+  // Enforce attachment sizing and hard page behavior so receipts are never sliced.
+  // Keep each invoice attachment short enough to fit a single rendered PDF page.
+  const maxAttachmentHeightPx=Math.max(520,Math.min(900,Math.floor(pageSliceHeightPx*0.6)));
+  const invoiceWraps=Array.from(clone.querySelectorAll(".invoice-attachment-wrap"));
+  invoiceWraps.forEach((wrap,index)=>{
+    wrap.style.display="block";
+    wrap.style.breakInside="avoid";
+    wrap.style.pageBreakInside="avoid";
+    if(index>0){
+      wrap.style.breakBefore="page";
+      wrap.style.pageBreakBefore="always";
+    }
+  });
+  clone.querySelectorAll(".invoice-attachment-wrap .invoice-attachment,.invoice-attachment-wrap img,.invoice-attachment-wrap canvas").forEach(el=>{
+    el.style.display="block";
+    el.style.margin="0 auto";
+    el.style.maxWidth="100%";
+    el.style.width="auto";
+    el.style.height="auto";
+    el.style.maxHeight=maxAttachmentHeightPx+"px";
+    el.style.objectFit="contain";
+    el.style.breakInside="avoid";
+    el.style.pageBreakInside="avoid";
+  });
+
+  mover.appendChild(clone);
+  viewport.appendChild(mover);
+  stage.appendChild(viewport);
+  document.body.appendChild(stage);
+
+  try{
+    await waitForImages(clone);
+    const totalHeight=Math.max(1,Math.ceil(clone.scrollHeight));
+    const roughPageCount=Math.max(1,Math.ceil(totalHeight/pageSliceHeightPx));
+    const captureScale=roughPageCount>14 ? 2.1 : Math.max(2.2,Math.min(2.7,(window.devicePixelRatio||1)*1.8));
+    const pdf=new JsPdfCtor({unit:"in",format:"letter",orientation:"portrait",compress:true,precision:14});
+
+    const protectedBlocks=[];
+    clone.querySelectorAll(".invoice-attachment-wrap").forEach(el=>{
+      const h=el.offsetHeight||0;
+      if(h<80) return;
+      const top=Math.max(0,Math.floor(el.offsetTop));
+      const bottom=Math.min(totalHeight,Math.ceil(el.offsetTop+h));
+      protectedBlocks.push({top,bottom});
+    });
+
+    const safeBreakSet=new Set([0,totalHeight]);
+    clone.querySelectorAll(".invoice-attachment-wrap,.invoice-attachment,img,.property-section").forEach(el=>{
+      const h=el.offsetHeight||0;
+      if(h<120) return;
+      const top=Math.max(0,Math.floor(el.offsetTop));
+      const bottom=Math.min(totalHeight,Math.ceil(el.offsetTop+h));
+      safeBreakSet.add(top);
+      safeBreakSet.add(bottom);
+    });
+    const safeBreaks=Array.from(safeBreakSet).sort((a,b)=>a-b);
+
+    let pageIndex=0;
+    let offset=0;
+    while(offset<totalHeight){
+      const target=Math.min(totalHeight,offset+pageSliceHeightPx);
+      let sliceEnd=target;
+
+      // If a protected block (receipt attachment) would be cut, break before it.
+      const crossingBlock=protectedBlocks.find(block=>block.top<target && block.bottom>target && block.top>offset);
+      if(crossingBlock){
+        sliceEnd=crossingBlock.top;
+      }
+
+      if(target<totalHeight){
+        const minEnd=offset+Math.floor(pageSliceHeightPx*0.55);
+        for(let i=safeBreaks.length-1;i>=0;i--){
+          const candidate=safeBreaks[i];
+          if(candidate<=sliceEnd && candidate>=minEnd){
+            sliceEnd=candidate;
+            break;
+          }
+        }
+      }
+      if(sliceEnd<=offset) sliceEnd=target;
+
+      const sliceHeight=Math.max(1,sliceEnd-offset);
+      viewport.style.height=sliceHeight+"px";
+      mover.style.transform="translateY(-"+offset+"px)";
+
+      const statusPage=Math.min(roughPageCount,pageIndex+1);
+      setPdfLoadingState(true,"Rendering page "+statusPage+" of "+roughPageCount+"...");
+      await nextPaint();
+
+      const canvas=await window.html2canvas(viewport,{
+        scale:captureScale,
+        useCORS:true,
+        backgroundColor:"#ffffff",
+        scrollX:0,
+        scrollY:0,
+        width:renderWidth,
+        height:sliceHeight,
+        windowWidth:renderWidth,
+        windowHeight:sliceHeight,
+        removeContainer:true
+      });
+
+      const imageData=canvas.toDataURL("image/jpeg",0.96);
+      const imageHeightIn=innerWidthIn*(canvas.height/canvas.width);
+      if(pageIndex>0) pdf.addPage();
+      pdf.addImage(imageData,"JPEG",marginIn,marginIn,innerWidthIn,imageHeightIn,undefined,"MEDIUM");
+      pageIndex++;
+      offset=sliceEnd;
+
+      canvas.width=0;
+      canvas.height=0;
+    }
+
+    setPdfLoadingState(true,"Finalizing download...");
+    pdf.save(filename);
+  }finally{
+    stage.remove();
+    setPdfLoadingState(false,"");
+  }
 }
 
 function buildSavedReportLink(reportId){
@@ -1781,22 +1988,8 @@ async function downloadLoadedSavedReportPdf(reportId){
   host.appendChild(exportContent);
   document.body.appendChild(host);
 
-  // Chrome canvas height limit ~32767px — auto-reduce scale for tall content.
-  // Calculated AFTER replaceCloneCanvasesWithImages so capped receipt images
-  // reduce scrollHeight, allowing a higher safeScale.
-  const safeScale=Math.min(2,Math.max(1,Math.floor(32000/exportContent.scrollHeight*10)/10));
-
   const filename=slugifyFilePart(report.owner||"owner")+"-"+slugifyFilePart(report.period||"saved-report")+".pdf";
-  const opt={
-    margin:0.3,
-    filename:filename,
-    image:{type:"jpeg",quality:1},
-    html2canvas:{scale:safeScale,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0},
-    pagebreak:{mode:["css","legacy"]},
-    jsPDF:{unit:"in",format:"letter",orientation:"portrait"}
-  };
-
-  html2pdf().set(opt).from(exportContent).save().then(()=>{
+  exportElementToHighQualityPdf(exportContent,filename).then(()=>{
     host.remove();
   }).catch((e)=>{
     host.remove();
@@ -3992,16 +4185,12 @@ function closeAll(){
 function downloadIncomePDF(){
 
 const element=document.getElementById("incomeReportResult");
+if(!element) return;
 
-const opt={
-margin:0.3,
-filename:"income-report.pdf",
-image:{type:'jpeg',quality:1},
-html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0},
-jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
-};
-
-html2pdf().set(opt).from(element).save();
+exportElementToHighQualityPdf(element,"income-report.pdf").catch((e)=>{
+console.error("downloadIncomePDF failed:",e);
+alert("Could not generate PDF: "+(e&&e.message?e.message:String(e)));
+});
 
 }
 
@@ -4030,21 +4219,7 @@ async function downloadPDF(){
   host.appendChild(exportContent);
   document.body.appendChild(host);
 
-  // Chrome canvas height limit ~32767px — auto-reduce scale for tall content.
-  // Calculated AFTER replaceCloneCanvasesWithImages because capped receipt images
-  // reduce scrollHeight, allowing a higher safeScale.
-  const safeScale=Math.min(2,Math.max(1,Math.floor(32000/exportContent.scrollHeight*10)/10));
-
-  const opt={
-    margin:0.3,
-    filename:currentOwner+"-statement.pdf",
-    image:{type:"jpeg",quality:1},
-    html2canvas:{scale:safeScale,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0},
-    pagebreak:{mode:["css","legacy"]},
-    jsPDF:{unit:"in",format:"letter",orientation:"portrait"}
-  };
-
-  html2pdf().set(opt).from(exportContent).save().then(()=>{
+  exportElementToHighQualityPdf(exportContent,currentOwner+"-statement.pdf").then(()=>{
     host.remove();
     document.getElementById("invoiceHeader").style.display="none";
   }).catch((e)=>{
