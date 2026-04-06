@@ -2817,7 +2817,8 @@ function preloadGuestyData(ownerName){
 
 function toggleOwnerMode(){
   const hasOwner=!!currentOwner;
-  document.getElementById("appControls").style.display=hasOwner?"":"none";
+  const canUseControlsWithoutOwner=LOGIN_DISABLED || isAdminUser();
+  document.getElementById("appControls").style.display=(hasOwner || canUseControlsWithoutOwner)?"":"none";
   document.getElementById("mainPanel").style.display="";
 }
 
