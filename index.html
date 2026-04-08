@@ -350,7 +350,7 @@ select,input,.btn{font-size:12px}
 <div class="modal-actions">
 <button class="btn-save" onclick="generateEmailReportLink()">GENERATE LINK</button>
 <button class="btn-add" onclick="copyEmailLink()">COPY LINK</button>
-<button class="btn-save" onclick="sendEmailClient()">SEND</button>
+<button id="emailSendBtn" class="btn-save" onclick="sendEmailClient()">SEND</button>
 <button class="btn-cancel" onclick="closeAll()">CLOSE</button>
 </div>
 </div>
@@ -475,6 +475,43 @@ let currentUserSession=null;
 let report1099RangeMode="month";
 const LOGIN_DISABLED=false;
 const PASSWORD_RESET_EMAIL="ti3155@yahoo.com";
+const EMAILJS_PUBLIC_KEY="UMIeNLaEMvhwD6Anq";
+const EMAILJS_SERVICE_ID="service_8xrjza6";
+const EMAILJS_TEMPLATE_ID="template_ad3gmlm";
+const EMAILJS_CONFIRM_TEMPLATE_ID="";
+let isSendingEmail=false;
+
+function getEmailJsConfigError(){
+  if(!EMAILJS_PUBLIC_KEY.trim()||!EMAILJS_SERVICE_ID.trim()||!EMAILJS_TEMPLATE_ID.trim()){
+    return "Email sending is not configured yet. Add your EmailJS PUBLIC KEY, SERVICE ID, and TEMPLATE ID in index.html.";
+  }
+  return "";
+}
+
+async function sendEmailViaEmailJs(templateId,templateParams){
+  const response=await fetch("https://api.emailjs.com/api/v1.0/email/send",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      service_id:EMAILJS_SERVICE_ID,
+      template_id:templateId,
+      user_id:EMAILJS_PUBLIC_KEY,
+      template_params:templateParams
+    })
+  });
+  if(!response.ok){
+    const detail=await response.text().catch(()=>"");
+    throw new Error("EmailJS request failed with status "+response.status+(detail?": "+detail.slice(0,220):""));
+  }
+}
+
+function buildShortConfirmationMessage(ownerName,periodLabel,recipient,link){
+  const safeOwner=(ownerName||"Owner").trim()||"Owner";
+  const safePeriod=(periodLabel||"Current period").trim()||"Current period";
+  const safeRecipient=(recipient||"recipient").trim()||"recipient";
+  const safeLink=(link||"").trim();
+  return "Sent to "+safeRecipient+" for "+safeOwner+" ("+safePeriod+")."+(safeLink?" Link: "+safeLink:"");
+}
 
 function num(v){return parseFloat((v||"0").toString().replace(/[$,]/g,""))||0;}
 function money(v){
@@ -2070,16 +2107,67 @@ function copyEmailLink(){
   });
 }
 
-function sendEmailClient(){
+async function sendEmailClient(){
+  if(isSendingEmail) return;
   const to=(document.getElementById("emailTo").value||"").trim();
   const subject=(document.getElementById("emailSubject").value||"").trim();
   const message=(document.getElementById("emailMessage").value||"").trim();
+  const link=(document.getElementById("emailLink").value||"").trim();
+  const statusEl=document.getElementById("emailStatus");
+  const sendBtn=document.getElementById("emailSendBtn");
   if(!to) return alert("Recipient email is required");
   if(!subject) return alert("Subject is required");
   if(!message) return alert("Message is required");
-  const normalizedMessage=message.replace(/\r?\n/g,"\r\n");
-  const mailto="mailto:"+encodeURIComponent(to)+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(normalizedMessage);
-  window.location.href=mailto;
+  const configError=getEmailJsConfigError();
+  if(configError){
+    if(statusEl) statusEl.textContent=configError;
+    alert(configError);
+    return;
+  }
+
+  const snapshot=(pendingEmailSnapshotId && (savedReports||[]).find(r=>r.id===pendingEmailSnapshotId)) || null;
+  const ownerName=(snapshot && snapshot.owner) ? snapshot.owner : (currentOwner||"Owner");
+  const periodLabel=(snapshot && snapshot.period) ? snapshot.period : getCurrentPeriodLabel();
+  const confirmationTemplateId=(EMAILJS_CONFIRM_TEMPLATE_ID||EMAILJS_TEMPLATE_ID).trim();
+  const shortConfirmation=buildShortConfirmationMessage(ownerName,periodLabel,to,link);
+
+  isSendingEmail=true;
+  if(sendBtn) sendBtn.disabled=true;
+  if(statusEl) statusEl.textContent="Sending email...";
+
+  try{
+    await sendEmailViaEmailJs(EMAILJS_TEMPLATE_ID.trim(),{
+      to_email:to,
+      email:to,
+      subject:subject,
+      message:message,
+      report_link:link,
+      owner_name:ownerName,
+      period_label:periodLabel,
+      reply_to:PASSWORD_RESET_EMAIL
+    });
+
+    await sendEmailViaEmailJs(confirmationTemplateId,{
+      to_email:PASSWORD_RESET_EMAIL,
+      email:PASSWORD_RESET_EMAIL,
+      subject:"Confirmation: report email sent",
+      message:shortConfirmation,
+      report_link:link,
+      owner_name:ownerName,
+      period_label:periodLabel,
+      sent_to:to
+    });
+
+    if(statusEl) statusEl.textContent="Email sent. Closing...";
+    setTimeout(()=>closeAll(),500);
+  }catch(error){
+    console.error("sendEmailClient failed:",error);
+    if(statusEl) statusEl.textContent="Failed to send email. Check EmailJS configuration and try again.";
+    alert("Failed to send email: "+(error&&error.message?error.message:String(error)));
+  }finally{
+    isSendingEmail=false;
+    if(sendBtn) sendBtn.disabled=false;
+  }
 }
 
 function openSavedReport(reportId){
