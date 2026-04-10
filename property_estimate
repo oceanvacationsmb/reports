@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vacation Rental Revenue Estimate | Ocean Vacations</title>
+  <meta name="description" content="Get an instant vacation rental revenue estimate for your property in Myrtle Beach, North Myrtle Beach, Surfside Beach, or Garden City." />
+  <style>
+    :root {
+      --bg: #f7fbff;
+      --white: #ffffff;
+      --text: #0f172a;
+      --muted: #5b6b82;
+      --blue: #206cff;
+      --teal: #08b7c9;
+      --navy: #08243e;
+      --orange: #ff9d3f;
+      --line: #e7eef7;
+      --shadow: 0 20px 50px rgba(9, 30, 66, 0.12);
+      --soft-shadow: 0 12px 30px rgba(9, 30, 66, 0.08);
+      --radius-xl: 34px;
+      --radius-lg: 24px;
+      --radius-md: 18px;
+      --max: 1120px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #fff7ed 0%, #ffffff 16%, #f6fbff 56%, #ffffff 100%);
+    }
+    a { color: inherit; text-decoration: none; }
+    .container { width: min(var(--max), calc(100% - 32px)); margin: 0 auto; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 14px 24px; border-radius: 999px; border: 0; font-weight: 800; cursor: pointer;
+      transition: .2s ease;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary { background: linear-gradient(135deg, var(--teal), var(--blue)); color: white; box-shadow: 0 14px 30px rgba(32,108,255,.28); }
+    .btn-light { background: rgba(255,255,255,.92); color: var(--navy); border: 1px solid var(--line); }
+    .pill {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 8px 14px; border-radius: 999px; font-size: 12px; font-weight: 800;
+      letter-spacing: .16em; text-transform: uppercase; background: rgba(255,255,255,.88);
+      color: #0c6d9c; border: 1px solid rgba(255,255,255,.72); box-shadow: var(--soft-shadow);
+    }
+    header {
+      position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.82); backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(231,238,247,.95);
+    }
+    .nav {
+      display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 0;
+    }
+    .brand-title { font-size: 28px; font-weight: 900; letter-spacing: -.03em; }
+    .brand-sub { font-size: 14px; color: var(--muted); }
+    .hero {
+      position: relative; overflow: hidden; padding: 84px 0 56px;
+    }
+    .blob, .blob2, .blob3 {
+      position: absolute; border-radius: 999px; filter: blur(70px); opacity: .5;
+    }
+    .blob { width: 280px; height: 280px; top: -30px; left: -60px; background: #77e1f7; }
+    .blob2 { width: 360px; height: 360px; top: 70px; right: -120px; background: #ffc586; }
+    .blob3 { width: 220px; height: 220px; bottom: 20px; left: 40%; background: #b9d8ff; }
+    .hero-grid {
+      position: relative; display: grid; grid-template-columns: 1.02fr .98fr; gap: 28px; align-items: center;
+    }
+    h1 {
+      margin: 18px 0 0; font-size: clamp(42px, 7vw, 76px); line-height: .98; letter-spacing: -.05em;
+    }
+    .lead {
+      margin-top: 18px; max-width: 720px; font-size: 20px; line-height: 1.8; color: #496179;
+    }
+    .hero-points {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 26px;
+    }
+    .point {
+      padding: 14px 16px; border-radius: 18px; background: rgba(255,255,255,.86); border: 1px solid rgba(255,255,255,.82); box-shadow: var(--soft-shadow);
+      font-weight: 700; color: #29445f;
+    }
+    .card {
+      background: rgba(255,255,255,.86); border: 1px solid rgba(255,255,255,.72); border-radius: var(--radius-xl);
+      box-shadow: var(--shadow); backdrop-filter: blur(16px);
+    }
+    .estimate-card { padding: 20px; }
+    .estimate-top {
+      padding: 28px; border-radius: 28px; color: white;
+      background: linear-gradient(135deg, #08243e 0%, #0e7f89 42%, #32b6ff 100%);
+    }
+    .estimate-top h2 { margin: 12px 0 0; font-size: 34px; line-height: 1.12; }
+    .estimate-top p { margin-top: 12px; color: #dff6ff; line-height: 1.8; }
+    .form-grid { display: grid; gap: 12px; margin-top: 22px; }
+    .field {
+      width: 100%; padding: 15px 16px; border-radius: 18px; background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.12);
+      color: #eef8ff; font-size: 14px;
+    }
+    .field::placeholder { color: #d6ecf5; }
+    select.field, input.field { appearance: none; -webkit-appearance: none; }
+    .check {
+      display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-radius: 18px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
+      color: #eef8ff;
+    }
+    .result {
+      display: none; margin-top: 18px; padding: 20px; border-radius: 24px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.12);
+    }
+    .result-range { margin-top: 8px; font-size: 36px; font-weight: 900; line-height: 1.08; }
+    .result-details { margin-top: 8px; color: #d6edf5; }
+    .section { padding: 72px 0; }
+    .section-head { display: flex; justify-content: space-between; gap: 24px; align-items: end; margin-bottom: 28px; }
+    .section-head h2 { margin: 8px 0 0; font-size: clamp(34px, 5vw, 52px); line-height: 1.02; letter-spacing: -.04em; }
+    .section-head p { max-width: 700px; line-height: 1.9; color: #496179; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    .info-card {
+      padding: 24px; border-radius: 28px; background: white; border: 1px solid #e9f0f8; box-shadow: var(--soft-shadow);
+    }
+    .info-card h3 { margin: 0; font-size: 26px; letter-spacing: -.03em; }
+    .info-card p { margin-top: 12px; color: var(--muted); line-height: 1.85; }
+    .cta {
+      padding: 34px; border-radius: 34px; background: linear-gradient(135deg, #fff7ed, #eff6ff, #ecfeff);
+      box-shadow: var(--shadow); border: 1px solid #e4edf6;
+    }
+    footer { padding: 32px 0 70px; border-top: 1px solid #e6eef7; background: white; }
+    .footer-grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 24px; }
+    footer h4 { margin: 0; font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+    footer p, footer a, footer div { color: #4a6078; line-height: 1.9; }
+    @media (max-width: 980px) {
+      .hero-grid, .grid3, .footer-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 760px) {
+      .nav { flex-wrap: wrap; }
+      .hero { padding-top: 60px; }
+      .hero-points { grid-template-columns: 1fr; }
+      .section { padding: 56px 0; }
+      .section-head { flex-direction: column; align-items: flex-start; }
+      .estimate-top h2 { font-size: 30px; }
+      .result-range { font-size: 30px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <div>
+        <div class="brand-title">Ocean Vacations</div>
+        <div class="brand-sub">Vacation Rentals & Property Management</div>
+      </div>
+      <div>
+        <a class="btn btn-light" href="https://oceanvacationsmb.com">Back to website</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="blob"></div>
+    <div class="blob2"></div>
+    <div class="blob3"></div>
+    <div class="container hero-grid">
+      <div>
+        <div class="pill">Owner revenue estimate</div>
+        <h1>See how much your vacation rental could earn</h1>
+        <p class="lead">This page is not using a third party estimate website. It uses a custom estimate formula based on area, home type, bedroom count, and standout features like pool and oceanfront appeal.</p>
+        <div class="hero-points">
+          <div class="point">Fast owner lead tool</div>
+          <div class="point">Built for Grand Strand markets</div>
+          <div class="point">Address autocomplete included</div>
+          <div class="point">Can be upgraded later with your own data</div>
+        </div>
+      </div>
+      <div class="card estimate-card" id="estimate-tool">
+        <div class="estimate-top">
+          <div class="pill" style="background:rgba(255,255,255,.16); border-color:rgba(255,255,255,.18); color:white; box-shadow:none;">Instant estimate</div>
+          <h2>Get a revenue range for your property</h2>
+          <p>Enter the address, city, home type, and bedroom count to see an estimated annual revenue range for a vacation rental property.</p>
+          <form id="revenueForm" class="form-grid">
+            <input id="address" class="field" type="text" placeholder="Property address" list="addressSuggestions" autocomplete="off" />
+            <datalist id="addressSuggestions"></datalist>
+            <select id="city" class="field">
+              <option>Myrtle Beach</option>
+              <option>North Myrtle Beach</option>
+              <option>Surfside Beach</option>
+              <option>Garden City</option>
+            </select>
+            <select id="propertyType" class="field">
+              <option>Condo</option>
+              <option>House</option>
+              <option>Large Group Home</option>
+            </select>
+            <input id="bedrooms" class="field" type="number" min="1" max="20" placeholder="Bedrooms" />
+            <label class="check"><input id="pool" type="checkbox" /> Has private pool</label>
+            <label class="check"><input id="oceanfront" type="checkbox" /> Oceanfront or steps to beach</label>
+            <button class="btn btn-primary" type="submit" style="width:100%;">Calculate revenue range</button>
+          </form>
+          <div id="revenueResult" class="result">
+            <div class="pill" style="background:rgba(255,255,255,.16); border-color:rgba(255,255,255,.18); color:white; box-shadow:none;">Estimated annual revenue</div>
+            <div id="estimateRange" class="result-range"></div>
+            <div id="estimateDetails" class="result-details"></div>
+            <div style="margin-top:10px; color:#d1e6ee; line-height:1.75; font-size:14px;">This is a planning estimate based on local market assumptions and property features. Final performance depends on seasonality, property condition, amenities, location, and management strategy.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <div class="pill">How it works</div>
+          <h2>A clean owner landing page you can link from your main website</h2>
+        </div>
+        <p>This is designed as a standalone page, so you can add a button anywhere on your main website that points directly to this estimate page.</p>
+      </div>
+      <div class="grid3">
+        <div class="info-card">
+          <h3>1. Owner enters address</h3>
+          <p>The address field offers a dropdown as they type, helping the page feel more professional and easier to use.</p>
+        </div>
+        <div class="info-card">
+          <h3>2. Estimate is calculated</h3>
+          <p>The page uses a custom formula tuned for Myrtle Beach, North Myrtle Beach, Surfside Beach, and Garden City properties.</p>
+        </div>
+        <div class="info-card">
+          <h3>3. You collect the lead</h3>
+          <p>This version is ready for testing now, and it can be upgraded later to send leads into email, a CRM, or a form handler.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container cta">
+      <div class="section-head" style="margin-bottom:0;">
+        <div>
+          <div class="pill">Important note</div>
+          <h2>I am not using a separate estimate website</h2>
+        </div>
+        <p>The current estimate tool is custom built. It does not depend on Vrbo or another public calculator. That gives you more control over the look, messaging, and lead flow on your own brand page.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container footer-grid">
+      <div>
+        <div class="brand-title" style="font-size:32px;">Ocean Vacations</div>
+        <p>Vacation rentals and property management throughout Myrtle Beach and the surrounding coastal communities.</p>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <div style="margin-top:14px;"><a href="https://oceanvacationsmb.com">Main website</a></div>
+        <div><a href="https://oceanvacationsmb.guestybookings.com/en">Booking engine</a></div>
+        <div><a href="#estimate-tool">Estimate tool</a></div>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <div style="margin-top:14px;">843-222-6516</div>
+        <div>oceanvacationsmb@gmail.com</div>
+        <div>Myrtle Beach, South Carolina</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const addressInput = document.getElementById('address');
+    const addressSuggestions = document.getElementById('addressSuggestions');
+    let addressTimer;
+
+    if (addressInput && addressSuggestions) {
+      addressInput.addEventListener('input', function () {
+        const query = this.value.trim();
+        clearTimeout(addressTimer);
+        if (query.length < 3) return;
+        addressTimer = setTimeout(async () => {
+          try {
+            const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&countrycodes=us&q=' + encodeURIComponent(query + ' South Carolina');
+            const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            const results = await response.json();
+            addressSuggestions.innerHTML = '';
+            results.forEach(item => {
+              const option = document.createElement('option');
+              option.value = item.display_name;
+              addressSuggestions.appendChild(option);
+            });
+          } catch (error) {
+            console.error('Address lookup failed', error);
+          }
+        }, 250);
+      });
+    }
+
+    const revenueForm = document.getElementById('revenueForm');
+    const revenueResult = document.getElementById('revenueResult');
+    const estimateRange = document.getElementById('estimateRange');
+    const estimateDetails = document.getElementById('estimateDetails');
+
+    if (revenueForm) {
+      revenueForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const city = document.getElementById('city').value;
+        const bedrooms = parseInt(document.getElementById('bedrooms').value || '0', 10);
+        const propertyType = document.getElementById('propertyType').value;
+        const pool = document.getElementById('pool').checked;
+        const oceanfront = document.getElementById('oceanfront').checked;
+
+        const cityBase = {
+          'Myrtle Beach': 32000,
+          'North Myrtle Beach': 36000,
+          'Surfside Beach': 39000,
+          'Garden City': 41000
+        };
+
+        const typeBoost = {
+          'Condo': 0,
+          'House': 9000,
+          'Large Group Home': 18000
+        };
+
+        const base = cityBase[city] || 32000;
+        const bedValue = Math.max(1, bedrooms) * 8500;
+        const extras = (pool ? 9000 : 0) + (oceanfront ? 14000 : 0) + (typeBoost[propertyType] || 0);
+        const estimate = base + bedValue + extras;
+        const low = Math.round(estimate * 0.9 / 1000) * 1000;
+        const high = Math.round(estimate * 1.18 / 1000) * 1000;
+
+        estimateRange.textContent = '$' + low.toLocaleString() + ' – $' + high.toLocaleString() + ' / year';
+        estimateDetails.textContent = city + ' • ' + bedrooms + ' BR • ' + propertyType + (pool ? ' • Pool' : '') + (oceanfront ? ' • Oceanfront' : '');
+        revenueResult.style.display = 'block';
+        revenueResult.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
+  </script>
+</body>
+</html>
