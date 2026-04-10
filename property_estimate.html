@@ -315,11 +315,19 @@
         <div class="header no-print">
           <div class="pill">GRI estimate tool</div>
           <div class="brand">Ocean Vacations</div>
-          <div class="sub">Simple owner estimator with printable GRI income report, PMC field, owner name, and property details.</div>
+          <div class="sub">Simple owner estimator with printable GRI income report, PMC field, owner name, property details, and faster address suggestions.</div>
         </div>
 
         <div class="tool no-print">
           <div class="grid">
+            <div class="field-wrap">
+              <label class="label">Estimated ADR</label>
+              <input id="adr" class="field" type="number" min="50" step="1" placeholder="Average daily rate" />
+            </div>
+            <div class="field-wrap">
+              <label class="label">Estimated Occupancy %</label>
+              <input id="occupancy" class="field" type="number" min="1" max="100" step="0.1" placeholder="Occupancy percentage" />
+            </div>
             <div class="field-wrap">
               <label class="label">Owner Name</label>
               <input id="ownerName" class="field" type="text" placeholder="Owner name" />
@@ -441,44 +449,77 @@
   <script>
     const addressInput = document.getElementById('address');
     const addressSuggestions = document.getElementById('addressSuggestions');
+    const cityInput = document.getElementById('city');
     let addressTimer;
+    const addressCache = {};
+
+    function localAddressHints(query, city) {
+      const presets = {
+        'Myrtle Beach': ['Ocean Blvd Myrtle Beach SC', 'Kings Hwy Myrtle Beach SC', '48th Ave N Myrtle Beach SC', 'Broadway at the Beach Myrtle Beach SC'],
+        'North Myrtle Beach': ['Ocean Drive North Myrtle Beach SC', 'Main St North Myrtle Beach SC', 'Crescent Beach North Myrtle Beach SC'],
+        'Surfside Beach': ['Surfside Dr Surfside Beach SC', 'Ocean Blvd S Surfside Beach SC', '17th Ave S Surfside Beach SC'],
+        'Garden City': ['Waccamaw Dr Garden City SC', 'Atlantic Ave Garden City SC', 'Garden City Beach SC']
+      };
+      const list = presets[city] || [];
+      return list.filter(item => item.toLowerCase().includes(query.toLowerCase())).slice(0, 5);
+    }
 
     if (addressInput && addressSuggestions) {
       addressInput.addEventListener('input', function () {
         const query = this.value.trim();
+        const city = cityInput.value;
         clearTimeout(addressTimer);
-        if (query.length < 3) return;
+        addressSuggestions.innerHTML = '';
+        if (query.length < 2) return;
+
+        localAddressHints(query, city).forEach(item => {
+          const option = document.createElement('option');
+          option.value = item;
+          addressSuggestions.appendChild(option);
+        });
+
+        const cacheKey = city + '|' + query.toLowerCase();
+        if (addressCache[cacheKey]) {
+          addressCache[cacheKey].forEach(item => {
+            const option = document.createElement('option');
+            option.value = item;
+            addressSuggestions.appendChild(option);
+          });
+          return;
+        }
+
         addressTimer = setTimeout(async () => {
           try {
-            const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&countrycodes=us&q=' + encodeURIComponent(query + ' South Carolina');
+            const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&countrycodes=us&state=South%20Carolina&city=' + encodeURIComponent(city) + '&q=' + encodeURIComponent(query);
             const response = await fetch(url, { headers: { Accept: 'application/json' } });
             const results = await response.json();
-            addressSuggestions.innerHTML = '';
-            results.forEach(item => {
+            const values = results.map(item => item.display_name);
+            addressCache[cacheKey] = values;
+            values.forEach(item => {
               const option = document.createElement('option');
-              option.value = item.display_name;
+              option.value = item;
               addressSuggestions.appendChild(option);
             });
           } catch (error) {
             console.error('Address lookup failed', error);
           }
-        }, 250);
+        }, 120);
       });
     }
 
     const months = [
-      ['January', 'Winter', 0.05],
-      ['February', 'Winter', 0.05],
-      ['March', 'Spring', 0.07],
-      ['April', 'Spring', 0.08],
+      ['January', 'Winter', 0.035],
+      ['February', 'Winter', 0.04],
+      ['March', 'Spring', 0.06],
+      ['April', 'Spring', 0.075],
       ['May', 'Shoulder', 0.09],
-      ['June', 'Peak', 0.12],
-      ['July', 'Peak', 0.14],
-      ['August', 'Peak', 0.12],
-      ['September', 'Shoulder', 0.08],
-      ['October', 'Fall', 0.07],
-      ['November', 'Fall', 0.06],
-      ['December', 'Holiday', 0.07]
+      ['June', 'Peak', 0.14],
+      ['July', 'Peak', 0.17],
+      ['August', 'Peak', 0.135],
+      ['September', 'Shoulder', 0.085],
+      ['October', 'Fall', 0.065],
+      ['November', 'Fall', 0.045],
+      ['December', 'Holiday', 0.06]
     ];
 
     function currency(num) {
@@ -503,25 +544,38 @@
       const propertyType = document.getElementById('propertyType').value;
       const bedrooms = parseInt(document.getElementById('bedrooms').value || '0', 10);
       const pmc = parseFloat(document.getElementById('pmc').value || '0');
+      const adrInput = parseFloat(document.getElementById('adr').value || '0');
+      const occInput = parseFloat(document.getElementById('occupancy').value || '0');
       const pool = document.getElementById('pool').checked;
       const oceanfront = document.getElementById('oceanfront').checked;
 
-      const cityBase = {
-        'Myrtle Beach': 32000,
-        'North Myrtle Beach': 36000,
-        'Surfside Beach': 39000,
-        'Garden City': 41000
+      const adrByCity = {
+        'Myrtle Beach': 165,
+        'North Myrtle Beach': 190,
+        'Surfside Beach': 210,
+        'Garden City': 225
       };
-      const typeBoost = {
-        'Condo': 0,
-        'House': 9000,
-        'Large Group Home': 18000
+      const occByCity = {
+        'Myrtle Beach': 52,
+        'North Myrtle Beach': 54,
+        'Surfside Beach': 56,
+        'Garden City': 57
+      };
+      const bedroomADRBoost = {
+        'Condo': 18,
+        'House': 30,
+        'Large Group Home': 55
       };
 
-      const base = cityBase[city] || 32000;
-      const bedValue = Math.max(1, bedrooms) * 8500;
-      const extras = (pool ? 9000 : 0) + (oceanfront ? 14000 : 0) + (typeBoost[propertyType] || 0);
-      const annual = base + bedValue + extras;
+      let adr = adrInput || ((adrByCity[city] || 170) + (Math.max(1, bedrooms) - 1) * (bedroomADRBoost[propertyType] || 20));
+      let occupancy = occInput || (occByCity[city] || 52);
+      if (pool) adr += 20;
+      if (oceanfront) adr += 35;
+      if (pool) occupancy += 2;
+      if (oceanfront) occupancy += 3;
+      occupancy = Math.min(75, Math.max(35, occupancy));
+
+      const annual = adr * 365 * (occupancy / 100);
       const avgMonthly = annual / 12;
       const pmcAmount = annual * (pmc / 100);
       const net = annual - pmcAmount;
