@@ -109,8 +109,12 @@ margin:20px 0;
 .summary-card{background:#fff;color:#000;border:1px solid #d4e1e7;border-radius:10px;padding:18px;text-align:center;}
 .summary-label{font-size:10px;color:#000;font-weight:bold;text-transform:uppercase}
 .summary-value{font-size:14px;font-weight:bold;color:#000;margin-top:6px}
-.compact-table{width:auto;display:table;table-layout:auto;margin:10px auto 0 auto;font-size:8.5px}
-.compact-table th,.compact-table td{padding:3px 6px;white-space:nowrap}
+.compact-table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;margin:10px 0 0 0}
+.compact-table{width:100%;table-layout:auto;font-size:15px;border-collapse:collapse}
+.compact-table th,.compact-table td{padding:10px 16px;white-space:nowrap;text-align:left}
+.compact-table th{font-weight:bold;background:#f5f7f8;color:#000;border-bottom:2px solid #ccc}
+.compact-table td{border-bottom:1px solid #e0e0e0}
+.compact-table tr:last-child td,.compact-table tr:last-child th{border-bottom:none}
 .invoice-attachment-wrap{display:block;text-align:center;page-break-inside:avoid;break-inside:avoid;margin:8px 0}
 .invoice-attachment{display:block;max-width:100%;width:auto;height:auto;max-height:10in;margin:0 auto;page-break-inside:avoid;break-inside:avoid;object-fit:contain}
 .modal{display:none;position:fixed;z-index:1001;left:50%;top:50%;transform:translate(-50%,-50%);width:90%;max-width:560px;background:#263942;color:#fff;border-radius:12px;padding:30px;box-shadow:0 12px 28px rgba(0,0,0,0.35);max-height:90vh;overflow-y:auto}
@@ -1480,7 +1484,7 @@ toDate = y + "-12-31";
       });
 
       html+="<div class='summary-grid'><div class='summary-card'><div class='summary-label'>GROSS PAYOUT</div><div class='summary-value'>"+money(totalPayout)+"</div></div></div>";
-      html+="<table class='compact-table'><tr><th>RESERVATION CODE</th><th>CHECK-IN/OUT</th><th>GROSS PAYOUT</th></tr>";
+      html+="<div class='compact-table-wrap'><table class='compact-table'><tr><th>RESERVATION CODE</th><th>CHECK-IN/OUT</th><th>GROSS PAYOUT</th></tr>";
       griRows.forEach(r=>{
         const payout=getGrossPayoutValue(r);
         const code=getRowCode(r);
@@ -1489,7 +1493,7 @@ toDate = y + "-12-31";
         const stay=checkIn+" - "+checkOut;
         html+="<tr><td>"+code+"</td><td>"+stay+"</td><td>"+money(payout)+"</td></tr>";
       });
-      html+="<tr><th colspan='2'>TOTAL</th><th>"+money(totalPayout)+"</th></tr></table>";
+      html+="<tr><th colspan='2'>TOTAL</th><th>"+money(totalPayout)+"</th></tr></table></div>";
     }else{
       const byProperty={};
       filtered.forEach(r=>{
@@ -1987,9 +1991,6 @@ function formatEmailTemplate(reportTitle,periodLabel,payoutDate,link){
     "Here is your "+reportTitle+" for "+periodLabel+".",
     "The transfer will be processed on "+payoutDate+".",
     "",
-    "Statement Link:",
-    (link||"<>"),
-    "",
     "Thank you,",
     "Ocean Vacations"
   ].join("\n");
@@ -2015,7 +2016,7 @@ function openEmailClient(reportId){
   const ownerEmail=snapshot ? snapshot.email : ((OWNERS[ownerName]&&OWNERS[ownerName].email)?OWNERS[ownerName].email:"");
 
   document.getElementById("emailTo").value=ownerEmail||"";
-  document.getElementById("emailSubject").value="Ocean Vacations - "+reportTitle+" - "+periodLabel;
+  document.getElementById("emailSubject").value="Your Ocean Vacations Report is Ready";
   document.getElementById("emailLink").value="";
   document.getElementById("emailStatus").textContent="Generating PDF link...";
 
