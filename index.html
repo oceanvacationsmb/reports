@@ -2485,9 +2485,11 @@ function loadData(){
       return;
     }
 
-    fetch(getGitHubAPI(),{
+    const ghFetch=fetch(getGitHubAPI(),{
       headers:{"Authorization":"token "+githubToken}
-    })
+    });
+    const ghTimeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error("timeout")),8000));
+    Promise.race([ghFetch,ghTimeout])
     .then(r=>{
       if(!r.ok)throw new Error(r.status);
       return r.json();
