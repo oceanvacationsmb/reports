@@ -620,10 +620,7 @@ function getGrossPayoutValue(row){
     ? num(row["MANUAL TOTAL PAYOUT"])
     : null;
   if(manual!==null) return manual;
-  const totalPayout=num(row && row["TOTAL PAYOUT"]);
-  if(totalPayout!==0) return totalPayout;
-  // Fallback to pre-cancellation payout for cancelled reservations where hostPayout=0
-  return num(row && row["PRE CANCELLATION HOST PAYOUT"]);
+  return num(row && row["TOTAL PAYOUT"]);
 }
 
 function isFinanciallyValidRow(row){
@@ -4041,7 +4038,8 @@ const p = a * pmcPercent;
 if(t.type==="draft"){
   w=getWebsiteVrboFeeValue(row);
 }
-      gross+=g-(isDraft ? getAirbnbResolutionCenterValue(row) : 0);
+      const arc=isDraft ? getAirbnbResolutionCenterValue(row) : 0;
+      gross+=g+Math.max(0,-arc);
       acc+=a;
       clean+=c;
       pmc+=p;
