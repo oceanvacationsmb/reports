@@ -620,7 +620,10 @@ function getGrossPayoutValue(row){
     ? num(row["MANUAL TOTAL PAYOUT"])
     : null;
   if(manual!==null) return manual;
-  return num(row && row["TOTAL PAYOUT"]);
+  const totalPayout=num(row && row["TOTAL PAYOUT"]);
+  if(totalPayout!==0) return totalPayout;
+  // Fallback to pre-cancellation payout for cancelled reservations where hostPayout=0
+  return num(row && row["PRE CANCELLATION HOST PAYOUT"]);
 }
 
 function isFinanciallyValidRow(row){
@@ -2895,24 +2898,30 @@ function fetchGuestyRowsForOwner(ownerName,useAllProperties){
     const apiKey=(guestyUrl.split("apiKey=")[1]||"").split("&")[0];
     if(!apiKey) return reject(new Error("Missing apiKey in Guesty URL"));
 
-    const reportUrl="https://report.guesty.com/api/shared-reservations-reports?timezone=America/New_York&skip=0&limit=1000";
-    fetch(reportUrl,{
-      headers:{
-        "accept":"*/*",
-        "authorization":apiKey,
-        "content-type":"application/json"
-      }
-    })
-    .then(r=>{
-      if(!r.ok) throw new Error("Guesty fetch failed: "+r.status);
-      return r.json();
-    })
-    .then(payload=>{
-      const rows=Array.isArray(payload)?payload:(payload.results||payload.data||[]);
-      const mapped=rows.map(mapGuestyReservation);
-      resolve(mapped);
-    })
-    .catch(reject);
+    const PAGE_LIMIT=1000;
+    const BASE_URL="https://report.guesty.com/api/shared-reservations-reports?timezone=America/New_York";
+
+    function fetchPage(skip,acc){
+      return fetch(BASE_URL+"&skip="+skip+"&limit="+PAGE_LIMIT,{
+        headers:{"accept":"*/*","authorization":apiKey,"content-type":"application/json"}
+      })
+      .then(r=>{
+        if(!r.ok) throw new Error("Guesty fetch failed: "+r.status);
+        return r.json();
+      })
+      .then(payload=>{
+        const rows=Array.isArray(payload)?payload:(payload.results||payload.data||[]);
+        const merged=acc.concat(rows);
+        if(rows.length<PAGE_LIMIT) return merged;
+        return fetchPage(skip+PAGE_LIMIT,merged);
+      });
+    }
+
+    fetchPage(0,[])
+      .then(allRows=>{
+        resolve(allRows.map(mapGuestyReservation));
+      })
+      .catch(reject);
   });
 }
 
