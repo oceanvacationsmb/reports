@@ -2780,7 +2780,8 @@ function mapGuestyReservation(r){
   });
 
   // Some Guesty shared reports expose taxes as top-level fields instead of invoiceItems.children.
-  resolutionCenter=Math.max(resolutionCenter,guestyValue("money.invoiceItems.Arc"));
+  // Use first non-zero direct ARC field (Math.max would zero out negatives like elevator fees)
+  (function(){var c=[r["money.invoiceItems.ARC"],r["money.invoiceItems.Arc"],r.money&&r.money.invoiceItems&&r.money.invoiceItems.ARC,r.money&&r.money.invoiceItems&&r.money.invoiceItems.Arc,r.airbnbResolutionCenter,r.resolutionCenter];for(var i=0;i<c.length;i++){if(c[i]!==undefined&&c[i]!==null){var v=extractGuestyMoneyValue(c[i]);if(v!==0){resolutionCenter=v;return;}}}})();
   cityTax=Math.max(cityTax,guestyValue("money.invoiceItems.CITY_TAX"),guestyValue("taxCity"));
   stateTax=Math.max(stateTax,guestyValue("money.invoiceItems.STATE_TAX"),guestyValue("taxState"));
   countyTax=Math.max(countyTax,guestyValue("money.invoiceItems.COUNTY_TAX"),guestyValue("taxCounty"));
