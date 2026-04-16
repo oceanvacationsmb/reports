@@ -2807,7 +2807,11 @@ function mapGuestyReservation(r){
     "CHECK-OUT DATE": (r.checkOutDate && r.checkOutDate.value) || "",
     "LISTING'S NICKNAME": (r["listing.nickname"] && r["listing.nickname"].children) || "",
     "PROPERTY ADDRESS": propertyAddress,
-    "TOTAL PAYOUT": guestyValue("money.hostPayout"),
+    "TOTAL PAYOUT": (function(){
+      var fields=[r["money.hostPayout"],r.money&&r.money.hostPayout,r["money.payout"],r.money&&r.money.payout,r["money.totalPayout"],r.money&&r.money.totalPayout,r.hostPayout,r.totalPayout,r.payout];
+      for(var i=0;i<fields.length;i++){if(fields[i]!==undefined&&fields[i]!==null)return extractGuestyMoneyValue(fields[i]);}
+      return 0;
+    })(),
     "ACCOMMODATION FARE": guestyValue("money.fareAccommodation"),
     "CLEANING FARE": guestyValue("money.fareCleaning"),
     "PLATFORM": guestyText("integration.platform"),
