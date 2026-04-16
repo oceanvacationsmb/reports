@@ -2468,12 +2468,28 @@ function loadLocalFallback(){
     });
 }
 
+function loadHeavyDataInBackground(){
+  fetch("invoices.json",{cache:"no-store"})
+    .then(r=>r.json())
+    .then(map=>{
+      (expenses||[]).forEach(e=>{if(e.invoice==="__ref__"&&map[e.id])e.invoice=map[e.id];});
+    })
+    .catch(()=>{});
+  fetch("saved_reports_html.json",{cache:"no-store"})
+    .then(r=>r.json())
+    .then(map=>{
+      (savedReports||[]).forEach(r=>{if(r.html==="__ref__"&&map[r.id])r.html=map[r.id];});
+    })
+    .catch(()=>{});
+}
+
 function loadData(){
   githubToken=localStorage.getItem("github_token")||"";
 
   const finalize=()=>{
     init();
     updateTokenStatus();
+    loadHeavyDataInBackground();
   };
 
   // Always hydrate from local files first so owner selector works even when GitHub data is empty/stale.
