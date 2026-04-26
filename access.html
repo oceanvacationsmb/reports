@@ -162,10 +162,10 @@ function openNewTab(url) {
 
 function loadContactPage() {
     document.getElementById("contentFrame").srcdoc = `
-        <div class="contact-page">
+        <div style="padding:30px;font-family:Arial;">
             <h2>Contact Information</h2>
 
-            <div class="contact-menu">
+            <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:20px;">
                 <button onclick="showContactSection('management')">Management</button>
                 <button onclick="showContactSection('maintenance')">Maintenance</button>
                 <button onclick="showContactSection('service')">Service</button>
@@ -174,95 +174,55 @@ function loadContactPage() {
                 <button onclick="showContactSection('filter')">Filter Size</button>
             </div>
 
-            <div id="contactDetails" class="contact-details">
+            <div id="contactDetails" style="padding:20px;background:#f1f4f8;border-radius:8px;">
                 Select a section above.
             </div>
         </div>
 
-        <style>
-            .contact-page {
-                padding: 30px;
-                font-family: Arial;
-                color: #1f2a38;
+        <script>
+            function showContactSection(section) {
+                const details = {
+                    management: \`
+                        <h3>Management</h3>
+                        Zack<br>843-222-6516<br>oceanvacationsmb@gmail.com<br><br>
+                        Lia<br>843-222-6357<br>liatedri18@hotmail.com<br><br>
+                        Isaac<br>843-206-2294<br>isaacedri@gmail.com
+                    \`,
+                    maintenance: \`
+                        <h3>Maintenance</h3>
+                        ECIA<br>843-653-6631<br><br>
+                        Quickfix<br>843-902-8745
+                    \`,
+                    service: \`
+                        <h3>Service</h3>
+                        Elevator Lan<br>859-358-5661
+                    \`,
+                    cleaning: \`
+                        <h3>Cleaning</h3>
+                        Add cleaning info
+                    \`,
+                    hoa: \`
+                        <h3>HOA's</h3>
+                        Add HOA info
+                    \`,
+                    filter: \`
+                        <h3>Filter Size</h3>
+                        Add filter sizes
+                    \`
+                };
+                document.getElementById("contactDetails").innerHTML = details[section];
             }
-
-            .contact-menu {
-                display: grid;
-                grid-template-columns: repeat(6, 1fr);
-                gap: 10px;
-                margin-bottom: 25px;
-            }
-
-            .contact-menu button {
-                padding: 12px;
-                border: none;
-                border-radius: 6px;
-                background: #3498db;
-                color: white;
-                cursor: pointer;
-                font-weight: bold;
-            }
-
-            .contact-menu button:hover {
-                background: #2980b9;
-            }
-
-            .contact-details {
-                padding: 20px;
-                background: #f1f4f8;
-                border-radius: 8px;
-                line-height: 1.6;
-            }
-        </style>
-
-       <script>
-function showContactSection(section) {
-    const details = {
-        management: `
-            <h3>Management</h3>
-            Zack<br>843-222-6516<br>oceanvacationsmb@gmail.com<br><br>
-            Lia<br>843-222-6357<br>liatedri18@hotmail.com<br><br>
-            Isaac<br>843-206-2294<br>isaacedri@gmail.com
-        `,
-
-        maintenance: `
-            <h3>Maintenance</h3>
-            ECIA<br>843-653-6631<br><br>
-            Quickfix<br>843-902-8745<br><br>
-            Roofer<br>843-458-5140<br><br>
-            Dennis Painter<br>843-602-4314<br><br>
-            Alex Handyman<br>843-205-9699<br><br>
-            Plumber<br>407-283-8230<br><br>
-            Vinyl Flooring<br>843-457-1152
-        `,
-
-        service: `
-            <h3>Service Providers</h3>
-            Elevator Lan<br>859-358-5661<br><br>
-            Paradies HVAC Moshe<br>843-222-3056<br><br>
-            Four Star Plumbing<br>843-236-7142<br><br>
-            Duraclean Carpet Cleaning<br>843-238-3382
-        `,
-
-        cleaning: `
-            <h3>Cleaning</h3>
-            Bella<br>843-251-4410<br><br>
-            Catherina<br>843-653-6632<br><br>
-            Carolina<br>843-712-3463
-        `
-    };
-
-    document.getElementById("contactDetails").innerHTML = details[section];
-}
-</script>
+        <\/script>
     `;
 }
 
+/* DEFAULT PAGE WITH LOGO */
 window.onload = function() {
     document.getElementById("contentFrame").srcdoc = `
-        <div style="padding:40px;font-family:Arial;">
-            <h1></h1>
-            <p></p>
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;font-family:Arial;">
+            <img src="logo.png" style="max-width:300px;margin-bottom:20px;">
+            <h1>OCEAN VACATIONS</h1>
+            <p>Select a tool from the left menu</p>
         </div>
     `;
 };
