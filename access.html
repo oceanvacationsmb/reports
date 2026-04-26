@@ -257,8 +257,104 @@ function loadContactPage() {
         </style>
 
         <script>
+            function loadContactPage() {
+    document.getElementById("contentFrame").srcdoc = `
+        <div class="contact-page">
+            <h2>Contact Information</h2>
+
+            <div class="contact-menu">
+                <button onclick="showContactSection('management')">Management</button>
+                <button onclick="showContactSection('maintenanceCleaning')">Maintenance / Cleaning</button>
+                <button onclick="showContactSection('hoa')">HOA's</button>
+                <button onclick="showContactSection('filter')">Filter Size</button>
+            </div>
+
+            <div id="contactDetails" class="contact-details"></div>
+        </div>
+
+        <style>
+            body {
+                margin: 0;
+                background: #f5f7fb;
+            }
+
+            .contact-page {
+                padding: 35px;
+                font-family: Arial, sans-serif;
+                color: #1f2a38;
+            }
+
+            .contact-page h2 {
+                font-size: 30px;
+                margin-bottom: 25px;
+            }
+
+            .contact-menu {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 14px;
+                margin-bottom: 28px;
+            }
+
+            .contact-menu button {
+                padding: 14px 10px;
+                border: none;
+                border-radius: 12px;
+                background: linear-gradient(135deg, #3498db, #1f78b4);
+                color: white;
+                cursor: pointer;
+                font-size: 15px;
+                font-weight: bold;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            }
+
+            .contact-menu button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 16px rgba(0,0,0,0.22);
+            }
+
+            .contact-details {
+                padding: 30px;
+                background: #ffffff;
+                border-radius: 16px;
+                line-height: 1.6;
+                font-size: 18px;
+                box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+                min-height: 250px;
+            }
+
+            .split-box {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 25px;
+            }
+
+            .info-card {
+                background: #f1f4f8;
+                border-radius: 14px;
+                padding: 25px;
+            }
+
+            .info-card h3 {
+                margin-top: 0;
+                font-size: 24px;
+            }
+
+            @media (max-width: 900px) {
+                .contact-menu {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+
+                .split-box {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+
+        <script>
             function showContactSection(section) {
                 const details = {
+
                     management: \`
                         <h3>Management</h3>
                         Zack<br>843-222-6516<br>oceanvacationsmb@gmail.com<br><br>
@@ -304,6 +400,11 @@ function loadContactPage() {
                 };
 
                 document.getElementById("contactDetails").innerHTML = details[section];
+            }
+
+            // DEFAULT LOAD → MANAGEMENT
+            window.onload = function() {
+                showContactSection('management');
             }
         <\/script>
     `;
