@@ -15,12 +15,13 @@
         position: fixed;
         top: 0;
         left: 0;
-        width: 220px;
+        width: 240px;
         height: 100vh;
         background: #1f2a38;
         color: #fff;
         padding: 15px;
         box-sizing: border-box;
+        overflow-y: auto;
     }
 
     .sidebar h2 {
@@ -60,10 +61,19 @@
         opacity: 0.8;
     }
 
+    .contact-section {
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    .contact-item {
+        margin-bottom: 6px;
+    }
+
     .topbar {
         position: fixed;
         top: 0;
-        left: 220px;
+        left: 240px;
         right: 0;
         height: 50px;
         background: #ffffff;
@@ -78,7 +88,7 @@
     .iframe-container {
         position: fixed;
         top: 50px;
-        left: 220px;
+        left: 240px;
         right: 0;
         bottom: 0;
     }
@@ -98,7 +108,6 @@
 
     <div class="settings-header">TOOLS</div>
 
-    <!-- WEBSITE FIRST -->
     <button class="btn" onclick="openAccessLink('https://oceanvacationsmb.com')">
         WEBSITE
     </button>
@@ -119,7 +128,6 @@
         COLLAGE TOOL
     </button>
 
-    <!-- EXTERNAL -->
     <button class="btn" onclick="openNewTab('https://www.airbnb.com')">
         AIRBNB <span class="icon">↗</span>
     </button>
@@ -127,6 +135,25 @@
     <button class="btn" onclick="openNewTab('https://www.airbnb.com/help/resolutions')">
         AIRBNB RESOLUTION <span class="icon">↗</span>
     </button>
+
+    <!-- CONTACT INFO -->
+    <div class="settings-header">CONTACT INFORMATION</div>
+
+    <div class="contact-section">
+        <div class="settings-header">Management Team</div>
+        <div class="contact-item">Zack<br>843-222-6516<br>oceanvacationsmb@gmail.com</div>
+        <div class="contact-item">Lia<br>843-222-6357<br>liatedri18@hotmail.com</div>
+        <div class="contact-item">Isaac<br>843-206-2294<br>isaacedri@gmail.com</div>
+
+        <div class="settings-header">Maintenance</div>
+        <div class="contact-item">ECIA<br>843-653-6631</div>
+        <div class="contact-item">Quickfix<br>843-902-8745</div>
+
+        <div class="settings-header">Service Providers</div>
+        <div class="contact-item">Elevator Lan<br>859-358-5661</div>
+        <div class="contact-item">Four Star Plumbing<br>843-236-7142</div>
+        <div class="contact-item">Duraclean Carpet Cleaning<br>843-238-3382</div>
+    </div>
 </div>
 
 <div class="topbar">
@@ -152,7 +179,6 @@ function openNewTab(url) {
     window.open(url, "_blank");
 }
 
-/* LOAD DEFAULT PAGE */
 window.onload = function() {
     openAccessLink('https://oceanvacationsmb.com');
 };
