@@ -162,10 +162,10 @@ function openNewTab(url) {
 
 function loadContactPage() {
     document.getElementById("contentFrame").srcdoc = `
-        <div style="padding:30px;font-family:Arial;">
+        <div class="contact-page">
             <h2>Contact Information</h2>
 
-            <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:20px;">
+            <div class="contact-menu">
                 <button onclick="showContactSection('management')">Management</button>
                 <button onclick="showContactSection('maintenance')">Maintenance</button>
                 <button onclick="showContactSection('service')">Service</button>
@@ -174,22 +174,96 @@ function loadContactPage() {
                 <button onclick="showContactSection('filter')">Filter Size</button>
             </div>
 
-            <div id="contactDetails" style="padding:20px;background:#f1f4f8;border-radius:8px;">
+            <div id="contactDetails" class="contact-details">
                 Select a section above.
             </div>
         </div>
 
+        <style>
+            body {
+                margin: 0;
+                background: #f5f7fb;
+            }
+
+            .contact-page {
+                padding: 35px;
+                font-family: Arial, sans-serif;
+                color: #1f2a38;
+            }
+
+            .contact-page h2 {
+                font-size: 30px;
+                margin-bottom: 25px;
+            }
+
+            .contact-menu {
+                display: grid;
+                grid-template-columns: repeat(6, 1fr);
+                gap: 14px;
+                margin-bottom: 28px;
+            }
+
+            .contact-menu button {
+                padding: 14px 10px;
+                border: none;
+                border-radius: 12px;
+                background: linear-gradient(135deg, #3498db, #1f78b4);
+                color: white;
+                cursor: pointer;
+                font-size: 15px;
+                font-weight: bold;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                transition: all 0.2s ease;
+            }
+
+            .contact-menu button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 16px rgba(0,0,0,0.22);
+                background: linear-gradient(135deg, #2f89c8, #17679d);
+            }
+
+            .contact-menu button:active {
+                transform: translateY(0);
+            }
+
+            .contact-details {
+                padding: 30px;
+                background: #ffffff;
+                border-radius: 16px;
+                line-height: 1.6;
+                font-size: 18px;
+                box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+                min-height: 250px;
+            }
+
+            .contact-details h3 {
+                margin-top: 0;
+                font-size: 26px;
+                color: #1f2a38;
+            }
+
+            @media (max-width: 1100px) {
+                .contact-menu {
+                    grid-template-columns: repeat(3, 1fr);
+                }
+            }
+
+            @media (max-width: 700px) {
+                .contact-menu {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+        </style>
+
         <script>
             function showContactSection(section) {
                 const details = {
-
                     management: \`
                         <h3>Management</h3>
                         Zack<br>843-222-6516<br>oceanvacationsmb@gmail.com<br><br>
                         Lia<br>843-222-6357<br>liatedri18@hotmail.com<br><br>
                         Isaac<br>843-206-2294<br>isaacedri@gmail.com
                     \`,
-
                     maintenance: \`
                         <h3>Maintenance</h3>
                         ECIA<br>843-653-6631<br><br>
@@ -200,7 +274,6 @@ function loadContactPage() {
                         Plumber<br>407-283-8230<br><br>
                         Vinyl Flooring<br>843-457-1152
                     \`,
-
                     service: \`
                         <h3>Service Providers</h3>
                         Elevator Lan<br>859-358-5661<br><br>
@@ -208,19 +281,16 @@ function loadContactPage() {
                         Four Star Plumbing<br>843-236-7142<br><br>
                         Duraclean Carpet Cleaning<br>843-238-3382
                     \`,
-
                     cleaning: \`
                         <h3>Cleaning</h3>
                         Bella<br>843-251-4410<br><br>
                         Catherina<br>843-653-6632<br><br>
                         Carolina<br>843-712-3463
                     \`,
-
                     hoa: \`
                         <h3>HOA's</h3>
                         Add HOA contacts here
                     \`,
-
                     filter: \`
                         <h3>Filter Size</h3>
                         Add filter sizes here
@@ -236,7 +306,7 @@ function loadContactPage() {
 window.onload = function() {
     document.getElementById("contentFrame").srcdoc = `
         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;font-family:Arial;">
-            <img src="<img src="https://oceanvacationsmb.github.io/reports/ChatGPT%20Image%20Apr%2026%2C%202026%2C%2006_07_25%20PM.png" style="max-width:300px;margin-bottom:20px;">
+            <img src="<img src="https://oceanvacationsmb.github.io/reports/for_web.png" style="max-width:300px;margin-bottom:20px;">
             <h1>OCEAN VACATIONS</h1>
             <p>Select a tool from the left menu</p>
         </div>
