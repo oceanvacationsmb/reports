@@ -61,15 +61,6 @@
         opacity: 0.9;
     }
 
-    .contact-section {
-        font-size: 11px;
-        line-height: 1.5;
-    }
-
-    .contact-item {
-        margin-bottom: 8px;
-    }
-
     .topbar {
         position: fixed;
         top: 0;
@@ -99,19 +90,21 @@
         border: none;
     }
 
-    .welcome {
-        font-family: Arial, sans-serif;
-        padding: 40px;
+    .contact-page {
+        padding: 30px;
+        font-family: Arial;
         color: #1f2a38;
     }
 
-    .welcome h1 {
+    .contact-page h2 {
         margin-top: 0;
-        font-size: 28px;
     }
 
-    .welcome p {
-        font-size: 16px;
+    .contact-box {
+        margin-bottom: 20px;
+        padding: 15px;
+        border-radius: 6px;
+        background: #f1f4f8;
     }
 </style>
 </head>
@@ -159,58 +152,11 @@
         AIRBNB RESOLUTION <span class="icon">↗</span>
     </button>
 
-    <div class="settings-header">CONTACT INFORMATION</div>
+    <div class="settings-header">CONTACT</div>
 
-    <div class="contact-section">
-        <div class="settings-header">Management Team</div>
-
-        <div class="contact-item">
-            Zack<br>
-            843-222-6516<br>
-            oceanvacationsmb@gmail.com
-        </div>
-
-        <div class="contact-item">
-            Lia<br>
-            843-222-6357<br>
-            liatedri18@hotmail.com
-        </div>
-
-        <div class="contact-item">
-            Isaac<br>
-            843-206-2294<br>
-            isaacedri@gmail.com
-        </div>
-
-        <div class="settings-header">Maintenance</div>
-
-        <div class="contact-item">
-            ECIA<br>
-            843-653-6631
-        </div>
-
-        <div class="contact-item">
-            Quickfix<br>
-            843-902-8745
-        </div>
-
-        <div class="settings-header">Service Providers</div>
-
-        <div class="contact-item">
-            Elevator Lan<br>
-            859-358-5661
-        </div>
-
-        <div class="contact-item">
-            Four Star Plumbing<br>
-            843-236-7142
-        </div>
-
-        <div class="contact-item">
-            Duraclean Carpet Cleaning<br>
-            843-238-3382
-        </div>
-    </div>
+    <button class="btn" onclick="loadContactPage()">
+        CONTACT INFO
+    </button>
 </div>
 
 <div class="topbar">
@@ -224,24 +170,48 @@
 <script>
 function openAccessLink(url) {
     const cacheBreaker = "v=" + new Date().getTime();
-
-    if (url.includes("?")) {
-        document.getElementById("contentFrame").src = url + "&" + cacheBreaker;
-    } else {
-        document.getElementById("contentFrame").src = url + "?" + cacheBreaker;
-    }
+    document.getElementById("contentFrame").src = url + (url.includes("?") ? "&" : "?") + cacheBreaker;
 }
 
 function openNewTab(url) {
     window.open(url, "_blank");
 }
 
+function loadContactPage() {
+    document.getElementById("contentFrame").srcdoc = `
+        <div class="contact-page">
+
+            <h2>Contact Information</h2>
+
+            <div class="contact-box">
+                <h3>Management Team</h3>
+                Zack<br>843-222-6516<br>oceanvacationsmb@gmail.com<br><br>
+                Lia<br>843-222-6357<br>liatedri18@hotmail.com<br><br>
+                Isaac<br>843-206-2294<br>isaacedri@gmail.com
+            </div>
+
+            <div class="contact-box">
+                <h3>Maintenance</h3>
+                ECIA<br>843-653-6631<br><br>
+                Quickfix<br>843-902-8745
+            </div>
+
+            <div class="contact-box">
+                <h3>Service Providers</h3>
+                Elevator Lan<br>859-358-5661<br><br>
+                Four Star Plumbing<br>843-236-7142<br><br>
+                Duraclean Carpet Cleaning<br>843-238-3382
+            </div>
+
+        </div>
+    `;
+}
+
 window.onload = function() {
     document.getElementById("contentFrame").srcdoc = `
-        <div class="welcome">
+        <div style="padding:40px;font-family:Arial;">
             <h1>OCEAN VACATIONS TOOLS ACCESS PAGE</h1>
-            <p>Select a tool from the left menu.</p>
-            <p>Website, Airbnb, DocuSign, and login pages open in a new tab.</p>
+            <p>Select a tool or contact section from the left menu.</p>
         </div>
     `;
 };
