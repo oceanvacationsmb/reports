@@ -11,14 +11,12 @@
         background: #f5f6fa;
     }
 
-    .container {
-        display: flex;
-        height: 100vh;
-    }
-
-    /* LEFT NAV */
     .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
         width: 220px;
+        height: 100vh;
         background: #1f2a38;
         color: #fff;
         padding: 15px;
@@ -48,28 +46,14 @@
         border-radius: 4px;
         background: #3498db;
         color: #fff;
-        transition: 0.2s;
     }
 
     .btn:hover {
         background: #2980b9;
     }
 
-    /* MAIN CONTENT */
-    .main {
-        flex: 1;
-        background: #fff;
-    }
-
-    iframe {
-        width: 100%;
-        height: 100%;
-        border: none;
-    }
-
-    /* HEADER TOP */
     .topbar {
-        position: absolute;
+        position: fixed;
         top: 0;
         left: 220px;
         right: 0;
@@ -84,55 +68,62 @@
     }
 
     .iframe-container {
-        position: absolute;
+        position: fixed;
         top: 50px;
         left: 220px;
         right: 0;
         bottom: 0;
+    }
+
+    iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
     }
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="sidebar">
+    <h2>OCEAN VACATIONS</h2>
 
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-        <h2>OCEAN VACATIONS</h2>
+    <div id="accessHeader" class="settings-header">TOOLS</div>
 
-        <div id="accessHeader" class="settings-header">TOOLS</div>
+    <button class="btn" onclick="openAccessLink('https://oceanvacationsmb.github.io/tax-remittance-dashboard/index.html')">
+        TAXES REPORT
+    </button>
 
-        <button class="btn" onclick="openAccessLink('https://oceanvacationsmb.github.io/tax-remittance-dashboard/index.html')">TAXES REPORT</button>
+    <button class="btn" onclick="openAccessLink('https://oceanvacationsmb.github.io/owner_income_report/index.html')">
+        OWNER PORTAL
+    </button>
 
-        <button class="btn" onclick="openAccessLink('https://paleturquoise-baboon-311445.hostingersite.com/login.php')">GUESTY PRICES</button>
+    <button class="btn" onclick="openAccessLink('https://oceanvacationsmb.github.io/reports/property_estimate.html')">
+        PROPERTY GRI ESTIMATOR
+    </button>
 
-        <button class="btn" onclick="openAccessLink('https://oceanvacationsmb.github.io/owner_income_report/index.html')">OWNER PORTAL</button>
-
-        <button class="btn" onclick="openAccessLink('https://app.guesty.com')">GUESTY</button>
-
-        <button class="btn" onclick="openAccessLink('https://oceanvacationsmb.github.io/reports/property_estimate.html')">PROPERTY GRI ESTIMATOR</button>
-
-        <button class="btn" onclick="openAccessLink('https://oceanvacationsmb.github.io/collage/')">COLLAGE TOOL</button>
-
-        <div id="settingsHeader" class="settings-header">SETTINGS</div>
-    </div>
-
+    <button class="btn" onclick="openAccessLink('https://oceanvacationsmb.github.io/collage/')">
+        COLLAGE TOOL
+    </button>
 </div>
 
-<!-- TOP TITLE -->
 <div class="topbar">
     OCEAN VACATIONS TOOLS ACCESS PAGE
 </div>
 
-<!-- IFRAME -->
 <div class="iframe-container">
     <iframe id="contentFrame" src=""></iframe>
 </div>
 
 <script>
 function openAccessLink(url) {
-    document.getElementById("contentFrame").src = url;
+    const cacheBreaker = "v=" + new Date().getTime();
+
+    if (url.includes("?")) {
+        document.getElementById("contentFrame").src = url + "&" + cacheBreaker;
+    } else {
+        document.getElementById("contentFrame").src = url + "?" + cacheBreaker;
+    }
 }
 </script>
 
