@@ -46,10 +46,18 @@
         border-radius: 4px;
         background: #3498db;
         color: #fff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
 
     .btn:hover {
         background: #2980b9;
+    }
+
+    .icon {
+        font-size: 12px;
+        opacity: 0.8;
     }
 
     .topbar {
@@ -88,8 +96,9 @@
 <div class="sidebar">
     <h2>OCEAN VACATIONS</h2>
 
-    <div id="accessHeader" class="settings-header">TOOLS</div>
+    <div class="settings-header">TOOLS</div>
 
+    <!-- INTERNAL (iframe) -->
     <button class="btn" onclick="openAccessLink('https://oceanvacationsmb.github.io/tax-remittance-dashboard/index.html')">
         TAXES REPORT
     </button>
@@ -106,19 +115,22 @@
         COLLAGE TOOL
     </button>
 
-    <button class="btn" onclick="window.open('https://www.airbnb.com/hosting','_blank')">
-    AIRBNB <span style="margin-left:6px;">↗</span>
-</button>
-
-<button class="btn" onclick="window.open('https://www.airbnb.com/resolutions','_blank')">
-    AIRBNB RESOLUTION CENTER <span style="margin-left:6px;">↗</span>
-</button>
-   
-
-    <button class="btn" onclick="openAccessLink('https://app.signnow.com/webapp/documents/538503b037ba43bbb7f9281054f4eb181e1d79f2')">
-        SIGN DOCUMENTS
+    <!-- EXTERNAL (new tab / login required) -->
+    <button class="btn" onclick="openNewTab('https://www.airbnb.com')">
+        AIRBNB <span class="icon">↗</span>
     </button>
-    
+
+    <button class="btn" onclick="openNewTab('https://www.airbnb.com/help/resolutions')">
+        AIRBNB RESOLUTION <span class="icon">↗</span>
+    </button>
+
+    <button class="btn" onclick="openNewTab('https://app.guesty.com')">
+        GUESTY <span class="icon">↗</span>
+    </button>
+
+    <button class="btn" onclick="openNewTab('https://paleturquoise-baboon-311445.hostingersite.com/login.php')">
+        SIGN DOCUMENTS <span class="icon">↗</span>
+    </button>
 </div>
 
 <div class="topbar">
@@ -138,6 +150,10 @@ function openAccessLink(url) {
     } else {
         document.getElementById("contentFrame").src = url + "?" + cacheBreaker;
     }
+}
+
+function openNewTab(url) {
+    window.open(url, "_blank");
 }
 </script>
 
