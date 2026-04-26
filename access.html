@@ -89,23 +89,6 @@
         height: 100%;
         border: none;
     }
-
-    .contact-page {
-        padding: 30px;
-        font-family: Arial;
-        color: #1f2a38;
-    }
-
-    .contact-page h2 {
-        margin-top: 0;
-    }
-
-    .contact-box {
-        margin-bottom: 20px;
-        padding: 15px;
-        border-radius: 6px;
-        background: #f1f4f8;
-    }
 </style>
 </head>
 
@@ -180,30 +163,95 @@ function openNewTab(url) {
 function loadContactPage() {
     document.getElementById("contentFrame").srcdoc = `
         <div class="contact-page">
-
             <h2>Contact Information</h2>
 
-            <div class="contact-box">
-                <h3>Management Team</h3>
-                Zack<br>843-222-6516<br>oceanvacationsmb@gmail.com<br><br>
-                Lia<br>843-222-6357<br>liatedri18@hotmail.com<br><br>
-                Isaac<br>843-206-2294<br>isaacedri@gmail.com
+            <div class="contact-menu">
+                <button onclick="showContactSection('management')">Management</button>
+                <button onclick="showContactSection('maintenance')">Maintenance</button>
+                <button onclick="showContactSection('service')">Service</button>
+                <button onclick="showContactSection('cleaning')">Cleaning</button>
+                <button onclick="showContactSection('hoa')">HOA's</button>
+                <button onclick="showContactSection('filter')">Filter Size</button>
             </div>
 
-            <div class="contact-box">
-                <h3>Maintenance</h3>
-                ECIA<br>843-653-6631<br><br>
-                Quickfix<br>843-902-8745
+            <div id="contactDetails" class="contact-details">
+                Select a section above.
             </div>
-
-            <div class="contact-box">
-                <h3>Service Providers</h3>
-                Elevator Lan<br>859-358-5661<br><br>
-                Four Star Plumbing<br>843-236-7142<br><br>
-                Duraclean Carpet Cleaning<br>843-238-3382
-            </div>
-
         </div>
+
+        <style>
+            .contact-page {
+                padding: 30px;
+                font-family: Arial;
+                color: #1f2a38;
+            }
+
+            .contact-menu {
+                display: grid;
+                grid-template-columns: repeat(6, 1fr);
+                gap: 10px;
+                margin-bottom: 25px;
+            }
+
+            .contact-menu button {
+                padding: 12px;
+                border: none;
+                border-radius: 6px;
+                background: #3498db;
+                color: white;
+                cursor: pointer;
+                font-weight: bold;
+            }
+
+            .contact-menu button:hover {
+                background: #2980b9;
+            }
+
+            .contact-details {
+                padding: 20px;
+                background: #f1f4f8;
+                border-radius: 8px;
+                line-height: 1.6;
+            }
+        </style>
+
+        <script>
+            function showContactSection(section) {
+                const details = {
+                    management: \`
+                        <h3>Management</h3>
+                        Zack<br>843-222-6516<br>oceanvacationsmb@gmail.com<br><br>
+                        Lia<br>843-222-6357<br>liatedri18@hotmail.com<br><br>
+                        Isaac<br>843-206-2294<br>isaacedri@gmail.com
+                    \`,
+                    maintenance: \`
+                        <h3>Maintenance</h3>
+                        ECIA<br>843-653-6631<br><br>
+                        Quickfix<br>843-902-8745
+                    \`,
+                    service: \`
+                        <h3>Service</h3>
+                        Elevator Lan<br>859-358-5661<br><br>
+                        Four Star Plumbing<br>843-236-7142<br><br>
+                        Duraclean Carpet Cleaning<br>843-238-3382
+                    \`,
+                    cleaning: \`
+                        <h3>Cleaning</h3>
+                        Add cleaning contacts here.
+                    \`,
+                    hoa: \`
+                        <h3>HOA's</h3>
+                        Add HOA contacts here.
+                    \`,
+                    filter: \`
+                        <h3>Filter Size</h3>
+                        Add filter sizes here.
+                    \`
+                };
+
+                document.getElementById("contactDetails").innerHTML = details[section];
+            }
+        <\/script>
     `;
 }
 
