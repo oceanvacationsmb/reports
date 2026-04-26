@@ -98,7 +98,11 @@
 
     <div class="settings-header">TOOLS</div>
 
-    <!-- INTERNAL (iframe) -->
+    <!-- WEBSITE FIRST -->
+    <button class="btn" onclick="openAccessLink('https://oceanvacationsmb.com')">
+        WEBSITE
+    </button>
+
     <button class="btn" onclick="openAccessLink('https://oceanvacationsmb.github.io/tax-remittance-dashboard/index.html')">
         TAXES REPORT
     </button>
@@ -115,27 +119,14 @@
         COLLAGE TOOL
     </button>
 
-    <!-- EXTERNAL (new tab / login required) -->
+    <!-- EXTERNAL -->
     <button class="btn" onclick="openNewTab('https://www.airbnb.com')">
         AIRBNB <span class="icon">↗</span>
     </button>
 
-    <button class="btn" onclick="openNewTab('https://www.airbnb.com/resolutions')">
+    <button class="btn" onclick="openNewTab('https://www.airbnb.com/help/resolutions')">
         AIRBNB RESOLUTION <span class="icon">↗</span>
     </button>
-
-    <button class="btn" onclick="openNewTab('https://app.guesty.com')">
-        GUESTY <span class="icon">↗</span>
-    </button>
-
-    <button class="btn" onclick="openNewTab('https://paleturquoise-baboon-311445.hostingersite.com/login.php')">
-        PRICE ADJUSTMENTS <span class="icon">↗</span>
-    </button>
-
-    <button class="btn" onclick="openNewTab('https://app.signnow.com/webapp/documents/b598cffbdb334ddeb18c7783528c31cf05c2b803')">
-        DOCUSIGN <span class="icon">↗</span>
-    </button>
-    
 </div>
 
 <div class="topbar">
@@ -143,7 +134,7 @@
 </div>
 
 <div class="iframe-container">
-    <iframe id="contentFrame" src=""></iframe>
+    <iframe id="contentFrame"></iframe>
 </div>
 
 <script>
@@ -160,6 +151,11 @@ function openAccessLink(url) {
 function openNewTab(url) {
     window.open(url, "_blank");
 }
+
+/* LOAD DEFAULT PAGE */
+window.onload = function() {
+    openAccessLink('https://oceanvacationsmb.com');
+};
 </script>
 
 </body>
