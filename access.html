@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title></title>
+<title>OCEAN VACATIONS TOOLS ACCESS PAGE</title>
 
 <style>
 body {
@@ -75,6 +75,12 @@ body {
     z-index: 10;
 }
 
+.clock {
+    margin-left: auto;
+    padding-right: 20px;
+    font-weight: normal;
+}
+
 .iframe-container {
     position: fixed;
     top: 50px;
@@ -142,7 +148,8 @@ iframe {
 </div>
 
 <div class="topbar">
-    
+    <div>OCEAN VACATIONS TOOLS ACCESS PAGE</div>
+    <div id="clock" class="clock"></div>
 </div>
 
 <div class="iframe-container">
@@ -176,19 +183,17 @@ function loadContactPage() {
             <h2 style="font-size:30px;margin-bottom:25px;">Contact Information</h2>
 
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;">
-                <button onclick="parent.showContactSection('management')" style="padding:14px;border:none;border-radius:12px;background:#3498db;color:white;font-weight:bold;cursor:pointer;">Management</button>
-                <button onclick="parent.showContactSection('maintenanceCleaning')" style="padding:14px;border:none;border-radius:12px;background:#3498db;color:white;font-weight:bold;cursor:pointer;">Maintenance / Cleaning</button>
-                <button onclick="parent.showContactSection('hoa')" style="padding:14px;border:none;border-radius:12px;background:#3498db;color:white;font-weight:bold;cursor:pointer;">HOA's</button>
-                <button onclick="parent.showContactSection('filter')" style="padding:14px;border:none;border-radius:12px;background:#3498db;color:white;font-weight:bold;cursor:pointer;">Filter Size</button>
+                <button onclick="parent.showContactSection('management')" style="padding:14px;border:none;border-radius:12px;background:#3498db;color:white;font-weight:bold;">Management</button>
+                <button onclick="parent.showContactSection('maintenanceCleaning')" style="padding:14px;border:none;border-radius:12px;background:#3498db;color:white;font-weight:bold;">Maintenance / Cleaning</button>
+                <button onclick="parent.showContactSection('hoa')" style="padding:14px;border:none;border-radius:12px;background:#3498db;color:white;font-weight:bold;">HOA's</button>
+                <button onclick="parent.showContactSection('filter')" style="padding:14px;border:none;border-radius:12px;background:#3498db;color:white;font-weight:bold;">Filter Size</button>
             </div>
 
-            <div id="contactDetails" style="padding:30px;background:white;border-radius:16px;line-height:1.6;font-size:18px;box-shadow:0 6px 18px rgba(0,0,0,0.08);min-height:250px;"></div>
+            <div id="contactDetails" style="padding:30px;background:white;border-radius:16px;font-size:18px;"></div>
         </div>
     `;
 
-    setTimeout(function() {
-        showContactSection("management");
-    }, 100);
+    setTimeout(() => showContactSection("management"), 100);
 }
 
 function showContactSection(section) {
@@ -205,10 +210,9 @@ function showContactSection(section) {
             Lia<br>843-222-6357<br>liatedri18@hotmail.com<br><br>
             Isaac<br>843-206-2294<br>isaacedri@gmail.com
         `,
-
         maintenanceCleaning: `
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:25px;">
-                <div style="background:#f1f4f8;border-radius:14px;padding:25px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                <div>
                     <h3>Maintenance / Service</h3>
                     ECIA<br>843-653-6631<br><br>
                     Quickfix<br>843-902-8745<br><br>
@@ -222,8 +226,7 @@ function showContactSection(section) {
                     Four Star Plumbing<br>843-236-7142<br><br>
                     Duraclean Carpet Cleaning<br>843-238-3382
                 </div>
-
-                <div style="background:#f1f4f8;border-radius:14px;padding:25px;">
+                <div>
                     <h3>Cleaning</h3>
                     Bella<br>843-251-4410<br><br>
                     Catherina<br>843-653-6632<br><br>
@@ -231,26 +234,32 @@ function showContactSection(section) {
                 </div>
             </div>
         `,
-
-        hoa: `
-            <h3>HOA's</h3>
-            Add HOA contacts here
-        `,
-
-        filter: `
-            <h3>Filter Size</h3>
-            Add filter sizes here
-        `
+        hoa: `<h3>HOA's</h3>Add HOA contacts`,
+        filter: `<h3>Filter Size</h3>Add filter sizes`
     };
 
     box.innerHTML = details[section];
 }
 
+function updateClock() {
+    const now = new Date();
+    const date = now.toLocaleDateString(undefined, {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+    const time = now.toLocaleTimeString();
+    document.getElementById("clock").innerHTML = date + " | " + time;
+}
+
+setInterval(updateClock, 1000);
+updateClock();
+
 window.onload = function() {
     document.getElementById("contentFrame").srcdoc = `
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;font-family:Arial;">
+        <div style="display:flex;align-items:center;justify-content:center;height:100%;font-family:Arial;">
             <h1>OCEAN VACATIONS</h1>
-            <p>Select a tool from the left menu</p>
         </div>
     `;
 };
