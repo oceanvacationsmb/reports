@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OCEAN VACATIONS TOOLS ACCESS PAGE</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f5f6fa;
+    }
+
+    .container {
+        display: flex;
+        height: 100vh;
+    }
+
+    /* LEFT NAV */
+    .sidebar {
+        width: 220px;
+        background: #1f2a38;
+        color: #fff;
+        padding: 15px;
+        box-sizing: border-box;
+    }
+
+    .sidebar h2 {
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    .settings-header {
+        font-size: 12px;
+        margin: 15px 0 8px;
+        color: #9fb3c8;
+        border-bottom: 1px solid #2f3d4f;
+        padding-bottom: 4px;
+    }
+
+    .btn {
+        width: 100%;
+        margin-bottom: 8px;
+        padding: 8px;
+        border: none;
+        cursor: pointer;
+        font-size: 11px;
+        border-radius: 4px;
+        background: #3498db;
+        color: #fff;
+        transition: 0.2s;
+    }
+
+    .btn:hover {
+        background: #2980b9;
+    }
+
+    /* MAIN CONTENT */
+    .main {
+        flex: 1;
+        background: #fff;
+    }
+
+    iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    /* HEADER TOP */
+    .topbar {
+        position: absolute;
+        top: 0;
+        left: 220px;
+        right: 0;
+        height: 50px;
+        background: #ffffff;
+        border-bottom: 1px solid #ddd;
+        display: flex;
+        align-items: center;
+        padding-left: 20px;
+        font-weight: bold;
+        z-index: 10;
+    }
+
+    .iframe-container {
+        position: absolute;
+        top: 50px;
+        left: 220px;
+        right: 0;
+        bottom: 0;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h2>OCEAN VACATIONS</h2>
+
+        <div id="accessHeader" class="settings-header">TOOLS</div>
+
+        <button class="btn" onclick="openAccessLink('https://oceanvacationsmb.github.io/tax-remittance-dashboard/index.html')">TAXES REPORT</button>
+
+        <button class="btn" onclick="openAccessLink('https://paleturquoise-baboon-311445.hostingersite.com/login.php')">GUESTY PRICES</button>
+
+        <button class="btn" onclick="openAccessLink('https://oceanvacationsmb.github.io/owner_income_report/index.html')">OWNER PORTAL</button>
+
+        <button class="btn" onclick="openAccessLink('https://app.guesty.com')">GUESTY</button>
+
+        <button class="btn" onclick="openAccessLink('https://oceanvacationsmb.github.io/reports/property_estimate.html')">PROPERTY GRI ESTIMATOR</button>
+
+        <button class="btn" onclick="openAccessLink('https://oceanvacationsmb.github.io/collage/')">COLLAGE TOOL</button>
+
+        <div id="settingsHeader" class="settings-header">SETTINGS</div>
+    </div>
+
+</div>
+
+<!-- TOP TITLE -->
+<div class="topbar">
+    OCEAN VACATIONS TOOLS ACCESS PAGE
+</div>
+
+<!-- IFRAME -->
+<div class="iframe-container">
+    <iframe id="contentFrame" src=""></iframe>
+</div>
+
+<script>
+function openAccessLink(url) {
+    document.getElementById("contentFrame").src = url;
+}
+</script>
+
+</body>
+</html>
