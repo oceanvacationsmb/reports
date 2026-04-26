@@ -5,90 +5,89 @@
 <title>OCEAN VACATIONS TOOLS ACCESS PAGE</title>
 
 <style>
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: #f5f6fa;
-    }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f6fa;
+}
 
-    .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 240px;
-        height: 100vh;
-        background: #1f2a38;
-        color: #fff;
-        padding: 15px;
-        box-sizing: border-box;
-        overflow-y: auto;
-    }
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 240px;
+    height: 100vh;
+    background: #1f2a38;
+    color: #fff;
+    padding: 15px;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
 
-    .sidebar h2 {
-        font-size: 16px;
-        margin-bottom: 10px;
-    }
+.sidebar h2 {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
 
-    .settings-header {
-        font-size: 12px;
-        margin: 15px 0 8px;
-        color: #9fb3c8;
-        border-bottom: 1px solid #2f3d4f;
-        padding-bottom: 4px;
-    }
+.settings-header {
+    font-size: 12px;
+    margin: 15px 0 8px;
+    color: #9fb3c8;
+    border-bottom: 1px solid #2f3d4f;
+    padding-bottom: 4px;
+}
 
-    .btn {
-        width: 100%;
-        margin-bottom: 8px;
-        padding: 8px;
-        border: none;
-        cursor: pointer;
-        font-size: 11px;
-        border-radius: 4px;
-        background: #3498db;
-        color: #fff;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+.btn {
+    width: 100%;
+    margin-bottom: 8px;
+    padding: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 11px;
+    border-radius: 4px;
+    background: #3498db;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-    .btn:hover {
-        background: #2980b9;
-    }
+.btn:hover {
+    background: #2980b9;
+}
 
-    .icon {
-        font-size: 12px;
-        opacity: 0.9;
-    }
+.icon {
+    font-size: 12px;
+}
 
-    .topbar {
-        position: fixed;
-        top: 0;
-        left: 240px;
-        right: 0;
-        height: 50px;
-        background: #ffffff;
-        border-bottom: 1px solid #ddd;
-        display: flex;
-        align-items: center;
-        padding-left: 20px;
-        font-weight: bold;
-        z-index: 10;
-    }
+.topbar {
+    position: fixed;
+    top: 0;
+    left: 240px;
+    right: 0;
+    height: 50px;
+    background: #ffffff;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+    font-weight: bold;
+    z-index: 10;
+}
 
-    .iframe-container {
-        position: fixed;
-        top: 50px;
-        left: 240px;
-        right: 0;
-        bottom: 0;
-    }
+.iframe-container {
+    position: fixed;
+    top: 50px;
+    left: 240px;
+    right: 0;
+    bottom: 0;
+}
 
-    iframe {
-        width: 100%;
-        height: 100%;
-        border: none;
-    }
+iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
 </style>
 </head>
 
@@ -152,8 +151,15 @@
 
 <script>
 function openAccessLink(url) {
+    const frame = document.getElementById("contentFrame");
     const cacheBreaker = "v=" + new Date().getTime();
-    document.getElementById("contentFrame").src = url + (url.includes("?") ? "&" : "?") + cacheBreaker;
+
+    frame.removeAttribute("srcdoc");
+    frame.src = "about:blank";
+
+    setTimeout(function() {
+        frame.src = url + (url.includes("?") ? "&" : "?") + cacheBreaker;
+    }, 50);
 }
 
 function openNewTab(url) {
@@ -161,161 +167,88 @@ function openNewTab(url) {
 }
 
 function loadContactPage() {
-    document.getElementById("contentFrame").srcdoc = `
-        <div class="contact-page">
-            <h2>Contact Information</h2>
+    const frame = document.getElementById("contentFrame");
 
-            <div class="contact-menu">
-                <button onclick="showContactSection('management')">Management</button>
-                <button onclick="showContactSection('maintenanceCleaning')">Maintenance / Cleaning</button>
-                <button onclick="showContactSection('hoa')">HOA's</button>
-                <button onclick="showContactSection('filter')">Filter Size</button>
+    frame.src = "about:blank";
+
+    frame.srcdoc = `
+        <div style="padding:35px;font-family:Arial;color:#1f2a38;background:#f5f7fb;min-height:100vh;">
+            <h2 style="font-size:30px;margin-bottom:25px;">Contact Information</h2>
+
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;">
+                <button onclick="parent.showContactSection('management')" style="padding:14px;border:none;border-radius:12px;background:#3498db;color:white;font-weight:bold;cursor:pointer;">Management</button>
+                <button onclick="parent.showContactSection('maintenanceCleaning')" style="padding:14px;border:none;border-radius:12px;background:#3498db;color:white;font-weight:bold;cursor:pointer;">Maintenance / Cleaning</button>
+                <button onclick="parent.showContactSection('hoa')" style="padding:14px;border:none;border-radius:12px;background:#3498db;color:white;font-weight:bold;cursor:pointer;">HOA's</button>
+                <button onclick="parent.showContactSection('filter')" style="padding:14px;border:none;border-radius:12px;background:#3498db;color:white;font-weight:bold;cursor:pointer;">Filter Size</button>
             </div>
 
-            <div id="contactDetails" class="contact-details"></div>
+            <div id="contactDetails" style="padding:30px;background:white;border-radius:16px;line-height:1.6;font-size:18px;box-shadow:0 6px 18px rgba(0,0,0,0.08);min-height:250px;"></div>
         </div>
-
-        <style>
-            body {
-                margin: 0;
-                background: #f5f7fb;
-            }
-
-            .contact-page {
-                padding: 35px;
-                font-family: Arial, sans-serif;
-                color: #1f2a38;
-            }
-
-            .contact-page h2 {
-                font-size: 30px;
-                margin-bottom: 25px;
-            }
-
-            .contact-menu {
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 14px;
-                margin-bottom: 28px;
-            }
-
-            .contact-menu button {
-                padding: 14px 10px;
-                border: none;
-                border-radius: 12px;
-                background: linear-gradient(135deg, #3498db, #1f78b4);
-                color: white;
-                cursor: pointer;
-                font-size: 15px;
-                font-weight: bold;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            }
-
-            .contact-menu button:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 6px 16px rgba(0,0,0,0.22);
-            }
-
-            .contact-details {
-                padding: 30px;
-                background: #ffffff;
-                border-radius: 16px;
-                line-height: 1.6;
-                font-size: 18px;
-                box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-                min-height: 250px;
-            }
-
-            .split-box {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 25px;
-            }
-
-            .info-card {
-                background: #f1f4f8;
-                border-radius: 14px;
-                padding: 25px;
-            }
-
-            .info-card h3 {
-                margin-top: 0;
-                font-size: 24px;
-            }
-
-            @media (max-width: 900px) {
-                .contact-menu {
-                    grid-template-columns: repeat(2, 1fr);
-                }
-
-                .split-box {
-                    grid-template-columns: 1fr;
-                }
-            }
-        </style>
-
-        <script>
-            function showContactSection(section) {
-                const details = {
-
-                    management: \`
-                        <h3>Management</h3>
-                        Zack<br>843-222-6516<br>oceanvacationsmb@gmail.com<br><br>
-                        Lia<br>843-222-6357<br>liatedri18@hotmail.com<br><br>
-                        Isaac<br>843-206-2294<br>isaacedri@gmail.com
-                    \`,
-
-                    maintenanceCleaning: \`
-                        <div class="split-box">
-                            <div class="info-card">
-                                <h3>Maintenance / Service</h3>
-                                ECIA<br>843-653-6631<br><br>
-                                Quickfix<br>843-902-8745<br><br>
-                                Roofer<br>843-458-5140<br><br>
-                                Dennis Painter<br>843-602-4314<br><br>
-                                Alex Handyman<br>843-205-9699<br><br>
-                                Plumber<br>407-283-8230<br><br>
-                                Vinyl Flooring<br>843-457-1152<br><br>
-                                Elevator Lan<br>859-358-5661<br><br>
-                                Paradies HVAC Moshe<br>843-222-3056<br><br>
-                                Four Star Plumbing<br>843-236-7142<br><br>
-                                Duraclean Carpet Cleaning<br>843-238-3382
-                            </div>
-
-                            <div class="info-card">
-                                <h3>Cleaning</h3>
-                                Bella<br>843-251-4410<br><br>
-                                Catherina<br>843-653-6632<br><br>
-                                Carolina<br>843-712-3463
-                            </div>
-                        </div>
-                    \`,
-
-                    hoa: \`
-                        <h3>HOA's</h3>
-                        Add HOA contacts here
-                    \`,
-
-                    filter: \`
-                        <h3>Filter Size</h3>
-                        Add filter sizes here
-                    \`
-                };
-
-                document.getElementById("contactDetails").innerHTML = details[section];
-            }
-
-            window.onload = function() {
-                showContactSection('management');
-            }
-        <\/script>
     `;
+
+    setTimeout(function() {
+        showContactSection("management");
+    }, 100);
+}
+
+function showContactSection(section) {
+    const frame = document.getElementById("contentFrame");
+    const doc = frame.contentDocument || frame.contentWindow.document;
+    const box = doc.getElementById("contactDetails");
+
+    if (!box) return;
+
+    const details = {
+        management: `
+            <h3>Management</h3>
+            Zack<br>843-222-6516<br>oceanvacationsmb@gmail.com<br><br>
+            Lia<br>843-222-6357<br>liatedri18@hotmail.com<br><br>
+            Isaac<br>843-206-2294<br>isaacedri@gmail.com
+        `,
+
+        maintenanceCleaning: `
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:25px;">
+                <div style="background:#f1f4f8;border-radius:14px;padding:25px;">
+                    <h3>Maintenance / Service</h3>
+                    ECIA<br>843-653-6631<br><br>
+                    Quickfix<br>843-902-8745<br><br>
+                    Roofer<br>843-458-5140<br><br>
+                    Dennis Painter<br>843-602-4314<br><br>
+                    Alex Handyman<br>843-205-9699<br><br>
+                    Plumber<br>407-283-8230<br><br>
+                    Vinyl Flooring<br>843-457-1152<br><br>
+                    Elevator Lan<br>859-358-5661<br><br>
+                    Paradies HVAC Moshe<br>843-222-3056<br><br>
+                    Four Star Plumbing<br>843-236-7142<br><br>
+                    Duraclean Carpet Cleaning<br>843-238-3382
+                </div>
+
+                <div style="background:#f1f4f8;border-radius:14px;padding:25px;">
+                    <h3>Cleaning</h3>
+                    Bella<br>843-251-4410<br><br>
+                    Catherina<br>843-653-6632<br><br>
+                    Carolina<br>843-712-3463
+                </div>
+            </div>
+        `,
+
+        hoa: `
+            <h3>HOA's</h3>
+            Add HOA contacts here
+        `,
+
+        filter: `
+            <h3>Filter Size</h3>
+            Add filter sizes here
+        `
+    };
+
+    box.innerHTML = details[section];
 }
 
 window.onload = function() {
     document.getElementById("contentFrame").srcdoc = `
         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;font-family:Arial;">
-            <img src="https://oceanvacationsmb.github.io/reports/for_web.png" style="max-width:300px;margin-bottom:20px;">
             <h1>OCEAN VACATIONS</h1>
             <p>Select a tool from the left menu</p>
         </div>
