@@ -4100,6 +4100,7 @@ const t=OWNERS[currentOwner];
 const pmcPercent=getEffectivePmcPercent(t);
 const selectedPeriod=getSelectedStatementPeriod();
 const recurringCharges=getRecurringChargesForOwner(currentOwner,{month:selectedPeriod.month,year:selectedPeriod.year});
+const baseRecurringCharges=Array.isArray(OWNERS[currentOwner]&&OWNERS[currentOwner].recurringCharges)?OWNERS[currentOwner].recurringCharges:[];
 const recurringTotal=(masterTotals.recurring||0);
 const nonRecurringExpenses=masterTotals.expenses-recurringTotal;
 const ownerPortal=isOwnerPortalUser();
@@ -4192,7 +4193,11 @@ recurringCharges.forEach((item,index)=>{
 html+="<tr>";
 html+="<td>"+(item.label||"Recurring")+"</td>";
 html+="<td>"+money(item.amount)+"</td>";
+if(index<baseRecurringCharges.length){
 html+="<td class='no-print'><button class='btn btn-info btn-small' onclick='openEditRecurringExpense("+index+")'>EDIT</button> <button class='btn btn-danger btn-small' onclick='deleteRecurringExpenseLocal("+index+")'>DELETE</button></td>";
+}else{
+html+="<td class='no-print'></td>";
+}
 html+="</tr>";
 });
 
