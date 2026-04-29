@@ -462,6 +462,7 @@ async function uploadPdfBlobToGitHub(pdfBlob,fileName){
 }
 
 let gitHubData={},OWNERS={},USERS={},vendors=[],expenses=[],csvData=[],propertySettings={},currentOwner="",masterTotals={},propertyTotals={},taxByProperty={},githubToken="",expenseTypes=[];
+let loadedInvoiceMap={},loadedReportHtmlMap={};
 let sessionExpenses=[];
 let editingExpenseId=null;
 let editingRecurringExpenseIndex=null;
@@ -2473,12 +2474,14 @@ function loadHeavyDataInBackground(){
   fetch("invoices.json",{cache:"no-store"})
     .then(r=>r.json())
     .then(map=>{
+      loadedInvoiceMap=map||{};
       (expenses||[]).forEach(e=>{if(e.invoice==="__ref__"&&map[e.id])e.invoice=map[e.id];});
     })
     .catch(()=>{});
   fetch("saved_reports_html.json",{cache:"no-store"})
     .then(r=>r.json())
     .then(map=>{
+      loadedReportHtmlMap=map||{};
       (savedReports||[]).forEach(r=>{if(r.html==="__ref__"&&map[r.id])r.html=map[r.id];});
     })
     .catch(()=>{});
@@ -3478,60 +3481,102 @@ function logoutUser(){
 }
 
 function saveToGitHub(type,callback){
-  if(!githubToken){
-    alert("❌ No token");
-    return;
+  if(!githubToken){alert("❌ No token");return;}
+
+  const repoBase="https://api.github.com/repos/oceanvacationsmb/reports";
+  const ghHeaders={"Authorization":"token "+githubToken,"Content-Type":"application/json"};
+
+  function toB64(str){
+    return btoa(unescape(encodeURIComponent(str)));
   }
-  
-  const data=JSON.stringify({owners:OWNERS,users:USERS,vendors:vendors,expenseTypes:expenseTypes,properties:propertySettings,expenses:expenses,savedReports:savedReports},null,2);
-  const content=btoa(unescape(encodeURIComponent(data)));
-  
-  function attemptSave(retryCount=0){
-    fetch(getGitHubAPI(),{headers:{"Authorization":"token "+githubToken}})
-      .then(r=>{
-        if(r.status===404){
-          return {sha:null, create:true};
-        }
-        if(!r.ok)throw new Error("GET failed: "+r.status);
-        return r.json().then(data=>({sha:data.sha, create:false}));
-      })
-      .then(({sha,create})=>{
-        const body={message:"Update "+type,content:content};
-        if(sha) body.sha=sha;
-        
-        return fetch(getGitHubAPI(),{
-          method:"PUT",
-          headers:{"Authorization":"token "+githubToken,"Content-Type":"application/json"},
-          body:JSON.stringify(body)
-        }).then(r=>({response:r,sha:sha}));
-      })
-      .then(({response,sha})=>{
-        if(response.status===409){
-          if(retryCount<3){
-            setTimeout(()=>attemptSave(retryCount+1), 2000);
-          }else{
-            alert("❌ Could not save after 4 attempts");
-          }
-          return;
-        }
-        
-        if(response.ok||response.status===200||response.status===201){
-          if(callback)callback();
-          return;
-        }
-        
-        throw new Error("PUT failed: "+response.status);
-      })
-      .catch(e=>{
-        if(retryCount<3){
-          setTimeout(()=>attemptSave(retryCount+1), 2000);
-        }else{
-          alert("❌ Save failed. Please try again.");
-        }
-      });
+
+  function ghFetch(url,opts){
+    return fetch(url,Object.assign({headers:ghHeaders},opts||{}))
+      .then(r=>{if(!r.ok)throw new Error(r.status+" "+url);return r.json();});
   }
-  
-  attemptSave();
+
+  // Strip large blobs from in-memory data before saving
+  const invoiceMap=Object.assign({},loadedInvoiceMap);
+  const reportHtmlMap=Object.assign({},loadedReportHtmlMap);
+
+  const strippedExpenses=expenses.map(e=>{
+    if(e.invoice&&e.invoice!=="__ref__"&&typeof e.invoice==="string"&&e.invoice.startsWith("data:")){
+      invoiceMap[e.id]=e.invoice;
+      return Object.assign({},e,{invoice:"__ref__"});
+    }
+    return e;
+  });
+
+  const strippedReports=(savedReports||[]).map(r=>{
+    if(r.html&&r.html!=="__ref__"&&typeof r.html==="string"&&r.html.length>500){
+      reportHtmlMap[r.id]=r.html;
+      return Object.assign({},r,{html:"__ref__"});
+    }
+    return r;
+  });
+
+  const mainJson=JSON.stringify({owners:OWNERS,users:USERS,vendors:vendors,expenseTypes:expenseTypes,properties:propertySettings,expenses:strippedExpenses,savedReports:strippedReports},null,2);
+  const invoiceJson=JSON.stringify(invoiceMap);
+  const reportHtmlJson=JSON.stringify(reportHtmlMap);
+
+  function createBlob(content){
+    return ghFetch(repoBase+"/git/blobs",{
+      method:"POST",
+      body:JSON.stringify({content:toB64(content),encoding:"base64"})
+    });
+  }
+
+  function attemptSave(retryCount){
+    retryCount=retryCount||0;
+    Promise.all([
+      createBlob(mainJson),
+      createBlob(invoiceJson),
+      createBlob(reportHtmlJson)
+    ])
+    .then(([mainBlob,invBlob,rptBlob])=>{
+      return ghFetch(repoBase+"/git/refs/heads/main")
+        .then(ref=>ghFetch(repoBase+"/git/commits/"+ref.object.sha)
+          .then(commit=>({headSha:ref.object.sha,treeSha:commit.tree.sha}))
+        )
+        .then(({headSha,treeSha})=>{
+          return ghFetch(repoBase+"/git/trees",{
+            method:"POST",
+            body:JSON.stringify({
+              base_tree:treeSha,
+              tree:[
+                {path:"data.json",mode:"100644",type:"blob",sha:mainBlob.sha},
+                {path:"invoices.json",mode:"100644",type:"blob",sha:invBlob.sha},
+                {path:"saved_reports_html.json",mode:"100644",type:"blob",sha:rptBlob.sha}
+              ]
+            })
+          })
+          .then(newTree=>ghFetch(repoBase+"/git/commits",{
+            method:"POST",
+            body:JSON.stringify({message:"Update "+type,tree:newTree.sha,parents:[headSha]})
+          }))
+          .then(newCommit=>fetch(repoBase+"/git/refs/heads/main",{
+            method:"PATCH",
+            headers:ghHeaders,
+            body:JSON.stringify({sha:newCommit.sha})
+          }))
+          .then(r=>{
+            if(r.status===422){
+              if(retryCount<3){setTimeout(()=>attemptSave(retryCount+1),2000);}
+              else{alert("❌ Could not save after 4 attempts");}
+              return;
+            }
+            if(!r.ok)throw new Error("ref update failed: "+r.status);
+            if(callback)callback();
+          });
+        });
+    })
+    .catch(()=>{
+      if(retryCount<3){setTimeout(()=>attemptSave(retryCount+1),2000);}
+      else{alert("❌ Save failed. Please try again.");}
+    });
+  }
+
+  attemptSave(0);
 }
 
 function updateVendorDropdown(){
