@@ -465,6 +465,7 @@ let gitHubData={},OWNERS={},USERS={},vendors=[],expenses=[],csvData=[],propertyS
 let sessionExpenses=[];
 let editingExpenseId=null;
 let editingRecurringExpenseIndex=null;
+let editingRecurringExpenseSource=null;
 let editingExpenseTypeIndex=null;
 let savedReports=[];
 let pendingEmailSnapshotId="";
@@ -3823,29 +3824,31 @@ function doneAddingExpenses(){
   });
 }
 
-function getEditableRecurringCharges(){
+function getRecurringSourceArray(src){
   if(!currentOwner || !OWNERS[currentOwner]) return [];
-  if(!Array.isArray(OWNERS[currentOwner].recurringCharges)){
-    OWNERS[currentOwner].recurringCharges=[];
-  }
-  return OWNERS[currentOwner].recurringCharges;
+  const o=OWNERS[currentOwner];
+  const key=src==='monthly'?'monthlyRecurringCharges':src==='date'?'specificDateRecurringCharges':src==='range'?'dateRangeRecurringCharges':'recurringCharges';
+  if(!Array.isArray(o[key])) o[key]=[];
+  return o[key];
 }
 
 function openAddRecurringExpense(){
   if(isOwnerPortalUser()) return alert("Not allowed in owner portal mode");
   if(!currentOwner) return alert("Select owner first");
   editingRecurringExpenseIndex=null;
+  editingRecurringExpenseSource=null;
   document.getElementById("recurringExpenseLabel").value="";
   document.getElementById("recurringExpenseAmount").value="";
   document.getElementById("saveRecurringExpenseBtn").textContent="ADD";
   openModal("recurringExpenseModal");
 }
 
-function openEditRecurringExpense(index){
-  const recurringCharges=getEditableRecurringCharges();
-  const item=recurringCharges[index];
+function openEditRecurringExpense(src,idx){
+  const arr=getRecurringSourceArray(src);
+  const item=arr[idx];
   if(!item) return alert("Recurring expense not found");
-  editingRecurringExpenseIndex=index;
+  editingRecurringExpenseSource=src;
+  editingRecurringExpenseIndex=idx;
   document.getElementById("recurringExpenseLabel").value=(item.label||"");
   document.getElementById("recurringExpenseAmount").value=num(item.amount);
   document.getElementById("saveRecurringExpenseBtn").textContent="UPDATE";
@@ -3858,16 +3861,16 @@ function submitRecurringExpense(){
   const amount=num(document.getElementById("recurringExpenseAmount").value);
   if(!label || amount<=0) return alert("Enter a name and amount greater than zero");
 
-  const recurringCharges=getEditableRecurringCharges();
-  const nextItem={label:label,amount:amount};
-
   if(editingRecurringExpenseIndex===null){
-    recurringCharges.push(nextItem);
+    const baseArr=getRecurringSourceArray('base');
+    baseArr.push({label:label,amount:amount});
   }else{
-    recurringCharges[editingRecurringExpenseIndex]=nextItem;
+    const arr=getRecurringSourceArray(editingRecurringExpenseSource);
+    arr[editingRecurringExpenseIndex]=Object.assign({},arr[editingRecurringExpenseIndex],{label:label,amount:amount});
   }
 
   editingRecurringExpenseIndex=null;
+  editingRecurringExpenseSource=null;
   closeAll();
 
   const savedOwner=currentOwner;
@@ -3884,11 +3887,11 @@ function submitRecurringExpense(){
   });
 }
 
-function deleteRecurringExpenseLocal(index){
+function deleteRecurringExpenseLocal(src,idx){
   if(!confirm("Delete recurring expense?")) return;
-  const recurringCharges=getEditableRecurringCharges();
-  if(index<0 || index>=recurringCharges.length) return;
-  recurringCharges.splice(index,1);
+  const arr=getRecurringSourceArray(src);
+  if(idx<0 || idx>=arr.length) return;
+  arr.splice(idx,1);
 
   const savedOwner=currentOwner;
   const savedMonth=document.getElementById("monthSelect").value;
@@ -4100,7 +4103,6 @@ const t=OWNERS[currentOwner];
 const pmcPercent=getEffectivePmcPercent(t);
 const selectedPeriod=getSelectedStatementPeriod();
 const recurringCharges=getRecurringChargesForOwner(currentOwner,{month:selectedPeriod.month,year:selectedPeriod.year});
-const baseRecurringCharges=Array.isArray(OWNERS[currentOwner]&&OWNERS[currentOwner].recurringCharges)?OWNERS[currentOwner].recurringCharges:[];
 const recurringTotal=(masterTotals.recurring||0);
 const nonRecurringExpenses=masterTotals.expenses-recurringTotal;
 const ownerPortal=isOwnerPortalUser();
@@ -4189,17 +4191,24 @@ html+="<div class='no-print' style='margin:10px 0 8px 0'><button class='btn btn-
 html+="<table>";
 html+="<tr><th>NAME OF EXPENSE</th><th>AMOUNT</th><th class='no-print'>ACTION</th></tr>";
 
-recurringCharges.forEach((item,index)=>{
+{
+const _o=OWNERS[currentOwner]||{};
+const _sm=selectedPeriod.month;const _sy=selectedPeriod.year;
+const _ps=new Date(_sy,_sm-1,1);const _pe=new Date(_sy,_sm,getMonthEndDay(_sy,_sm));
+const taggedRecurring=[
+  ...(Array.isArray(_o.recurringCharges)?_o.recurringCharges:[]).map((item,i)=>({label:(item.label||'Recurring'),amount:num(item.amount),_src:'base',_idx:i})),
+  ...(Array.isArray(_o.monthlyRecurringCharges)?_o.monthlyRecurringCharges:[]).filter(item=>parseInt(item&&item.month,10)===_sm).map((item,i)=>({label:(item.label||'Recurring'),amount:num(item.amount),_src:'monthly',_idx:i})),
+  ...(Array.isArray(_o.specificDateRecurringCharges)?_o.specificDateRecurringCharges:[]).filter(item=>parseInt(item&&item.month,10)===_sm).map((item,i)=>({label:(item.label||'Recurring'),amount:num(item.amount),_src:'date',_idx:i})),
+  ...(Array.isArray(_o.dateRangeRecurringCharges)?_o.dateRangeRecurringCharges:[]).filter(item=>{const s=parseIsoDate(item&&item.startDate);const e=parseIsoDate(item&&item.endDate);if(!s||!e)return false;const ns=s<=e?s:e;const ne=s<=e?e:s;return ns<=_pe&&ne>=_ps;}).map((item,i)=>({label:(item.label||'Recurring'),amount:num(item.amount),_src:'range',_idx:i}))
+].filter(item=>item.label||item.amount!==0);
+taggedRecurring.forEach((item)=>{
 html+="<tr>";
 html+="<td>"+(item.label||"Recurring")+"</td>";
 html+="<td>"+money(item.amount)+"</td>";
-if(index<baseRecurringCharges.length){
-html+="<td class='no-print'><button class='btn btn-info btn-small' onclick='openEditRecurringExpense("+index+")'>EDIT</button> <button class='btn btn-danger btn-small' onclick='deleteRecurringExpenseLocal("+index+")'>DELETE</button></td>";
-}else{
-html+="<td class='no-print'></td>";
-}
+html+="<td class='no-print'><button class='btn btn-info btn-small' onclick=\"openEditRecurringExpense('"+item._src+"',"+item._idx+")\">EDIT</button> <button class='btn btn-danger btn-small' onclick=\"deleteRecurringExpenseLocal('"+item._src+"',"+item._idx+")\">DELETE</button></td>";
 html+="</tr>";
 });
+}
 
 html+="<tr><th>TOTAL</th><th>"+money(recurringTotal)+"</th><th class='no-print'></th></tr>";
 html+="</table>";
