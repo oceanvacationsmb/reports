@@ -209,6 +209,7 @@ select,input,.btn{font-size:12px}
 <div class="sidebar-top">
 <button id="homeBtn" class="btn btn-primary home-icon-btn" onclick="goHomeReports()" aria-label="Home" title="Home">⌂</button>
 <div id="tokenStatus" class="token-status token-inactive">LOADING...</div>
+<div id="storageStatus" style="font-size:10px;margin-top:4px;padding:3px 6px;border-radius:4px;display:none"></div>
 </div>
 <div id="userSessionStatus" style="display:none"></div>
 <div id="ownerLoginBtn" style="display:none"></div>
@@ -1303,6 +1304,26 @@ function updateTokenStatus(){
     status.className="token-status token-inactive";
   }
 }
+
+function updateStorageIndicator(){
+  const el=document.getElementById("storageStatus");
+  if(!el||!githubToken) return;
+  const invoiceBytes=(expenses||[]).reduce((sum,e)=>{
+    if(!e.invoice||e.invoice==="__ref__"||e.invoice.startsWith("iref:")) return sum;
+    return sum+e.invoice.length;
+  },0);
+  const legacyBytes=JSON.stringify(loadedInvoiceMap||{}).length;
+  const reportBytes=JSON.stringify(loadedReportHtmlMap||{}).length;
+  const totalMB=((invoiceBytes+legacyBytes+reportBytes)/1024/1024).toFixed(1);
+  const pct=totalMB/100;
+  let color="#4caf50";
+  let label="Storage: "+totalMB+" MB";
+  if(pct>0.9){color="#f44336";label="⚠️ Storage: "+totalMB+" MB / 100 MB — CRITICAL";}
+  else if(pct>0.7){color="#ff9800";label="⚠️ Storage: "+totalMB+" MB / 100 MB — getting full";}
+  el.style.display="";
+  el.style.color=color;
+  el.textContent=label;
+}
 function showIncomeReport(){
 if(isOwnerPortalUser() && getOwnerPortalType()!=="draft"){
   generateStatement(true);
@@ -1671,6 +1692,27 @@ function renderInvoiceCanvases(root){
     }catch(_){
       invoiceSrc=encoded;
     }
+    if(invoiceSrc.startsWith("iref:")){
+      const invoiceId=invoiceSrc.slice(5);
+      return fetch("invoices/"+invoiceId+".b64",{cache:"no-store"})
+        .then(r=>{if(!r.ok)throw new Error("not found");return r.text();})
+        .then(dataUrl=>{
+          canvas.setAttribute("data-invoice",encodeURIComponent(dataUrl));
+          invoiceSrc=dataUrl;
+        })
+        .then(()=>{
+          if(!invoiceSrc.startsWith("data:application/pdf")) return;
+          return pdfjsLib.getDocument(invoiceSrc).promise.then(pdf=>pdf.getPage(1)).then(page=>{
+            const scale=Math.max(2,Math.min(4,(window.devicePixelRatio||1)*2));
+            const viewport=page.getViewport({scale:scale});
+            canvas.height=viewport.height;canvas.width=viewport.width;
+            canvas.style.width="100%";canvas.style.height="auto";
+            canvas.classList.add("invoice-attachment");
+            return page.render({canvasContext:canvas.getContext("2d"),viewport:viewport}).promise;
+          }).then(()=>{canvas.dataset.rendered="1";});
+        }).catch(()=>{});
+    }
+
     if(!invoiceSrc.startsWith("data:application/pdf")) return;
 
     return pdfjsLib.getDocument(invoiceSrc).promise.then(pdf=>pdf.getPage(1)).then(page=>{
@@ -2476,8 +2518,9 @@ function loadHeavyDataInBackground(){
     .then(map=>{
       loadedInvoiceMap=map||{};
       (expenses||[]).forEach(e=>{if(e.invoice==="__ref__"&&map[e.id])e.invoice=map[e.id];});
+      updateStorageIndicator();
     })
-    .catch(()=>{});
+    .catch(()=>{updateStorageIndicator();});
   fetch("saved_reports_html.json",{cache:"no-store"})
     .then(r=>r.json())
     .then(map=>{
@@ -3492,13 +3535,14 @@ function saveToGitHub(type,callback){
   }
 
   // Strip large blobs from in-memory data before saving
-  const invoiceMap=Object.assign({},loadedInvoiceMap);
   const reportHtmlMap=Object.assign({},loadedReportHtmlMap);
 
+  // New invoices get their own individual files instead of one big invoices.json
+  const newInvoiceFiles=[];
   const strippedExpenses=expenses.map(e=>{
-    if(e.invoice&&e.invoice!=="__ref__"&&typeof e.invoice==="string"&&e.invoice.startsWith("data:")){
-      invoiceMap[e.id]=e.invoice;
-      return Object.assign({},e,{invoice:"__ref__"});
+    if(e.invoice&&e.invoice!=="__ref__"&&!e.invoice.startsWith("iref:")&&typeof e.invoice==="string"&&e.invoice.startsWith("data:")){
+      newInvoiceFiles.push({path:"invoices/"+e.id+".b64",content:e.invoice});
+      return Object.assign({},e,{invoice:"iref:"+e.id});
     }
     return e;
   });
@@ -3512,7 +3556,6 @@ function saveToGitHub(type,callback){
   });
 
   const mainJson=JSON.stringify({owners:OWNERS,users:USERS,vendors:vendors,expenseTypes:expenseTypes,properties:propertySettings,expenses:strippedExpenses,savedReports:strippedReports},null,2);
-  const invoiceJson=JSON.stringify(invoiceMap);
   const reportHtmlJson=JSON.stringify(reportHtmlMap);
 
   function createBlob(content){
@@ -3524,12 +3567,16 @@ function saveToGitHub(type,callback){
 
   function attemptSave(retryCount){
     retryCount=retryCount||0;
-    Promise.all([
+    const blobPromises=[
       createBlob(mainJson),
-      createBlob(invoiceJson),
-      createBlob(reportHtmlJson)
-    ])
-    .then(([mainBlob,invBlob,rptBlob])=>{
+      createBlob(reportHtmlJson),
+      ...newInvoiceFiles.map(f=>createBlob(f.content).then(blob=>({path:f.path,sha:blob.sha})))
+    ];
+    Promise.all(blobPromises)
+    .then(results=>{
+      const mainBlob=results[0];
+      const rptBlob=results[1];
+      const invoiceTreeItems=results.slice(2).map(r=>({path:r.path,mode:"100644",type:"blob",sha:r.sha}));
       return ghFetch(repoBase+"/git/refs/heads/main")
         .then(ref=>ghFetch(repoBase+"/git/commits/"+ref.object.sha)
           .then(commit=>({headSha:ref.object.sha,treeSha:commit.tree.sha}))
@@ -3541,8 +3588,8 @@ function saveToGitHub(type,callback){
               base_tree:treeSha,
               tree:[
                 {path:"data.json",mode:"100644",type:"blob",sha:mainBlob.sha},
-                {path:"invoices.json",mode:"100644",type:"blob",sha:invBlob.sha},
-                {path:"saved_reports_html.json",mode:"100644",type:"blob",sha:rptBlob.sha}
+                {path:"saved_reports_html.json",mode:"100644",type:"blob",sha:rptBlob.sha},
+                ...invoiceTreeItems
               ]
             })
           })
