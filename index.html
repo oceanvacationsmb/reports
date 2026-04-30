@@ -1713,6 +1713,17 @@ function renderInvoiceCanvases(root){
         }).catch(()=>{});
     }
 
+    if(invoiceSrc.startsWith("https://")&&invoiceSrc.includes("/raw/upload/")){
+      return pdfjsLib.getDocument(invoiceSrc).promise.then(pdf=>pdf.getPage(1)).then(page=>{
+        const scale=Math.max(2,Math.min(4,(window.devicePixelRatio||1)*2));
+        const viewport=page.getViewport({scale:scale});
+        canvas.height=viewport.height;canvas.width=viewport.width;
+        canvas.style.width="100%";canvas.style.height="auto";
+        canvas.classList.add("invoice-attachment");
+        return page.render({canvasContext:canvas.getContext("2d"),viewport:viewport}).promise;
+      }).then(()=>{canvas.dataset.rendered="1";}).catch(()=>{});
+    }
+
     if(!invoiceSrc.startsWith("data:application/pdf")) return;
 
     return pdfjsLib.getDocument(invoiceSrc).promise.then(pdf=>pdf.getPage(1)).then(page=>{
@@ -3523,6 +3534,19 @@ function logoutUser(){
   init();
 }
 
+function uploadToCloudinary(file){
+  return new Promise((resolve,reject)=>{
+    const resourceType=file.type==="application/pdf"?"raw":"image";
+    const fd=new FormData();
+    fd.append("file",file);
+    fd.append("upload_preset","oceanvacations");
+    fetch("https://api.cloudinary.com/v1_1/dolrwwa8h/"+resourceType+"/upload",{method:"POST",body:fd})
+      .then(r=>{if(!r.ok)throw new Error(r.status);return r.json();})
+      .then(data=>resolve(data.secure_url))
+      .catch(reject);
+  });
+}
+
 function saveToGitHub(type,callback){
   if(!githubToken){alert("❌ No token");return;}
 
@@ -3790,11 +3814,17 @@ propertyValue = "OWNER";
       alert("Expense updated");
     };
     if(fileEdit){
-      const editReader=new FileReader();
-      editReader.onload=function(ev){
-        finalizeUpdate(ev.target.result);
-      };
-      editReader.readAsDataURL(fileEdit);
+      const btn=document.getElementById("addExpenseBtn");
+      btn.textContent="Uploading invoice...";
+      btn.disabled=true;
+      uploadToCloudinary(fileEdit).then(url=>{
+        btn.disabled=false;
+        finalizeUpdate(url);
+      }).catch(()=>{
+        btn.disabled=false;
+        btn.textContent="SAVE CHANGES";
+        alert("Invoice upload failed. Please try again.");
+      });
     }else{
       finalizeUpdate(existing.invoice||null);
     }
@@ -3807,10 +3837,10 @@ const file=document.getElementById("expenseInvoice").files[0];
 let invoiceData=null;
 
 if(file){
-  const reader=new FileReader();
-  reader.onload=function(e){
-    invoiceData=e.target.result;
-
+  const btn=document.getElementById("addExpenseBtn");
+  btn.textContent="Uploading invoice...";
+  btn.disabled=true;
+  uploadToCloudinary(file).then(url=>{
     expenses.push({
       id:expenseId,
       owner:currentOwner,
@@ -3819,22 +3849,20 @@ if(file){
       vendor:vendor,
       amount:amount,
       notes:notes,
-      invoice:invoiceData,
+      invoice:url,
       month:period.month,
       year:period.year,
       createdAt:createdAtIso
     });
-    const btn=document.getElementById("addExpenseBtn");
-btn.textContent="✓ EXPENSE RECORDED";
-
-setTimeout(()=>{
-btn.textContent="✓ ADD EXPENSE";
-},1000);
-
+    btn.disabled=false;
+    btn.textContent="✓ EXPENSE RECORDED";
+    setTimeout(()=>{btn.textContent="✓ ADD EXPENSE";},1000);
     displaySessionExpenses();
-  };
-
-  reader.readAsDataURL(file);
+  }).catch(()=>{
+    btn.disabled=false;
+    btn.textContent="ADD EXPENSE";
+    alert("Invoice upload failed. Please try again.");
+  });
   return;
 }
 
@@ -4348,18 +4376,14 @@ if(ownerInvoices.length>0){
 html+="<div style='text-align:center'>";
  
  ownerInvoices.forEach(e=>{
-
+const _isPdf=e.invoice.startsWith("data:application/pdf")||(e.invoice.startsWith("https://")&&e.invoice.includes("/raw/upload/"));
 html+="<div class='invoice-attachment-wrap'>";
-  if(e.invoice.startsWith("data:application/pdf")){
+if(_isPdf){
 html+="<canvas class='invoice-attachment invoice-pdf-canvas' data-invoice='"+escapeHtmlAttr(encodeURIComponent(e.invoice))+"'></canvas>";
-
 }else{
-
 html+="<img class='invoice-attachment' src='"+e.invoice+"'>";
 }
-
 html+="</div>";
-
 });
 
 html+="</div>";
@@ -4501,17 +4525,13 @@ html+="</div>";
 if(invoices.length>0){
 html+="<div style='text-align:center'>";
  invoices.forEach(e=>{
-
+const _isPdf=e.invoice.startsWith("data:application/pdf")||(e.invoice.startsWith("https://")&&e.invoice.includes("/raw/upload/"));
 html+="<div class='invoice-attachment-wrap'>";
- if(e.invoice.startsWith("data:application/pdf")){
-
+if(_isPdf){
 html+="<canvas class='invoice-attachment invoice-pdf-canvas' data-invoice='"+escapeHtmlAttr(encodeURIComponent(e.invoice))+"'></canvas>";
-
 }else{
 html+="<img class='invoice-attachment' src='"+e.invoice+"'>";}
-
 html+="</div>";
-
 });
 
 html+="</div>";
