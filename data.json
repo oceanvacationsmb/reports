@@ -1883,6 +1883,19 @@
       "month": 4,
       "year": 2026,
       "createdAt": "2026-04-30T16:53:22.436Z"
+    },
+    {
+      "id": 1777571372622,
+      "owner": "827B - Jeff",
+      "type": "MAINTENANCE",
+      "property": "GC - 827B",
+      "vendor": "ECIA",
+      "amount": 100,
+      "notes": "",
+      "invoice": "__ref__",
+      "month": 4,
+      "year": 2026,
+      "createdAt": "2026-04-30T17:49:32.622Z"
     }
   ],
   "savedReports": [
