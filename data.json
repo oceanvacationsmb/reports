@@ -1896,6 +1896,32 @@
       "month": 4,
       "year": 2026,
       "createdAt": "2026-04-30T17:49:32.622Z"
+    },
+    {
+      "id": 1777571909190,
+      "owner": "KOBI - 508-1-2",
+      "type": "MAINTENANCE",
+      "property": "NMB - 508/1-33S",
+      "vendor": "PARADIES HEATING AND AIR",
+      "amount": 80,
+      "notes": "",
+      "invoice": "__ref__",
+      "month": 4,
+      "year": 2026,
+      "createdAt": "2026-04-30T17:58:29.190Z"
+    },
+    {
+      "id": 1777571918749,
+      "owner": "KOBI - 508-1-2",
+      "type": "MAINTENANCE",
+      "property": "NMB - 508/2-33S",
+      "vendor": "PARADIES HEATING AND AIR",
+      "amount": 80,
+      "notes": "",
+      "invoice": "__ref__",
+      "month": 4,
+      "year": 2026,
+      "createdAt": "2026-04-30T17:58:38.749Z"
     }
   ],
   "savedReports": [
