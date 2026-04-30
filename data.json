@@ -1987,6 +1987,19 @@
       "month": 4,
       "year": 2026,
       "createdAt": "2026-04-30T18:04:48.641Z"
+    },
+    {
+      "id": 1777574092108,
+      "owner": "ERAN MARON",
+      "type": "PURCHASE",
+      "property": "GCSSB - 113A-12S",
+      "vendor": "AMAZON",
+      "amount": 22.46,
+      "notes": "",
+      "invoice": "__ref__",
+      "month": 4,
+      "year": 2026,
+      "createdAt": "2026-04-30T18:34:52.108Z"
     }
   ],
   "savedReports": [
