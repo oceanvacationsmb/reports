@@ -1620,7 +1620,7 @@ function removeTableColumnByHeaderText(table,headerText){
 
 function sanitizeSavedReportHtml(report){
   const html=(report && report.html ? report.html : "");
-  if(!html) return html;
+  if(!html || html==="__ref__") return "";
 
   const wrapper=document.createElement("div");
   wrapper.innerHTML=html;
@@ -3486,10 +3486,6 @@ function saveToGitHub(type,callback){
   const repoBase="https://api.github.com/repos/oceanvacationsmb/reports";
   const ghHeaders={"Authorization":"token "+githubToken,"Content-Type":"application/json"};
 
-  function toB64(str){
-    return btoa(unescape(encodeURIComponent(str)));
-  }
-
   function ghFetch(url,opts){
     return fetch(url,Object.assign({headers:ghHeaders},opts||{}))
       .then(r=>{if(!r.ok)throw new Error(r.status+" "+url);return r.json();});
@@ -3522,7 +3518,7 @@ function saveToGitHub(type,callback){
   function createBlob(content){
     return ghFetch(repoBase+"/git/blobs",{
       method:"POST",
-      body:JSON.stringify({content:toB64(content),encoding:"base64"})
+      body:JSON.stringify({content:content,encoding:"utf-8"})
     });
   }
 
