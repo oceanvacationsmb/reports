@@ -2017,17 +2017,6 @@
   ],
   "savedReports": [
     {
-      "id": "rpt_1777583012031",
-      "createdAt": "2026-04-30T21:03:32.031Z",
-      "owner": "1552 - YEN",
-      "reportKey": "statement",
-      "reportTitle": "Statement",
-      "period": "April 2026",
-      "email": "tristate1391@gmail.com",
-      "html": "__ref__",
-      "createdBy": "admin"
-    },
-    {
       "id": "rpt_1777582929834",
       "createdAt": "2026-04-30T21:02:09.834Z",
       "owner": "ERAN MARON",
