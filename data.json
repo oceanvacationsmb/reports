@@ -1922,6 +1922,71 @@
       "month": 4,
       "year": 2026,
       "createdAt": "2026-04-30T17:58:38.749Z"
+    },
+    {
+      "id": 1777572201508,
+      "owner": "ERAN MARON",
+      "type": "MAINTENANCE",
+      "property": "NMB - 204-27N",
+      "vendor": "ECIA",
+      "amount": 80,
+      "notes": "",
+      "invoice": "__ref__",
+      "month": 4,
+      "year": 2026,
+      "createdAt": "2026-04-30T18:03:21.508Z"
+    },
+    {
+      "id": 1777572232597,
+      "owner": "ERAN MARON",
+      "type": "MAINTENANCE",
+      "property": "NMB - 400A",
+      "vendor": "ECIA",
+      "amount": 75,
+      "notes": "",
+      "invoice": "__ref__",
+      "month": 4,
+      "year": 2026,
+      "createdAt": "2026-04-30T18:03:52.597Z"
+    },
+    {
+      "id": 1777572253596,
+      "owner": "ERAN MARON",
+      "type": "MAINTENANCE",
+      "property": "MB - Tuscan C",
+      "vendor": "ECIA",
+      "amount": 75,
+      "notes": "",
+      "invoice": "__ref__",
+      "month": 4,
+      "year": 2026,
+      "createdAt": "2026-04-30T18:04:13.596Z"
+    },
+    {
+      "id": 1777572269780,
+      "owner": "ERAN MARON",
+      "type": "MAINTENANCE",
+      "property": "MB - Tuscan C",
+      "vendor": "ECIA",
+      "amount": 75,
+      "notes": "",
+      "invoice": "__ref__",
+      "month": 4,
+      "year": 2026,
+      "createdAt": "2026-04-30T18:04:29.780Z"
+    },
+    {
+      "id": 1777572288641,
+      "owner": "ERAN MARON",
+      "type": "MAINTENANCE",
+      "property": "GCSSB - 113A-12S",
+      "vendor": "ECIA",
+      "amount": 100,
+      "notes": "",
+      "invoice": "__ref__",
+      "month": 4,
+      "year": 2026,
+      "createdAt": "2026-04-30T18:04:48.641Z"
     }
   ],
   "savedReports": [
