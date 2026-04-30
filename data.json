@@ -85,32 +85,7 @@
       "recurringCharges": [],
       "monthlyRecurringCharges": [],
       "specificDateRecurringCharges": [],
-      "dateRangeRecurringCharges": [
-        {
-          "startDate": "2026-04-01",
-          "endDate": "2026-09-30",
-          "label": "Pool Cleaning",
-          "amount": 250
-        },
-        {
-          "startDate": "2026-10-01",
-          "endDate": "2027-03-31",
-          "label": "Pool Cleaning",
-          "amount": 150
-        },
-        {
-          "startDate": "2026-04-01",
-          "endDate": "2027-12-31",
-          "label": "Pest Control",
-          "amount": 45
-        },
-        {
-          "startDate": "2026-04-01",
-          "endDate": "2026-09-30",
-          "label": "Landscaping",
-          "amount": 90
-        }
-      ]
+      "dateRangeRecurringCharges": []
     },
     "469C - ASSAF": {
       "email": "adahabani@gmail.com",
