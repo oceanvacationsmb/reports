@@ -252,7 +252,7 @@
       "recurringCharges": [
         {
           "label": "Pool Cleaning",
-          "amount": 250
+          "amount": 125
         },
         {
           "label": "Pest Control",
