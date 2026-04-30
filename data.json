@@ -82,7 +82,20 @@
       "salesFeePercent": 10,
       "type": "payout",
       "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=0542d3c012e0c4bb62fe31f35ba940d1e7ee42da5c24e73cedc34d7fd794e256804ae48b3386d18beb91471e751355ca50ebef2512b865d769ea84debeba8ec7",
-      "recurringCharges": [],
+      "recurringCharges": [
+        {
+          "label": "Pool Cleaning",
+          "amount": 250
+        },
+        {
+          "label": "Pest Control",
+          "amount": 45
+        },
+        {
+          "label": "Landscaping",
+          "amount": 45
+        }
+      ],
       "monthlyRecurringCharges": [],
       "specificDateRecurringCharges": [],
       "dateRangeRecurringCharges": []
