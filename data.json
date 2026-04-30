@@ -2000,6 +2000,19 @@
       "month": 4,
       "year": 2026,
       "createdAt": "2026-04-30T18:34:52.108Z"
+    },
+    {
+      "id": 1777574265628,
+      "owner": "ERAN MARON",
+      "type": "MAINTENANCE",
+      "property": "NMB - 400A",
+      "vendor": "QUICKFIX LLC",
+      "amount": 313.82,
+      "notes": "",
+      "invoice": "__ref__",
+      "month": 4,
+      "year": 2026,
+      "createdAt": "2026-04-30T18:37:45.628Z"
     }
   ],
   "savedReports": [
