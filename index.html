@@ -2504,13 +2504,14 @@ function applyLoadedData(data){
 }
 
 function loadLocalFallback(){
-  const tryData=fetch("data.json",{cache:"no-store"})
+  const bust="?t="+Date.now();
+  const tryData=fetch("data.json"+bust,{cache:"no-store"})
     .then(r=>{
       if(!r.ok) throw new Error("Local data.json not found");
       return r.json();
     });
 
-  const tryBackup=fetch("BACKUP%20DATA.JSON",{cache:"no-store"})
+  const tryBackup=fetch("BACKUP%20DATA.JSON"+bust,{cache:"no-store"})
     .then(r=>{
       if(!r.ok) throw new Error("Backup data not found");
       return r.json();
@@ -2524,7 +2525,8 @@ function loadLocalFallback(){
 }
 
 function loadHeavyDataInBackground(){
-  fetch("invoices.json",{cache:"no-store"})
+  const bust="?t="+Date.now();
+  fetch("invoices.json"+bust,{cache:"no-store"})
     .then(r=>r.json())
     .then(map=>{
       loadedInvoiceMap=map||{};
@@ -2532,7 +2534,7 @@ function loadHeavyDataInBackground(){
       updateStorageIndicator();
     })
     .catch(()=>{updateStorageIndicator();});
-  fetch("saved_reports_html.json",{cache:"no-store"})
+  fetch("saved_reports_html.json"+bust,{cache:"no-store"})
     .then(r=>r.json())
     .then(map=>{
       loadedReportHtmlMap=map||{};
@@ -2559,8 +2561,9 @@ function loadData(){
       return;
     }
 
-    const ghFetch=fetch(getGitHubAPI(),{
-      headers:{"Authorization":"token "+githubToken}
+    const ghFetch=fetch(getGitHubAPI()+"?t="+Date.now(),{
+      headers:{"Authorization":"token "+githubToken},
+      cache:"no-store"
     });
     const ghTimeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error("timeout")),8000));
     Promise.race([ghFetch,ghTimeout])
