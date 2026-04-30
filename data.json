@@ -34,23 +34,19 @@
       "salesFeePercent": 5,
       "type": "payout",
       "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=bbbab438244300805daaf5485d3b516cbeee616fba7e640fc3b80d0b648c01d13e3f70a2bde2abaf9deb3b661aabf1c17453fd4e6d799f380cfd059df66cf01e",
-      "recurringCharges": [],
-      "monthlyRecurringCharges": [],
-      "specificDateRecurringCharges": [],
-      "dateRangeRecurringCharges": [
+      "recurringCharges": [
         {
-          "startDate": "2026-04-01",
-          "endDate": "2026-09-30",
-          "label": "Landscaping",
+          "label": "Pest Control",
           "amount": 45
         },
         {
-          "startDate": "2026-04-01",
-          "endDate": "2026-12-31",
-          "label": "Pest Control",
+          "label": "Landscaping",
           "amount": 45
         }
-      ]
+      ],
+      "monthlyRecurringCharges": [],
+      "specificDateRecurringCharges": [],
+      "dateRangeRecurringCharges": []
     },
     "113-13 - CARL": {
       "email": "chrpfd@verizon.net",
@@ -58,23 +54,19 @@
       "salesFeePercent": 5,
       "type": "payout",
       "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=d6ab951850fef54399e2206f36f4e79fb1b425a8e5c891076036b11f50da8870613a226021487307c8c5f51eae997a08dd7e112d013ef683728ad1d9220ee0b7",
-      "recurringCharges": [],
-      "monthlyRecurringCharges": [],
-      "specificDateRecurringCharges": [],
-      "dateRangeRecurringCharges": [
+      "recurringCharges": [
         {
-          "startDate": "2026-04-01",
-          "endDate": "2026-12-31",
           "label": "Pest Control",
           "amount": 45
         },
         {
-          "startDate": "2026-04-01",
-          "endDate": "2026-09-30",
           "label": "Landscaping",
           "amount": 45
         }
-      ]
+      ],
+      "monthlyRecurringCharges": [],
+      "specificDateRecurringCharges": [],
+      "dateRangeRecurringCharges": []
     },
     "115C-15 - CHRIS": {
       "email": "beachsmyles@gmail.com",
@@ -113,17 +105,15 @@
       "salesFeePercent": 5,
       "type": "payout",
       "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=9512389c04f387d631c31f5eb901ae89d56d646ebe156166da68e78502c1c64d6a8bab54753942cc5be2ab33ce8523e5902e9ddfd24285efb4786c2de32225d6",
-      "recurringCharges": [],
-      "monthlyRecurringCharges": [],
-      "specificDateRecurringCharges": [],
-      "dateRangeRecurringCharges": [
+      "recurringCharges": [
         {
-          "startDate": "2026-01-01",
-          "endDate": "2026-12-31",
           "label": "Pest Control",
           "amount": 45
         }
-      ]
+      ],
+      "monthlyRecurringCharges": [],
+      "specificDateRecurringCharges": [],
+      "dateRangeRecurringCharges": []
     },
     "214 - GTI GROUP TAL": {
       "email": "zilkerinvestments@gmail.com",
@@ -133,16 +123,16 @@
       "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=796af50d38fbbedbcec1df5bdd790355a574f67e21a823ba64f9a26cda86cc4d6d7c71552d7c02889a32557ed6185d44de44820881f74e128d66dacd57a70017",
       "recurringCharges": [
         {
-          "label": "Pool cleaning",
+          "label": "Pool Cleaning",
           "amount": 250
         },
         {
-          "label": "Pest control",
+          "label": "Pest Control",
           "amount": 45
         },
         {
           "label": "Landscaping",
-          "amount": 90
+          "amount": 45
         }
       ]
     },
@@ -190,7 +180,7 @@
         },
         {
           "label": "Landscaping",
-          "amount": 90
+          "amount": 45
         }
       ]
     },
@@ -259,7 +249,20 @@
       "splitOwnerPercent": 50,
       "guestyReportUrl": "https://report.guesty.com/apps/reservations?apiKey=93f728eb57983f66c7d4abafc09d570fabf3cfc86f3fa75b3a71f17c696663a5ddd61994381fe366fc7da9481a3c9ec58c44b974a1646fd61f40456b8f4cbb0d",
       "guestyAllPropertiesUrl": "",
-      "recurringCharges": [],
+      "recurringCharges": [
+        {
+          "label": "Pool Cleaning",
+          "amount": 250
+        },
+        {
+          "label": "Pest Control",
+          "amount": 45
+        },
+        {
+          "label": "Landscaping",
+          "amount": 45
+        }
+      ],
       "monthlyRecurringCharges": [],
       "specificDateRecurringCharges": [],
       "dateRangeRecurringCharges": []
