@@ -1861,17 +1861,6 @@
   ],
   "savedReports": [
     {
-      "id": "rpt_1777258232668",
-      "createdAt": "2026-04-27T02:50:32.668Z",
-      "owner": "4679/204 - MORENA",
-      "reportKey": "statement",
-      "reportTitle": "Statement",
-      "period": "April 2026",
-      "email": "",
-      "html": "__ref__",
-      "createdBy": "admin"
-    },
-    {
       "id": "rpt_1775360738012",
       "createdAt": "2026-04-05T03:45:38.012Z",
       "owner": "ERAN MARON",
