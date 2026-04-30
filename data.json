@@ -1861,17 +1861,6 @@
   ],
   "savedReports": [
     {
-      "id": "rpt_1775360738012",
-      "createdAt": "2026-04-05T03:45:38.012Z",
-      "owner": "ERAN MARON",
-      "reportKey": "statement",
-      "reportTitle": "Statement",
-      "period": "April 2026",
-      "email": "maron.eran@gmail.com",
-      "html": "__ref__",
-      "createdBy": "admin"
-    },
-    {
       "id": "rpt_1774999034432",
       "createdAt": "2026-03-31T23:17:14.432Z",
       "owner": "113-13 - CARL",
