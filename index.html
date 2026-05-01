@@ -1701,6 +1701,13 @@ function renderInvoiceCanvases(root){
           invoiceSrc=dataUrl;
         })
         .then(()=>{
+          if(invoiceSrc.startsWith("data:image/")){
+            const img=document.createElement("img");
+            img.className="invoice-attachment";
+            img.src=invoiceSrc;
+            if(canvas.parentNode) canvas.parentNode.replaceChild(img,canvas);
+            return;
+          }
           if(!invoiceSrc.startsWith("data:application/pdf")) return;
           return pdfjsLib.getDocument(invoiceSrc).promise.then(pdf=>pdf.getPage(1)).then(page=>{
             const scale=Math.max(2,Math.min(4,(window.devicePixelRatio||1)*2));
@@ -4379,7 +4386,7 @@ if(ownerInvoices.length>0){
 html+="<div style='text-align:center'>";
  
  ownerInvoices.forEach(e=>{
-const _isPdf=e.invoice.startsWith("data:application/pdf")||(e.invoice.startsWith("https://")&&e.invoice.includes("/raw/upload/"));
+const _isPdf=e.invoice.startsWith("data:application/pdf")||e.invoice.startsWith("iref:")||(e.invoice.startsWith("https://")&&e.invoice.includes("/raw/upload/"));
 html+="<div class='invoice-attachment-wrap'>";
 if(_isPdf){
 html+="<canvas class='invoice-attachment invoice-pdf-canvas' data-invoice='"+escapeHtmlAttr(encodeURIComponent(e.invoice))+"'></canvas>";
@@ -4528,7 +4535,7 @@ html+="</div>";
 if(invoices.length>0){
 html+="<div style='text-align:center'>";
  invoices.forEach(e=>{
-const _isPdf=e.invoice.startsWith("data:application/pdf")||(e.invoice.startsWith("https://")&&e.invoice.includes("/raw/upload/"));
+const _isPdf=e.invoice.startsWith("data:application/pdf")||e.invoice.startsWith("iref:")||(e.invoice.startsWith("https://")&&e.invoice.includes("/raw/upload/"));
 html+="<div class='invoice-attachment-wrap'>";
 if(_isPdf){
 html+="<canvas class='invoice-attachment invoice-pdf-canvas' data-invoice='"+escapeHtmlAttr(encodeURIComponent(e.invoice))+"'></canvas>";
