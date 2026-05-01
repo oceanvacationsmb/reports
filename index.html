@@ -1309,7 +1309,7 @@ function updateStorageIndicator(){
   const el=document.getElementById("storageStatus");
   if(!el||!githubToken) return;
   const invoiceBytes=(expenses||[]).reduce((sum,e)=>{
-    if(!e.invoice||e.invoice==="__ref__"||e.invoice.startsWith("iref:")) return sum;
+    if(!e.invoice||e.invoice==="__ref__"||e.invoice.startsWith("iref:")||e.invoice.startsWith("https://")) return sum;
     return sum+e.invoice.length;
   },0);
   const legacyBytes=JSON.stringify(loadedInvoiceMap||{}).length;
