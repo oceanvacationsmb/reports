@@ -2052,6 +2052,19 @@
       "month": 5,
       "year": 2026,
       "createdAt": "2026-05-07T03:00:54.604Z"
+    },
+    {
+      "id": 1778122929372,
+      "owner": "ERAN MARON",
+      "type": "CLEANING",
+      "property": "NMB - 709-2",
+      "vendor": "PMC",
+      "amount": 400,
+      "notes": "CLEANING FEE PUSHED FROM 5TH TO 13TH",
+      "invoice": null,
+      "month": 5,
+      "year": 2026,
+      "createdAt": "2026-05-07T03:02:09.372Z"
     }
   ],
   "savedReports": [
