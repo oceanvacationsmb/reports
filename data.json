@@ -2039,6 +2039,19 @@
       "month": 5,
       "year": 2026,
       "createdAt": "2026-05-01T17:11:58.651Z"
+    },
+    {
+      "id": 1778122854604,
+      "owner": "ERAN MARON",
+      "type": "CREDIT",
+      "property": "NMB - 709-2",
+      "vendor": "ADJUEMENT",
+      "amount": -400,
+      "notes": "CLEANING FEE FROM PAYOUT - NO CHAGE!",
+      "invoice": null,
+      "month": 5,
+      "year": 2026,
+      "createdAt": "2026-05-07T03:00:54.604Z"
     }
   ],
   "savedReports": [
