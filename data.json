@@ -2078,6 +2078,19 @@
       "month": 4,
       "year": 2026,
       "createdAt": "2026-05-08T00:27:46.195Z"
+    },
+    {
+      "id": 1778200102487,
+      "owner": "3104 - JACOB ZROYA",
+      "type": "MAINTENANCE",
+      "property": "OWNER",
+      "vendor": "PARADIES HEATING AND AIR",
+      "amount": 100,
+      "notes": "",
+      "invoice": null,
+      "month": 4,
+      "year": 2026,
+      "createdAt": "2026-05-08T00:28:22.487Z"
     }
   ],
   "savedReports": [
