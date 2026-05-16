@@ -73,6 +73,12 @@ body{
     font-size:13px;
 }
 
+/* MOBILE DROPDOWN */
+
+.mobile-select{
+    display:none;
+}
+
 /* TOPBAR */
 
 .topbar{
@@ -112,69 +118,48 @@ iframe{
     border:none;
 }
 
-/* MOBILE */
+/* MOBILE VERSION */
 
 @media(max-width:768px){
 
-    body{
-        overflow:hidden;
-    }
-
     .sidebar{
         width:100%;
-        height:auto;
-        max-height:42vh;
-        padding:10px;
+        height:58px;
+        max-height:none;
+        padding:8px 10px;
+        background:#1f2a38;
+        display:flex;
+        align-items:center;
     }
 
-    .sidebar h2{
-        font-size:16px;
-        margin-bottom:10px;
+    .sidebar h2,
+    .settings-header,
+    .sidebar .btn{
+        display:none;
     }
 
-    .btn{
-        padding:10px;
-        font-size:12px;
+    .mobile-select{
+        display:block;
+        width:100%;
+        height:42px;
+        padding:0 12px;
+        font-size:15px;
+        border-radius:8px;
+        border:1px solid #ccc;
+        background:white;
+        color:#1f2a38;
+        font-weight:bold;
     }
 
     .topbar{
-        left:0;
-        top:42vh;
-        height:45px;
-        font-size:12px;
-        padding:0 10px;
-    }
-
-    .clock{
         display:none;
     }
 
     .iframe-container{
+        top:58px;
         left:0;
-        top:calc(42vh + 45px);
-    }
-}
-
-@media(max-width:480px){
-
-    .sidebar{
-        max-height:45vh;
-    }
-
-    .topbar{
-        top:45vh;
-        justify-content:center;
-        text-align:center;
-        padding:0;
-    }
-
-    .iframe-container{
-        top:calc(45vh + 45px);
-    }
-
-    .btn{
-        font-size:11px;
-        padding:9px;
+        right:0;
+        bottom:0;
     }
 }
 
@@ -186,6 +171,22 @@ iframe{
 <div class="sidebar">
 
     <h2>OCEAN VACATIONS</h2>
+
+    <select class="mobile-select" onchange="handleMobileSelect(this.value)">
+        <option value="">Select Tool</option>
+        <option value="new:https://www.oceanvacationsmb.com">Website</option>
+        <option value="frame:https://oceanvacationsmb.github.io/tax-remittance-dashboard/index.html">Taxes Report</option>
+        <option value="frame:https://oceanvacationsmb.github.io/rentapp/admin.html">Rental Application</option>
+        <option value="frame:https://oceanvacationsmb.github.io/owner_income_report/index.html">Owner Portal</option>
+        <option value="frame:https://oceanvacationsmb.github.io/reports/property_estimate.html">Property GRI Estimator</option>
+        <option value="frame:https://oceanvacationsmb.github.io/collage/">Collage Tool</option>
+        <option value="new:https://app.signnow.com/webapp/documents/b598cffbdb334ddeb18c7783528c31cf05c2b803">Docusign</option>
+        <option value="new:https://app.guesty.com/auth/login">Guesty</option>
+        <option value="new:https://paleturquoise-baboon-311445.hostingersite.com/login.php">Price Adjustment</option>
+        <option value="new:https://www.airbnb.com/hosting">Airbnb</option>
+        <option value="new:https://www.airbnb.com/resolutions">Airbnb Resolution</option>
+        <option value="contact">Contact Info</option>
+    </select>
 
     <div class="settings-header">TOOLS</div>
 
@@ -271,6 +272,28 @@ function openAccessLink(url){
 
 function openNewTab(url){
     window.open(url,"_blank");
+}
+
+function handleMobileSelect(value){
+
+    if(!value) return;
+
+    if(value === "contact"){
+        loadContactPage();
+        return;
+    }
+
+    const type = value.split(":")[0];
+
+    const url = value.substring(type.length + 1);
+
+    if(type === "frame"){
+        openAccessLink(url);
+    }
+
+    if(type === "new"){
+        openNewTab(url);
+    }
 }
 
 function loadContactPage(){
