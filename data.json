@@ -2052,6 +2052,32 @@
       "month": 5,
       "year": 2026,
       "createdAt": "2026-05-21T15:50:27.886Z"
+    },
+    {
+      "id": 1779378783774,
+      "owner": "113-15 - MAT",
+      "type": "CLEANING",
+      "property": "OWNER",
+      "vendor": "ADJUEMENT",
+      "amount": -128.75,
+      "notes": "CREDIT FOR CARPET CLEANING",
+      "invoice": "https://res.cloudinary.com/dolrwwa8h/image/upload/v1779378979/a00ro5yagauvimmhpxzj.jpg",
+      "month": 5,
+      "year": 2026,
+      "createdAt": "2026-05-21T15:53:03.774Z"
+    },
+    {
+      "id": 1779378856234,
+      "owner": "3104 - JACOB ZROYA",
+      "type": "PURCHASE",
+      "property": "OWNER",
+      "vendor": "PMC",
+      "amount": 545.85,
+      "notes": "TOWELS",
+      "invoice": "https://res.cloudinary.com/dolrwwa8h/image/upload/v1779379052/mslkdrn3gaa4pfomvkia.jpg",
+      "month": 5,
+      "year": 2026,
+      "createdAt": "2026-05-21T15:54:16.234Z"
     }
   ],
   "savedReports": [
