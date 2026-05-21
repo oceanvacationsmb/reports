@@ -2091,6 +2091,32 @@
       "month": 5,
       "year": 2026,
       "createdAt": "2026-05-21T15:55:17.006Z"
+    },
+    {
+      "id": 1779378931597,
+      "owner": "214 - GTI GROUP TAL",
+      "type": "MAINTENANCE",
+      "property": "OWNER",
+      "vendor": "ECIA",
+      "amount": 670,
+      "notes": "",
+      "invoice": "https://res.cloudinary.com/dolrwwa8h/image/upload/v1779379127/vg59mn9hhfwyrl7jczm9.jpg",
+      "month": 5,
+      "year": 2026,
+      "createdAt": "2026-05-21T15:55:31.597Z"
+    },
+    {
+      "id": 1779378967921,
+      "owner": "214 - GTI GROUP TAL",
+      "type": "PURCHASE",
+      "property": "OWNER",
+      "vendor": "AMAZON",
+      "amount": 19.42,
+      "notes": "",
+      "invoice": "https://res.cloudinary.com/dolrwwa8h/image/upload/v1779379163/saajfmukqtcielxzumfz.jpg",
+      "month": 5,
+      "year": 2026,
+      "createdAt": "2026-05-21T15:56:07.921Z"
     }
   ],
   "savedReports": [
