@@ -2247,6 +2247,19 @@
       "month": 5,
       "year": 2026,
       "createdAt": "2026-05-21T15:58:38.121Z"
+    },
+    {
+      "id": 1779379227861,
+      "owner": "827B - Jeff",
+      "type": "PURCHASE",
+      "property": "OWNER",
+      "vendor": "AMAZON",
+      "amount": 127.07,
+      "notes": "",
+      "invoice": "https://res.cloudinary.com/dolrwwa8h/image/upload/v1779379423/ohqd7a1aqyxsq0vuxskz.jpg",
+      "month": 5,
+      "year": 2026,
+      "createdAt": "2026-05-21T16:00:27.861Z"
     }
   ],
   "savedReports": [
