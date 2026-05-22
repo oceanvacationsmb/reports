@@ -2481,6 +2481,32 @@
       "month": 5,
       "year": 2026,
       "createdAt": "2026-05-22T17:10:52.743Z"
+    },
+    {
+      "id": 1779470377371,
+      "owner": "3104 - JACOB ZROYA",
+      "type": "SUPPLIES",
+      "property": "OWNER",
+      "vendor": "WALMART",
+      "amount": 64.54,
+      "notes": "EXTRA PILLOWS",
+      "invoice": "https://res.cloudinary.com/dolrwwa8h/raw/upload/v1779470573/b6ckqzzd4fsfcbszamva.pdf",
+      "month": 5,
+      "year": 2026,
+      "createdAt": "2026-05-22T17:19:37.371Z"
+    },
+    {
+      "id": 1779470419823,
+      "owner": "3104 - JACOB ZROYA",
+      "type": "SUPPLIES",
+      "property": "OWNER",
+      "vendor": "PMC",
+      "amount": 36.9,
+      "notes": "LIGHT BULBS + CORD",
+      "invoice": "https://res.cloudinary.com/dolrwwa8h/image/upload/v1779470616/sa8m1tp17lsvsdvr22ob.jpg",
+      "month": 5,
+      "year": 2026,
+      "createdAt": "2026-05-22T17:20:19.823Z"
     }
   ],
   "savedReports": [
