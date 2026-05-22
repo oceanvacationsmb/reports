@@ -2598,19 +2598,6 @@
       "month": 5,
       "year": 2026,
       "createdAt": "2026-05-22T17:25:31.518Z"
-    },
-    {
-      "id": 1779470848056,
-      "owner": "ERAN MARON",
-      "type": "MAINTENANCE",
-      "property": "NMB - 204-27N",
-      "vendor": "PMC",
-      "amount": 135,
-      "notes": "",
-      "invoice": "https://res.cloudinary.com/dolrwwa8h/raw/upload/v1779471044/w5dollhfyziljf7yfeyp.pdf",
-      "month": 5,
-      "year": 2026,
-      "createdAt": "2026-05-22T17:27:28.056Z"
     }
   ],
   "savedReports": [
