@@ -2611,6 +2611,19 @@
       "month": 5,
       "year": 2026,
       "createdAt": "2026-05-22T18:11:52.586Z"
+    },
+    {
+      "id": 1779644998281,
+      "owner": "ERAN MARON",
+      "type": "REPAIR",
+      "property": "MB - Tuscan B",
+      "vendor": "PARADIES HEATING AND AIR",
+      "amount": 150,
+      "notes": "",
+      "invoice": "https://res.cloudinary.com/dolrwwa8h/image/upload/v1779645194/mmcskvsbqkc3rd8lnf64.jpg",
+      "month": 5,
+      "year": 2026,
+      "createdAt": "2026-05-24T17:49:58.281Z"
     }
   ],
   "savedReports": [
