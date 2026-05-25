@@ -2702,6 +2702,19 @@
       "month": 5,
       "year": 2026,
       "createdAt": "2026-05-25T17:53:32.180Z"
+    },
+    {
+      "id": 1779732246937,
+      "owner": "ERAN MARON",
+      "type": "PURCHASE",
+      "property": "NMB - 304B",
+      "vendor": "HOME DEPOT",
+      "amount": 32.38,
+      "notes": "",
+      "invoice": "https://res.cloudinary.com/dolrwwa8h/image/upload/v1779732444/ooblx7m4rysr112k5hwh.jpg",
+      "month": 5,
+      "year": 2026,
+      "createdAt": "2026-05-25T18:04:06.937Z"
     }
   ],
   "savedReports": [
