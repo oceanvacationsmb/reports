@@ -2689,6 +2689,19 @@
       "month": 5,
       "year": 2026,
       "createdAt": "2026-05-25T17:46:16.588Z"
+    },
+    {
+      "id": 1779731612180,
+      "owner": "214 - GTI GROUP TAL",
+      "type": "MAINTENANCE",
+      "property": "OWNER",
+      "vendor": "PMC",
+      "amount": 85,
+      "notes": "",
+      "invoice": "https://res.cloudinary.com/dolrwwa8h/image/upload/v1779731809/io2bqgfsg9cna5zmc7h4.jpg",
+      "month": 5,
+      "year": 2026,
+      "createdAt": "2026-05-25T17:53:32.180Z"
     }
   ],
   "savedReports": [
