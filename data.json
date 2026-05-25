@@ -2676,6 +2676,19 @@
       "month": 5,
       "year": 2026,
       "createdAt": "2026-05-25T17:45:54.176Z"
+    },
+    {
+      "id": 1779731176588,
+      "owner": "214 - GTI GROUP TAL",
+      "type": "PURCHASE",
+      "property": "OWNER",
+      "vendor": "AMAZON",
+      "amount": 75.76,
+      "notes": "",
+      "invoice": "https://res.cloudinary.com/dolrwwa8h/image/upload/v1779731373/umfollsxsd29lg6lbskj.jpg",
+      "month": 5,
+      "year": 2026,
+      "createdAt": "2026-05-25T17:46:16.588Z"
     }
   ],
   "savedReports": [
