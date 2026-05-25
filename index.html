@@ -117,6 +117,7 @@ margin:20px 0;
 .compact-table tr:last-child td,.compact-table tr:last-child th{border-bottom:none}
 .invoice-attachment-wrap{display:block;text-align:center;page-break-inside:avoid;break-inside:avoid;margin:8px 0}
 .invoice-attachment{display:block;max-width:100%;width:auto;height:auto;max-height:10in;margin:0 auto;page-break-inside:avoid;break-inside:avoid;object-fit:contain}
+.report-total-banner{display:block;text-align:center;font-size:22px;font-weight:bold;margin:25px 0;page-break-inside:avoid;break-inside:avoid;page-break-before:avoid;break-before:avoid;page-break-after:avoid;break-after:avoid}
 .modal{display:none;position:fixed;z-index:1001;left:50%;top:50%;transform:translate(-50%,-50%);width:90%;max-width:560px;background:#263942;color:#fff;border-radius:12px;padding:30px;box-shadow:0 12px 28px rgba(0,0,0,0.35);max-height:90vh;overflow-y:auto}
 .modal.show{display:block}
 .modal-title{font-size:20px;font-weight:bold;margin-bottom:20px;text-transform:uppercase;text-align:center;border-bottom:2px solid #fff;padding-bottom:15px}
@@ -464,6 +465,7 @@ async function uploadPdfBlobToGitHub(pdfBlob,fileName){
 
 let gitHubData={},OWNERS={},USERS={},vendors=[],expenses=[],csvData=[],propertySettings={},currentOwner="",masterTotals={},propertyTotals={},taxByProperty={},githubToken="",expenseTypes=[];
 let loadedInvoiceMap={},loadedReportHtmlMap={};
+let heavyDataReadyPromise=Promise.resolve();
 let sessionExpenses=[];
 let editingExpenseId=null;
 let editingRecurringExpenseIndex=null;
@@ -1884,6 +1886,15 @@ async function exportElementToHighQualityPdf(sourceElement,filename,options){
     el.style.pageBreakInside="avoid";
   });
 
+  clone.querySelectorAll(".report-total-banner").forEach(el=>{
+    el.style.breakInside="avoid";
+    el.style.pageBreakInside="avoid";
+    el.style.breakBefore="avoid";
+    el.style.pageBreakBefore="avoid";
+    el.style.breakAfter="avoid";
+    el.style.pageBreakAfter="avoid";
+  });
+
   mover.appendChild(clone);
   viewport.appendChild(mover);
   stage.appendChild(viewport);
@@ -1913,6 +1924,15 @@ async function exportElementToHighQualityPdf(sourceElement,filename,options){
       if(h<120) return;
       const top=Math.max(0,Math.floor(el.offsetTop));
       const bottom=Math.min(totalHeight,Math.ceil(el.offsetTop+h));
+      safeBreakSet.add(top);
+      safeBreakSet.add(bottom);
+    });
+    clone.querySelectorAll(".report-total-banner").forEach(el=>{
+      const h=el.offsetHeight||0;
+      if(h<1) return;
+      const top=Math.max(0,Math.floor(el.offsetTop));
+      const bottom=Math.min(totalHeight,Math.ceil(el.offsetTop+h));
+      protectedBlocks.push({top,bottom});
       safeBreakSet.add(top);
       safeBreakSet.add(bottom);
     });
@@ -1998,7 +2018,7 @@ function canSnapshotCurrentView(){
   return key==="statement" || key==="income" || key==="gri" || key==="summary";
 }
 
-function createReportSnapshot(done){
+async function createReportSnapshot(done){
   if(!canSnapshotCurrentView()){
     alert("Generate a report first (Statement, Income, GRI or Summary)");
     return;
@@ -2007,6 +2027,8 @@ function createReportSnapshot(done){
     alert("GitHub token required to save a shareable report link. Click GITHUB SETUP first.");
     return;
   }
+
+  await heavyDataReadyPromise;
 
   const html=getCurrentReportHtml();
   if(!html || !html.trim()){
@@ -2089,10 +2111,12 @@ function openEmailClient(reportId){
   setTimeout(()=>generateEmailReportLink(),50);
 }
 
-function generateEmailReportLink(){
+async function generateEmailReportLink(){
   if(isGeneratingEmailLink) return;
   isGeneratingEmailLink=true;
   document.getElementById("emailStatus").textContent="Generating PDF and uploading link...";
+
+  await heavyDataReadyPromise;
 
   const liveContent=document.getElementById("content");
   const liveMain=document.getElementById("mainContent");
@@ -2233,7 +2257,7 @@ async function sendEmailClient(){
   }
 }
 
-function openSavedReport(reportId){
+async function openSavedReport(reportId){
   const report=(savedReports||[]).find(r=>r.id===reportId);
   if(!report){
     alert("Saved report not found");
@@ -2263,7 +2287,8 @@ function openSavedReport(reportId){
   html+="<div class='no-export' style='font-size:12px;color:#667;padding:0 4px 10px 4px'>Saved: "+new Date(report.createdAt).toLocaleString()+" | Period: "+(report.period||"-")+"</div>";
   html+=sanitizeSavedReportHtml(report);
   document.getElementById("mainContent").innerHTML=html;
-  renderInvoiceCanvases(document.getElementById("mainContent"));
+  await renderInvoiceCanvases(document.getElementById("mainContent"));
+  await nextPaint();
   location.hash="saved-report="+encodeURIComponent(report.id);
 }
 
@@ -2273,6 +2298,8 @@ async function downloadLoadedSavedReportPdf(reportId){
     alert("Saved report not found");
     return;
   }
+
+  await heavyDataReadyPromise;
 
   const liveContent=document.getElementById("content");
   const liveMain=document.getElementById("mainContent");
@@ -2533,7 +2560,7 @@ function loadLocalFallback(){
 
 function loadHeavyDataInBackground(){
   const bust="?t="+Date.now();
-  fetch("invoices.json"+bust,{cache:"no-store"})
+  const invoicePromise=fetch("invoices.json"+bust,{cache:"no-store"})
     .then(r=>r.json())
     .then(map=>{
       loadedInvoiceMap=map||{};
@@ -2541,13 +2568,43 @@ function loadHeavyDataInBackground(){
       updateStorageIndicator();
     })
     .catch(()=>{updateStorageIndicator();});
-  fetch("saved_reports_html.json"+bust,{cache:"no-store"})
+
+  const reportPromise=fetch("saved_reports_html.json"+bust,{cache:"no-store"})
     .then(r=>r.json())
     .then(map=>{
       loadedReportHtmlMap=map||{};
       (savedReports||[]).forEach(r=>{if(r.html==="__ref__"&&map[r.id])r.html=map[r.id];});
     })
     .catch(()=>{});
+
+  heavyDataReadyPromise=Promise.allSettled([invoicePromise,reportPromise]).then(()=>{
+    refreshCurrentViewAfterDeferredData();
+    updateStorageIndicator();
+  });
+
+  return heavyDataReadyPromise;
+}
+
+function refreshCurrentViewAfterDeferredData(){
+  if(currentView==="statement" && currentOwner){
+    generateStatement(true);
+    return;
+  }
+  if(currentView==="income"){
+    runIncomeReport();
+    return;
+  }
+  if(currentView==="summary"){
+    generateSummary();
+    return;
+  }
+  if(currentView==="1099"){
+    show1099();
+    return;
+  }
+  if(currentView==="saved-report"){
+    loadSavedReportFromHash();
+  }
 }
 
 function loadData(){
@@ -4217,7 +4274,7 @@ if(t.type==="draft"){
   }
   
 
-function displayStatement(){
+async function displayStatement(){
 currentView="statement";
 document.querySelectorAll(".invoice-header").forEach(el=>el.style.display="none");
 document.getElementById("reportTitle").style.display="";
@@ -4337,7 +4394,8 @@ html+="</tr>";
 }
 
 html+="<tr><th>TOTAL</th><th>"+money(recurringTotal)+"</th><th class='no-print'></th></tr>";
-html+="</table>";
+  await renderInvoiceCanvases(document.getElementById("mainContent"));
+  await nextPaint();
 html+="</div>";
 }
 
@@ -4437,7 +4495,7 @@ html+="<div class='property-title'><span class='property-icon'>🏠</span>"+getP
   html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
   html+="<div class='summary-card'><div class='summary-label'>PMC ("+(pmcPercent*100).toFixed(2)+"%)</div><div class='summary-value'>"+money(p.pmc)+"</div></div>";
   html+="</div>";
-  html+="<div style='text-align:center;font-size:22px;font-weight:bold;margin:25px 0'>AMOUNT DUE: "+money(r)+"</div>";
+  html+="<div class='report-total-banner'>AMOUNT DUE: "+money(r)+"</div>";
     }else{
       html+="<div class='summary-grid'>";
       html+="<div class='summary-card'><div class='summary-label'>NET ACCOMMODATION</div><div class='summary-value'>"+money(p.acc)+"</div></div>";
@@ -4446,7 +4504,7 @@ html+="<div class='property-title'><span class='property-icon'>🏠</span>"+getP
       html+="<div class='summary-card'><div class='summary-label'>EXPENSES</div><div class='summary-value'>"+money(p.expenses)+"</div></div>";
       }
       html+="</div>";
-      html+="<div style='text-align:center;font-size:22px;font-weight:bold;margin:25px 0'>OWNER PAYOUT: "+money(r)+"</div>";
+      html+="<div class='report-total-banner'>OWNER PAYOUT: "+money(r)+"</div>";
     }
     
     html+="<div style='margin-top:15px'><div class='section-title'>RESERVATIONS</div><table style='margin-top:10px'>";
@@ -4552,7 +4610,8 @@ html+="</div>";
 html+="</div>";
 });
 document.getElementById("mainContent").innerHTML=html;
-renderInvoiceCanvases(document.getElementById("mainContent"));
+await renderInvoiceCanvases(document.getElementById("mainContent"));
+await nextPaint();
 requestAnimationFrame(restoreScrollPosition);
 }
 
@@ -4783,7 +4842,7 @@ function downloadIncomePDF(){
 const element=document.getElementById("incomeReportResult");
 if(!element) return;
 
-exportElementToHighQualityPdf(element,"income-report.pdf").catch((e)=>{
+heavyDataReadyPromise.then(()=>exportElementToHighQualityPdf(element,"income-report.pdf")).catch((e)=>{
 console.error("downloadIncomePDF failed:",e);
 alert("Could not generate PDF: "+(e&&e.message?e.message:String(e)));
 });
@@ -4795,6 +4854,8 @@ async function downloadPDF(){
   const liveContent=document.getElementById("content");
   const liveMain=document.getElementById("mainContent");
   if(!liveContent||!liveMain) return;
+
+  await heavyDataReadyPromise;
 
   document.getElementById("invoiceHeader").style.display="";
 
