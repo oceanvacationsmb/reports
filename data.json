@@ -252,7 +252,7 @@
       "recurringCharges": [
         {
           "label": "Pool Cleaning",
-          "amount": 125
+          "amount": 250
         },
         {
           "label": "Pest Control",
@@ -2630,10 +2630,10 @@
       "owner": "115C-15 - CHRIS",
       "type": "MAINTENANCE",
       "property": "GCSSB - 115C 15N",
-      "vendor": "SEABOARD BEDDING",
+      "vendor": "PARADIES HEATING AND AIR",
       "amount": 250,
       "notes": "",
-      "invoice": "https://res.cloudinary.com/dolrwwa8h/image/upload/v1779730167/ewkrvaefrrpkezb7dbru.jpg",
+      "invoice": "https://res.cloudinary.com/dolrwwa8h/image/upload/v1779730190/nop6mfytflqaxilxsg5v.jpg",
       "month": 5,
       "year": 2026,
       "createdAt": "2026-05-25T17:26:10.094Z"
