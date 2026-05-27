@@ -2806,19 +2806,6 @@
       "month": 5,
       "year": 2026,
       "createdAt": "2026-05-27T17:35:56.993Z"
-    },
-    {
-      "id": 1779903396141,
-      "owner": "ERAN MARON",
-      "type": "SUPPLIES",
-      "property": "NMB - 204-28N",
-      "vendor": "AMAZON",
-      "amount": 64.76,
-      "notes": "",
-      "invoice": "https://res.cloudinary.com/dolrwwa8h/image/upload/v1779903594/ey8smxwegoi9oynu6pdy.jpg",
-      "month": 5,
-      "year": 2026,
-      "createdAt": "2026-05-27T17:36:36.141Z"
     }
   ],
   "savedReports": [
