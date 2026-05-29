@@ -484,6 +484,7 @@ let currentUserSession=null;
 let report1099RangeMode="month";
 const LOGIN_DISABLED=false;
 const PASSWORD_RESET_EMAIL="ti3155@yahoo.com";
+const LOCAL_SAVED_REPORTS_CACHE_KEY="saved_reports_local_cache";
 const EMAILJS_PUBLIC_KEY="UMIeNLaEMvhwD6Anq";
 const EMAILJS_SERVICE_ID="service_8xrjza6";
 const EMAILJS_TEMPLATE_ID="template_ad3gmlm";
@@ -1850,7 +1851,7 @@ async function exportElementToHighQualityPdf(sourceElement,filename,options){
   const pageSliceHeightPx=Math.max(580,Math.floor(renderWidth*pageAspect));
 
   const stage=document.createElement("div");
-  stage.style.cssText="position:fixed;left:-99999px;top:0;width:1120px;background:#fff;z-index:-1;pointer-events:none";
+  stage.style.cssText="position:absolute;left:-99999px;top:0;width:1120px;background:#fff;z-index:-1;pointer-events:none";
 
   const viewport=document.createElement("div");
   viewport.style.cssText="position:relative;width:1120px;overflow:hidden;background:#fff";
@@ -1860,6 +1861,26 @@ async function exportElementToHighQualityPdf(sourceElement,filename,options){
 
   const clone=sourceElement.cloneNode(true);
   clone.style.width="100%";
+
+  // Prevent cloned fixed/sticky headers or footers from appearing as duplicates
+  // Convert any fixed or sticky positioned elements inside the clone to static
+  // so they render only once in the cloned flow.
+  (function normalizeFixeds(){
+    try{
+      const els=Array.from(clone.querySelectorAll("*"));
+      els.forEach(el=>{
+        const cs=window.getComputedStyle(el);
+        if(!cs) return;
+        if(cs.position==="fixed"||cs.position==="sticky"){
+          el.style.position="static";
+          el.style.top="";
+          el.style.left="";
+          el.style.right="";
+          el.style.zIndex="";
+        }
+      });
+    }catch(e){}
+  })();
 
   // Enforce attachment sizing and hard page behavior so receipts are never sliced.
   // Keep each invoice attachment short enough to fit a single rendered PDF page.
@@ -1910,31 +1931,47 @@ async function exportElementToHighQualityPdf(sourceElement,filename,options){
     const pdf=new JsPdfCtor({unit:"in",format:"letter",orientation:"portrait",compress:true,precision:14});
 
     const protectedBlocks=[];
-    clone.querySelectorAll(".invoice-attachment-wrap").forEach(el=>{
-      const h=el.offsetHeight||0;
-      if(h<80) return;
-      const top=Math.max(0,Math.floor(el.offsetTop));
-      const bottom=Math.min(totalHeight,Math.ceil(el.offsetTop+h));
-      protectedBlocks.push({top,bottom});
-    });
+    const rootRect=clone.getBoundingClientRect();
+    function relBounds(el){
+      const r=el.getBoundingClientRect();
+      const top=Math.max(0,Math.floor(r.top-rootRect.top));
+      const bottom=Math.min(totalHeight,Math.ceil(r.bottom-rootRect.top));
+      return {top,bottom,height:Math.max(0,bottom-top)};
+    }
+
+    const safeBreakSelectors=[
+      ".invoice-attachment-wrap",
+      ".invoice-attachment",
+      "img",
+      "canvas",
+      ".property-section",
+      "table",
+      "table tr",
+      "table thead",
+      "table tbody",
+      "table tfoot",
+      ".report-total-banner",
+      ".summary-grid",
+      "header",
+      "footer",
+      "section",
+      "article",
+      "aside",
+      "figure"
+    ];
 
     const safeBreakSet=new Set([0,totalHeight]);
-    clone.querySelectorAll(".invoice-attachment-wrap,.invoice-attachment,img,.property-section").forEach(el=>{
-      const h=el.offsetHeight||0;
-      if(h<120) return;
-      const top=Math.max(0,Math.floor(el.offsetTop));
-      const bottom=Math.min(totalHeight,Math.ceil(el.offsetTop+h));
-      safeBreakSet.add(top);
-      safeBreakSet.add(bottom);
-    });
-    clone.querySelectorAll(".report-total-banner").forEach(el=>{
-      const h=el.offsetHeight||0;
-      if(h<1) return;
-      const top=Math.max(0,Math.floor(el.offsetTop));
-      const bottom=Math.min(totalHeight,Math.ceil(el.offsetTop+h));
-      protectedBlocks.push({top,bottom});
-      safeBreakSet.add(top);
-      safeBreakSet.add(bottom);
+    safeBreakSelectors.forEach(sel=>{
+      clone.querySelectorAll(sel).forEach(el=>{
+        const b=relBounds(el);
+        if(!b || b.height<6) return;
+        // Protect truly large elements from being split
+        if(sel.indexOf("invoice")>=0 || sel.indexOf("report-total")>=0){
+          protectedBlocks.push({top:b.top,bottom:b.bottom});
+        }
+        safeBreakSet.add(b.top);
+        safeBreakSet.add(b.bottom);
+      });
     });
     const safeBreaks=Array.from(safeBreakSet).sort((a,b)=>a-b);
 
@@ -2146,6 +2183,7 @@ async function generateEmailReportLink(){
     .then(()=>waitForImages(liveMain))
     .then(()=>{
       const exportContent=liveContent.cloneNode(true);
+      removeDuplicateInvoiceHeaders(exportContent);
       exportContent.querySelectorAll(".action-buttons,.no-print,.btn-danger,.no-export").forEach(el=>el.remove());
       exportContent.style.cssText="background:#fff;box-shadow:none;border:none;border-radius:0;padding:18px";
 
@@ -2320,6 +2358,7 @@ async function downloadLoadedSavedReportPdf(reportId){
   await waitForImages(liveMain);
 
   const exportContent=liveContent.cloneNode(true);
+  removeDuplicateInvoiceHeaders(exportContent);
   exportContent.querySelectorAll(".action-buttons,.no-print,.btn-danger,.no-export").forEach(el=>el.remove());
   // Remove card styling so the PDF has a clean flat white background
   exportContent.style.cssText="background:#fff;box-shadow:none;border:none;border-radius:0;padding:18px";
@@ -2537,6 +2576,49 @@ function applyLoadedData(data){
   savedReports=(data&&data.savedReports)||[];
 }
 
+function persistLocalSavedReportsCache(){
+  try{
+    localStorage.setItem(LOCAL_SAVED_REPORTS_CACHE_KEY,JSON.stringify({
+      savedReports:savedReports||[],
+      savedReportHtmlMap:loadedReportHtmlMap||{}
+    }));
+  }catch(e){}
+}
+
+function removeDuplicateInvoiceHeaders(container){
+  try{
+    if(!container) return;
+    const hdrs=container.querySelectorAll('.invoice-header');
+    if(!hdrs || hdrs.length<=1) return;
+    // Keep the first header, remove others
+    for(let i=1;i<hdrs.length;i++){
+      hdrs[i].remove();
+    }
+  }catch(e){}
+}
+
+function hydrateLocalSavedReportsCache(){
+  try{
+    const raw=localStorage.getItem(LOCAL_SAVED_REPORTS_CACHE_KEY);
+    if(!raw) return;
+    const cache=JSON.parse(raw)||{};
+    const cachedReports=Array.isArray(cache.savedReports) ? cache.savedReports : [];
+    const mergedReports=new Map();
+    (savedReports||[]).forEach(r=>{if(r&&r.id) mergedReports.set(r.id,r);});
+    cachedReports.forEach(r=>{if(r&&r.id) mergedReports.set(r.id,r);});
+    savedReports=Array.from(mergedReports.values());
+
+    if(cache.savedReportHtmlMap && typeof cache.savedReportHtmlMap==="object"){
+      loadedReportHtmlMap=Object.assign({},loadedReportHtmlMap||{},cache.savedReportHtmlMap);
+      (savedReports||[]).forEach(r=>{
+        if(r && r.html==="__ref__" && loadedReportHtmlMap[r.id]){
+          r.html=loadedReportHtmlMap[r.id];
+        }
+      });
+    }
+  }catch(e){}
+}
+
 function loadLocalFallback(){
   const bust="?t="+Date.now();
   const tryData=fetch("data.json"+bust,{cache:"no-store"})
@@ -2578,6 +2660,7 @@ function loadHeavyDataInBackground(){
     .catch(()=>{});
 
   heavyDataReadyPromise=Promise.allSettled([invoicePromise,reportPromise]).then(()=>{
+    try{ persistLocalSavedReportsCache(); }catch(e){}
     refreshCurrentViewAfterDeferredData();
     updateStorageIndicator();
   });
@@ -2611,6 +2694,7 @@ function loadData(){
   githubToken=localStorage.getItem("github_token")||"";
 
   const finalize=()=>{
+    hydrateLocalSavedReportsCache();
     init();
     updateTokenStatus();
     loadHeavyDataInBackground();
@@ -3700,6 +3784,7 @@ function saveToGitHub(type,callback){
               return;
             }
             if(!r.ok)throw new Error("ref update failed: "+r.status);
+            try{ persistLocalSavedReportsCache(); }catch(e){}
             if(callback)callback();
           });
         });
@@ -4394,8 +4479,7 @@ html+="</tr>";
 }
 
 html+="<tr><th>TOTAL</th><th>"+money(recurringTotal)+"</th><th class='no-print'></th></tr>";
-  await renderInvoiceCanvases(document.getElementById("mainContent"));
-  await nextPaint();
+html+="</table>";
 html+="</div>";
 }
 
@@ -4837,16 +4921,18 @@ function closeAll(){
   document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));
 }
 
-function downloadIncomePDF(){
-
-const element=document.getElementById("incomeReportResult");
-if(!element) return;
-
-heavyDataReadyPromise.then(()=>exportElementToHighQualityPdf(element,"income-report.pdf")).catch((e)=>{
-console.error("downloadIncomePDF failed:",e);
-alert("Could not generate PDF: "+(e&&e.message?e.message:String(e)));
-});
-
+async function downloadIncomePDF(){
+  const element=document.getElementById("incomeReportResult");
+  if(!element) return;
+  try{
+    await heavyDataReadyPromise;
+    const liveMain=document.getElementById("mainContent");
+    if(liveMain) await renderInvoiceCanvases(liveMain);
+    await exportElementToHighQualityPdf(element,"income-report.pdf");
+  }catch(e){
+    console.error("downloadIncomePDF failed:",e);
+    alert("Could not generate PDF: "+(e&&e.message?e.message:String(e)));
+  }
 }
 
 async function downloadPDF(){
@@ -4863,6 +4949,7 @@ async function downloadPDF(){
   await waitForImages(liveMain);
 
   const exportContent=liveContent.cloneNode(true);
+  removeDuplicateInvoiceHeaders(exportContent);
   exportContent.querySelectorAll(".action-buttons,.no-print,.btn-danger,.no-export").forEach(el=>el.remove());
   // Remove card styling so the PDF has a clean flat white background (no shadow/border/radius)
   exportContent.style.cssText="background:#fff;box-shadow:none;border:none;border-radius:0;padding:18px";
