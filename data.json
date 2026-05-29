@@ -2837,6 +2837,17 @@
   ],
   "savedReports": [
     {
+      "id": "rpt_1780081250302",
+      "createdAt": "2026-05-29T19:00:50.302Z",
+      "owner": "214 - GTI GROUP TAL",
+      "reportKey": "summary",
+      "reportTitle": "Summary Report",
+      "period": "June 2026",
+      "email": "zilkerinvestments@gmail.com",
+      "html": "__ref__",
+      "createdBy": "admin"
+    },
+    {
       "id": "rpt_1780080997444",
       "createdAt": "2026-05-29T18:56:37.444Z",
       "owner": "113-13 - CARL",
