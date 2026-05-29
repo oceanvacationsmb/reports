@@ -2819,6 +2819,19 @@
       "month": 5,
       "year": 2026,
       "createdAt": "2026-05-29T16:11:39.586Z"
+    },
+    {
+      "id": 1780071473390,
+      "owner": "ERAN MARON",
+      "type": "SERVICE",
+      "property": "NMB - 204-27N",
+      "vendor": "DURACLEAN",
+      "amount": 225,
+      "notes": "Carpet Cleaning",
+      "invoice": "https://res.cloudinary.com/dolrwwa8h/raw/upload/v1780071673/deokwvdmtlsvx8y499z6.pdf",
+      "month": 5,
+      "year": 2026,
+      "createdAt": "2026-05-29T16:17:53.390Z"
     }
   ],
   "savedReports": [
