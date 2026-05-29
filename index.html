@@ -465,6 +465,7 @@ async function uploadPdfBlobToGitHub(pdfBlob,fileName){
 
 let gitHubData={},OWNERS={},USERS={},vendors=[],expenses=[],csvData=[],propertySettings={},currentOwner="",masterTotals={},propertyTotals={},taxByProperty={},githubToken="",expenseTypes=[];
 let loadedInvoiceMap={},loadedReportHtmlMap={};
+window.deletedSavedReportIds=window.deletedSavedReportIds||[];
 let heavyDataReadyPromise=Promise.resolve();
 let sessionExpenses=[];
 let editingExpenseId=null;
@@ -1988,10 +1989,9 @@ async function exportElementToHighQualityPdf(sourceElement,filename,options){
       }
 
       if(target<totalHeight){
-        const minEnd=offset+Math.floor(pageSliceHeightPx*0.55);
-        for(let i=safeBreaks.length-1;i>=0;i--){
+        for(let i=0;i<safeBreaks.length;i++){
           const candidate=safeBreaks[i];
-          if(candidate<=sliceEnd && candidate>=minEnd){
+          if(candidate>=target){
             sliceEnd=candidate;
             break;
           }
@@ -2022,8 +2022,13 @@ async function exportElementToHighQualityPdf(sourceElement,filename,options){
 
       const imageData=canvas.toDataURL("image/jpeg",0.96);
       const imageHeightIn=innerWidthIn*(canvas.height/canvas.width);
+      const fitScale=imageHeightIn>innerHeightIn ? (innerHeightIn/imageHeightIn) : 1;
+      const addWidthIn=innerWidthIn*fitScale;
+      const addHeightIn=imageHeightIn*fitScale;
+      const addX=marginIn+((innerWidthIn-addWidthIn)/2);
+      const addY=marginIn+((innerHeightIn-addHeightIn)/2);
       if(pageIndex>0) pdf.addPage();
-      pdf.addImage(imageData,"JPEG",marginIn,marginIn,innerWidthIn,imageHeightIn,undefined,"MEDIUM");
+      pdf.addImage(imageData,"JPEG",addX,addY,addWidthIn,addHeightIn,undefined,"MEDIUM");
       pageIndex++;
       offset=sliceEnd;
 
@@ -2034,6 +2039,16 @@ async function exportElementToHighQualityPdf(sourceElement,filename,options){
     if(returnBlob){
       setPdfLoadingState(true,"Finalizing PDF...");
       return pdf.output("blob");
+    }
+
+    // Test hook: when running automated verification, return a data URI
+    // instead of saving the file so tests can inspect the PDF content.
+    if (opts.testReturnDataUri) {
+      try{
+        const uri = pdf.output && pdf.output('datauristring');
+        window.__lastGeneratedPdfDataUri = uri;
+        return uri;
+      }catch(e){}
     }
 
     setPdfLoadingState(true,"Finalizing download...");
@@ -2407,6 +2422,15 @@ function deleteSavedReport(reportId){
   }
   if(!confirm("Delete this saved report?")) return;
   savedReports=(savedReports||[]).filter(r=>r.id!==reportId);
+  try{
+    if(Array.isArray(window.deletedSavedReportIds) && !window.deletedSavedReportIds.includes(reportId)){
+      window.deletedSavedReportIds.push(reportId);
+    }
+    if(loadedReportHtmlMap && typeof loadedReportHtmlMap==="object"){
+      delete loadedReportHtmlMap[reportId];
+    }
+    persistLocalSavedReportsCache();
+  }catch(e){}
   if(!githubToken){
     showHistory();
     return;
@@ -2580,7 +2604,8 @@ function persistLocalSavedReportsCache(){
   try{
     localStorage.setItem(LOCAL_SAVED_REPORTS_CACHE_KEY,JSON.stringify({
       savedReports:savedReports||[],
-      savedReportHtmlMap:loadedReportHtmlMap||{}
+      savedReportHtmlMap:loadedReportHtmlMap||{},
+      deletedSavedReportIds:window.deletedSavedReportIds||[]
     }));
   }catch(e){}
 }
@@ -2602,14 +2627,16 @@ function hydrateLocalSavedReportsCache(){
     const raw=localStorage.getItem(LOCAL_SAVED_REPORTS_CACHE_KEY);
     if(!raw) return;
     const cache=JSON.parse(raw)||{};
+    window.deletedSavedReportIds=Array.isArray(cache.deletedSavedReportIds) ? cache.deletedSavedReportIds.filter(Boolean) : (window.deletedSavedReportIds||[]);
     const cachedReports=Array.isArray(cache.savedReports) ? cache.savedReports : [];
     const mergedReports=new Map();
     (savedReports||[]).forEach(r=>{if(r&&r.id) mergedReports.set(r.id,r);});
     cachedReports.forEach(r=>{if(r&&r.id) mergedReports.set(r.id,r);});
-    savedReports=Array.from(mergedReports.values());
+    savedReports=Array.from(mergedReports.values()).filter(r=>!(window.deletedSavedReportIds||[]).includes(r.id));
 
     if(cache.savedReportHtmlMap && typeof cache.savedReportHtmlMap==="object"){
       loadedReportHtmlMap=Object.assign({},loadedReportHtmlMap||{},cache.savedReportHtmlMap);
+      (window.deletedSavedReportIds||[]).forEach(id=>{ if(loadedReportHtmlMap && loadedReportHtmlMap[id]) delete loadedReportHtmlMap[id]; });
       (savedReports||[]).forEach(r=>{
         if(r && r.html==="__ref__" && loadedReportHtmlMap[r.id]){
           r.html=loadedReportHtmlMap[r.id];
