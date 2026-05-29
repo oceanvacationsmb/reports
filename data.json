@@ -2806,6 +2806,19 @@
       "month": 5,
       "year": 2026,
       "createdAt": "2026-05-27T17:35:56.993Z"
+    },
+    {
+      "id": 1780071099586,
+      "owner": "469C - ASSAF",
+      "type": "PURCHASE",
+      "property": "MB - 469C",
+      "vendor": "AMAZON",
+      "amount": 10.68,
+      "notes": "",
+      "invoice": "https://res.cloudinary.com/dolrwwa8h/image/upload/v1780071299/z3sty8a2fwfi3hbqwhw9.jpg",
+      "month": 5,
+      "year": 2026,
+      "createdAt": "2026-05-29T16:11:39.586Z"
     }
   ],
   "savedReports": [
