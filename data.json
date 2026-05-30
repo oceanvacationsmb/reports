@@ -2842,7 +2842,7 @@
       "vendor": "AMAZON",
       "amount": 36.72,
       "notes": "500 NET",
-      "invoice": null,
+      "invoice": "https://res.cloudinary.com/dolrwwa8h/image/upload/v1780166185/nptqk2tuxxypmznyf874.jpg",
       "month": 5,
       "year": 2026,
       "createdAt": "2026-05-30T18:31:04.791Z"
