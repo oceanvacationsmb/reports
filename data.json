@@ -2846,6 +2846,19 @@
       "month": 5,
       "year": 2026,
       "createdAt": "2026-05-30T18:31:04.791Z"
+    },
+    {
+      "id": 1780284705795,
+      "owner": "ERAN MARON",
+      "type": "MAINTENANCE",
+      "property": "NMB - 400B",
+      "vendor": "ECIA",
+      "amount": 100,
+      "notes": "",
+      "invoice": "https://res.cloudinary.com/dolrwwa8h/raw/upload/v1780284706/lyfgkx8kcqbto0lhlu4e.pdf",
+      "month": 6,
+      "year": 2026,
+      "createdAt": "2026-06-01T03:31:45.795Z"
     }
   ],
   "savedReports": [
