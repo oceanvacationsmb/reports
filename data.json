@@ -1496,19 +1496,6 @@
       "createdAt": "2026-04-17T16:52:32.002Z"
     },
     {
-      "id": 1776446621550,
-      "owner": "ERAN MARON",
-      "type": "ADJUSTMENT",
-      "property": "OWNER",
-      "vendor": "ADJUEMENT",
-      "amount": 7993.37,
-      "notes": "827 BUYER CREDIT",
-      "invoice": "__ref__",
-      "month": 7,
-      "year": 2026,
-      "createdAt": "2026-04-17T17:23:41.550Z"
-    },
-    {
       "id": 1776446722650,
       "owner": "ERAN MARON",
       "type": "ADJUSTMENT",
