@@ -1535,19 +1535,6 @@
       "createdAt": "2026-04-17T17:25:22.650Z"
     },
     {
-      "id": 1776446753625,
-      "owner": "ERAN MARON",
-      "type": "ADJUSTMENT",
-      "property": "OWNER",
-      "vendor": "ADJUEMENT",
-      "amount": 0.01,
-      "notes": "CREDIT FOR 827 NEW OWNER - 06/25/2026 - 06/30/2026 > JEANNE CARR",
-      "invoice": "__ref__",
-      "month": 6,
-      "year": 2026,
-      "createdAt": "2026-04-17T17:25:53.625Z"
-    },
-    {
       "id": 1776446759353,
       "owner": "ERAN MARON",
       "type": "ADJUSTMENT",
