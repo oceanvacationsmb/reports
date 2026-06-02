@@ -2820,6 +2820,19 @@
       "month": 6,
       "year": 2026,
       "createdAt": "2026-06-01T03:35:18.204Z"
+    },
+    {
+      "id": 1780361528457,
+      "owner": "ERAN MARON",
+      "type": "MAINTENANCE",
+      "property": "OWNER",
+      "vendor": "PMC",
+      "amount": 9568.17,
+      "notes": "JULY 18-25 - Michele Clark - 827 CREDIT",
+      "invoice": null,
+      "month": 7,
+      "year": 2026,
+      "createdAt": "2026-06-02T00:52:08.457Z"
     }
   ],
   "savedReports": [
