@@ -3726,7 +3726,7 @@ function uploadToCloudinary(file){
 }
 
 function saveToGitHub(type,callback){
-  if(!githubToken){alert("❌ No token");return;}
+  if(!githubToken){alert("❌ No GitHub token saved. Click GITHUB SETUP first.");return;}
 
   const repoBase="https://api.github.com/repos/oceanvacationsmb/reports";
   const ghHeaders={"Authorization":"token "+githubToken,"Content-Type":"application/json"};
@@ -4050,6 +4050,8 @@ if(file){
     btn.disabled=false;
     btn.textContent="✓ EXPENSE RECORDED";
     setTimeout(()=>{btn.textContent="✓ ADD EXPENSE";},1000);
+    sessionExpenses.push({id:expenseId,type:type,property:prop,vendor:vendor,amount:amount});
+    persistExpense();
     displaySessionExpenses();
   }).catch(()=>{
     btn.disabled=false;
@@ -4225,7 +4227,7 @@ function setupToken(){
   githubToken=token.trim();
   localStorage.setItem("github_token",githubToken);
   
-  fetch("https://api.github.com/user",{headers:{"Authorization":"token "+githubToken}})
+  fetch("https://api.github.com/user",{cache:"no-store",headers:{"Authorization":"token "+githubToken}})
     .then(r=>r.json())
     .then(u=>{
       if(u.message){
