@@ -3732,7 +3732,7 @@ function saveToGitHub(type,callback){
   const ghHeaders={"Authorization":"token "+githubToken,"Content-Type":"application/json"};
 
   function ghFetch(url,opts){
-    return fetch(url,Object.assign({headers:ghHeaders},opts||{}))
+    return fetch(url,Object.assign({cache:"no-store",headers:ghHeaders},opts||{}))
       .then(r=>{if(!r.ok)throw new Error(r.status+" "+url);return r.json();});
   }
 
@@ -3892,7 +3892,13 @@ function openAddExpense(){
   if(isOwnerPortalUser()) return alert("Not allowed in owner portal mode");
   if(!currentOwner)return alert("Select owner first");
 
-  sessionExpenses=[];
+  const period=getSelectedStatementPeriod();
+  sessionExpenses=(expenses||[]).filter(e=>{
+    return e
+      && e.owner===currentOwner
+      && String(e.month)===String(period.month)
+      && String(e.year)===String(period.year);
+  });
   editingExpenseId=null;
   document.getElementById("expenseCheckmark").style.display="none";
   document.getElementById("expenseFormContent").style.display="block";
@@ -3920,6 +3926,8 @@ function openAddExpense(){
         fillProps(rows);
       })
       .catch(()=>{
+
+    displaySessionExpenses();
         fillProps([]);
       });
   }
@@ -3965,6 +3973,11 @@ propertyValue = "OWNER";
   const notes=document.getElementById("expenseNotes").value;
   const period=getSelectedStatementPeriod();
   const createdAtIso=new Date().toISOString();
+  const persistExpense=()=>{
+    saveToGitHub("expenses",()=>{
+      try{ processData(); }catch(e){}
+    });
+  };
 
   if(editingExpenseId!==null){
     const idx=(expenses||[]).findIndex(e=>e.id===editingExpenseId);
@@ -3991,6 +4004,7 @@ propertyValue = "OWNER";
       document.getElementById("expenseAmount").value="";
       document.getElementById("expenseNotes").value="";
       alert("Expense updated");
+      persistExpense();
     };
     if(fileEdit){
       const btn=document.getElementById("addExpenseBtn");
@@ -4065,6 +4079,7 @@ setTimeout(()=>{
 btn.textContent="✓ ADD EXPENSE";
 },1000);
   sessionExpenses.push({id:expenseId,type:type,property:prop,vendor:vendor,amount:amount});
+  persistExpense();
   
   document.getElementById("expenseType").value="MAINTENANCE";
   document.getElementById("expenseProperty").value="";
