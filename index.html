@@ -4052,6 +4052,12 @@ if(file){
     setTimeout(()=>{btn.textContent="✓ ADD EXPENSE";},1000);
     sessionExpenses.push({id:expenseId,type:type,property:prop,vendor:vendor,amount:amount});
     persistExpense();
+    document.getElementById("expenseType").value=expenseTypes[0]||"MAINTENANCE";
+    document.getElementById("expenseProperty").value="";
+    document.getElementById("expenseVendor").value="";
+    document.getElementById("expenseAmount").value="";
+    document.getElementById("expenseNotes").value="";
+    document.getElementById("expenseInvoice").value="";
     displaySessionExpenses();
   }).catch(()=>{
     btn.disabled=false;
@@ -4083,7 +4089,7 @@ btn.textContent="✓ ADD EXPENSE";
   sessionExpenses.push({id:expenseId,type:type,property:prop,vendor:vendor,amount:amount});
   persistExpense();
   
-  document.getElementById("expenseType").value="MAINTENANCE";
+  document.getElementById("expenseType").value=expenseTypes[0]||"MAINTENANCE";
   document.getElementById("expenseProperty").value="";
   document.getElementById("expenseVendor").value="";
   document.getElementById("expenseAmount").value="";
