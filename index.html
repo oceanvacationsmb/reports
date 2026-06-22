@@ -4113,10 +4113,20 @@ function displaySessionExpenses(){
   }
   
   let html="<div style='color:#fff;font-weight:bold;margin-bottom:10px'>ADDED EXPENSES (" + sessionExpenses.length + "):</div>";
-  sessionExpenses.forEach(e=>{
-    html+="<div class='expense-item'>";
-    html+="<div class='expense-item-text'>"+e.type+" - "+e.vendor+" ("+e.property+")<br>"+money(e.amount)+"</div>";
-    html+="<button class='expense-item-delete' onclick='deleteSessionExpense("+e.id+")'>DELETE</button>";
+  sessionExpenses.forEach(se=>{
+    const fullExpense=(expenses||[]).find(e=>e.id===se.id);
+    html+="<div style='margin-bottom:12px;padding:10px;background:#555;border-radius:3px;border-left:4px solid #28a745'>";
+    html+="<div class='expense-item-text'>"+se.type+" - "+se.vendor+" ("+se.property+")<br>"+money(se.amount)+"</div>";
+    if(fullExpense&&fullExpense.invoice){
+      const invoiceUrl=fullExpense.invoice;
+      if(invoiceUrl.startsWith("https://")){
+        html+="<div style='margin-top:6px;font-size:10px;color:#90ee90'>✓ Invoice uploaded</div>";
+        html+="<img src='"+invoiceUrl+"' style='max-width:120px;max-height:80px;margin-top:6px;border-radius:3px;cursor:pointer' onclick='window.open(\""+invoiceUrl.replace(/"/g,'&quot;')+"\",\"_blank\")' title='Click to view full image'>";
+      }else if(invoiceUrl.startsWith("data:")){
+        html+="<div style='margin-top:6px;font-size:10px;color:#90ee90'>✓ Invoice attached</div>";
+      }
+    }
+    html+="<div style='margin-top:8px;text-align:right'><button class='expense-item-delete' onclick='deleteSessionExpense("+se.id+")'>DELETE</button></div>";
     html+="</div>";
   });
   listDiv.innerHTML=html;
@@ -4583,7 +4593,7 @@ html+="<div class='invoice-attachment-wrap'>";
 if(_isPdf){
 html+="<canvas class='invoice-attachment invoice-pdf-canvas' data-invoice='"+escapeHtmlAttr(encodeURIComponent(e.invoice))+"'></canvas>";
 }else{
-html+="<img class='invoice-attachment' src='"+e.invoice+"'>";
+html+="<img class='invoice-attachment' src='"+escapeHtmlAttr(e.invoice)+"' alt='Invoice'>";
 }
 html+="</div>";
 });
@@ -4732,7 +4742,7 @@ html+="<div class='invoice-attachment-wrap'>";
 if(_isPdf){
 html+="<canvas class='invoice-attachment invoice-pdf-canvas' data-invoice='"+escapeHtmlAttr(encodeURIComponent(e.invoice))+"'></canvas>";
 }else{
-html+="<img class='invoice-attachment' src='"+e.invoice+"'>";}
+html+="<img class='invoice-attachment' src='"+escapeHtmlAttr(e.invoice)+"' alt='Invoice'>";}
 html+="</div>";
 });
 
